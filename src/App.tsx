@@ -12,14 +12,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/carga" replace />} />
+        <Route index element={<Navigate to="/mi-vigo" replace />} />
+        <Route path="mi-vigo" element={<MyVigoPage />} />
         <Route path="carga" element={<ChargingPage />} />
         <Route path="rutas" element={<RoutesPage />} />
         <Route path="costos" element={<CostsPage />} />
         <Route path="accesorios" element={<AccessoriesPage />} />
         <Route path="tecnologia" element={<TechPage />} />
         <Route path="faq" element={<FaqPage />} />
-        <Route path="mi-vigo" element={<MyVigoPage />} />
       </Route>
     </Routes>
   )
