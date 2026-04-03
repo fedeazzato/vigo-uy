@@ -1,0 +1,101 @@
+{
+  "tech": [
+    {
+      "id": "screen",
+      "title": "Pantalla y sistema",
+      "icon": "🖥️",
+      "items": [
+        { "bold": "Sistema operativo:", "text": "Tablet Android con sistema propietario. Android Auto no está habilitado de fábrica." },
+        { "bold": "Wallpaper:", "text": "Solo 5 imágenes preinstaladas — deslizar con touch para cambiar. No se puede poner foto personalizada." },
+        { "bold": "Radio FM:", "text": "Funciona en modo automático. Algunas frecuencias uruguayas no aparecen en modo manual." },
+        { "bold": "Reset de pantalla:", "text": "Mantener presionado el botón MODE unos segundos resetea el sistema." },
+        { "bold": "Música por USB:", "text": "Conectar pendrive USB-C con archivos mp3 sueltos en la raíz (no en carpetas). Ir a Multimedia en el menú." }
+      ]
+    },
+    {
+      "id": "driving",
+      "title": "Modos de conducción",
+      "icon": "🚗",
+      "items": [
+        { "bold": "Modo siesta:", "text": "Permite dejar el auto ventilado o climatizado sin motor en movimiento. Muy usado en verano." },
+        { "bold": "Regeneración de freno:", "text": "Configurable. En ciudad: nivel máximo para recuperar energía. En ruta: nivel bajo o cero para aprovechar la inercia." },
+        { "bold": "Marchas:", "text": "La posición de las marchas está al revés respecto al estándar occidental — es una queja común al principio, pero se acostumbra." },
+        { "bold": "Límites de carga AC/DC:", "text": "El auto acepta hasta 60 kW en DC. En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)." }
+      ]
+    },
+    {
+      "id": "support",
+      "title": "Soporte y contactos",
+      "icon": "🛠️",
+      "items": [
+        { "bold": "Fidocar (importador UY):", "text": "Talleres en Montevideo e Interbalnearia. Service de 5.000 km demora 3-4 horas. Primer service recomendado al llegar a esos km." },
+        { "bold": "Dongfeng China:", "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino." },
+        { "bold": "Telegram:", "text": "t.me/ElectricosUruguay — grupo con subgrupos de viajes, modelos, instalaciones, servicios y QR de cargadores." },
+        { "bold": "PlugShare:", "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad." },
+        { "bold": "EONE App:", "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'." }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "tiempo-carga",
+      "q": "¿Cuánto tarda en cargarse de 0 a 100%?",
+      "a": "Cargador incluido (12A, 2kW): ~24–26 hs. Instalación 16A en casa: ~10 hs. Wallbox 32A: ~5–6 hs. Cargador DC rápido público (60 kW): mucho menos, depende del nivel de carga."
+    },
+    {
+      "id": "corte-automatico",
+      "q": "¿La carga se corta sola al llegar al límite?",
+      "a": "Sí. Se configura el límite desde el auto (80%, 90%, 100%). Cuando llega, corta automáticamente — no hace falta estar presente."
+    },
+    {
+      "id": "carga-lluvia",
+      "q": "¿Puedo cargar bajo la lluvia?",
+      "a": "Sí, es seguro. Los conectores están diseñados para uso exterior. Varios miembros lo hacen habitualmente sin problemas."
+    },
+    {
+      "id": "pistola-trabada",
+      "q": "¿Qué hago si la pistola queda trabada?",
+      "a": "Hay una linga de emergencia dentro del capot que libera el seguro mecánicamente. Encontrarla y jalar suavemente — la pistola sale."
+    },
+    {
+      "id": "android-auto",
+      "q": "¿La Vigo tiene Android Auto?",
+      "a": "No de fábrica. Con Android solo funciona Bluetooth (música y llamadas). Para navegación en pantalla hace falta un adaptador Carlinkit (~$4.000–5.000 o más barato en Temu/AliExpress). Con iPhone, el CarPlay inalámbrico funciona de forma nativa."
+    },
+    {
+      "id": "autonomia",
+      "q": "¿La autonomía que muestra el auto es real?",
+      "a": "Es la estimación WLTP europea. E2 al 100%: ~362 km. E2+ al 100%: ~411 km. A 90 km/h sin aire se acerca mucho. A 120 km/h con aire baja considerablemente. En ciudad puede superar esos valores."
+    },
+    {
+      "id": "rueda-auxilio",
+      "q": "¿Hay rueda de auxilio?",
+      "a": "No viene de fábrica. Se puede conseguir una llanta 5x108 rodado 16 (ej. Peugeot) con cubierta 215/65 R16. Hay miembros del grupo que venden. También en Panam y Ruedas El Gaucho."
+    },
+    {
+      "id": "matricula",
+      "q": "¿Cómo se pone la matrícula?",
+      "a": "Los agujeros del auto no coinciden con la posición estándar uruguaya. Hay que hacer agujeros nuevos con tornillos 6x1 de 20 mm. Es algo que le pasó a casi todos — es normal."
+    },
+    {
+      "id": "aire-acondicionado",
+      "q": "¿El aire acondicionado consume mucha batería?",
+      "a": "Sí, afecta la autonomía, especialmente en ruta a velocidades altas. A 110 km/h con aire, la autonomía baja notablemente. Se recomienda usarlo con criterio en viajes largos."
+    },
+    {
+      "id": "uso-intensivo",
+      "q": "¿La Vigo sirve para trabajar con muchos kilómetros?",
+      "a": "Sí. Varios miembros hacen 3.000 km/mes con un costo de ~$1.420 cargando en casa en triple horario. La clave es cargar de madrugada y tener instalación adecuada."
+    },
+    {
+      "id": "garantia",
+      "q": "¿La Vigo tiene garantía en Uruguay?",
+      "a": "Sí, a través de Fidocar (importador oficial). Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
+    },
+    {
+      "id": "viaje-exterior",
+      "q": "¿Se puede llevar a Brasil o Argentina?",
+      "a": "Sí. Hay miembros que hicieron Montevideo–Florianópolis sin problemas. Brasil tiene buena infraestructura de carga en ciudades. Argentina es más limitada — planificar bien."
+    }
+  ]
+}
