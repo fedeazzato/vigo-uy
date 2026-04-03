@@ -16,6 +16,19 @@ export interface StatItem {
 
 // ── Charging data ────────────────────────────────────────────────────────────
 
+export type AutonomyStandard = 'CLTC' | 'NEDC' | 'WLTP'
+
+export interface AutonomyEntry {
+  km: number
+  note: string
+}
+
+export interface AutonomyData {
+  standards: AutonomyStandard[]
+  models: Record<Model, Record<AutonomyStandard, AutonomyEntry>>
+  disclaimer: string
+}
+
 export interface Charger {
   name: string
   badge: string
@@ -37,6 +50,7 @@ export interface HomeChargingData {
 
 export interface ChargingData {
   stats: StatItem[]
+  autonomy: AutonomyData
   homeCharging: HomeChargingData
   publicCharging: PublicChargingData
 }

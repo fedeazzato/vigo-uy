@@ -4,11 +4,26 @@
     "source": "WhatsApp - Amantes de la Vigo Uruguay 🇺🇾"
   },
   "stats": [
-    { "value": "~6 km", "label": "por kWh cargando en casa" },
+    { "value": "~6 km", "label": "por kWh" },
     { "value": "44,94 kWh", "label": "batería E2", "model": "E2" },
-    { "value": "51,87 kWh", "label": "batería E2+", "model": "E2+" },
-    { "value": "$0,48/km", "label": "costo mínimo (triple horario)" }
+    { "value": "51,87 kWh", "label": "batería E2+", "model": "E2+" }
   ],
+  "autonomy": {
+    "standards": ["CLTC", "NEDC", "WLTP"],
+    "models": {
+      "E2": {
+        "CLTC": { "km": 401, "note": "Ciclo chino — condiciones ideales" },
+        "NEDC": { "km": 361, "note": "Ciclo europeo nuevo" },
+        "WLTP": { "km": 306, "note": "Ciclo más representativo" }
+      },
+      "E2+": {
+        "CLTC": { "km": 471, "note": "Ciclo chino — condiciones ideales" },
+        "NEDC": { "km": 411, "note": "Ciclo europeo nuevo" },
+        "WLTP": { "km": 349, "note": "Ciclo más representativo" }
+      }
+    },
+    "disclaimer": "La autonomía real varía según velocidad, temperatura y uso del aire acondicionado."
+  },
   "homeCharging": {
     "title": "Carga en casa",
     "tips": [

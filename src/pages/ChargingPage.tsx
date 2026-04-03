@@ -1,18 +1,28 @@
+import { useState } from 'react'
 import rawData from '../data/charging.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import styles from './Pages.module.css'
-import type { ChargingData } from '../types'
+import type { ChargingData, AutonomyStandard } from '../types'
 
 const data = rawData as ChargingData
 
+const STANDARD_LABELS: Record<AutonomyStandard, string> = {
+  CLTC: 'CLTC',
+  NEDC: 'NEDC',
+  WLTP: 'WLTP',
+}
+
 export default function ChargingPage() {
   const { model } = useUserPrefs()
-  const { stats, homeCharging, publicCharging } = data
+  const { stats, autonomy, homeCharging, publicCharging } = data
+  const [standard, setStandard] = useState<AutonomyStandard>('WLTP')
 
   const visibleStats = model
     ? stats.filter(s => !s.model || s.model === model)
     : stats
+
+  const modelsToShow = (model ? [model] : (['E2', 'E2+'] as const))
 
   return (
     <div>
@@ -22,6 +32,38 @@ export default function ChargingPage() {
       />
 
       <StatGrid stats={visibleStats} />
+
+      <Card>
+        <div className={styles.autonomyHeader}>
+          <CardTitle icon="🔋">Autonomía</CardTitle>
+          <div className={styles.standardPicker}>
+            {autonomy.standards.map((s) => (
+              <button
+                key={s}
+                className={`${styles.standardBtn} ${standard === s ? styles.standardBtnActive : ''}`}
+                onClick={() => setStandard(s as AutonomyStandard)}
+              >
+                {STANDARD_LABELS[s as AutonomyStandard]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.autonomyGrid}>
+          {modelsToShow.map((m) => {
+            const entry = autonomy.models[m][standard]
+            return (
+              <div key={m} className={styles.autonomyModelCard}>
+                <div className={styles.autonomyModelLabel}>{m}</div>
+                <div className={styles.autonomyKm}>{entry.km} <span className={styles.autonomyKmUnit}>km</span></div>
+                <div className={styles.autonomyNote}>{entry.note}</div>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className={styles.autonomyDisclaimer}>⚠️ {autonomy.disclaimer}</p>
+      </Card>
 
       <Card>
         <CardTitle icon="🏠">{homeCharging.title}</CardTitle>

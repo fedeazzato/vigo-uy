@@ -28,6 +28,99 @@
   border-top: 1px solid var(--border);
 }
 
+/* ── Autonomy ── */
+.autonomyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.autonomyHeader > :first-child {
+  margin-bottom: 0;
+}
+
+.standardPicker {
+  display: flex;
+  gap: 4px;
+}
+
+.standardBtn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.standardBtn:hover {
+  background: var(--gray-100);
+  color: var(--text-primary);
+}
+
+.standardBtnActive {
+  background: var(--green-50);
+  color: var(--green-600);
+  border-color: var(--green-100);
+}
+
+.autonomyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.autonomyModelCard {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.autonomyModelLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.autonomyKm {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--green-600);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.autonomyKmUnit {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.autonomyNote {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+.autonomyDisclaimer {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
 /* ── Routes page ── */
 .routeCard {
   overflow: hidden;
