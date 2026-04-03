@@ -25,7 +25,11 @@ export default function MyVigoPage() {
               className={styles.colorDot}
               style={{
                 background: COLOR_HEX[color],
-                border: color === 'Blanco' ? '1.5px solid var(--border-strong)' : undefined,
+                border: color === 'Blanco'
+                  ? '1.5px solid var(--border-strong)'
+                  : color === 'Negro'
+                  ? '1.5px solid var(--swatch-dark-border)'
+                  : undefined,
               }}
             />
           )}
@@ -71,7 +75,7 @@ export default function MyVigoPage() {
                 className={styles.swatch}
                 style={{
                   background: COLOR_HEX[c],
-                  borderColor: c === 'Blanco' ? 'var(--border-strong)' : 'transparent',
+                  borderColor: c === 'Blanco' ? 'var(--border-strong)' : c === 'Negro' ? 'var(--swatch-dark-border)' : 'transparent',
                   color: COLOR_DARK_TEXT[c] ? '#1a1a18' : '#fff',
                 }}
               />

@@ -111,8 +111,36 @@
 }
 
 .sidebarFooter {
-  padding: 1rem;
+  padding: 0.75rem 1rem 1rem;
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  width: 100%;
+  transition: background 0.12s, color 0.12s;
+}
+
+.themeToggle:hover {
+  background: var(--gray-100);
+  color: var(--text-primary);
+}
+
+.themeIcon {
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .footerText {
@@ -168,9 +196,27 @@
     width: 100%;
   }
 
+  .mobileHeaderTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 0.75rem;
+  }
+
   .mobileHeader .brand {
     border-bottom: none;
     padding: 0.75rem 1rem;
+  }
+
+  .themeToggleMobile {
+    font-size: 18px;
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    line-height: 1;
+    flex-shrink: 0;
   }
 
   .mobileNav {

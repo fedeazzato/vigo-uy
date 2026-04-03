@@ -1,6 +1,25 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX } from '../context/UserPrefsContext'
+import type { Theme } from '../context/UserPrefsContext'
+
+function nextTheme(current: Theme): Theme {
+  if (current === null) return 'light'
+  if (current === 'light') return 'dark'
+  return null
+}
+
+const THEME_ICON: Record<NonNullable<Theme> | 'system', string> = {
+  system: '⊙',
+  light: '☀',
+  dark: '☾',
+}
+
+const THEME_LABEL: Record<NonNullable<Theme> | 'system', string> = {
+  system: 'Sistema',
+  light: 'Claro',
+  dark: 'Oscuro',
+}
 
 interface NavItem {
   to: string
@@ -19,7 +38,8 @@ const NAV: NavItem[] = [
 ]
 
 export default function Layout() {
-  const { model, color } = useUserPrefs()
+  const { model, color, theme, setTheme } = useUserPrefs()
+  const themeKey = theme ?? 'system'
 
   return (
     <div className={styles.shell}>
@@ -63,6 +83,14 @@ export default function Layout() {
         </nav>
 
         <div className={styles.sidebarFooter}>
+          <button
+            className={styles.themeToggle}
+            onClick={() => setTheme(nextTheme(theme))}
+            title={THEME_LABEL[themeKey]}
+          >
+            <span className={styles.themeIcon}>{THEME_ICON[themeKey]}</span>
+            <span>{THEME_LABEL[themeKey]}</span>
+          </button>
           <div className={styles.footerText}>
             Basado en el grupo de WhatsApp
           </div>
@@ -71,11 +99,20 @@ export default function Layout() {
       </aside>
 
       <div className={styles.mobileHeader}>
-        <div className={styles.brand} style={{ padding: '0 1rem' }}>
-          <div className={styles.brandIcon}>⚡</div>
-          <div>
-            <div className={styles.brandName}>Wiki Vigo Uruguay</div>
+        <div className={styles.mobileHeaderTop}>
+          <div className={styles.brand} style={{ padding: '0 1rem' }}>
+            <div className={styles.brandIcon}>⚡</div>
+            <div>
+              <div className={styles.brandName}>Wiki Vigo Uruguay</div>
+            </div>
           </div>
+          <button
+            className={styles.themeToggleMobile}
+            onClick={() => setTheme(nextTheme(theme))}
+            title={THEME_LABEL[themeKey]}
+          >
+            {THEME_ICON[themeKey]}
+          </button>
         </div>
         <nav className={styles.mobileNav}>
           {NAV.map(({ to, label, icon }) => (
