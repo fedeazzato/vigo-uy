@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import styles from './Layout.module.css'
-import { useUserPrefs, COLOR_HEX } from '../context/UserPrefsContext'
+import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { Theme } from '../context/UserPrefsContext'
 
 function nextTheme(current: Theme): Theme {
@@ -59,7 +59,7 @@ export default function Layout() {
                 className={styles.vigoTagDot}
                 style={{
                   background: COLOR_HEX[color],
-                  border: color === 'Blanco' ? '1.5px solid var(--border-strong)' : undefined,
+                  border: COLOR_BORDER[color] ? `1.5px solid ${COLOR_BORDER[color]}` : undefined,
                 }}
               />
             )}

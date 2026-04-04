@@ -9,17 +9,26 @@ export const COLORS: Color[] = ['Blanco', 'Verde', 'Gris', 'Beige', 'Negro']
 
 export const COLOR_HEX: Record<Color, string> = {
   Blanco: '#EEEEE6',
-  Verde:  '#2D6A4F',
-  Gris:   '#7A7C7D',
-  Beige:  '#C4AA85',
+  Verde:  '#7A924E',  // olive green
+  Gris:   '#B8BCBF',  // silver
+  Beige:  '#FFEFD6',  // light sand
   Negro:  '#1C1C1C',
+}
+
+// CSS border value for each color swatch/dot, or null if no border needed
+export const COLOR_BORDER: Record<Color, string | null> = {
+  Blanco: 'var(--border-strong)',
+  Verde:  null,
+  Gris:   'var(--border-strong)',
+  Beige:  'var(--border-strong)',
+  Negro:  'var(--swatch-dark-border)',
 }
 
 // Whether the swatch label/checkmark needs dark text for contrast
 export const COLOR_DARK_TEXT: Record<Color, boolean> = {
   Blanco: true,
-  Verde:  false,
-  Gris:   false,
+  Verde:  true,   // olive is light enough for dark text
+  Gris:   true,   // silver is light
   Beige:  true,
   Negro:  false,
 }

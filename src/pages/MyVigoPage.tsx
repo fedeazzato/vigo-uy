@@ -1,6 +1,7 @@
-import { useUserPrefs, MODELS, COLORS, COLOR_HEX, COLOR_DARK_TEXT } from '../context/UserPrefsContext'
+import { useUserPrefs, MODELS, COLORS, COLOR_HEX, COLOR_DARK_TEXT, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { Model } from '../types'
 import { PageHeader, Card, CardTitle } from '../components/UI'
+import { CarPreview } from '../components/CarPreview'
 import styles from './MyVigoPage.module.css'
 
 const MODEL_INFO: Record<Model, { battery: string; extra: string }> = {
@@ -25,11 +26,7 @@ export default function MyVigoPage() {
               className={styles.colorDot}
               style={{
                 background: COLOR_HEX[color],
-                border: color === 'Blanco'
-                  ? '1.5px solid var(--border-strong)'
-                  : color === 'Negro'
-                  ? '1.5px solid var(--swatch-dark-border)'
-                  : undefined,
+                border: COLOR_BORDER[color] ? `1.5px solid ${COLOR_BORDER[color]}` : undefined,
               }}
             />
           )}
@@ -63,6 +60,7 @@ export default function MyVigoPage() {
       </Card>
 
       <Card>
+        <CarPreview color={color} />
         <CardTitle icon="🎨">Color</CardTitle>
         <div className={styles.colorGrid}>
           {COLORS.map((c) => (
@@ -75,7 +73,7 @@ export default function MyVigoPage() {
                 className={styles.swatch}
                 style={{
                   background: COLOR_HEX[c],
-                  borderColor: c === 'Blanco' ? 'var(--border-strong)' : c === 'Negro' ? 'var(--swatch-dark-border)' : 'transparent',
+                  borderColor: COLOR_BORDER[c] ?? 'transparent',
                   color: COLOR_DARK_TEXT[c] ? '#1a1a18' : '#fff',
                 }}
               />
