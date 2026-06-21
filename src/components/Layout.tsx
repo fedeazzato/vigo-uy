@@ -28,13 +28,15 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: '/mi-vigo',    label: 'Mi Vigo',     icon: '🚗' },
-  { to: '/carga',      label: 'Carga',       icon: '⚡' },
-  { to: '/rutas',      label: 'Rutas',       icon: '🗺️' },
-  { to: '/costos',     label: 'Costos',      icon: '💰' },
-  { to: '/accesorios', label: 'Accesorios',  icon: '🔧' },
-  { to: '/tecnologia', label: 'Tecnología',  icon: '📱' },
-  { to: '/faq',        label: 'FAQ',         icon: '💬' },
+  { to: '/mi-vigo',        label: 'Mi Vigo',        icon: '🚗' },
+  { to: '/ficha-tecnica',  label: 'Ficha técnica',  icon: '📋' },
+  { to: '/carga',          label: 'Carga',          icon: '⚡' },
+  { to: '/rutas',          label: 'Rutas',          icon: '🗺️' },
+  { to: '/costos',         label: 'Costos',         icon: '💰' },
+  { to: '/mantenimiento',  label: 'Mantenimiento',  icon: '🛠️' },
+  { to: '/accesorios',     label: 'Accesorios',     icon: '🔧' },
+  { to: '/tecnologia',     label: 'Tecnología',     icon: '📱' },
+  { to: '/faq',            label: 'FAQ',            icon: '💬' },
 ]
 
 export default function Layout() {

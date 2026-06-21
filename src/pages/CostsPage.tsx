@@ -8,7 +8,7 @@ const data = rawData as CostsData
 
 export default function CostsPage() {
   const { model } = useUserPrefs()
-  const { perKm, fullCharge, realCases, patent } = data
+  const { perKm, fullCharge, realCases, patent, insurance } = data
 
   const activeModel = model ?? 'E2+'
   const activeFullCharge = fullCharge[activeModel]
@@ -108,6 +108,22 @@ export default function CostsPage() {
           )}
         </div>
         <Alert type="info">{patent.note}</Alert>
+        {patent.policyNotes.map((note, i) => (
+          <Alert key={i} type="warning">{note}</Alert>
+        ))}
+      </Card>
+
+      <SectionDivider label="Seguro" />
+
+      <Card>
+        <CardTitle icon="🛡️">Rango de precios reportado</CardTitle>
+        <div className={styles.realCaseHeader}>
+          <span className={styles.realCaseCost}>{insurance.range}</span>
+        </div>
+        <Alert type="warning">{insurance.disclaimer}</Alert>
+        <p className={styles.realCaseConditions}>
+          Aseguradoras mencionadas por el grupo: {insurance.insurers.join(', ')}.
+        </p>
       </Card>
     </div>
   )

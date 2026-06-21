@@ -17,9 +17,10 @@
       "items": [
         { "bold": "Qué es:", "text": "Adaptador que habilita Android Auto inalámbrico (y también CarPlay) en la pantalla de la Vigo. Se conecta al puerto USB izquierdo (el de datos). El derecho es solo para carga." },
         { "bold": "Precio en Uruguay:", "text": "$4.000–$5.000. En Temu o AliExpress: más barato. Modelo recomendado: CarlinKit 2025 LiteS 5 en 1." },
-        { "bold": "Problema conocido:", "text": "Algunos modelos dejan de funcionar tras actualizaciones automáticas. Solución: restaurar de fábrica desde la web del dispositivo (conectarse por WiFi a la IP del Carlinkit) o bajar una versión anterior desde carlinkit.com/faq_detail/63.html" },
+        { "bold": "Problema conocido:", "text": "Algunos modelos dejan de funcionar tras actualizaciones automáticas. Solución: restaurar de fábrica desde la web del dispositivo (conectarse por WiFi a la IP del Carlinkit) o bajar una versión anterior desde carlinkit.com/faq_detail/63.html. Para evitar que vuelva a pasar, desactivar las actualizaciones automáticas del dispositivo." },
         { "bold": "iPhone:", "text": "CarPlay inalámbrico funciona nativo sin adaptador. Si se desconecta: borrar la conexión del auto y del cel y reconectar desde cero." },
-        { "bold": "Android sin Carlinkit:", "text": "Solo Bluetooth para música y llamadas. Sin navegación en pantalla." }
+        { "bold": "Android sin Carlinkit:", "text": "Solo Bluetooth para música y llamadas. Sin navegación en pantalla." },
+        { "bold": "Alternativa — tablet multimedia aftermarket:", "text": "Tablets de 10\" (Temu, MercadoLibre, ~$1.500–3.000) que se instalan en el mismo soporte y reproducen YouTube y Netflix de forma nativa, conectando automáticamente al encender el auto. Calidad y compatibilidad variable según el vendedor." }
       ]
     },
     {
@@ -56,8 +57,9 @@
       "title": "Otros accesorios",
       "icon": "✨",
       "items": [
-        { "bold": "Polarizado (láminas):", "text": "Oferta del grupo de Sebastián Multiservicios — nanocerámica con rechazo IR90, UVA 99%, UVB 99%. Contactar por privado." },
-        { "bold": "Pendrive USB:", "text": "Formato USB-C. Poner canciones en la raíz (no dentro de carpetas). Ir a Multimedia en el menú. Formato FAT32 recomendado." }
+        { "bold": "Polarizado (láminas):", "text": "Oferta del grupo de Sebastián Multiservicios — nanocerámica con rechazo IR90, UVA 99%, UVB 99%. Contactar por privado. ⚠️ El parabrisas delantero no se puede polarizar en Uruguay — ni siquiera con láminas transparentes anti-UV — está prohibido por ley. El polarizado solo es legal en laterales y luneta trasera." },
+        { "bold": "Pendrive USB:", "text": "Formato USB-C. Poner canciones en la raíz (no dentro de carpetas). Ir a Multimedia en el menú. Formato FAT32 recomendado." },
+        { "bold": "Enganche para remolque:", "text": "No se ofrece oficialmente en Uruguay y Dongfeng no confirma compatibilidad estructural. Al menos un miembro reportó una instalación no oficial (~USD 100) — consultar con un instalador especializado antes de hacerlo, ya que no hay garantía de fábrica para esta modificación." }
       ]
     }
   ]

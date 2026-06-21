@@ -62,12 +62,19 @@ export default function ChargingPage() {
           })}
         </div>
 
+        <StatGrid stats={autonomy.realConsumption} />
+
         <p className={styles.autonomyDisclaimer}>⚠️ {autonomy.disclaimer}</p>
       </Card>
 
       <Card>
         <CardTitle icon="🏠">{homeCharging.title}</CardTitle>
         <TipList items={homeCharging.tips} />
+      </Card>
+
+      <Card>
+        <CardTitle icon="🔌">{data.v2l.title}</CardTitle>
+        <TipList items={data.v2l.tips} />
       </Card>
 
       <SectionDivider label="Cargadores públicos" />
@@ -78,7 +85,14 @@ export default function ChargingPage() {
         <Card key={i}>
           <div className={styles.chargerHeader}>
             <span className={styles.chargerName}>{c.name}</span>
-            <Badge color={c.badgeColor}>{c.badge}</Badge>
+            <div>
+              {c.source && (
+                <Badge color={c.source === 'manual' ? 'blue' : 'gray'}>
+                  {c.source === 'manual' ? 'Manual oficial' : 'Comunidad'}
+                </Badge>
+              )}{' '}
+              <Badge color={c.badgeColor}>{c.badge}</Badge>
+            </div>
           </div>
           <p className={styles.chargerDetails}>{c.details}</p>
           {c.tips && <p className={styles.chargerTip}>💡 {c.tips}</p>}
@@ -90,6 +104,12 @@ export default function ChargingPage() {
       {publicCharging.alerts.map((a, i) => (
         <Alert key={i} type={i === 0 ? 'danger' : 'warning'}>{a}</Alert>
       ))}
+
+      <SectionDivider label={data.troubleshooting.title} />
+
+      <Card>
+        <TipList items={data.troubleshooting.tips} />
+      </Card>
     </div>
   )
 }

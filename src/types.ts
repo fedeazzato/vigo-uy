@@ -26,8 +26,11 @@ export interface AutonomyEntry {
 export interface AutonomyData {
   standards: AutonomyStandard[]
   models: Record<Model, Record<AutonomyStandard, AutonomyEntry>>
+  realConsumption: StatItem[]
   disclaimer: string
 }
+
+export type SourceTag = 'manual' | 'comunidad'
 
 export interface Charger {
   name: string
@@ -35,6 +38,7 @@ export interface Charger {
   badgeColor: string
   details: string
   tips?: string
+  source?: SourceTag
 }
 
 export interface PublicChargingData {
@@ -53,6 +57,8 @@ export interface ChargingData {
   autonomy: AutonomyData
   homeCharging: HomeChargingData
   publicCharging: PublicChargingData
+  v2l: HomeChargingData
+  troubleshooting: HomeChargingData
 }
 
 // ── Routes data ──────────────────────────────────────────────────────────────
@@ -120,6 +126,13 @@ export interface PatentData {
   e2: PatentEntry
   e2plus: PatentEntry
   note: string
+  policyNotes: string[]
+}
+
+export interface InsuranceData {
+  range: string
+  disclaimer: string
+  insurers: string[]
 }
 
 export interface CostsData {
@@ -127,6 +140,7 @@ export interface CostsData {
   fullCharge: Record<Model, ModelFullCharge>
   realCases: RealCase[]
   patent: PatentData
+  insurance: InsuranceData
 }
 
 // ── Accessories data ─────────────────────────────────────────────────────────
@@ -160,4 +174,63 @@ export interface FaqEntry {
 export interface TechFaqData {
   tech: TechSection[]
   faq: FaqEntry[]
+}
+
+// ── Ficha técnica data ───────────────────────────────────────────────────────
+
+export interface SpecRow {
+  label: string
+  value: string
+}
+
+export interface SpecGroup {
+  id: string
+  icon: string
+  title: string
+  rows: SpecRow[]
+  note?: string
+}
+
+export type LightSeverity = 'danger' | 'warning' | 'info'
+
+export interface WarningLight {
+  icon: string
+  name: string
+  meaning: string
+  severity: LightSeverity
+}
+
+export interface VinLocation {
+  label: string
+  text: string
+}
+
+export interface FichaTecnicaData {
+  specGroups: SpecGroup[]
+  warningLights: WarningLight[]
+  vinLocations: VinLocation[]
+  warranty: TipItem[]
+}
+
+// ── Mantenimiento data ───────────────────────────────────────────────────────
+
+export interface ScheduleItem {
+  interval: string
+  tasks: string[]
+}
+
+export interface DealerPriceRow {
+  dealer: string
+  service: string
+  price: string
+  note?: string
+}
+
+export interface MantenimientoData {
+  schedule: ScheduleItem[]
+  severeConditions: TipItem[]
+  dealerPrices: DealerPriceRow[]
+  knownIssues: Category[]
+  safety: TipItem[]
+  warrantyNote: string
 }

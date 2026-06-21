@@ -9,12 +9,20 @@
       "text": "En autopista conviene poner regeneración baja o nula y aprovechar la inercia del auto. La regeneración fuerte es más útil en ciudad con frenadas frecuentes."
     },
     {
+      "bold": "Crucero y regeneración:",
+      "text": "El control de crucero (ACC) desactiva la regeneración mientras está activo. En bajadas largas conviene desactivarlo y frenar con el pedal para recuperar energía."
+    },
+    {
       "bold": "Planificación:",
       "text": "Usar PlugShare para ver el estado de los cargadores en tiempo real antes de salir."
     },
     {
-      "bold": "Autonomía real:",
-      "text": "E2 al 100%: ~362 km. E2+ al 100%: ~411 km. Con aire y a 110 km/h se reduce. En ciudad puede superar esos valores."
+      "bold": "Cómo estimar el rango restante:",
+      "text": "Conviene calcular con el consumo del último tramo recorrido (kWh/100km), no con el promedio histórico del auto — cambia mucho entre ciudad, ruta, frío y viento. Ver la página de Carga para los valores típicos por condición."
+    },
+    {
+      "bold": "Confiabilidad de cargadores por zona:",
+      "text": "Rocha, Maldonado y San José son las zonas con más quejas de cargadores UTE fuera de servicio. Antes de salir, revisar el estado en PlugShare y tener un plan B (EONE, DMC o EverGo)."
     },
     {
       "bold": "Los primeros viajes:",
@@ -46,7 +54,7 @@
       "difficulty": "Fácil",
       "stops": [
         { "name": "Montevideo", "type": "origin" },
-        { "name": "Rocha", "type": "charge", "note": "Parada recomendada. Cargadores compatibles con la Vigo." },
+        { "name": "Rocha", "type": "charge", "note": "Parada recomendada. Cargadores compatibles con la Vigo, aunque la zona tiene reportes frecuentes de equipos UTE fuera de servicio — verificar estado en PlugShare antes de salir." },
         { "name": "Punta del Diablo", "type": "warning", "note": "Cargadores con conector incompatible con la Vigo — no cargar aquí." },
         { "name": "Chuy", "type": "destination" }
       ],
@@ -78,13 +86,34 @@
         { "name": "Montevideo", "type": "origin" },
         { "name": "Rocha", "type": "charge" },
         { "name": "Chuy / Río Branco", "type": "charge", "note": "Cruce de frontera. Verificar horarios de Policía y Panda — suelen ser 24hs." },
-        { "name": "Pelotas / Porto Alegre (Brasil)", "type": "charge", "note": "Cargadores disponibles. Red más densa en ciudades brasileñas." },
+        { "name": "Yaguarão (Brasil)", "type": "charge", "note": "Cargador gratuito compatible con la app Tupi, apenas cruzando la frontera." },
+        { "name": "Pelotas / Porto Alegre (Brasil)", "type": "warning", "note": "El tramo Pelotas–Porto Alegre (BR-116) tiene ~260 km sin alternativas — salir con 100% de batería, es riesgoso llegar con menos de 90%. El cargador rápido gratuito antes de Porto Alegre suele estar ocupado; conviene tener un plan B en la app Tupi." },
         { "name": "Florianópolis", "type": "destination" }
       ],
       "tips": [
         "Varios miembros del grupo hicieron este viaje. Es viable pero requiere planificación.",
-        "Brasil tiene buena red de cargadores en ciudades principales.",
-        "Llegar de madrugada al Chuy para cargar y hacer trámites migratorios sin esperas."
+        "Bajar la app Tupi y cargar reales antes de cruzar — ronda 1,89 reales/kWh, con opción de reserva por 3 reales cada 15 minutos.",
+        "Llegar de madrugada al Chuy para cargar y hacer trámites migratorios sin esperas.",
+        "De Porto Alegre hacia el sur el consumo sube a ~14 kWh/100km por viento y terreno — recalcular el rango con ese dato, no con el promedio del viaje."
+      ]
+    },
+    {
+      "id": "argentina",
+      "title": "Montevideo → Argentina (ej. Mendoza)",
+      "distance": "Variable (+1.000 km a Mendoza)",
+      "difficulty": "Avanzada",
+      "stops": [
+        { "name": "Montevideo", "type": "origin" },
+        { "name": "Colón / Concordia (cruce)", "type": "charge", "note": "Cruce de frontera. Verificar trámites migratorios y de aduana para el vehículo con anticipación." },
+        { "name": "Rosario / Córdoba", "type": "charge", "note": "Redes de carga adecuadas en estas ciudades." },
+        { "name": "Ruta 7 (Rufino, Villa Mercedes)", "type": "warning", "note": "Tramo con muy pocos cargadores — solo 2 puntos Shell Recharge en toda la ruta 7 reportados." },
+        { "name": "Mendoza", "type": "destination" }
+      ],
+      "tips": [
+        "Shell Recharge requiere DNI argentino y una cuenta local — gestionarlo con anticipación o con ayuda de un residente.",
+        "La app de YPF está bloqueada para DNI no argentino.",
+        "Sin las apps locales, cargar sale más caro (~1.500 ARS por carga en algunas estaciones) y suele requerir efectivo o tarjeta física.",
+        "Algunos peajes tienen cargadores lentos pero gratuitos como respaldo."
       ]
     }
   ]

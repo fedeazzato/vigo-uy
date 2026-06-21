@@ -47,6 +47,15 @@
   "patent": {
     "e2": { "valuation": "$25.990 USD", "patent": "~$16.000 UY" },
     "e2plus": { "valuation": "$28.990 USD", "patent": "$29.816 UY sin bonificación" },
-    "note": "Verificar siempre en la web de SUCIVE — en 2026 hubo aforamientos incorrectos."
+    "note": "Verificar siempre en la web de SUCIVE — en 2026 hubo aforamientos incorrectos.",
+    "policyNotes": [
+      "A mediados de 2026 se discutía aplicar IMESI a algunos modelos eléctricos — el estado de esta propuesta cambia con el tiempo, verificar vigencia antes de presupuestar.",
+      "Algunos compradores accedieron a un descuento del 20% en el empadronamiento según la fecha de compra — consultar con SUCIVE o la Intendencia si sigue vigente."
+    ]
+  },
+  "insurance": {
+    "range": "$27.000 – $69.000+ por año",
+    "disclaimer": "El precio varía mucho según zona, edad y antigüedad como conductor, y aseguradora — los montos reportados por el grupo van desde $27.000/año en planes básicos hasta más de $69.000/año en coberturas completas en zonas de mayor riesgo. Conviene cotizar en varias aseguradoras antes de elegir.",
+    "insurers": ["ACAU", "MAPFRE", "Aseguradora Basan"]
   }
 }

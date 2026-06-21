@@ -7,6 +7,8 @@ import AccessoriesPage from './pages/AccessoriesPage'
 import TechPage from './pages/TechPage'
 import FaqPage from './pages/FaqPage'
 import MyVigoPage from './pages/MyVigoPage'
+import FichaTecnicaPage from './pages/FichaTecnicaPage'
+import MantenimientoPage from './pages/MantenimientoPage'
 
 export default function App() {
   return (
@@ -14,9 +16,11 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/mi-vigo" replace />} />
         <Route path="mi-vigo" element={<MyVigoPage />} />
+        <Route path="ficha-tecnica" element={<FichaTecnicaPage />} />
         <Route path="carga" element={<ChargingPage />} />
         <Route path="rutas" element={<RoutesPage />} />
         <Route path="costos" element={<CostsPage />} />
+        <Route path="mantenimiento" element={<MantenimientoPage />} />
         <Route path="accesorios" element={<AccessoriesPage />} />
         <Route path="tecnologia" element={<TechPage />} />
         <Route path="faq" element={<FaqPage />} />

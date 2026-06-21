@@ -6,7 +6,10 @@
       "icon": "🖥️",
       "items": [
         { "bold": "Sistema operativo:", "text": "Tablet Android con sistema propietario. Android Auto no está habilitado de fábrica." },
+        { "bold": "Idioma:", "text": "Comandos de voz disponibles solo en inglés (\"Open windows\", \"Close windows\", etc.) — no hay opción en español. El menú en pantalla se puede poner en español, pero algunos botones quedan en inglés." },
         { "bold": "Wallpaper:", "text": "Solo 5 imágenes preinstaladas — deslizar con touch para cambiar. No se puede poner foto personalizada." },
+        { "bold": "Pantalla dividida:", "text": "El ícono de 4 cuadrados en la esquina inferior izquierda alterna entre una app, todos los íconos, o dos apps en paralelo (ej. Waze + Spotify)." },
+        { "bold": "Cámara 360 en rotondas:", "text": "Se activa sola a baja velocidad e interrumpe la navegación — se puede desactivar en Configuración → Cámaras → activación automática." },
         { "bold": "Radio FM:", "text": "Funciona en modo automático. Algunas frecuencias uruguayas no aparecen en modo manual." },
         { "bold": "Reset de pantalla:", "text": "Mantener presionado el botón MODE unos segundos resetea el sistema." },
         { "bold": "Música por USB:", "text": "Conectar pendrive USB-C con archivos mp3 sueltos en la raíz (no en carpetas). Ir a Multimedia en el menú." }
@@ -14,13 +17,19 @@
     },
     {
       "id": "driving",
-      "title": "Modos de conducción",
+      "title": "Conducción y controles",
       "icon": "🚗",
       "items": [
         { "bold": "Modo siesta:", "text": "Permite dejar el auto ventilado o climatizado sin motor en movimiento. Muy usado en verano." },
         { "bold": "Regeneración de freno:", "text": "Configurable. En ciudad: nivel máximo para recuperar energía. En ruta: nivel bajo o cero para aprovechar la inercia." },
+        { "bold": "Control de crucero:", "text": "Se activa empujando la palanca derecha hacia abajo a la velocidad deseada; los botones +/- del volante ajustan el objetivo (máximo 130 km/h). Desactiva la regeneración mientras está encendido." },
+        { "bold": "AUTO HOLD (freno de mano electrónico):", "text": "Se activa solo al detenerse del todo, para evitar que el auto se mueva. Se libera al acelerar." },
+        { "bold": "Plegado de espejos:", "text": "Girar la rueda de control de espejos hasta el final en el sentido contrario pliega ambos espejos — funciona incluso en movimiento." },
+        { "bold": "Apertura del baúl:", "text": "Botón en el control remoto, abre solo el baúl sin destrabar las puertas. Presionar dos veces para volver a trabarlo." },
+        { "bold": "Altura de las luces:", "text": "Rueda en el lado inferior izquierdo del volante ajusta la altura del haz de luz." },
         { "bold": "Marchas:", "text": "La posición de las marchas está al revés respecto al estándar occidental — es una queja común al principio, pero se acostumbra." },
-        { "bold": "Límites de carga AC/DC:", "text": "El auto acepta hasta 60 kW en DC. En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)." }
+        { "bold": "Sonido de aviso a peatones (AVAS):", "text": "Suena obligatoriamente por debajo de ~30 km/h, por regulación de seguridad para peatones y ciclistas con baja visión. No se puede desactivar desde el menú." },
+        { "bold": "Límites de carga AC/DC:", "text": "El auto acepta hasta 60 kW en DC (dato reportado por la comunidad, no figura en el manual). En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)." }
       ]
     },
     {
@@ -28,11 +37,13 @@
       "title": "Soporte y contactos",
       "icon": "🛠️",
       "items": [
-        { "bold": "Fidocar (importador UY):", "text": "Talleres en Montevideo e Interbalnearia. Service de 5.000 km demora 3-4 horas. Primer service recomendado al llegar a esos km." },
+        { "bold": "Fidocar (importador UY):", "text": "Talleres en Montevideo e Interbalnearia. Service de 5.000 km gratuito y demora 3-4 horas." },
+        { "bold": "Otros concesionarios con service:", "text": "Sole y Lorenzo, Las Torres, Dongfeng Torre y Empalme Olmos también hacen el service oficial — ver precios y plazos comparados en la página de Mantenimiento." },
         { "bold": "Dongfeng China:", "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino." },
         { "bold": "Telegram:", "text": "t.me/ElectricosUruguay — grupo con subgrupos de viajes, modelos, instalaciones, servicios y QR de cargadores." },
         { "bold": "PlugShare:", "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad." },
-        { "bold": "EONE App:", "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'." }
+        { "bold": "EONE App:", "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'." },
+        { "bold": "Apps para viajar al exterior:", "text": "Tupi para cargadores en Brasil (cargar reales antes de cruzar). Shell Recharge para Argentina (requiere DNI argentino y cuenta local — la app de YPF está bloqueada para extranjeros)." }
       ]
     }
   ],
@@ -40,12 +51,12 @@
     {
       "id": "tiempo-carga",
       "q": "¿Cuánto tarda en cargarse de 0 a 100%?",
-      "a": "Cargador incluido (12A, 2kW): ~24–26 hs. Instalación 16A en casa: ~10 hs. Wallbox 32A: ~5–6 hs. Cargador DC rápido público (60 kW): mucho menos, depende del nivel de carga."
+      "a": "Cargador incluido (12A, 2kW): ~24–26 hs. Instalación 16A en casa: ~10 hs. Wallbox 32A: ~5–6 hs. Cargador DC rápido público: mucho menos, depende del nivel de carga y se hace notoriamente más lento después del 80% (protección térmica de la batería, no es una falla)."
     },
     {
       "id": "corte-automatico",
       "q": "¿La carga se corta sola al llegar al límite?",
-      "a": "Sí. Se configura el límite desde el auto (80%, 90%, 100%). Cuando llega, corta automáticamente — no hace falta estar presente."
+      "a": "Sí. Se configura el límite desde el auto (80%, 90%, 100%). Cuando llega, corta automáticamente — no hace falta estar presente. Algunos autos se quedan trabados en 94% por un bug de software; se soluciona restableciendo de fábrica el sistema multimedia."
     },
     {
       "id": "carga-lluvia",
@@ -65,7 +76,7 @@
     {
       "id": "autonomia",
       "q": "¿La autonomía que muestra el auto es real?",
-      "a": "Es la estimación WLTP europea. E2 al 100%: ~362 km. E2+ al 100%: ~411 km. A 90 km/h sin aire se acerca mucho. A 120 km/h con aire baja considerablemente. En ciudad puede superar esos valores."
+      "a": "El manual oficial solo homologa el ciclo CLTC: E2 401 km / E2+ 471 km. En la práctica, a 90 km/h sin aire se acerca mucho a eso; con aire en ruta a 110-120 km/h baja considerablemente (consumo real reportado: ~14-16 kWh/100km en ruta con aire, ~22 kWh/100km en invierno). En ciudad, con ~9-10 kWh/100km, puede superar la cifra homologada."
     },
     {
       "id": "rueda-auxilio",
@@ -80,7 +91,7 @@
     {
       "id": "aire-acondicionado",
       "q": "¿El aire acondicionado consume mucha batería?",
-      "a": "Sí, afecta la autonomía, especialmente en ruta a velocidades altas. A 110 km/h con aire, la autonomía baja notablemente. Se recomienda usarlo con criterio en viajes largos."
+      "a": "Sí, afecta la autonomía, especialmente en ruta a velocidades altas. A 110 km/h con aire, la autonomía baja notablemente. Se recomienda usarlo con criterio en viajes largos. En algunas unidades el AC enfría poco — si pasa, conviene reclamarlo en garantía."
     },
     {
       "id": "uso-intensivo",
@@ -90,12 +101,47 @@
     {
       "id": "garantia",
       "q": "¿La Vigo tiene garantía en Uruguay?",
-      "a": "Sí, a través de Fidocar (importador oficial). Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
+      "a": "Sí, a través de Fidocar (importador oficial): 8 años o 200.000 km en la batería de alto voltaje, 8 años en el vehículo. Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
     },
     {
       "id": "viaje-exterior",
       "q": "¿Se puede llevar a Brasil o Argentina?",
-      "a": "Sí. Hay miembros que hicieron Montevideo–Florianópolis sin problemas. Brasil tiene buena infraestructura de carga en ciudades. Argentina es más limitada — planificar bien."
+      "a": "Sí. Hay miembros que hicieron Montevideo–Florianópolis sin problemas usando la app Tupi para cargar. Argentina es más limitada — Shell Recharge requiere DNI argentino y la red de cargadores es escasa fuera de las ciudades grandes; planificar bien."
+    },
+    {
+      "id": "carga-80-vs-100",
+      "q": "¿Hay que cargar solo hasta 80% para no dañar la batería?",
+      "a": "El manual no pide ese límite — indica que se puede cargar a 100% para el uso diario sin problema. Algunos electricistas del grupo recomiendan preferir la carga AC (más lenta) sobre la carga rápida DC repetida, ya que esta última genera más calor en la batería con el uso frecuente."
+    },
+    {
+      "id": "motor-potencia",
+      "q": "¿Qué motor y potencia tiene la Vigo?",
+      "a": "Motor síncrono de imanes permanentes de 120 kW y 230 N·m de torque, con refrigeración líquida. Velocidad máxima 150 km/h en ambas versiones (E2 y E2+)."
+    },
+    {
+      "id": "v2l",
+      "q": "¿Qué es la función V2L?",
+      "a": "Vehicle-to-Load: permite usar la batería del auto para alimentar dispositivos externos (hasta 3 kW) a través de un adaptador que se compra por separado. Útil para herramientas, heladeras portátiles o camping."
+    },
+    {
+      "id": "intervalos-service",
+      "q": "¿Cuáles son los intervalos de mantenimiento oficiales?",
+      "a": "Service general cada 30.000 km o 24 meses. El sistema de batería se revisa además cada 15.000 km o 12 meses. En condiciones severas (polvo, calor extremo, sal, caminos de tierra) varios ítems se revisan con más frecuencia — ver el detalle en la página de Mantenimiento."
+    },
+    {
+      "id": "perder-garantia",
+      "q": "¿Si no hago el service en fecha pierdo la garantía?",
+      "a": "Sí. El manual oficial indica que no cumplir con el mantenimiento programado en los intervalos indicados hace perder el derecho a garantía."
+    },
+    {
+      "id": "oxido-asientos",
+      "q": "¿Es normal encontrar óxido debajo de los asientos?",
+      "a": "Es un problema de calidad reportado por varios miembros, atribuido a un recubrimiento anticorrosivo insuficiente de fábrica. Conviene revisar debajo de los asientos delanteros al recibir el auto y reclamar en garantía si aparece."
+    },
+    {
+      "id": "adas-lluvia",
+      "q": "¿El frenado automático y los asistentes de carril funcionan bien con lluvia?",
+      "a": "Funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas. No conviene depender de ellos como única medida de seguridad en esas condiciones."
     }
   ]
 }
