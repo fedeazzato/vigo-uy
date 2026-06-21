@@ -181,6 +181,7 @@ export interface TechFaqData {
 export interface SpecRow {
   label: string
   value: string
+  model?: Model | null
 }
 
 export interface SpecGroup {

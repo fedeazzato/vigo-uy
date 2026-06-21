@@ -12,10 +12,10 @@
         { "label": "Despeje al piso (carga completa)", "value": "151 mm" },
         { "label": "Ángulo de ataque / salida", "value": "23° / 30°" },
         { "label": "Pendiente máxima superable", "value": "30%" },
-        { "label": "Peso en orden de marcha — E2", "value": "1.526–1.545 kg" },
-        { "label": "Peso en orden de marcha — E2+", "value": "1.550–1.570 kg" },
-        { "label": "Peso bruto vehicular (GVWR) — E2", "value": "1.945 kg" },
-        { "label": "Peso bruto vehicular (GVWR) — E2+", "value": "1.975 kg" },
+        { "label": "Peso en orden de marcha — E2", "value": "1.526–1.545 kg", "model": "E2" },
+        { "label": "Peso en orden de marcha — E2+", "value": "1.550–1.570 kg", "model": "E2+" },
+        { "label": "Peso bruto vehicular (GVWR) — E2", "value": "1.945 kg", "model": "E2" },
+        { "label": "Peso bruto vehicular (GVWR) — E2+", "value": "1.975 kg", "model": "E2+" },
         { "label": "Asientos homologados", "value": "5" },
         { "label": "Tracción", "value": "Delantera" }
       ]
@@ -30,10 +30,10 @@
         { "label": "Par máximo", "value": "230 N·m" },
         { "label": "Velocidad máxima", "value": "150 km/h" },
         { "label": "Refrigeración del motor", "value": "Líquida" },
-        { "label": "Batería E2", "value": "44,94 kWh — Li-ion (0QD-S32-44.94-400-139BF)" },
-        { "label": "Batería E2+", "value": "51,87 kWh — Li-ion (0QD-S32-51.87-480-171BF)" },
-        { "label": "Consumo homologado CLTC — E2", "value": "12,4 kWh/100 km" },
-        { "label": "Consumo homologado CLTC — E2+", "value": "12,6 kWh/100 km" }
+        { "label": "Batería E2", "value": "44,94 kWh — Li-ion (0QD-S32-44.94-400-139BF)", "model": "E2" },
+        { "label": "Batería E2+", "value": "51,87 kWh — Li-ion (0QD-S32-51.87-480-171BF)", "model": "E2+" },
+        { "label": "Consumo homologado CLTC — E2", "value": "12,4 kWh/100 km", "model": "E2" },
+        { "label": "Consumo homologado CLTC — E2+", "value": "12,6 kWh/100 km", "model": "E2+" }
       ],
       "note": "El manual oficial solo informa el ciclo CLTC. Las cifras NEDC y WLTP que se muestran en la página de Carga son de referencia y no figuran en este manual."
     },
@@ -43,8 +43,8 @@
       "title": "Neumáticos",
       "rows": [
         { "label": "Medida (según manual, ambas versiones)", "value": "205/55 R16" },
-        { "label": "Medida real entregada — E2 (reportado)", "value": "215/60 R17" },
-        { "label": "Medida real entregada — E2+ (reportado)", "value": "215/55 R18" },
+        { "label": "Medida real entregada — E2 (reportado)", "value": "215/60 R17", "model": "E2" },
+        { "label": "Medida real entregada — E2+ (reportado)", "value": "215/55 R18", "model": "E2+" },
         { "label": "Presión — 2 ocupantes", "value": "2,25 bar" },
         { "label": "Presión — carga completa (5 ocupantes)", "value": "2,6 bar" },
         { "label": "Presión recomendada en ruta (comunidad)", "value": "2,76 bar (40 PSI)" },

@@ -1,5 +1,6 @@
 import rawData from '../data/ficha-tecnica.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, SectionDivider } from '../components/UI'
+import { useUserPrefs } from '../context/UserPrefsContext'
 import styles from './Pages.module.css'
 import type { FichaTecnicaData, LightSeverity } from '../types'
 
@@ -18,6 +19,7 @@ const SEVERITY_BADGE: Record<LightSeverity, string> = {
 }
 
 export default function FichaTecnicaPage() {
+  const { model } = useUserPrefs()
   const groupedLights = (['danger', 'warning', 'info'] as LightSeverity[]).map((sev) => ({
     severity: sev,
     lights: data.warningLights.filter((l) => l.severity === sev),
@@ -30,23 +32,29 @@ export default function FichaTecnicaPage() {
         subtitle="Especificaciones oficiales del manual Dongfeng VIGO (mercado Uruguay)."
       />
 
-      {data.specGroups.map((group) => (
-        <Card key={group.id}>
-          <div className={styles.specGroupHeader}>
-            <CardTitle icon={group.icon}>{group.title}</CardTitle>
-            {group.note && <Badge color="blue">Manual oficial</Badge>}
-          </div>
-          <div className={styles.priceTable}>
-            {group.rows.map((row, i) => (
-              <div key={i} className={styles.priceRow}>
-                <div className={styles.priceLabel}>{row.label}</div>
-                <div className={styles.priceValue}>{row.value}</div>
-              </div>
-            ))}
-          </div>
-          {group.note && <Alert type="info">{group.note}</Alert>}
-        </Card>
-      ))}
+      {data.specGroups.map((group) => {
+        const visibleRows = model
+          ? group.rows.filter((r) => !r.model || r.model === model)
+          : group.rows
+
+        return (
+          <Card key={group.id}>
+            <div className={styles.specGroupHeader}>
+              <CardTitle icon={group.icon}>{group.title}</CardTitle>
+              {group.note && <Badge color="blue">Manual oficial</Badge>}
+            </div>
+            <div className={styles.priceTable}>
+              {visibleRows.map((row, i) => (
+                <div key={i} className={styles.priceRow}>
+                  <div className={styles.priceLabel}>{row.label}</div>
+                  <div className={styles.priceValue}>{row.value}</div>
+                </div>
+              ))}
+            </div>
+            {group.note && <Alert type="info">{group.note}</Alert>}
+          </Card>
+        )
+      })}
 
       <SectionDivider label="Advertencias del tablero" />
 
