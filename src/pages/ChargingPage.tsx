@@ -88,7 +88,7 @@ export default function ChargingPage() {
             <div>
               {c.source && (
                 <Badge color={c.source === 'manual' ? 'blue' : 'gray'}>
-                  {c.source === 'manual' ? 'Manual oficial' : 'Comunidad'}
+                  {c.source === 'manual' ? 'Oficial' : 'Comunidad'}
                 </Badge>
               )}{' '}
               <Badge color={c.badgeColor}>{c.badge}</Badge>

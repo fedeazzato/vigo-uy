@@ -17,8 +17,10 @@
         { "label": "Peso bruto vehicular (GVWR) — E2", "value": "1.945 kg", "model": "E2" },
         { "label": "Peso bruto vehicular (GVWR) — E2+", "value": "1.975 kg", "model": "E2+" },
         { "label": "Asientos homologados", "value": "5" },
-        { "label": "Tracción", "value": "Delantera" }
-      ]
+        { "label": "Tracción", "value": "Delantera" },
+        { "label": "Capacidad del baúl", "value": "500 litros" }
+      ],
+      "note": "La capacidad del baúl (500 litros) figura en la ficha técnica del importador oficial — no está en el manual del usuario."
     },
     {
       "id": "motor-bateria",
@@ -26,16 +28,18 @@
       "title": "Motor y batería",
       "rows": [
         { "label": "Tipo de motor", "value": "Síncrono de imanes permanentes (TZ200XS32E)" },
-        { "label": "Potencia máxima", "value": "120 kW" },
+        { "label": "Potencia máxima", "value": "120 kW (160 CV)" },
         { "label": "Par máximo", "value": "230 N·m" },
         { "label": "Velocidad máxima", "value": "150 km/h" },
         { "label": "Refrigeración del motor", "value": "Líquida" },
-        { "label": "Batería E2", "value": "44,94 kWh — Li-ion (0QD-S32-44.94-400-139BF)", "model": "E2" },
-        { "label": "Batería E2+", "value": "51,87 kWh — Li-ion (0QD-S32-51.87-480-171BF)", "model": "E2+" },
+        { "label": "Batería E2", "value": "44,94 kWh — LFP, litio-hierro-fosfato (0QD-S32-44.94-400-139BF)", "model": "E2" },
+        { "label": "Batería E2+", "value": "51,87 kWh — LFP, litio-hierro-fosfato (0QD-S32-51.87-480-171BF)", "model": "E2+" },
         { "label": "Consumo homologado CLTC — E2", "value": "12,4 kWh/100 km", "model": "E2" },
-        { "label": "Consumo homologado CLTC — E2+", "value": "12,6 kWh/100 km", "model": "E2+" }
+        { "label": "Consumo homologado CLTC — E2+", "value": "12,6 kWh/100 km", "model": "E2+" },
+        { "label": "Carga rápida DC (30%→80%) — E2", "value": "30 min", "model": "E2" },
+        { "label": "Carga rápida DC (30%→80%) — E2+", "value": "18 min", "model": "E2+" }
       ],
-      "note": "El manual oficial solo informa el ciclo CLTC. Las cifras NEDC y WLTP que se muestran en la página de Carga son de referencia y no figuran en este manual."
+      "note": "El manual del usuario solo informa el ciclo CLTC. La ficha técnica del importador oficial confirma además el ciclo NEDC — ver la página de Carga. El ciclo WLTP que se muestra ahí sigue siendo una estimación: no figura en ninguna fuente oficial. La química LFP de la batería y los tiempos de carga rápida DC también provienen de la ficha técnica del importador."
     },
     {
       "id": "neumaticos",
@@ -43,14 +47,16 @@
       "title": "Neumáticos",
       "rows": [
         { "label": "Medida (según manual, ambas versiones)", "value": "205/55 R16" },
-        { "label": "Medida real entregada — E2 (reportado)", "value": "215/60 R17", "model": "E2" },
-        { "label": "Medida real entregada — E2+ (reportado)", "value": "215/55 R18", "model": "E2+" },
+        { "label": "Rin (llanta de aleación) — E2", "value": "17″", "model": "E2" },
+        { "label": "Rin (llanta de aleación) — E2+", "value": "18″", "model": "E2+" },
+        { "label": "Medida de cubierta — E2 (reportado)", "value": "215/60 R17", "model": "E2" },
+        { "label": "Medida de cubierta — E2+ (reportado)", "value": "215/55 R18", "model": "E2+" },
         { "label": "Presión — 2 ocupantes", "value": "2,25 bar" },
         { "label": "Presión — carga completa (5 ocupantes)", "value": "2,6 bar" },
         { "label": "Presión recomendada en ruta (comunidad)", "value": "2,76 bar (40 PSI)" },
         { "label": "Desbalance máximo por rueda", "value": "≤ 8 g (ISO 18159:2018)" }
       ],
-      "note": "El manual indica una sola medida (205/55 R16) para ambas versiones, pero los autos entregados en Uruguay traen llantas más grandes según lo reportado por el grupo. Verificar físicamente la medida antes de comprar cubiertas."
+      "note": "El manual del usuario indica una sola medida (205/55 R16) para ambas versiones. La ficha técnica del importador oficial confirma que el rin sí difiere por versión (E2: 17″, E2+: 18″), pero no publica la medida completa de la cubierta — esa parte sigue siendo un dato reportado por el grupo. Verificar físicamente antes de comprar cubiertas."
     }
   ],
   "warningLights": [
@@ -90,12 +96,16 @@
     { "label": "Número de motor", "text": "Estampado en la carcasa inferior del motor de tracción, o en la etiqueta del lado derecho del compartimento delantero." }
   ],
   "warranty": [
-    { "bold": "Batería de alto voltaje:", "text": "8 años o 200.000 km, lo que ocurra primero (según el manual oficial)." },
-    { "bold": "Vehículo:", "text": "8 años de garantía general." },
+    { "bold": "Vehículo (primer dueño):", "text": "7 años o 300.000 km, lo que ocurra primero — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador." },
+    { "bold": "Batería de alto voltaje (primer dueño):", "text": "10 años sin límite de kilometraje — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador." },
+    { "bold": "Vehículo (segundo dueño):", "text": "5 años o 150.000 km — según las FAQs del sitio oficial del importador." },
+    { "bold": "Batería de alto voltaje (segundo dueño):", "text": "8 años o 200.000 km — según las FAQs del sitio oficial del importador." },
+    { "bold": "Garantía anterior (manual de agosto 2025):", "text": "El manual del usuario original indicaba 8 años o 200.000 km para la batería y 8 años para el vehículo, sin distinguir primer o segundo dueño — términos más cortos que los vigentes desde mayo de 2026." },
     { "bold": "Modificaciones:", "text": "Modificar, ajustar o desarmar el vehículo sin autorización anula la garantía de esa pieza o sistema." },
     { "bold": "Mantenimiento programado:", "text": "No cumplir con los services en los intervalos indicados hace perder el derecho a garantía." },
     { "bold": "Cargador:", "text": "El cargador entregado con el auto no está cubierto por la garantía del vehículo — es un accesorio aparte de Fidocar." },
     { "bold": "Protección de parabrisas:", "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía — es un servicio del concesionario, no de fábrica." },
-    { "bold": "Transferencia:", "text": "El manual es parte integral del vehículo y debe transferirse junto con él si se vende." }
+    { "bold": "Transferencia:", "text": "El manual es parte integral del vehículo y debe transferirse junto con él si se vende." },
+    { "bold": "Importante:", "text": "El importador aclara que las especificaciones técnicas pueden cambiar sin previo aviso — confirmar siempre la garantía vigente al momento de la compra." }
   ]
 }

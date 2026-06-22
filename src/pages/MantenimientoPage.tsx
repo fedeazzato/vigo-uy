@@ -13,6 +13,8 @@ export default function MantenimientoPage() {
         subtitle="Service oficial, precios por concesionario y problemas conocidos."
       />
 
+      <Alert type="info">{data.officialNote}</Alert>
+
       {data.schedule.map((item, i) => (
         <Card key={i}>
           <CardTitle icon="🗓️">{item.interval}</CardTitle>

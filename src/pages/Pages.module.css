@@ -500,6 +500,17 @@
   background: var(--surface-secondary);
 }
 
+.faqQuestionText {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faqIcon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
 .faqOpen .faqQuestion {
   background: var(--green-50);
   color: var(--green-600);

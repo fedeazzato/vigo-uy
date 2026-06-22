@@ -1,4 +1,5 @@
 {
+  "officialNote": "El importador oficial comunica el service cada 15.000 km o 1 año (lo que ocurra primero), con el primer service a los 5.000 km sin costo. El detalle de tareas a 30.000 km del manual del usuario se reparte entre estas visitas — no es una visita aparte.",
   "schedule": [
     {
       "interval": "Cada 30.000 km o 24 meses — service general",
@@ -84,6 +85,7 @@
     }
   ],
   "safety": [
+    { "bold": "ADAS solo en E2+:", "text": "Según la ficha técnica del importador oficial, los sistemas avanzados de asistencia al conductor (ADAS) — frenado automático, asistente de carril, etc. — son exclusivos de la versión E2+. La E2 no los trae de fábrica." },
     { "bold": "ADAS (frenado automático, aviso y asistente de carril):", "text": "Funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas — no siempre están calibrados para el tránsito local. No depender de ellos como única medida de seguridad en esas condiciones." },
     { "bold": "AVAS (sonido de aviso a peatones):", "text": "Suena obligatoriamente por debajo de ~30 km/h. Es un requisito de seguridad para peatones y ciclistas con baja visión — no se puede desactivar desde el menú, y no se recomienda desconectarlo físicamente." },
     { "bold": "Apagado de emergencia del sistema de alto voltaje:", "text": "En caso de choque o necesidad de manipular el auto, el sistema de alta tensión se aísla desconectando ambos cables de la batería de 12V (positivo y negativo)." },

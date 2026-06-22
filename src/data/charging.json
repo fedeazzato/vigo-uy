@@ -13,13 +13,13 @@
     "models": {
       "E2": {
         "CLTC": { "km": 401, "note": "Ciclo chino — el único que figura en el manual oficial" },
-        "NEDC": { "km": 361, "note": "Ciclo europeo nuevo — dato de referencia, no está en el manual" },
-        "WLTP": { "km": 306, "note": "Ciclo más representativo — dato de referencia, no está en el manual" }
+        "NEDC": { "km": 361, "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador" },
+        "WLTP": { "km": 306, "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador" }
       },
       "E2+": {
         "CLTC": { "km": 471, "note": "Ciclo chino — el único que figura en el manual oficial" },
-        "NEDC": { "km": 411, "note": "Ciclo europeo nuevo — dato de referencia, no está en el manual" },
-        "WLTP": { "km": 349, "note": "Ciclo más representativo — dato de referencia, no está en el manual" }
+        "NEDC": { "km": 411, "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador" },
+        "WLTP": { "km": 349, "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador" }
       }
     },
     "realConsumption": [

@@ -29,7 +29,7 @@ export default function FichaTecnicaPage() {
     <div>
       <PageHeader
         title="📋 Ficha técnica"
-        subtitle="Especificaciones oficiales del manual Dongfeng VIGO (mercado Uruguay)."
+        subtitle="Especificaciones oficiales del manual Dongfeng VIGO y de la ficha técnica del importador oficial (mercado Uruguay)."
       />
 
       {data.specGroups.map((group) => {
@@ -41,7 +41,7 @@ export default function FichaTecnicaPage() {
           <Card key={group.id}>
             <div className={styles.specGroupHeader}>
               <CardTitle icon={group.icon}>{group.title}</CardTitle>
-              {group.note && <Badge color="blue">Manual oficial</Badge>}
+              {group.note && <Badge color="blue">Oficial</Badge>}
             </div>
             <div className={styles.priceTable}>
               {visibleRows.map((row, i) => (

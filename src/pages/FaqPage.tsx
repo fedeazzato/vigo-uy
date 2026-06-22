@@ -34,7 +34,10 @@ function FaqItem({ item, isOpen, onToggle }: FaqItemProps) {
   return (
     <div ref={ref} className={`${styles.faqItem} ${isOpen ? styles.faqOpen : ''}`}>
       <button className={styles.faqQuestion} onClick={onToggle}>
-        <span>{item.q}</span>
+        <span className={styles.faqQuestionText}>
+          <span className={styles.faqIcon}>{item.icon}</span>
+          {item.q}
+        </span>
         <span className={styles.faqChevron}>{isOpen ? '−' : '+'}</span>
       </button>
       {isOpen && (

@@ -167,6 +167,7 @@ export interface TechSection {
 
 export interface FaqEntry {
   id: string
+  icon: string
   q: string
   a: string
 }
@@ -228,6 +229,7 @@ export interface DealerPriceRow {
 }
 
 export interface MantenimientoData {
+  officialNote: string
   schedule: ScheduleItem[]
   severeConditions: TipItem[]
   dealerPrices: DealerPriceRow[]

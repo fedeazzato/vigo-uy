@@ -37,8 +37,9 @@
       "title": "Soporte y contactos",
       "icon": "🛠️",
       "items": [
-        { "bold": "Fidocar (importador UY):", "text": "Talleres en Montevideo e Interbalnearia. Service de 5.000 km gratuito y demora 3-4 horas." },
-        { "bold": "Otros concesionarios con service:", "text": "Sole y Lorenzo, Las Torres, Dongfeng Torre y Empalme Olmos también hacen el service oficial — ver precios y plazos comparados en la página de Mantenimiento." },
+        { "bold": "Fidocar (importador, locales oficiales):", "text": "Ruta Interbalnearia km 22.500 (tel. 2683 6251) · Punta del Este, Av. Roosevelt esq. Martiniano Chiossi (tel. 4226 8434) · Cuareim 2012 (tel. 095 030 437) · Av. Italia 5046 esq. A. Gallinal (tel. 094 370 985) · Luis Alberto de Herrera 1145 (tel. 2623 54 93). Service de 5.000 km gratuito y demora 3-4 horas." },
+        { "bold": "Dongfeng Las Torres:", "text": "Concesionario oficial alternativo a Fidocar para conocer y comprar los modelos Dongfeng, confirmado en el sitio oficial del importador." },
+        { "bold": "Otros lugares de service reportados:", "text": "Sole y Lorenzo también hace el service oficial según el grupo — ver precios y plazos comparados en la página de Mantenimiento." },
         { "bold": "Dongfeng China:", "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino." },
         { "bold": "Telegram:", "text": "t.me/ElectricosUruguay — grupo con subgrupos de viajes, modelos, instalaciones, servicios y QR de cargadores." },
         { "bold": "PlugShare:", "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad." },
@@ -50,98 +51,117 @@
   "faq": [
     {
       "id": "tiempo-carga",
+      "icon": "⏱️",
       "q": "¿Cuánto tarda en cargarse de 0 a 100%?",
       "a": "Cargador incluido (12A, 2kW): ~24–26 hs. Instalación 16A en casa: ~10 hs. Wallbox 32A: ~5–6 hs. Cargador DC rápido público: mucho menos, depende del nivel de carga y se hace notoriamente más lento después del 80% (protección térmica de la batería, no es una falla)."
     },
     {
       "id": "corte-automatico",
+      "icon": "🔋",
       "q": "¿La carga se corta sola al llegar al límite?",
       "a": "Sí. Se configura el límite desde el auto (80%, 90%, 100%). Cuando llega, corta automáticamente — no hace falta estar presente. Algunos autos se quedan trabados en 94% por un bug de software; se soluciona restableciendo de fábrica el sistema multimedia."
     },
     {
       "id": "carga-lluvia",
+      "icon": "🌧️",
       "q": "¿Puedo cargar bajo la lluvia?",
       "a": "Sí, es seguro. Los conectores están diseñados para uso exterior. Varios miembros lo hacen habitualmente sin problemas."
     },
     {
       "id": "pistola-trabada",
+      "icon": "🔒",
       "q": "¿Qué hago si la pistola queda trabada?",
       "a": "Hay una linga de emergencia dentro del capot que libera el seguro mecánicamente. Encontrarla y jalar suavemente — la pistola sale."
     },
     {
       "id": "android-auto",
+      "icon": "📱",
       "q": "¿La Vigo tiene Android Auto?",
       "a": "No de fábrica. Con Android solo funciona Bluetooth (música y llamadas). Para navegación en pantalla hace falta un adaptador Carlinkit (~$4.000–5.000 o más barato en Temu/AliExpress). Con iPhone, el CarPlay inalámbrico funciona de forma nativa."
     },
     {
       "id": "autonomia",
+      "icon": "🛣️",
       "q": "¿La autonomía que muestra el auto es real?",
       "a": "El manual oficial solo homologa el ciclo CLTC: E2 401 km / E2+ 471 km. En la práctica, a 90 km/h sin aire se acerca mucho a eso; con aire en ruta a 110-120 km/h baja considerablemente (consumo real reportado: ~14-16 kWh/100km en ruta con aire, ~22 kWh/100km en invierno). En ciudad, con ~9-10 kWh/100km, puede superar la cifra homologada."
     },
     {
       "id": "rueda-auxilio",
+      "icon": "🛞",
       "q": "¿Hay rueda de auxilio?",
       "a": "No viene de fábrica. Se puede conseguir una llanta 5x108 rodado 16 (ej. Peugeot) con cubierta 215/65 R16. Hay miembros del grupo que venden. También en Panam y Ruedas El Gaucho."
     },
     {
       "id": "matricula",
+      "icon": "🔖",
       "q": "¿Cómo se pone la matrícula?",
       "a": "Los agujeros del auto no coinciden con la posición estándar uruguaya. Hay que hacer agujeros nuevos con tornillos 6x1 de 20 mm. Es algo que le pasó a casi todos — es normal."
     },
     {
       "id": "aire-acondicionado",
+      "icon": "❄️",
       "q": "¿El aire acondicionado consume mucha batería?",
       "a": "Sí, afecta la autonomía, especialmente en ruta a velocidades altas. A 110 km/h con aire, la autonomía baja notablemente. Se recomienda usarlo con criterio en viajes largos. En algunas unidades el AC enfría poco — si pasa, conviene reclamarlo en garantía."
     },
     {
       "id": "uso-intensivo",
+      "icon": "🚕",
       "q": "¿La Vigo sirve para trabajar con muchos kilómetros?",
       "a": "Sí. Varios miembros hacen 3.000 km/mes con un costo de ~$1.420 cargando en casa en triple horario. La clave es cargar de madrugada y tener instalación adecuada."
     },
     {
       "id": "garantia",
+      "icon": "🛡️",
       "q": "¿La Vigo tiene garantía en Uruguay?",
-      "a": "Sí, a través de Fidocar (importador oficial): 8 años o 200.000 km en la batería de alto voltaje, 8 años en el vehículo. Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
+      "a": "Sí, a través de Fidocar (importador oficial). Para el primer dueño, desde mayo de 2026: 7 años o 300.000 km en el vehículo y 10 años sin límite de kilometraje en la batería de alto voltaje. Para el segundo dueño: 5 años o 150.000 km en el vehículo y 8 años o 200.000 km en la batería. Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
     },
     {
       "id": "viaje-exterior",
+      "icon": "🌎",
       "q": "¿Se puede llevar a Brasil o Argentina?",
       "a": "Sí. Hay miembros que hicieron Montevideo–Florianópolis sin problemas usando la app Tupi para cargar. Argentina es más limitada — Shell Recharge requiere DNI argentino y la red de cargadores es escasa fuera de las ciudades grandes; planificar bien."
     },
     {
       "id": "carga-80-vs-100",
+      "icon": "💯",
       "q": "¿Hay que cargar solo hasta 80% para no dañar la batería?",
       "a": "El manual no pide ese límite — indica que se puede cargar a 100% para el uso diario sin problema. Algunos electricistas del grupo recomiendan preferir la carga AC (más lenta) sobre la carga rápida DC repetida, ya que esta última genera más calor en la batería con el uso frecuente."
     },
     {
       "id": "motor-potencia",
+      "icon": "🐎",
       "q": "¿Qué motor y potencia tiene la Vigo?",
       "a": "Motor síncrono de imanes permanentes de 120 kW y 230 N·m de torque, con refrigeración líquida. Velocidad máxima 150 km/h en ambas versiones (E2 y E2+)."
     },
     {
       "id": "v2l",
+      "icon": "🔌",
       "q": "¿Qué es la función V2L?",
       "a": "Vehicle-to-Load: permite usar la batería del auto para alimentar dispositivos externos (hasta 3 kW) a través de un adaptador que se compra por separado. Útil para herramientas, heladeras portátiles o camping."
     },
     {
       "id": "intervalos-service",
+      "icon": "🗓️",
       "q": "¿Cuáles son los intervalos de mantenimiento oficiales?",
-      "a": "Service general cada 30.000 km o 24 meses. El sistema de batería se revisa además cada 15.000 km o 12 meses. En condiciones severas (polvo, calor extremo, sal, caminos de tierra) varios ítems se revisan con más frecuencia — ver el detalle en la página de Mantenimiento."
+      "a": "El importador comunica el primer chequeo a los 5.000 km (sin costo) y luego cada 15.000 km o 1 año, lo que ocurra primero. El manual del usuario detalla además qué tareas se hacen en cada una de esas visitas según el múltiplo de 15.000 km (algunas, como el cambio de refrigerante del motor, son cada 30.000 km). En condiciones severas (polvo, calor extremo, sal, caminos de tierra) varios ítems se revisan con más frecuencia — ver el detalle en la página de Mantenimiento."
     },
     {
       "id": "perder-garantia",
+      "icon": "⚠️",
       "q": "¿Si no hago el service en fecha pierdo la garantía?",
       "a": "Sí. El manual oficial indica que no cumplir con el mantenimiento programado en los intervalos indicados hace perder el derecho a garantía."
     },
     {
       "id": "oxido-asientos",
+      "icon": "🪑",
       "q": "¿Es normal encontrar óxido debajo de los asientos?",
       "a": "Es un problema de calidad reportado por varios miembros, atribuido a un recubrimiento anticorrosivo insuficiente de fábrica. Conviene revisar debajo de los asientos delanteros al recibir el auto y reclamar en garantía si aparece."
     },
     {
       "id": "adas-lluvia",
+      "icon": "🤖",
       "q": "¿El frenado automático y los asistentes de carril funcionan bien con lluvia?",
-      "a": "Funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas. No conviene depender de ellos como única medida de seguridad en esas condiciones."
+      "a": "Estos sistemas (ADAS) son exclusivos de la versión E2+ — la E2 no los trae, según la página oficial del modelo. En la E2+ funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas. No conviene depender de ellos como única medida de seguridad en esas condiciones."
     }
   ]
 }
