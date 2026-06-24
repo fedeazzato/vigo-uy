@@ -88,6 +88,24 @@ export default function Layout() {
             <span className={styles.themeIcon}>{THEME_ICON[effectiveTheme]}</span>
             <span>{THEME_LABEL[effectiveTheme]}</span>
           </button>
+          <div className={styles.footerLinks}>
+            <a
+              href="https://forms.gle/SiNjQ77d71bUHvJ96"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.footerLink}
+            >
+              Sugerir info
+            </a>
+            <a
+              href="https://github.com/fedeazzato/vigo-uy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.footerLink}
+            >
+              Código en GitHub
+            </a>
+          </div>
           <div className={styles.footerText}>
             Basado en el grupo de WhatsApp
           </div>
@@ -103,13 +121,24 @@ export default function Layout() {
               <div className={styles.brandName}>Wiki Vigo Uruguay</div>
             </div>
           </div>
-          <button
-            className={styles.themeToggleMobile}
-            onClick={toggleTheme}
-            title={THEME_LABEL[effectiveTheme]}
-          >
-            {THEME_ICON[effectiveTheme]}
-          </button>
+          <div className={styles.mobileHeaderActions}>
+            <a
+              href="https://forms.gle/SiNjQ77d71bUHvJ96"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.suggestLinkMobile}
+              title="Sugerir info"
+            >
+              💬
+            </a>
+            <button
+              className={styles.themeToggleMobile}
+              onClick={toggleTheme}
+              title={THEME_LABEL[effectiveTheme]}
+            >
+              {THEME_ICON[effectiveTheme]}
+            </button>
+          </div>
         </div>
         <nav className={styles.mobileNav}>
           {NAV.map(({ to, label, icon }) => (

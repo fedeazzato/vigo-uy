@@ -143,6 +143,22 @@
   line-height: 1;
 }
 
+.footerLinks {
+  display: flex;
+  gap: 10px;
+}
+
+.footerLink {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
 .footerText {
   font-size: 11px;
   color: var(--text-tertiary);
@@ -208,7 +224,15 @@
     padding: 0.75rem 1rem;
   }
 
-  .themeToggleMobile {
+  .mobileHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .themeToggleMobile,
+  .suggestLinkMobile {
     font-size: 18px;
     padding: 6px 8px;
     border-radius: var(--radius-md);
@@ -217,6 +241,12 @@
     border: 1px solid var(--border);
     line-height: 1;
     flex-shrink: 0;
+  }
+
+  .suggestLinkMobile {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
   }
 
   .mobileNav {
