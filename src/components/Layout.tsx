@@ -1,22 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
-import type { Theme } from '../context/UserPrefsContext'
+import type { EffectiveTheme } from '../context/UserPrefsContext'
 
-function nextTheme(current: Theme): Theme {
-  if (current === null) return 'light'
-  if (current === 'light') return 'dark'
-  return null
-}
-
-const THEME_ICON: Record<NonNullable<Theme> | 'system', string> = {
-  system: '⊙',
+const THEME_ICON: Record<EffectiveTheme, string> = {
   light: '☀',
   dark: '☾',
 }
 
-const THEME_LABEL: Record<NonNullable<Theme> | 'system', string> = {
-  system: 'Sistema',
+const THEME_LABEL: Record<EffectiveTheme, string> = {
   light: 'Claro',
   dark: 'Oscuro',
 }
@@ -40,8 +32,11 @@ const NAV: NavItem[] = [
 ]
 
 export default function Layout() {
-  const { model, color, theme, setTheme } = useUserPrefs()
-  const themeKey = theme ?? 'system'
+  const { model, color, effectiveTheme, setTheme } = useUserPrefs()
+
+  function toggleTheme() {
+    setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')
+  }
 
   return (
     <div className={styles.shell}>
@@ -87,11 +82,11 @@ export default function Layout() {
         <div className={styles.sidebarFooter}>
           <button
             className={styles.themeToggle}
-            onClick={() => setTheme(nextTheme(theme))}
-            title={THEME_LABEL[themeKey]}
+            onClick={toggleTheme}
+            title={THEME_LABEL[effectiveTheme]}
           >
-            <span className={styles.themeIcon}>{THEME_ICON[themeKey]}</span>
-            <span>{THEME_LABEL[themeKey]}</span>
+            <span className={styles.themeIcon}>{THEME_ICON[effectiveTheme]}</span>
+            <span>{THEME_LABEL[effectiveTheme]}</span>
           </button>
           <div className={styles.footerText}>
             Basado en el grupo de WhatsApp
@@ -110,10 +105,10 @@ export default function Layout() {
           </div>
           <button
             className={styles.themeToggleMobile}
-            onClick={() => setTheme(nextTheme(theme))}
-            title={THEME_LABEL[themeKey]}
+            onClick={toggleTheme}
+            title={THEME_LABEL[effectiveTheme]}
           >
-            {THEME_ICON[themeKey]}
+            {THEME_ICON[effectiveTheme]}
           </button>
         </div>
         <nav className={styles.mobileNav}>

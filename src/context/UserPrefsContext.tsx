@@ -3,6 +3,7 @@ import type { Model, Color } from '../types'
 
 export type { Model, Color }
 export type Theme = 'light' | 'dark' | null  // null = follow system
+export type EffectiveTheme = 'light' | 'dark'
 
 export const MODELS: Model[] = ['E2', 'E2+']
 export const COLORS: Color[] = ['Blanco', 'Verde', 'Gris', 'Beige', 'Negro']
@@ -42,6 +43,7 @@ interface Prefs {
 }
 
 interface UserPrefsContextValue extends Prefs {
+  effectiveTheme: EffectiveTheme
   setModel: (m: Model) => void
   setColor: (c: Color) => void
   setTheme: (t: Theme) => void
@@ -67,33 +69,33 @@ function save(prefs: Prefs) {
 
 export function UserPrefsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(load)
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
 
   function update(next: Prefs) {
     setPrefs(next)
     save(next)
   }
 
-  // Apply data-theme to <html> and keep it in sync with system changes
+  // Only used as a fallback until the user explicitly picks Claro/Oscuro
   useEffect(() => {
-    const apply = (systemDark: boolean) => {
-      const effective = prefs.theme ?? (systemDark ? 'dark' : 'light')
-      document.documentElement.setAttribute('data-theme', effective)
-    }
-
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    apply(mq.matches)
-
-    const listener = (e: MediaQueryListEvent) => {
-      // Only react to system changes when user hasn't picked a preference
-      if (prefs.theme === null) apply(e.matches)
-    }
+    const listener = (e: MediaQueryListEvent) => setSystemDark(e.matches)
     mq.addEventListener('change', listener)
     return () => mq.removeEventListener('change', listener)
-  }, [prefs.theme])
+  }, [])
+
+  const effectiveTheme: EffectiveTheme = prefs.theme ?? (systemDark ? 'dark' : 'light')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', effectiveTheme)
+  }, [effectiveTheme])
 
   return (
     <UserPrefsContext.Provider value={{
       ...prefs,
+      effectiveTheme,
       setModel: (model) => update({ ...prefs, model }),
       setColor: (color) => update({ ...prefs, color }),
       setTheme: (theme) => update({ ...prefs, theme }),

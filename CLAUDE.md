@@ -50,9 +50,9 @@ When adding a new color, update all four records.
 ## Theme (dark mode)
 
 - Implemented via `data-theme="light"|"dark"` on `<html>`, set by `UserPrefsContext`
-- System preference is detected on load via `prefers-color-scheme` and kept in sync
+- Only two user-facing states: Claro / Oscuro. The toggle just flips between them via `effectiveTheme`.
+- "Sistema" (`theme: null`) is not a selectable state — it's only the initial fallback for visitors who haven't toggled yet, resolved from `prefers-color-scheme` and kept live until the user picks one explicitly
 - Dark-mode token overrides live in `[data-theme="dark"]` in `src/index.css`
-- The toggle cycles: Sistema → Claro → Oscuro → Sistema
 
 ## Car color preview (`src/components/CarPreview.tsx`)
 
