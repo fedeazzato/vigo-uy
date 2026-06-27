@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/vigo-uy/sw.js', { scope: '/vigo-uy/' })})}
