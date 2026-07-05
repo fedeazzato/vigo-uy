@@ -132,8 +132,7 @@ export default function NewServiceEntryPage() {
                 className={formStyles.chInput}
                 value={serviceDate}
                 onInput={(e: any) => setServiceDate(e.target.value ?? '')}
-                type="text"
-                placeholder="AAAA-MM-DD"
+                type="date"
               />
             </div>
             <div className={styles.field}>
