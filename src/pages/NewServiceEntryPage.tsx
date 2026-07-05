@@ -205,10 +205,11 @@ export default function NewServiceEntryPage() {
             <label className={styles.label} htmlFor="service-notes">Notas (opcional)</label>
             <ChEdit
               id="service-notes"
-              className={formStyles.chInput}
+              className={`${formStyles.chInput} ${formStyles.chTextarea}`}
               value={notes}
               onInput={(e: any) => setNotes(e.target.value ?? '')}
               multiline
+              autoGrow
               placeholder="Detalles adicionales..."
             />
           </div>

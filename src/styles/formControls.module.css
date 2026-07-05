@@ -23,3 +23,12 @@
   border-color: var(--green-400);
   box-shadow: 0 0 0 3px var(--green-50);
 }
+
+/* For multiline fields: guarantees a ~3-line minimum height. ch-edit's
+   internal textarea is sized via `block-size: 100%` chained down from the
+   host's own box, so a min-height set here on the host (light DOM) is
+   enough to establish that floor — no need to reach into its shadow DOM. */
+.chTextarea {
+  min-height: 90px;
+  line-height: 1.4;
+}
