@@ -21,6 +21,7 @@ interface StopDraft {
   arrivalPercentage: string
   departurePercentage: string
   durationMinutes: string
+  averageSpeed: string
 }
 
 function emptyStop(): StopDraft {
@@ -31,6 +32,7 @@ function emptyStop(): StopDraft {
     arrivalPercentage: '',
     departurePercentage: '',
     durationMinutes: '',
+    averageSpeed: '',
   }
 }
 
@@ -42,7 +44,12 @@ function stopToDraft(stop: TripChargingStop): StopDraft {
     arrivalPercentage: stop.arrival_percentage != null ? String(stop.arrival_percentage) : '',
     departurePercentage: stop.departure_percentage != null ? String(stop.departure_percentage) : '',
     durationMinutes: stop.duration_minutes != null ? String(stop.duration_minutes) : '',
+    averageSpeed: stop.average_speed_kmh != null ? String(stop.average_speed_kmh) : '',
   }
+}
+
+function isValidNonNegative(n: number | undefined): boolean {
+  return n === undefined || n >= 0
 }
 
 function parseOptionalNumber(value: string): number | undefined {
@@ -68,6 +75,8 @@ export default function NewTripLogPage() {
   const [distanceKm, setDistanceKm] = useState('')
   const [tripDate, setTripDate] = useState(today())
   const [startingCharge, setStartingCharge] = useState('')
+  const [endingCharge, setEndingCharge] = useState('')
+  const [averageSpeed, setAverageSpeed] = useState('')
   const [stops, setStops] = useState<StopDraft[]>([])
   const [rating, setRating] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
@@ -94,6 +103,8 @@ export default function NewTripLogPage() {
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
           setTripDate(data.trip_date)
           setStartingCharge(data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : '')
+          setEndingCharge(data.ending_charge_percentage != null ? String(data.ending_charge_percentage) : '')
+          setAverageSpeed(data.average_speed_kmh != null ? String(data.average_speed_kmh) : '')
           setStops(((data.charging_stops ?? []) as TripChargingStop[]).map(stopToDraft))
           setRating(data.rating)
           setNotes(data.notes ?? '')
@@ -133,6 +144,16 @@ export default function NewTripLogPage() {
       setError('La batería al salir debe estar entre 0 y 100.')
       return
     }
+    const endCharge = parseOptionalNumber(endingCharge)
+    if (!isValidPercentage(endCharge)) {
+      setError('La batería al llegar debe estar entre 0 y 100.')
+      return
+    }
+    const avgSpeed = parseOptionalNumber(averageSpeed)
+    if (!isValidNonNegative(avgSpeed)) {
+      setError('La velocidad media debe ser un número válido.')
+      return
+    }
 
     const cleanStops: TripChargingStop[] = []
     for (const s of stops) {
@@ -143,6 +164,11 @@ export default function NewTripLogPage() {
         setError('Los porcentajes de batería en las paradas deben estar entre 0 y 100.')
         return
       }
+      const stopSpeed = parseOptionalNumber(s.averageSpeed)
+      if (!isValidNonNegative(stopSpeed)) {
+        setError('La velocidad media entre paradas debe ser un número válido.')
+        return
+      }
       const stop: TripChargingStop = { name: s.name.trim() }
       if (s.note.trim()) stop.note = s.note.trim()
       const distanceFromPrevious = parseOptionalNumber(s.distanceFromPrevious)
@@ -151,6 +177,7 @@ export default function NewTripLogPage() {
       if (departure !== undefined) stop.departure_percentage = departure
       const duration = parseOptionalNumber(s.durationMinutes)
       if (duration !== undefined) stop.duration_minutes = duration
+      if (stopSpeed !== undefined) stop.average_speed_kmh = stopSpeed
       cleanStops.push(stop)
     }
 
@@ -164,6 +191,8 @@ export default function NewTripLogPage() {
       distance_km: distance,
       trip_date: tripDate,
       starting_charge_percentage: startCharge ?? null,
+      ending_charge_percentage: endCharge ?? null,
+      average_speed_kmh: avgSpeed ?? null,
       charging_stops: cleanStops,
       rating,
       notes: notes.trim() || null,
@@ -258,16 +287,43 @@ export default function NewTripLogPage() {
             </div>
           </div>
 
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="trip-starting-charge">Batería al salir (%, opcional)</label>
+              <ChEdit
+                id="trip-starting-charge"
+                className={formStyles.chInput}
+                value={startingCharge}
+                onInput={(e: any) => setStartingCharge(e.target.value ?? '')}
+                type="text"
+                mode="numeric"
+                placeholder="90"
+              />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="trip-ending-charge">Batería al llegar (%, opcional)</label>
+              <ChEdit
+                id="trip-ending-charge"
+                className={formStyles.chInput}
+                value={endingCharge}
+                onInput={(e: any) => setEndingCharge(e.target.value ?? '')}
+                type="text"
+                mode="numeric"
+                placeholder="15"
+              />
+            </div>
+          </div>
+
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="trip-starting-charge">Batería al salir (%, opcional)</label>
+            <label className={styles.label} htmlFor="trip-avg-speed">Velocidad media del viaje (km/h, opcional)</label>
             <ChEdit
-              id="trip-starting-charge"
+              id="trip-avg-speed"
               className={formStyles.chInput}
-              value={startingCharge}
-              onInput={(e: any) => setStartingCharge(e.target.value ?? '')}
+              value={averageSpeed}
+              onInput={(e: any) => setAverageSpeed(e.target.value ?? '')}
               type="text"
-              mode="numeric"
-              placeholder="90"
+              mode="decimal"
+              placeholder="95"
             />
           </div>
 
@@ -348,6 +404,17 @@ export default function NewTripLogPage() {
                         type="text"
                         mode="numeric"
                         placeholder="35"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Velocidad media hasta acá (km/h)</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.averageSpeed}
+                        onInput={(e: any) => updateStop(index, 'averageSpeed', e.target.value ?? '')}
+                        type="text"
+                        mode="decimal"
+                        placeholder="90"
                       />
                     </div>
                   </div>

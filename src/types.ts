@@ -262,6 +262,7 @@ export interface TripChargingStop {
   arrival_percentage?: number
   departure_percentage?: number
   duration_minutes?: number
+  average_speed_kmh?: number
 }
 
 export interface TripLog {
@@ -273,6 +274,8 @@ export interface TripLog {
   distance_km: number | null
   trip_date: string
   starting_charge_percentage: number | null
+  ending_charge_percentage: number | null
+  average_speed_kmh: number | null
   charging_stops: TripChargingStop[]
   rating: number | null
   notes: string | null
