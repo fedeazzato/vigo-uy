@@ -42,6 +42,11 @@
 }
 .item:last-child { border-bottom: none; }
 
+/* Same row layout, but for items with no cost column (e.g. trips) */
+.itemTwoCol {
+  grid-template-columns: 1fr auto;
+}
+
 .itemTitle {
   font-size: 14px;
   font-weight: 600;

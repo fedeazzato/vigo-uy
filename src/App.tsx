@@ -13,6 +13,7 @@ import MantenimientoPage from './pages/MantenimientoPage'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import NewServiceEntryPage from './pages/NewServiceEntryPage'
+import NewTripLogPage from './pages/NewTripLogPage'
 
 export default function App() {
   return (
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="mi-actividad" element={<DashboardPage />} />
           <Route path="costos/nuevo" element={<NewServiceEntryPage />} />
           <Route path="costos/:id/editar" element={<NewServiceEntryPage />} />
+          <Route path="viajes/nuevo" element={<NewTripLogPage />} />
+          <Route path="viajes/:id/editar" element={<NewTripLogPage />} />
         </Route>
       </Route>
     </Routes>

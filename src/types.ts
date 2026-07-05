@@ -254,3 +254,24 @@ export interface ServiceEntry {
   hidden: boolean
   created_at: string
 }
+
+export interface TripChargingStop {
+  name: string
+  note?: string
+}
+
+export interface TripLog {
+  id: string
+  user_id: string
+  title: string
+  origin: string
+  destination: string
+  distance_km: number | null
+  trip_date: string
+  charging_stops: TripChargingStop[]
+  rating: number | null
+  notes: string | null
+  is_public: boolean
+  hidden: boolean
+  created_at: string
+}
