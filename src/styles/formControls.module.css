@@ -1,0 +1,22 @@
+/* Shared visual chrome for ch-edit fields, since the component itself ships
+   with no border/background by design (it expects a design system like
+   Chameleon's Mercury to supply it — deliberately not adopted here, since
+   Mercury's documented setup requires Chameleon's full barrel loader,
+   which bloats the PWA precache well past its 2MB limit). */
+.chInput {
+  display: block;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.chInput:hover {
+  border-color: var(--text-tertiary);
+}
+.chInput:focus-within {
+  border-color: var(--green-400);
+  box-shadow: 0 0 0 3px var(--green-50);
+}

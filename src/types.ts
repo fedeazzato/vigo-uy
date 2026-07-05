@@ -237,3 +237,20 @@ export interface MantenimientoData {
   safety: TipItem[]
   warrantyNote: string
 }
+
+// ── Service entries (Supabase-backed, user-submitted) ───────────────────────
+
+export interface ServiceEntry {
+  id: string
+  user_id: string
+  service_date: string
+  odometer_km: number
+  dealer: string
+  service_type: string
+  cost_uyu: number
+  city: string | null
+  notes: string | null
+  is_public: boolean
+  hidden: boolean
+  created_at: string
+}

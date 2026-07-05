@@ -4,6 +4,7 @@ import { PageHeader, Card, Alert } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
 import styles from './LoginPage.module.css'
+import formStyles from '../styles/formControls.module.css'
 
 const RESEND_COOLDOWN_SECONDS = 60
 
@@ -95,6 +96,7 @@ export default function LoginPage() {
             <label className={styles.label} htmlFor="login-email">Email</label>
             <ChEdit
               id="login-email"
+              className={formStyles.chInput}
               value={emailInput}
               onInput={(e: any) => setEmailInput(e.target.value ?? '')}
               type="text"
@@ -113,6 +115,7 @@ export default function LoginPage() {
             <label className={styles.label} htmlFor="login-code">Código de verificación</label>
             <ChEdit
               id="login-code"
+              className={formStyles.chInput}
               value={codeInput}
               onInput={(e: any) => setCodeInput(e.target.value ?? '')}
               type="text"
