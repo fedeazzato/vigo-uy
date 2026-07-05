@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
@@ -19,8 +19,13 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState(0)
 
-  const emailRef = useRef<HTMLChEditElement>(null)
-  const codeRef = useRef<HTMLChEditElement>(null)
+  // ch-edit must be used as a controlled component: it resets its displayed
+  // value to its own `value` prop whenever the native input fails HTML5
+  // validity (e.g. any incomplete type="email" text) — left uncontrolled,
+  // that prop stays `undefined` forever and every such reset shows the
+  // literal string "undefined" instead of what was typed.
+  const [emailInput, setEmailInput] = useState('')
+  const [codeInput, setCodeInput] = useState('')
 
   useEffect(() => {
     if (status === 'signedIn') navigate('/mi-actividad', { replace: true })
@@ -34,7 +39,7 @@ export default function LoginPage() {
 
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
-    const value = emailRef.current?.value?.trim() ?? ''
+    const value = emailInput.trim()
     if (!value) return
 
     setSubmitting(true)
@@ -47,13 +52,14 @@ export default function LoginPage() {
       return
     }
     setEmail(value)
+    setCodeInput('')
     setStep('code')
     setCooldown(RESEND_COOLDOWN_SECONDS)
   }
 
   async function handleVerifyOtp(e: FormEvent) {
     e.preventDefault()
-    const code = codeRef.current?.value?.trim() ?? ''
+    const code = codeInput.trim()
     if (!code) return
 
     setSubmitting(true)
@@ -89,11 +95,13 @@ export default function LoginPage() {
             <label className={styles.label} htmlFor="login-email">Email</label>
             <ChEdit
               id="login-email"
-              ref={emailRef}
-              type="email"
+              value={emailInput}
+              onInput={(e: any) => setEmailInput(e.target.value ?? '')}
+              type="text"
+              mode="email"
               placeholder="tu@email.com"
               autoFocus
-              disabled={submitting}
+              {...(submitting ? { disabled: true } : {})}
             />
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? 'Enviando…' : 'Enviar código'}
@@ -105,13 +113,14 @@ export default function LoginPage() {
             <label className={styles.label} htmlFor="login-code">Código de verificación</label>
             <ChEdit
               id="login-code"
-              ref={codeRef}
+              value={codeInput}
+              onInput={(e: any) => setCodeInput(e.target.value ?? '')}
               type="text"
               mode="numeric"
               maxLength={10}
               placeholder="Código"
               autoFocus
-              disabled={submitting}
+              {...(submitting ? { disabled: true } : {})}
             />
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? 'Verificando…' : 'Verificar'}

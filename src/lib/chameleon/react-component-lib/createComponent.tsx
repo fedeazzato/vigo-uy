@@ -62,7 +62,14 @@ export const createReactComponent = <
         } else {
           const type = typeof value
 
-          if (type === 'string' || type === 'boolean' || type === 'number') {
+          // Omit `false` booleans entirely rather than setting e.g. `disabled="false"`.
+          // React only skips false boolean attributes for HTML tags it recognizes —
+          // for custom elements it sets the literal string, and Stencil's
+          // ElementInternals-backed props (like `disabled`) treat mere attribute
+          // *presence* as truthy, regardless of its value.
+          if (type === 'boolean' && value === false) {
+            // skip
+          } else if (type === 'string' || type === 'boolean' || type === 'number') {
             acc[camelToDashCase(name)] = value
           }
         }
