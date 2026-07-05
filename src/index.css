@@ -5,6 +5,11 @@
 }
 
 :root {
+  /* Lets native form controls (e.g. the date input's calendar icon) render
+     with the right palette for the active theme instead of the OS default,
+     which is invisible against a dark surface. */
+  color-scheme: light;
+
   --green-50: #E1F5EE;
   --green-100: #9FE1CB;
   --green-400: #1D9E75;
@@ -55,6 +60,8 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
+
   --text-primary: #EEEEE8;
   --text-secondary: #A8A8A0;
   --text-tertiary: #6E6E66;
