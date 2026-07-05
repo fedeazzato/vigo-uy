@@ -222,17 +222,19 @@ export default function NewServiceEntryPage() {
             Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
           </label>
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
-            {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-          </button>
-          <button
-            type="button"
-            className={styles.cancelLink}
-            onClick={() => navigate('/mi-actividad')}
-            disabled={submitting}
-          >
-            Cancelar
-          </button>
+          <div className={styles.actions}>
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => navigate('/mi-actividad')}
+              disabled={submitting}
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
       </Card>
     </div>
