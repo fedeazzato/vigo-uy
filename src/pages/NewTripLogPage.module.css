@@ -41,26 +41,58 @@
 .stopsList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.stopRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
+.stopCard {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+.stopHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stopHeaderLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.stopMainRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stopChargeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.smallLabel {
+  font-size: 11px;
+  color: var(--text-tertiary);
 }
 
 .removeStopBtn {
-  background: var(--surface-secondary);
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
   color: var(--text-tertiary);
+  text-decoration: underline;
   cursor: pointer;
 }
-.removeStopBtn:hover { color: var(--red-600); border-color: var(--red-400); }
+.removeStopBtn:hover { color: var(--red-600); }
 
 .addStopBtn {
   align-self: flex-start;
@@ -140,7 +172,8 @@
   .row {
     grid-template-columns: 1fr;
   }
-  .stopRow {
+  .stopMainRow,
+  .stopChargeRow {
     grid-template-columns: 1fr;
   }
 }

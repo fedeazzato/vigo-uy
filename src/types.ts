@@ -258,6 +258,10 @@ export interface ServiceEntry {
 export interface TripChargingStop {
   name: string
   note?: string
+  distance_from_previous_km?: number
+  arrival_percentage?: number
+  departure_percentage?: number
+  duration_minutes?: number
 }
 
 export interface TripLog {
@@ -268,6 +272,7 @@ export interface TripLog {
   destination: string
   distance_km: number | null
   trip_date: string
+  starting_charge_percentage: number | null
   charging_stops: TripChargingStop[]
   rating: number | null
   notes: string | null

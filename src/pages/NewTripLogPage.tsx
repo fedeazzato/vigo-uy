@@ -12,6 +12,50 @@ function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+// Form state for a stop keeps every value as a string (ch-edit needs a
+// controlled string value); numbers are parsed only on submit.
+interface StopDraft {
+  name: string
+  note: string
+  distanceFromPrevious: string
+  arrivalPercentage: string
+  departurePercentage: string
+  durationMinutes: string
+}
+
+function emptyStop(): StopDraft {
+  return {
+    name: '',
+    note: '',
+    distanceFromPrevious: '',
+    arrivalPercentage: '',
+    departurePercentage: '',
+    durationMinutes: '',
+  }
+}
+
+function stopToDraft(stop: TripChargingStop): StopDraft {
+  return {
+    name: stop.name,
+    note: stop.note ?? '',
+    distanceFromPrevious: stop.distance_from_previous_km != null ? String(stop.distance_from_previous_km) : '',
+    arrivalPercentage: stop.arrival_percentage != null ? String(stop.arrival_percentage) : '',
+    departurePercentage: stop.departure_percentage != null ? String(stop.departure_percentage) : '',
+    durationMinutes: stop.duration_minutes != null ? String(stop.duration_minutes) : '',
+  }
+}
+
+function parseOptionalNumber(value: string): number | undefined {
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const n = Number(trimmed)
+  return Number.isFinite(n) ? n : undefined
+}
+
+function isValidPercentage(n: number | undefined): boolean {
+  return n === undefined || (n >= 0 && n <= 100)
+}
+
 export default function NewTripLogPage() {
   const { id } = useParams()
   const isEdit = Boolean(id)
@@ -23,7 +67,8 @@ export default function NewTripLogPage() {
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
   const [tripDate, setTripDate] = useState(today())
-  const [stops, setStops] = useState<TripChargingStop[]>([])
+  const [startingCharge, setStartingCharge] = useState('')
+  const [stops, setStops] = useState<StopDraft[]>([])
   const [rating, setRating] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
   const [isPublic, setIsPublic] = useState(true)
@@ -48,7 +93,8 @@ export default function NewTripLogPage() {
           setDestination(data.destination)
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
           setTripDate(data.trip_date)
-          setStops(data.charging_stops ?? [])
+          setStartingCharge(data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : '')
+          setStops(((data.charging_stops ?? []) as TripChargingStop[]).map(stopToDraft))
           setRating(data.rating)
           setNotes(data.notes ?? '')
           setIsPublic(data.is_public)
@@ -58,10 +104,10 @@ export default function NewTripLogPage() {
   }, [id, isEdit])
 
   function addStop() {
-    setStops((prev) => [...prev, { name: '', note: '' }])
+    setStops((prev) => [...prev, emptyStop()])
   }
 
-  function updateStop(index: number, field: keyof TripChargingStop, value: string) {
+  function updateStop(index: number, field: keyof StopDraft, value: string) {
     setStops((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)))
   }
 
@@ -82,13 +128,34 @@ export default function NewTripLogPage() {
       setError('La distancia debe ser un número válido.')
       return
     }
+    const startCharge = parseOptionalNumber(startingCharge)
+    if (!isValidPercentage(startCharge)) {
+      setError('La batería al salir debe estar entre 0 y 100.')
+      return
+    }
+
+    const cleanStops: TripChargingStop[] = []
+    for (const s of stops) {
+      if (!s.name.trim()) continue
+      const arrival = parseOptionalNumber(s.arrivalPercentage)
+      const departure = parseOptionalNumber(s.departurePercentage)
+      if (!isValidPercentage(arrival) || !isValidPercentage(departure)) {
+        setError('Los porcentajes de batería en las paradas deben estar entre 0 y 100.')
+        return
+      }
+      const stop: TripChargingStop = { name: s.name.trim() }
+      if (s.note.trim()) stop.note = s.note.trim()
+      const distanceFromPrevious = parseOptionalNumber(s.distanceFromPrevious)
+      if (distanceFromPrevious !== undefined) stop.distance_from_previous_km = distanceFromPrevious
+      if (arrival !== undefined) stop.arrival_percentage = arrival
+      if (departure !== undefined) stop.departure_percentage = departure
+      const duration = parseOptionalNumber(s.durationMinutes)
+      if (duration !== undefined) stop.duration_minutes = duration
+      cleanStops.push(stop)
+    }
 
     setSubmitting(true)
     setError(null)
-
-    const cleanStops = stops
-      .filter((s) => s.name.trim())
-      .map((s) => ({ name: s.name.trim(), ...(s.note?.trim() ? { note: s.note.trim() } : {}) }))
 
     const payload = {
       title: title.trim(),
@@ -96,6 +163,7 @@ export default function NewTripLogPage() {
       destination: destination.trim(),
       distance_km: distance,
       trip_date: tripDate,
+      starting_charge_percentage: startCharge ?? null,
       charging_stops: cleanStops,
       rating,
       notes: notes.trim() || null,
@@ -191,32 +259,98 @@ export default function NewTripLogPage() {
           </div>
 
           <div className={styles.field}>
+            <label className={styles.label} htmlFor="trip-starting-charge">Batería al salir (%, opcional)</label>
+            <ChEdit
+              id="trip-starting-charge"
+              className={formStyles.chInput}
+              value={startingCharge}
+              onInput={(e: any) => setStartingCharge(e.target.value ?? '')}
+              type="text"
+              mode="numeric"
+              placeholder="90"
+            />
+          </div>
+
+          <div className={styles.field}>
             <label className={styles.label}>Paradas de carga (opcional)</label>
             {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
             <div className={styles.stopsList}>
               {stops.map((stop, index) => (
-                <div key={index} className={styles.stopRow}>
-                  <ChEdit
-                    className={formStyles.chInput}
-                    value={stop.name}
-                    onInput={(e: any) => updateStop(index, 'name', e.target.value ?? '')}
-                    type="text"
-                    placeholder="Nombre del cargador"
-                  />
-                  <ChEdit
-                    className={formStyles.chInput}
-                    value={stop.note ?? ''}
-                    onInput={(e: any) => updateStop(index, 'note', e.target.value ?? '')}
-                    type="text"
-                    placeholder="Nota (opcional)"
-                  />
-                  <button
-                    type="button"
-                    className={styles.removeStopBtn}
-                    onClick={() => removeStop(index)}
-                  >
-                    Quitar
-                  </button>
+                <div key={index} className={styles.stopCard}>
+                  <div className={styles.stopHeader}>
+                    <span className={styles.stopHeaderLabel}>Parada {index + 1}</span>
+                    <button
+                      type="button"
+                      className={styles.removeStopBtn}
+                      onClick={() => removeStop(index)}
+                    >
+                      Quitar
+                    </button>
+                  </div>
+
+                  <div className={styles.stopMainRow}>
+                    <ChEdit
+                      className={formStyles.chInput}
+                      value={stop.name}
+                      onInput={(e: any) => updateStop(index, 'name', e.target.value ?? '')}
+                      type="text"
+                      placeholder="Nombre del cargador"
+                    />
+                    <ChEdit
+                      className={formStyles.chInput}
+                      value={stop.note}
+                      onInput={(e: any) => updateStop(index, 'note', e.target.value ?? '')}
+                      type="text"
+                      placeholder="Nota (opcional)"
+                    />
+                  </div>
+
+                  <div className={styles.stopChargeRow}>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Distancia desde la parada anterior (km)</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.distanceFromPrevious}
+                        onInput={(e: any) => updateStop(index, 'distanceFromPrevious', e.target.value ?? '')}
+                        type="text"
+                        mode="numeric"
+                        placeholder="80"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>% al llegar</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.arrivalPercentage}
+                        onInput={(e: any) => updateStop(index, 'arrivalPercentage', e.target.value ?? '')}
+                        type="text"
+                        mode="numeric"
+                        placeholder="20"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>% al salir</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.departurePercentage}
+                        onInput={(e: any) => updateStop(index, 'departurePercentage', e.target.value ?? '')}
+                        type="text"
+                        mode="numeric"
+                        placeholder="80"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Minutos cargando</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.durationMinutes}
+                        onInput={(e: any) => updateStop(index, 'durationMinutes', e.target.value ?? '')}
+                        type="text"
+                        mode="numeric"
+                        placeholder="35"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
