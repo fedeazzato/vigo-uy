@@ -13,12 +13,16 @@ npm run deploy       # Build + push to gh-pages branch (GitHub Pages)
 
 ## Architecture
 
-This is a **content-driven static wiki** — no backend, no API calls. All displayed information lives in JSON files under `src/data/`. Adding or editing content never requires touching React code.
+The frontend is still a **static SPA deployed to GitHub Pages** (no server, `HashRouter`), but the site is no longer purely static content: it has a Supabase (Postgres + Auth) backend for real user accounts and user-submitted data. Two kinds of content coexist, and the distinction matters everywhere in the UI:
+
+- **Curated content** — hand-maintained by the site owner, lives in JSON files under `src/data/`, imported directly into page components. Adding or editing this content never requires touching React code.
+- **Community content** — submitted by authenticated users (service costs, trip logs), lives in Supabase tables, fetched at runtime via `src/lib/supabaseClient.ts`. Always visually distinguish community-submitted data from curated data (reuse the `source: 'manual' | 'comunidad'` badge pattern already used in `charging.json`/`types.ts`).
 
 ### Data flow
 
 ```
-src/data/*.json  →  page components  →  shared UI primitives (UI.tsx)
+src/data/*.json          →  page components  →  shared UI primitives (UI.tsx)
+Supabase (Postgres/Auth)  →  AuthContext / data hooks  →  page components
 ```
 
 Each page imports its JSON file, casts it to the matching TypeScript interface from `src/types.ts`, and composes the UI using the shared components from `src/components/UI.tsx`.
@@ -46,6 +50,14 @@ All user state (model, color, theme) lives in `UserPrefsContext` and is persiste
 - **`COLOR_DARK_TEXT`** — `Record<Color, boolean>` — whether the swatch label needs dark text for contrast
 
 When adding a new color, update all four records.
+
+## Backend & auth (Supabase)
+
+- **`src/lib/supabaseClient.ts`** — the single Supabase client instance. Exports `supabase`, typed `SupabaseClient | null`: it's `null` if `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are unset, so the app (and `npm run build` / `npm run type-check` in CI) never hard-fails on missing secrets. Any code that reads/writes Supabase must handle the `null` case.
+- **Env vars** — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, documented in `.env.example`. Set them in a local `.env.local` (already covered by `.gitignore`'s `*.local`) for local dev.
+- **Auth is email OTP (6-digit code), never magic links.** `HashRouter` owns `location.hash` for routing; a magic-link flow that also stashes the session in the URL hash would collide with it, and GitHub Pages has no server to handle an OAuth-style redirect callback anyway. The client is configured with `detectSessionInUrl: false` for this reason — do not change this without re-reading this note. No password auth, no forgot-password flow, ever — that's a deliberate product decision, not an oversight.
+- **Row Level Security is the real security boundary, not client-side route guards.** GitHub Pages serves the whole SPA bundle (including the public anon key) statically to everyone — a `RequireAuth`/`RequireModerator` wrapper only improves UX for signed-out/non-moderator users, it enforces nothing. Every access rule (who can read/write/moderate a row) must be expressed as a Postgres RLS policy, never assumed from the frontend alone.
+- **Session persistence** is handled entirely by `supabase-js` itself (`localStorage`, key prefixed `sb-<project-ref>-auth-token`) — a separate mechanism from `UserPrefsContext`'s own `vigo-prefs` key; the two don't interact.
 
 ## Theme (dark mode)
 

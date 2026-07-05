@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
+import RequireAuth from './components/RequireAuth'
 import ChargingPage from './pages/ChargingPage'
 import RoutesPage from './pages/RoutesPage'
 import CostsPage from './pages/CostsPage'
@@ -9,6 +10,8 @@ import FaqPage from './pages/FaqPage'
 import MyVigoPage from './pages/MyVigoPage'
 import FichaTecnicaPage from './pages/FichaTecnicaPage'
 import MantenimientoPage from './pages/MantenimientoPage'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 
 export default function App() {
   return (
@@ -24,6 +27,10 @@ export default function App() {
         <Route path="accesorios" element={<AccessoriesPage />} />
         <Route path="tecnologia" element={<TechPage />} />
         <Route path="faq" element={<FaqPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="mi-actividad" element={<DashboardPage />} />
+        </Route>
       </Route>
     </Routes>
   )

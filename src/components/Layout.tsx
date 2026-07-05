@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
+import { useAuth } from '../context/AuthContext'
 
 const THEME_ICON: Record<EffectiveTheme, string> = {
   light: '☀',
@@ -29,10 +30,12 @@ const NAV: NavItem[] = [
   { to: '/accesorios',     label: 'Accesorios',     icon: '🔧' },
   { to: '/tecnologia',     label: 'Tecnología',     icon: '📱' },
   { to: '/faq',            label: 'FAQ',            icon: '💬' },
+  { to: '/mi-actividad',   label: 'Mi actividad',   icon: '📋' },
 ]
 
 export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
+  const { user, status, signOut } = useAuth()
 
   function toggleTheme() {
     setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')
@@ -80,6 +83,14 @@ export default function Layout() {
         </nav>
 
         <div className={styles.sidebarFooter}>
+          {status === 'signedIn' ? (
+            <div className={styles.accountRow}>
+              <span className={styles.accountEmail} title={user?.email}>{user?.email}</span>
+              <button className={styles.footerLink} onClick={signOut}>Cerrar sesión</button>
+            </div>
+          ) : status !== 'loading' && (
+            <NavLink to="/login" className={styles.footerLink}>Iniciar sesión</NavLink>
+          )}
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}

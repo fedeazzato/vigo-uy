@@ -41,6 +41,12 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
+          {
+            // Auth/session and community data must always hit the network —
+            // never served stale from the offline cache.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkOnly',
+          },
         ],
       },
     }),
