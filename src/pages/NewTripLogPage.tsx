@@ -3,8 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
+import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import type { TripChargingStop } from '../types'
+import type { TripChargingStop, Model } from '../types'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -67,6 +68,7 @@ export default function NewTripLogPage() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const { user } = useAuth()
+  const { model: preferredModel } = useUserPrefs()
   const navigate = useNavigate()
 
   const [title, setTitle] = useState('')
@@ -74,6 +76,7 @@ export default function NewTripLogPage() {
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
   const [tripDate, setTripDate] = useState(today())
+  const [model, setModel] = useState<Model | ''>(() => (isEdit ? '' : preferredModel ?? ''))
   const [startingCharge, setStartingCharge] = useState('')
   const [endingCharge, setEndingCharge] = useState('')
   const [averageSpeed, setAverageSpeed] = useState('')
@@ -102,6 +105,7 @@ export default function NewTripLogPage() {
           setDestination(data.destination)
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
           setTripDate(data.trip_date)
+          setModel(data.model ?? '')
           setStartingCharge(data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : '')
           setEndingCharge(data.ending_charge_percentage != null ? String(data.ending_charge_percentage) : '')
           setAverageSpeed(data.average_speed_kmh != null ? String(data.average_speed_kmh) : '')
@@ -132,6 +136,10 @@ export default function NewTripLogPage() {
 
     if (!title.trim() || !origin.trim() || !destination.trim()) {
       setError('Completá título, origen y destino.')
+      return
+    }
+    if (isPublic && !model) {
+      setError('Seleccioná el modelo (E2 o E2+) para compartir con la comunidad.')
       return
     }
     const distance = distanceKm.trim() ? Number(distanceKm) : null
@@ -190,6 +198,7 @@ export default function NewTripLogPage() {
       destination: destination.trim(),
       distance_km: distance,
       trip_date: tripDate,
+      model: model || null,
       starting_charge_percentage: startCharge ?? null,
       ending_charge_percentage: endCharge ?? null,
       average_speed_kmh: avgSpeed ?? null,
@@ -465,6 +474,24 @@ export default function NewTripLogPage() {
               autoGrow
               placeholder="Detalles adicionales..."
             />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>
+              Modelo{isPublic && ' (obligatorio para compartir)'}
+            </label>
+            <div className={styles.modelRow}>
+              {MODELS.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
+                  onClick={() => setModel(m)}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
           </div>
 
           <label className={styles.checkboxRow}>

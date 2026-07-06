@@ -117,7 +117,7 @@ export default function DashboardPage() {
             {trips.map((trip) => (
               <li key={trip.id} className={`${styles.item} ${styles.itemTwoCol}`}>
                 <div>
-                  <div className={styles.itemTitle}>{trip.title}</div>
+                  <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
                   <div className={styles.itemMeta}>
                     {trip.trip_date} · {trip.origin} → {trip.destination}
                     {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}

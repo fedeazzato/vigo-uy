@@ -273,6 +273,7 @@ export interface TripLog {
   destination: string
   distance_km: number | null
   trip_date: string
+  model: Model | null
   starting_charge_percentage: number | null
   ending_charge_percentage: number | null
   average_speed_kmh: number | null

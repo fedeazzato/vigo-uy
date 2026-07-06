@@ -123,6 +123,31 @@
 }
 .starBtn.filled { color: var(--amber-400); }
 
+/* ── Model ── */
+
+.modelRow {
+  display: flex;
+  gap: 8px;
+}
+
+.modelBtn {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.modelBtn:hover { border-color: var(--text-tertiary); }
+.modelBtnSelected {
+  background: var(--green-50);
+  border-color: var(--green-400);
+  color: var(--green-600);
+}
+
 /* ── Actions ── */
 
 .actions {
