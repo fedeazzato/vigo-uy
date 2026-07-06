@@ -72,12 +72,6 @@
   gap: 8px;
 }
 
-.stopChargeRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
 .smallLabel {
   font-size: 11px;
   color: var(--text-tertiary);
@@ -172,8 +166,7 @@
   .row {
     grid-template-columns: 1fr;
   }
-  .stopMainRow,
-  .stopChargeRow {
+  .stopMainRow {
     grid-template-columns: 1fr;
   }
 }

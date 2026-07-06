@@ -345,23 +345,30 @@ export default function NewTripLogPage() {
                   </div>
 
                   <div className={styles.stopMainRow}>
-                    <ChEdit
-                      className={formStyles.chInput}
-                      value={stop.name}
-                      onInput={(e: any) => updateStop(index, 'name', e.target.value ?? '')}
-                      type="text"
-                      placeholder="Nombre del cargador"
-                    />
-                    <ChEdit
-                      className={formStyles.chInput}
-                      value={stop.note}
-                      onInput={(e: any) => updateStop(index, 'note', e.target.value ?? '')}
-                      type="text"
-                      placeholder="Nota (opcional)"
-                    />
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Nombre del cargador</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.name}
+                        onInput={(e: any) => updateStop(index, 'name', e.target.value ?? '')}
+                        type="text"
+                        placeholder="Nombre del cargador"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Minutos cargando</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.durationMinutes}
+                        onInput={(e: any) => updateStop(index, 'durationMinutes', e.target.value ?? '')}
+                        type="text"
+                        mode="numeric"
+                        placeholder="35"
+                      />
+                    </div>
                   </div>
 
-                  <div className={styles.stopChargeRow}>
+                  <div className={styles.stopMainRow}>
                     <div className={styles.field}>
                       <label className={styles.smallLabel}>Distancia desde la parada anterior (km)</label>
                       <ChEdit
@@ -373,6 +380,20 @@ export default function NewTripLogPage() {
                         placeholder="80"
                       />
                     </div>
+                    <div className={styles.field}>
+                      <label className={styles.smallLabel}>Velocidad media hasta acá (km/h)</label>
+                      <ChEdit
+                        className={formStyles.chInput}
+                        value={stop.averageSpeed}
+                        onInput={(e: any) => updateStop(index, 'averageSpeed', e.target.value ?? '')}
+                        type="text"
+                        mode="decimal"
+                        placeholder="90"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.stopMainRow}>
                     <div className={styles.field}>
                       <label className={styles.smallLabel}>% al llegar</label>
                       <ChEdit
@@ -395,28 +416,18 @@ export default function NewTripLogPage() {
                         placeholder="80"
                       />
                     </div>
-                    <div className={styles.field}>
-                      <label className={styles.smallLabel}>Minutos cargando</label>
-                      <ChEdit
-                        className={formStyles.chInput}
-                        value={stop.durationMinutes}
-                        onInput={(e: any) => updateStop(index, 'durationMinutes', e.target.value ?? '')}
-                        type="text"
-                        mode="numeric"
-                        placeholder="35"
-                      />
-                    </div>
-                    <div className={styles.field}>
-                      <label className={styles.smallLabel}>Velocidad media hasta acá (km/h)</label>
-                      <ChEdit
-                        className={formStyles.chInput}
-                        value={stop.averageSpeed}
-                        onInput={(e: any) => updateStop(index, 'averageSpeed', e.target.value ?? '')}
-                        type="text"
-                        mode="decimal"
-                        placeholder="90"
-                      />
-                    </div>
+                  </div>
+
+                  <div className={styles.field}>
+                    <label className={styles.smallLabel}>Nota (opcional)</label>
+                    <ChEdit
+                      className={`${formStyles.chInput} ${formStyles.chTextarea}`}
+                      value={stop.note}
+                      onInput={(e: any) => updateStop(index, 'note', e.target.value ?? '')}
+                      multiline
+                      autoGrow
+                      placeholder="Detalles de esta parada..."
+                    />
                   </div>
                 </div>
               ))}
