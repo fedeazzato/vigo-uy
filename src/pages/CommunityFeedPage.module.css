@@ -1,0 +1,61 @@
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  padding: 8px 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.item:last-child { border-bottom: none; }
+
+.itemTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.itemCost {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green-600);
+  white-space: nowrap;
+}
+
+.author {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+@media (max-width: 500px) {
+  .item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}

@@ -238,6 +238,18 @@ export interface MantenimientoData {
   warrantyNote: string
 }
 
+// ── Auth profile (Supabase-backed) ──────────────────────────────────────────
+
+export interface Profile {
+  id: string
+  display_name: string
+  city: string | null
+  model: Model | null
+  color: Color | null
+  is_moderator: boolean
+  created_at: string
+}
+
 // ── Service entries (Supabase-backed, user-submitted) ───────────────────────
 
 export interface ServiceEntry {

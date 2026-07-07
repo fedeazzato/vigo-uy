@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import type { AuthError, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
+import type { Profile } from '../types'
 
 export type AuthStatus = 'loading' | 'signedOut' | 'signedIn' | 'disabled'
 
 interface AuthContextValue {
   user: User | null
+  profile: Profile | null
   status: AuthStatus
   sendOtp: (email: string) => Promise<{ error: AuthError | null }>
   verifyOtp: (email: string, token: string) => Promise<{ error: AuthError | null }>
@@ -16,6 +18,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [status, setStatus] = useState<AuthStatus>(supabase ? 'loading' : 'disabled')
 
   useEffect(() => {
@@ -33,6 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!supabase || !user) {
+      setProfile(null)
+      return
+    }
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => setProfile((data as Profile) ?? null))
+  }, [user])
 
   async function sendOtp(email: string) {
     if (!supabase) return { error: new Error('Supabase no configurado') as AuthError }
@@ -55,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, status, sendOtp, verifyOtp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, status, sendOtp, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   )

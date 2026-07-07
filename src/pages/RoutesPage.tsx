@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import rawData from '../data/routes.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, SectionDivider } from '../components/UI'
 import styles from './Pages.module.css'
@@ -88,6 +89,13 @@ export default function RoutesPage() {
       <Card>
         <CardTitle icon="🧠">Tips para optimizar la autonomía</CardTitle>
         <TipList items={data.generalTips} />
+      </Card>
+
+      <Card>
+        <p className={styles.routeStopNote}>
+          Estas rutas son verificadas por el grupo. <Link to="/comunidad">Mirá la comunidad</Link> para
+          ver viajes reales compartidos por otros usuarios, con sus paradas de carga.
+        </p>
       </Card>
     </div>
   )

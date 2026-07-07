@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import rawData from '../data/costs.json'
 import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
@@ -63,6 +64,13 @@ export default function CostsPage() {
       </Card>
 
       <SectionDivider label="Casos reales del grupo" />
+
+      <Card>
+        <p className={styles.realCaseConditions}>
+          Estos son casos verificados por el grupo. <Link to="/comunidad">Mirá la comunidad</Link> para
+          ver más costos de service compartidos por otros usuarios.
+        </p>
+      </Card>
 
       {realCases.map((c, i) => (
         <Card key={i}>

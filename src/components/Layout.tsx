@@ -31,11 +31,16 @@ const NAV: NavItem[] = [
   { to: '/tecnologia',     label: 'Tecnología',     icon: '📱' },
   { to: '/faq',            label: 'FAQ',            icon: '💬' },
   { to: '/mi-actividad',   label: 'Mi actividad',   icon: '📋' },
+  { to: '/comunidad',      label: 'Comunidad',      icon: '🌐' },
 ]
 
 export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
-  const { user, status, signOut } = useAuth()
+  const { user, profile, status, signOut } = useAuth()
+
+  const nav = profile?.is_moderator
+    ? [...NAV, { to: '/moderacion', label: 'Moderación', icon: '🛡️' }]
+    : NAV
 
   function toggleTheme() {
     setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')
@@ -68,7 +73,7 @@ export default function Layout() {
         )}
 
         <nav className={styles.nav}>
-          {NAV.map(({ to, label, icon }) => (
+          {nav.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -152,7 +157,7 @@ export default function Layout() {
           </div>
         </div>
         <nav className={styles.mobileNav}>
-          {NAV.map(({ to, label, icon }) => (
+          {nav.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}

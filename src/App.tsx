@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import RequireAuth from './components/RequireAuth'
+import RequireModerator from './components/RequireModerator'
 import ChargingPage from './pages/ChargingPage'
 import RoutesPage from './pages/RoutesPage'
 import CostsPage from './pages/CostsPage'
@@ -14,6 +15,8 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import NewServiceEntryPage from './pages/NewServiceEntryPage'
 import NewTripLogPage from './pages/NewTripLogPage'
+import CommunityFeedPage from './pages/CommunityFeedPage'
+import ModerationPage from './pages/ModerationPage'
 
 export default function App() {
   return (
@@ -36,6 +39,10 @@ export default function App() {
           <Route path="costos/:id/editar" element={<NewServiceEntryPage />} />
           <Route path="viajes/nuevo" element={<NewTripLogPage />} />
           <Route path="viajes/:id/editar" element={<NewTripLogPage />} />
+          <Route path="comunidad" element={<CommunityFeedPage />} />
+        </Route>
+        <Route element={<RequireModerator />}>
+          <Route path="moderacion" element={<ModerationPage />} />
         </Route>
       </Route>
     </Routes>
