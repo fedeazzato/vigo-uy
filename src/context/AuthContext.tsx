@@ -9,9 +9,15 @@ interface AuthContextValue {
   user: User | null
   profile: Profile | null
   status: AuthStatus
-  sendOtp: (email: string) => Promise<{ error: AuthError | null }>
+  sendOtp: (email: string, captchaToken?: string | null) => Promise<{ error: AuthError | null }>
   verifyOtp: (email: string, token: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
+  // Passkeys are a Supabase Auth Beta feature ("may change without notice"),
+  // so every call here is wrapped defensively — email OTP always remains the
+  // primary, permanent login path regardless of whether these work.
+  passkeysSupported: boolean
+  registerPasskey: () => Promise<{ error: Error | null }>
+  signInWithPasskey: () => Promise<{ error: Error | null }>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -50,11 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(({ data }) => setProfile((data as Profile) ?? null))
   }, [user])
 
-  async function sendOtp(email: string) {
+  async function sendOtp(email: string, captchaToken?: string | null) {
     if (!supabase) return { error: new Error('Supabase no configurado') as AuthError }
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: true, captchaToken: captchaToken ?? undefined },
     })
     return { error }
   }
@@ -70,8 +76,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  const passkeysSupported =
+    Boolean(supabase) &&
+    typeof supabase?.auth.registerPasskey === 'function' &&
+    typeof window !== 'undefined' &&
+    Boolean(window.PublicKeyCredential)
+
+  async function registerPasskey() {
+    if (!supabase) return { error: new Error('Supabase no configurado') }
+    try {
+      const { error } = await supabase.auth.registerPasskey()
+      return { error }
+    } catch (e) {
+      return { error: e instanceof Error ? e : new Error('No se pudo registrar la llave de acceso') }
+    }
+  }
+
+  async function signInWithPasskey() {
+    if (!supabase) return { error: new Error('Supabase no configurado') }
+    try {
+      const { error } = await supabase.auth.signInWithPasskey()
+      return { error }
+    } catch (e) {
+      return { error: e instanceof Error ? e : new Error('No se pudo iniciar sesión con la llave de acceso') }
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, status, sendOtp, verifyOtp, signOut }}>
+    <AuthContext.Provider
+      value={{ user, profile, status, sendOtp, verifyOtp, signOut, passkeysSupported, registerPasskey, signInWithPasskey }}
+    >
       {children}
     </AuthContext.Provider>
   )

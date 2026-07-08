@@ -12,11 +12,22 @@
   color: var(--text-primary);
 }
 
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .addLink {
   font-size: 13px;
   font-weight: 600;
   color: var(--green-600);
   text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
 }
 .addLink:hover { text-decoration: underline; }
 

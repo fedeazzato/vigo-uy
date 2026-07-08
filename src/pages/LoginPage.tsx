@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
+import { TurnstileWidget, TURNSTILE_ENABLED } from '../components/TurnstileWidget'
 import { useAuth } from '../context/AuthContext'
 import styles from './LoginPage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -11,7 +12,7 @@ const RESEND_COOLDOWN_SECONDS = 60
 type Step = 'email' | 'code'
 
 export default function LoginPage() {
-  const { sendOtp, verifyOtp, status } = useAuth()
+  const { sendOtp, verifyOtp, status, passkeysSupported, signInWithPasskey } = useAuth()
   const navigate = useNavigate()
 
   const [step, setStep] = useState<Step>('email')
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState(0)
+  const [passkeyPending, setPasskeyPending] = useState(false)
 
   // ch-edit must be used as a controlled component: it resets its displayed
   // value to its own `value` prop whenever the native input fails HTML5
@@ -27,6 +29,8 @@ export default function LoginPage() {
   // literal string "undefined" instead of what was typed.
   const [emailInput, setEmailInput] = useState('')
   const [codeInput, setCodeInput] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [turnstileKey, setTurnstileKey] = useState(0)
 
   useEffect(() => {
     if (status === 'signedIn') navigate('/mi-actividad', { replace: true })
@@ -42,11 +46,17 @@ export default function LoginPage() {
     e.preventDefault()
     const value = emailInput.trim()
     if (!value) return
+    if (TURNSTILE_ENABLED && !captchaToken) {
+      setError('Completá la verificación de seguridad.')
+      return
+    }
 
     setSubmitting(true)
     setError(null)
-    const { error } = await sendOtp(value)
+    const { error } = await sendOtp(value, captchaToken)
     setSubmitting(false)
+    setCaptchaToken(null)
+    setTurnstileKey((k) => k + 1)
 
     if (error) {
       setError(error.message)
@@ -71,6 +81,16 @@ export default function LoginPage() {
     if (error) setError(error.message)
   }
 
+  async function handlePasskeySignIn() {
+    setPasskeyPending(true)
+    setError(null)
+    const { error } = await signInWithPasskey()
+    setPasskeyPending(false)
+    // On success, the auth state listener flips `status` to 'signedIn' and
+    // the redirect effect above takes over — nothing else to do here.
+    if (error) setError('No se pudo iniciar sesión con la llave de acceso. Probá con el código por email.')
+  }
+
   async function handleResend() {
     if (cooldown > 0) return
     setSubmitting(true)
@@ -91,6 +111,20 @@ export default function LoginPage() {
       <Card>
         {error && <Alert type="danger">{error}</Alert>}
 
+        {step === 'email' && passkeysSupported && (
+          <>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              onClick={handlePasskeySignIn}
+              disabled={passkeyPending}
+            >
+              {passkeyPending ? 'Verificando…' : '🔑 Iniciar sesión con llave de acceso'}
+            </button>
+            <p className={styles.divider}>o con tu email</p>
+          </>
+        )}
+
         {step === 'email' ? (
           <form className={styles.form} onSubmit={handleSendOtp}>
             <label className={styles.label} htmlFor="login-email">Email</label>
@@ -105,6 +139,7 @@ export default function LoginPage() {
               autoFocus
               {...(submitting ? { disabled: true } : {})}
             />
+            {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? 'Enviando…' : 'Enviar código'}
             </button>
