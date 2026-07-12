@@ -1,6 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { Card, CardTitle, Alert } from './UI'
-import { ChEdit } from '../lib/chameleon/ChEdit'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
@@ -141,12 +140,12 @@ export default function VehicleCard() {
           <div className={styles.field}>
             <label className={styles.label} htmlFor="vehicle-plate">Matrícula (opcional)</label>
             <div className={styles.inlineRow}>
-              <ChEdit
+              <input
                 id="vehicle-plate"
-                className={formStyles.chInput}
-                value={plate}
-                onInput={(e: any) => setPlate(e.target.value ?? '')}
                 type="text"
+                className={formStyles.input}
+                value={plate}
+                onChange={(e) => setPlate(e.target.value)}
                 placeholder="ABC 1234"
               />
               <button
@@ -184,12 +183,12 @@ export default function VehicleCard() {
               tus próximos viajes van a sumar al vehículo compartido.
             </p>
             <div className={styles.inlineRow}>
-              <ChEdit
+              <input
                 id="join-code"
-                className={formStyles.chInput}
-                value={joinCode}
-                onInput={(e: any) => setJoinCode(e.target.value ?? '')}
                 type="text"
+                className={formStyles.input}
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
                 placeholder="Código de 6 letras"
               />
               <button type="submit" className={styles.secondaryBtn} disabled={busy || !joinCode.trim()}>

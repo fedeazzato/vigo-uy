@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { Card, CardTitle, Alert } from './UI'
-import { ChEdit } from '../lib/chameleon/ChEdit'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
@@ -59,12 +58,12 @@ export default function ProfileCard() {
       <form className={styles.form} onSubmit={saveProfile}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="profile-name">Nombre visible</label>
-          <ChEdit
+          <input
             id="profile-name"
-            className={formStyles.chInput}
-            value={displayName}
-            onInput={(e: any) => setDisplayName(e.target.value ?? '')}
             type="text"
+            className={formStyles.input}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Tu nombre en la comunidad"
           />
           <span className={styles.hint}>Aparece junto a tus viajes y services compartidos.</span>
@@ -72,12 +71,12 @@ export default function ProfileCard() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="profile-city">Ciudad</label>
-          <ChEdit
+          <input
             id="profile-city"
-            className={formStyles.chInput}
-            value={city}
-            onInput={(e: any) => setCity(e.target.value ?? '')}
             type="text"
+            className={formStyles.input}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
             placeholder="Montevideo"
           />
         </div>

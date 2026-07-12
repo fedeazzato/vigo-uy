@@ -1,6 +1,26 @@
 # C1 — Supabase CLI migration workflow
 
-**Status:** TODO · **Phase:** C · **Depends on:** nothing
+**Status:** Done (2026-07-12) — code/docs complete; the link + baseline steps
+below require the maintainer's Supabase access token · **Phase:** C ·
+**Depends on:** nothing
+
+## Maintainer checklist (run once, ~5 minutes)
+
+The CLI is installed as a dev dependency and `supabase/config.toml` is
+committed. The existing `NNNN_name.sql` filenames are valid CLI versions —
+no renames needed. To finish:
+
+1. `npx supabase login` (opens browser; or set `SUPABASE_ACCESS_TOKEN`).
+2. `npx supabase link --project-ref <ref>` — the ref is the subdomain of
+   `VITE_SUPABASE_URL` (e.g. `abcd1234` from `https://abcd1234.supabase.co`).
+3. Baseline the hand-pasted history (marks 0001–0019 as already applied):
+   `npx supabase migration repair --status applied 0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011 0012 0013 0014 0015 0016 0017 0018 0019`
+4. Verify: `npx supabase migration list` shows local and remote in sync, and
+   `npx supabase db push` reports nothing to push.
+5. Drift audit: `npx supabase db diff --linked` — an empty diff confirms the
+   hand-pasting never missed a migration; if it reports drift, save the output
+   (that is the audit this spec exists for) before reconciling.
+6. Then C2: `npm run gen:types` to generate `src/lib/database.types.ts`.
 
 ## Context
 

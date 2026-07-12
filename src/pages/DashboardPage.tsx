@@ -4,6 +4,7 @@ import { PageHeader, Card, Alert } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { invalidateCommunityCache } from '../lib/communityData'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
@@ -66,6 +67,7 @@ export default function DashboardPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     setEntries((prev) => prev.filter((e) => e.id !== entryId))
   }
 
@@ -78,6 +80,7 @@ export default function DashboardPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     setTrips((prev) => prev.filter((t) => t.id !== tripId))
   }
 
@@ -90,6 +93,7 @@ export default function DashboardPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     setPurchases((prev) => prev.filter((p) => p.id !== purchaseId))
   }
 

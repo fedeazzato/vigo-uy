@@ -9,10 +9,10 @@ requirements, files to touch, and acceptance criteria.
 1. Read `CLAUDE.md` at the repo root before anything else — it documents hard
    constraints (HashRouter, RLS as the only security boundary, email OTP only,
    `supabase` client may be `null`, Spanish UI text / English code).
-2. SQL migrations are numbered files in `supabase/migrations/` and are applied
-   **by hand-pasting into the Supabase SQL Editor** (until C1 changes that).
-   New migrations must be idempotent-friendly and carry the standard header
-   comment explaining how to apply them.
+2. SQL migrations are numbered files in `supabase/migrations/`, managed with
+   the Supabase CLI since C1: create with `npx supabase migration new <name>`,
+   apply with `npx supabase db push`. New migrations must be
+   idempotent-friendly; never edit an applied migration.
 3. `npm run type-check` and `npm run build` must pass when you finish.
 4. When a spec is done, update its **Status** line and check it off in the
    table below.
@@ -30,11 +30,11 @@ requirements, files to touch, and acceptance criteria.
 | [B1](B1-mobile-navigation.md) | Bottom tab bar + Guía section | B | B2 | Done |
 | [B2](B2-home-page.md) | Inicio home page (replace redirect to Mi Vigo) | B | — | Done |
 | [B3](B3-mobile-polish.md) | Touch targets, icons, offline notice | B | A5 | Done |
-| [C1](C1-migration-workflow.md) | Supabase CLI migration workflow | C | — | TODO |
-| [C2](C2-generated-types.md) | Generated DB types | C | C1 | TODO |
-| [C3](C3-native-inputs.md) | Replace ChEdit with native inputs | C | — | TODO |
-| [C4](C4-data-cache.md) | Shared community-data cache | C | — | TODO |
-| [C5](C5-trip-form-disclosure.md) | Trip form progressive disclosure | C | C3 | TODO |
+| [C1](C1-migration-workflow.md) | Supabase CLI migration workflow | C | — | Done (needs maintainer link) |
+| [C2](C2-generated-types.md) | Generated DB types | C | C1 | Blocked on C1 link |
+| [C3](C3-native-inputs.md) | Replace ChEdit with native inputs | C | — | Done |
+| [C4](C4-data-cache.md) | Shared community-data cache | C | — | Done |
+| [C5](C5-trip-form-disclosure.md) | Trip form progressive disclosure | C | C3 | Done |
 | [D1](D1-prefer-community.md) | `preferCommunity` gate + retirement tracker | D | — | TODO |
 | [D2](D2-verified-content.md) | Moderator-verified content ("Oficial" flag) | D | A1 | TODO |
 | [D3](D3-security-followups.md) | Minor security follow-ups | D | — | TODO |

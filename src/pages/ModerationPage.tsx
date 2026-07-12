@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { PageHeader, Card, Alert, Badge, Skeleton } from '../components/UI'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { invalidateCommunityCache } from '../lib/communityData'
 import { useAuth } from '../context/AuthContext'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { AdminUserRow, PartPurchase, ServiceEntry, TripLog } from '../types'
@@ -76,6 +77,7 @@ export default function ModerationPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     if (table === 'service_entries') {
       setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, hidden: !currentHidden } : e)))
     } else if (table === 'trip_logs') {
@@ -93,6 +95,7 @@ export default function ModerationPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     if (table === 'service_entries') setEntries((prev) => prev.filter((e) => e.id !== id))
     else if (table === 'trip_logs') setTrips((prev) => prev.filter((t) => t.id !== id))
     else setPurchases((prev) => prev.filter((p) => p.id !== id))
@@ -127,6 +130,8 @@ export default function ModerationPage() {
       setError(toFriendlyError(error))
       return
     }
+    // Banning/unbanning changes which public content is visible.
+    invalidateCommunityCache()
     setUsers((prev) =>
       prev.map((u) => (u.id === target.id ? { ...u, banned_at: banned ? new Date().toISOString() : null } : u))
     )

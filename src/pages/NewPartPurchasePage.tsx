@@ -1,10 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
-import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { invalidateCommunityCache } from '../lib/communityData'
 import { partsCatalog } from '../lib/partsCatalog'
 import styles from './NewPartPurchasePage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -111,6 +111,7 @@ export default function NewPartPurchasePage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     navigate('/mi-actividad')
   }
 
@@ -142,19 +143,19 @@ export default function NewPartPurchasePage() {
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-date">Fecha</label>
-              <ChEdit
+              <input
                 id="purchase-date"
-                className={formStyles.chInput}
-                value={purchaseDate}
-                onInput={(e: any) => setPurchaseDate(e.target.value ?? '')}
                 type="date"
+                className={formStyles.input}
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
               />
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-category">Categoría</label>
               <select
                 id="purchase-category"
-                className={formStyles.chInput}
+                className={formStyles.input}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -167,12 +168,12 @@ export default function NewPartPurchasePage() {
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="purchase-item">¿Qué compraste?</label>
-            <ChEdit
+            <input
               id="purchase-item"
-              className={formStyles.chInput}
-              value={item}
-              onInput={(e: any) => setItem(e.target.value ?? '')}
               type="text"
+              className={formStyles.input}
+              value={item}
+              onChange={(e) => setItem(e.target.value)}
               placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
             />
             <span className={styles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
@@ -181,24 +182,24 @@ export default function NewPartPurchasePage() {
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-store">¿Dónde?</label>
-              <ChEdit
+              <input
                 id="purchase-store"
-                className={formStyles.chInput}
-                value={store}
-                onInput={(e: any) => setStore(e.target.value ?? '')}
                 type="text"
+                className={formStyles.input}
+                value={store}
+                onChange={(e) => setStore(e.target.value)}
                 placeholder="Comercio o importador"
               />
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-price">Precio (UYU)</label>
-              <ChEdit
+              <input
                 id="purchase-price"
-                className={formStyles.chInput}
-                value={priceUyu}
-                onInput={(e: any) => setPriceUyu(e.target.value ?? '')}
                 type="text"
-                mode="decimal"
+                inputMode="decimal"
+                className={formStyles.input}
+                value={priceUyu}
+                onChange={(e) => setPriceUyu(e.target.value)}
                 placeholder="12000"
               />
             </div>
@@ -207,24 +208,24 @@ export default function NewPartPurchasePage() {
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-km">Kilometraje (opcional)</label>
-              <ChEdit
+              <input
                 id="purchase-km"
-                className={formStyles.chInput}
-                value={odometerKm}
-                onInput={(e: any) => setOdometerKm(e.target.value ?? '')}
                 type="text"
-                mode="numeric"
+                inputMode="numeric"
+                className={formStyles.input}
+                value={odometerKm}
+                onChange={(e) => setOdometerKm(e.target.value)}
                 placeholder="45000"
               />
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-city">Ciudad (opcional)</label>
-              <ChEdit
+              <input
                 id="purchase-city"
-                className={formStyles.chInput}
-                value={city}
-                onInput={(e: any) => setCity(e.target.value ?? '')}
                 type="text"
+                className={formStyles.input}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
                 placeholder="Montevideo"
               />
             </div>
@@ -254,13 +255,12 @@ export default function NewPartPurchasePage() {
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="purchase-notes">Notas (opcional)</label>
-            <ChEdit
+            <textarea
               id="purchase-notes"
-              className={`${formStyles.chInput} ${formStyles.chTextarea}`}
+              rows={3}
+              className={`${formStyles.input} ${formStyles.textarea}`}
               value={notes}
-              onInput={(e: any) => setNotes(e.target.value ?? '')}
-              multiline
-              autoGrow
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Plazo de entrega, atención, si volverías a comprar ahí..."
             />
           </div>

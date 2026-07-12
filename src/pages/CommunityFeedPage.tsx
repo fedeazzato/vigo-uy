@@ -144,14 +144,14 @@ export default function CommunityFeedPage() {
       <div className={styles.toolbar}>
         <input
           type="search"
-          className={`${formStyles.chInput} ${styles.searchInput}`}
+          className={`${formStyles.input} ${styles.searchInput}`}
           placeholder="Buscar por título, lugar, taller…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Buscar"
         />
         <select
-          className={formStyles.chInput}
+          className={formStyles.input}
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
           aria-label="Tipo"
@@ -162,7 +162,7 @@ export default function CommunityFeedPage() {
           <option value="repuestos">Repuestos</option>
         </select>
         <select
-          className={formStyles.chInput}
+          className={formStyles.input}
           value={modelFilter}
           onChange={(e) => setModelFilter(e.target.value as ModelFilter)}
           aria-label="Modelo"
@@ -172,7 +172,7 @@ export default function CommunityFeedPage() {
           <option value="E2+">E2+</option>
         </select>
         <select
-          className={formStyles.chInput}
+          className={formStyles.input}
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOrder)}
           aria-label="Orden"

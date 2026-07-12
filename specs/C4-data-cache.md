@@ -1,6 +1,6 @@
 # C4 — Shared community-data cache
 
-**Status:** TODO · **Phase:** C · **Depends on:** nothing
+**Status:** Done (2026-07-12) · **Phase:** C · **Depends on:** nothing
 
 ## Context
 

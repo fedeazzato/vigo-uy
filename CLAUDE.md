@@ -64,6 +64,18 @@ When adding a new color, update all four records.
 - **`profiles.is_moderator` / `banned_at` are trigger-protected.** A `before update` trigger reverts changes to both columns on any client session unless the transaction-local GUC `vigo.admin_action = 'on'` is set — and only the SECURITY DEFINER admin RPCs (`admin_set_user_moderator`, `admin_set_user_banned`), which verify the caller is a non-banned moderator, set it. Do not try to update these columns from the frontend; the SQL Editor bootstrap path (promote the first moderator by hand) still works because `auth.uid()` is null there.
 - **Shared vehicles**: every user gets a `vehicles` row + `vehicle_members` membership on signup (one vehicle per user, enforced by a unique constraint). Vehicles have **no public name** — the leaderboard labels them by member display names — and an optional `plate` that, like `join_code`, is visible only to the vehicle's own members (never expose either in an anon-reachable relation). Family members link accounts by entering a vehicle's 6-char `join_code` via the `join_vehicle_by_code` RPC (moves the caller; `reset_my_vehicle` is the undo; `remove_vehicle_member` lets the vehicle's creator eject a member, who automatically gets a fresh own vehicle). `trip_logs`/`service_entries.vehicle_id` is forced server-side by a trigger (set from the author's membership on insert, frozen on update) — never send it from the client.
 
+## Migrations (Supabase CLI)
+
+Migrations live in `supabase/migrations/` as numbered `NNNN_name.sql` files and are managed with the Supabase CLI (installed as a dev dependency; run it via `npx supabase …`). The old "paste into the SQL Editor" workflow is retired — do not add that instruction to new migration headers.
+
+- **Create**: `npx supabase migration new <name>` (or hand-create the next `NNNN_name.sql` in sequence — the numeric prefix is the version and must be unique and increasing).
+- **Apply**: `npx supabase db push` (pushes pending migrations to the linked remote project). A push with nothing pending is a no-op.
+- **Never edit a migration that has been applied** — write a new one.
+- **Status / drift**: `npx supabase migration list` shows local vs remote; `npx supabase db diff --linked` audits schema drift.
+- Linking requires a maintainer with a Supabase access token: `npx supabase login`, then `npx supabase link --project-ref <ref>` (the ref is the subdomain of `VITE_SUPABASE_URL`).
+- After every migration, regenerate DB types: `npm run gen:types` (see `src/lib/database.types.ts`).
+- Local Docker development (`supabase start`) is optional, not required.
+
 ## Theme (dark mode)
 
 - Implemented via `data-theme="light"|"dark"` on `<html>`, set by `UserPrefsContext`

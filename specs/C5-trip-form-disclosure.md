@@ -1,6 +1,6 @@
 # C5 — Trip form progressive disclosure
 
-**Status:** TODO · **Phase:** C · **Depends on:** C3 (do input migration first
+**Status:** Done (2026-07-12) · **Phase:** C · **Depends on:** C3 (do input migration first
 so this spec doesn't restyle ChEdit markup it's about to delete)
 
 ## Context

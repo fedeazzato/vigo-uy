@@ -17,84 +17,167 @@ import type {
   VehicleLeaderboardEntry,
 } from '../types'
 
-export async function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; error: string | null }> {
-  if (!supabase) return { trips: [], error: null }
-  const { data, error } = await supabase
-    .from('trip_logs')
-    .select('*')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  return { trips: (data ?? []) as TripLog[], error: error ? toFriendlyError(error) : null }
+// ── TTL cache ─────────────────────────────────────────────────────────────
+// Pages remount on every navigation and would otherwise refetch the same
+// community rows each time (repeated skeletons on mobile, avoidable egress).
+// Caching the *promise* also dedupes identical requests fired by components
+// mounting simultaneously. Deliberately not a client-cache framework: a TTL
+// memo is all this app needs (no new dependency).
+
+const TTL_MS = 60_000
+const cache = new Map<string, { promise: Promise<unknown>; at: number }>()
+
+function cached<T>(key: string, fn: () => Promise<T>, failed?: (result: T) => boolean): Promise<T> {
+  const hit = cache.get(key)
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.promise as Promise<T>
+  const promise = fn().then(
+    (result) => {
+      // Failures are not cached; the next mount retries.
+      if (failed?.(result)) cache.delete(key)
+      return result
+    },
+    (err) => {
+      cache.delete(key)
+      throw err
+    }
+  )
+  cache.set(key, { promise, at: Date.now() })
+  return promise
 }
 
-export async function fetchPublicServiceEntries(
+// Call after every successful community-content mutation (insert/update/
+// delete/hide) so the next page visit sees fresh data instead of a stale
+// 60-second snapshot.
+export function invalidateCommunityCache(): void {
+  cache.clear()
+}
+
+// ── Fetch helpers ─────────────────────────────────────────────────────────
+
+export function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ trips: [], error: null })
+  return cached(
+    `publicTrips:${limit}`,
+    async () => {
+      const { data, error } = await client
+        .from('trip_logs')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      return { trips: (data ?? []) as TripLog[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export function fetchPublicServiceEntries(
   limit: number
 ): Promise<{ entries: ServiceEntry[]; error: string | null }> {
-  if (!supabase) return { entries: [], error: null }
-  const { data, error } = await supabase
-    .from('service_entries')
-    .select('*')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  return { entries: (data ?? []) as ServiceEntry[], error: error ? toFriendlyError(error) : null }
+  const client = supabase
+  if (!client) return Promise.resolve({ entries: [], error: null })
+  return cached(
+    `publicServiceEntries:${limit}`,
+    async () => {
+      const { data, error } = await client
+        .from('service_entries')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      return { entries: (data ?? []) as ServiceEntry[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
 }
 
-export async function fetchPublicPartPurchases(
+export function fetchPublicPartPurchases(
   limit: number
 ): Promise<{ purchases: PartPurchase[]; error: string | null }> {
-  if (!supabase) return { purchases: [], error: null }
-  const { data, error } = await supabase
-    .from('part_purchases')
-    .select('*')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  return { purchases: (data ?? []) as PartPurchase[], error: error ? toFriendlyError(error) : null }
+  const client = supabase
+  if (!client) return Promise.resolve({ purchases: [], error: null })
+  return cached(
+    `publicPartPurchases:${limit}`,
+    async () => {
+      const { data, error } = await client
+        .from('part_purchases')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      return { purchases: (data ?? []) as PartPurchase[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
 }
 
 // Resolves author display names through the public_profiles view, which is
 // readable without a session (the profiles table is not).
-export async function fetchAuthorNames(userIds: string[]): Promise<Record<string, string>> {
-  if (!supabase || userIds.length === 0) return {}
-  const { data } = await supabase.from('public_profiles').select('id, display_name').in('id', userIds)
-  const map: Record<string, string> = {}
-  for (const p of (data ?? []) as PublicProfile[]) map[p.id] = p.display_name
-  return map
+export function fetchAuthorNames(userIds: string[]): Promise<Record<string, string>> {
+  const client = supabase
+  if (!client || userIds.length === 0) return Promise.resolve({})
+  const key = `authorNames:${[...userIds].sort().join(',')}`
+  return cached(key, async () => {
+    const { data } = await client.from('public_profiles').select('id, display_name').in('id', userIds)
+    const map: Record<string, string> = {}
+    for (const p of (data ?? []) as PublicProfile[]) map[p.id] = p.display_name
+    return map
+  })
 }
 
-export async function fetchCommunityStats(): Promise<{
+export function fetchCommunityStats(): Promise<{
   cityStats: CityCostStat[]
   modelStats: ModelTripStat[]
   error: string | null
 }> {
-  if (!supabase) return { cityStats: [], modelStats: [], error: null }
-  const [cityRes, modelRes] = await Promise.all([
-    supabase.from('service_cost_stats_by_city').select('*'),
-    supabase.from('trip_stats_by_model').select('*'),
-  ])
-  return {
-    cityStats: (cityRes.data ?? []) as CityCostStat[],
-    modelStats: (modelRes.data ?? []) as ModelTripStat[],
-    error: cityRes.error
-      ? toFriendlyError(cityRes.error)
-      : modelRes.error
-      ? toFriendlyError(modelRes.error)
-      : null,
-  }
+  const client = supabase
+  if (!client) return Promise.resolve({ cityStats: [], modelStats: [], error: null })
+  return cached(
+    'communityStats',
+    async () => {
+      const [cityRes, modelRes] = await Promise.all([
+        client.from('service_cost_stats_by_city').select('*'),
+        client.from('trip_stats_by_model').select('*'),
+      ])
+      return {
+        cityStats: (cityRes.data ?? []) as CityCostStat[],
+        modelStats: (modelRes.data ?? []) as ModelTripStat[],
+        error: cityRes.error
+          ? toFriendlyError(cityRes.error)
+          : modelRes.error
+          ? toFriendlyError(modelRes.error)
+          : null,
+      }
+    },
+    (r) => r.error !== null
+  )
 }
 
-export async function fetchLeaderboard(): Promise<{ rows: VehicleLeaderboardEntry[]; error: string | null }> {
-  if (!supabase) return { rows: [], error: null }
-  const { data, error } = await supabase.from('vehicle_km_leaderboard').select('*')
-  return { rows: (data ?? []) as VehicleLeaderboardEntry[], error: error ? toFriendlyError(error) : null }
+export function fetchLeaderboard(): Promise<{ rows: VehicleLeaderboardEntry[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ rows: [], error: null })
+  return cached(
+    'leaderboard',
+    async () => {
+      const { data, error } = await client.from('vehicle_km_leaderboard').select('*')
+      return { rows: (data ?? []) as VehicleLeaderboardEntry[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
 }
 
-export async function fetchCommunityTotals(): Promise<{ totals: CommunityTotals | null; error: string | null }> {
-  if (!supabase) return { totals: null, error: null }
-  const { data, error } = await supabase.from('community_totals').select('*').single()
-  return { totals: (data as CommunityTotals) ?? null, error: error ? toFriendlyError(error) : null }
+export function fetchCommunityTotals(): Promise<{ totals: CommunityTotals | null; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ totals: null, error: null })
+  return cached(
+    'communityTotals',
+    async () => {
+      const { data, error } = await client.from('community_totals').select('*').single()
+      return { totals: (data as CommunityTotals) ?? null, error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
 }
 
 export interface CommunityContent {

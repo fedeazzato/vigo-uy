@@ -1,7 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
-import { ChEdit } from '../lib/chameleon/ChEdit'
 import { TurnstileWidget, TURNSTILE_ENABLED } from '../components/TurnstileWidget'
 import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
@@ -23,11 +22,6 @@ export default function LoginPage() {
   const [cooldown, setCooldown] = useState(0)
   const [passkeyPending, setPasskeyPending] = useState(false)
 
-  // ch-edit must be used as a controlled component: it resets its displayed
-  // value to its own `value` prop whenever the native input fails HTML5
-  // validity (e.g. any incomplete type="email" text) — left uncontrolled,
-  // that prop stays `undefined` forever and every such reset shows the
-  // literal string "undefined" instead of what was typed.
   const [emailInput, setEmailInput] = useState('')
   const [codeInput, setCodeInput] = useState('')
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
@@ -137,16 +131,17 @@ export default function LoginPage() {
         {step === 'email' ? (
           <form className={styles.form} onSubmit={handleSendOtp}>
             <label className={styles.label} htmlFor="login-email">Email</label>
-            <ChEdit
+            <input
               id="login-email"
-              className={formStyles.chInput}
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              className={formStyles.input}
               value={emailInput}
-              onInput={(e: any) => setEmailInput(e.target.value ?? '')}
-              type="text"
-              mode="email"
+              onChange={(e) => setEmailInput(e.target.value)}
               placeholder="tu@email.com"
               autoFocus
-              {...(submitting ? { disabled: true } : {})}
+              disabled={submitting}
             />
             {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
@@ -157,17 +152,19 @@ export default function LoginPage() {
           <form className={styles.form} onSubmit={handleVerifyOtp}>
             <p className={styles.hint}>Enviamos un código a <strong>{email}</strong></p>
             <label className={styles.label} htmlFor="login-code">Código de verificación</label>
-            <ChEdit
+            <input
               id="login-code"
-              className={formStyles.chInput}
-              value={codeInput}
-              onInput={(e: any) => setCodeInput(e.target.value ?? '')}
               type="text"
-              mode="numeric"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]*"
               maxLength={10}
+              className={formStyles.input}
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value)}
               placeholder="Código"
               autoFocus
-              {...(submitting ? { disabled: true } : {})}
+              disabled={submitting}
             />
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? 'Verificando…' : 'Verificar'}

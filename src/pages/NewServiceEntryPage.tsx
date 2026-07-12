@@ -1,10 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
-import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { invalidateCommunityCache } from '../lib/communityData'
 import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
 import styles from './NewServiceEntryPage.module.css'
@@ -109,6 +109,7 @@ export default function NewServiceEntryPage() {
       setError(toFriendlyError(error))
       return
     }
+    invalidateCommunityCache()
     navigate('/mi-actividad')
   }
 
@@ -140,23 +141,23 @@ export default function NewServiceEntryPage() {
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="service-date">Fecha</label>
-              <ChEdit
+              <input
                 id="service-date"
-                className={formStyles.chInput}
-                value={serviceDate}
-                onInput={(e: any) => setServiceDate(e.target.value ?? '')}
                 type="date"
+                className={formStyles.input}
+                value={serviceDate}
+                onChange={(e) => setServiceDate(e.target.value)}
               />
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="service-km">Kilometraje</label>
-              <ChEdit
+              <input
                 id="service-km"
-                className={formStyles.chInput}
-                value={odometerKm}
-                onInput={(e: any) => setOdometerKm(e.target.value ?? '')}
                 type="text"
-                mode="numeric"
+                inputMode="numeric"
+                className={formStyles.input}
+                value={odometerKm}
+                onChange={(e) => setOdometerKm(e.target.value)}
                 placeholder="45000"
               />
             </div>
@@ -164,12 +165,12 @@ export default function NewServiceEntryPage() {
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="service-dealer">Taller</label>
-            <ChEdit
+            <input
               id="service-dealer"
-              className={formStyles.chInput}
-              value={dealer}
-              onInput={(e: any) => setDealer(e.target.value ?? '')}
               type="text"
+              className={formStyles.input}
+              value={dealer}
+              onChange={(e) => setDealer(e.target.value)}
               placeholder="Nombre del taller"
             />
             <span className={styles.hint}>Talleres conocidos: {KNOWN_DEALERS.join(', ')}</span>
@@ -177,12 +178,12 @@ export default function NewServiceEntryPage() {
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="service-type">Tipo de service</label>
-            <ChEdit
+            <input
               id="service-type"
-              className={formStyles.chInput}
-              value={serviceType}
-              onInput={(e: any) => setServiceType(e.target.value ?? '')}
               type="text"
+              className={formStyles.input}
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
               placeholder="Ej: service de 15.000 km"
             />
           </div>
@@ -190,24 +191,24 @@ export default function NewServiceEntryPage() {
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="service-cost">Costo (UYU)</label>
-              <ChEdit
+              <input
                 id="service-cost"
-                className={formStyles.chInput}
-                value={costUyu}
-                onInput={(e: any) => setCostUyu(e.target.value ?? '')}
                 type="text"
-                mode="decimal"
+                inputMode="decimal"
+                className={formStyles.input}
+                value={costUyu}
+                onChange={(e) => setCostUyu(e.target.value)}
                 placeholder="7500"
               />
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="service-city">Ciudad</label>
-              <ChEdit
+              <input
                 id="service-city"
-                className={formStyles.chInput}
-                value={city}
-                onInput={(e: any) => setCity(e.target.value ?? '')}
                 type="text"
+                className={formStyles.input}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
                 placeholder="Montevideo"
               />
             </div>
@@ -215,13 +216,12 @@ export default function NewServiceEntryPage() {
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="service-notes">Notas (opcional)</label>
-            <ChEdit
+            <textarea
               id="service-notes"
-              className={`${formStyles.chInput} ${formStyles.chTextarea}`}
+              rows={3}
+              className={`${formStyles.input} ${formStyles.textarea}`}
               value={notes}
-              onInput={(e: any) => setNotes(e.target.value ?? '')}
-              multiline
-              autoGrow
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Detalles adicionales..."
             />
           </div>

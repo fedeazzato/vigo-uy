@@ -1,42 +1,40 @@
-/* Shared visual chrome for ch-edit fields, since the component itself ships
-   with no border/background by design (it expects a design system like
-   Chameleon's Mercury to supply it — deliberately not adopted here, since
-   Mercury's documented setup requires Chameleon's full barrel loader,
-   which bloats the PWA precache well past its 2MB limit). */
-.chInput {
+/* Shared visual chrome for native form controls (inputs, selects,
+   textareas) used by every form in the app. */
+.input {
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 10px 12px;
   background: var(--surface);
   font-size: 14px;
+  font-family: inherit;
   color: var(--text-primary);
   transition: border-color 0.15s, box-shadow 0.15s;
-  /* ch-edit's own placeholder CSS defaults to `currentColor`, making
-     placeholder text indistinguishable from a real typed value. */
-  --ch-placeholder-color: var(--text-tertiary);
 }
-.chInput:hover {
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+.input:hover {
   border-color: var(--text-tertiary);
 }
-.chInput:focus-within {
+.input:focus {
   border-color: var(--green-400);
   box-shadow: 0 0 0 3px var(--green-50);
+  outline: none;
 }
 
-/* For multiline fields: guarantees a ~3-line minimum height. ch-edit's
-   internal textarea is sized via `block-size: 100%` chained down from the
-   host's own box, so a min-height set here on the host (light DOM) is
-   enough to establish that floor — no need to reach into its shadow DOM. */
-.chTextarea {
+.textarea {
   min-height: 90px;
   line-height: 1.4;
+  resize: vertical;
 }
 
 /* iOS Safari zooms the page when a focused input's font-size is < 16px —
    keep inputs at 16px on mobile widths. */
 @media (max-width: 700px) {
-  .chInput {
+  .input {
     font-size: 16px;
   }
 }

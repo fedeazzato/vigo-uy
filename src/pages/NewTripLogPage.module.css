@@ -195,3 +195,48 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Progressive disclosure (battery/charge details) ── */
+
+.disclosureBtn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+.disclosureBtn:hover {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+}
+
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+.shareBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.modelHint {
+  font-size: 12px;
+  color: var(--amber-400);
+  margin-top: 6px;
+  display: block;
+}
