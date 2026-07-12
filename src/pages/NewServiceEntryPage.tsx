@@ -43,7 +43,7 @@ export default function NewServiceEntryPage() {
     supabase
       .from('service_entries')
       .select('*')
-      .eq('id', id)
+      .eq('id', id!)
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
@@ -100,7 +100,7 @@ export default function NewServiceEntryPage() {
     }
 
     const { error } = isEdit
-      ? await supabase.from('service_entries').update(payload).eq('id', id)
+      ? await supabase.from('service_entries').update(payload).eq('id', id!)
       : await supabase.from('service_entries').insert({ ...payload, user_id: user.id })
 
     setSubmitting(false)

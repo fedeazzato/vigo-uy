@@ -30,8 +30,8 @@ requirements, files to touch, and acceptance criteria.
 | [B1](B1-mobile-navigation.md) | Bottom tab bar + Guía section | B | B2 | Done |
 | [B2](B2-home-page.md) | Inicio home page (replace redirect to Mi Vigo) | B | — | Done |
 | [B3](B3-mobile-polish.md) | Touch targets, icons, offline notice | B | A5 | Done |
-| [C1](C1-migration-workflow.md) | Supabase CLI migration workflow | C | — | Done (needs maintainer link) |
-| [C2](C2-generated-types.md) | Generated DB types | C | C1 | Blocked on C1 link |
+| [C1](C1-migration-workflow.md) | Supabase CLI migration workflow | C | — | Done |
+| [C2](C2-generated-types.md) | Generated DB types | C | C1 | Done |
 | [C3](C3-native-inputs.md) | Replace ChEdit with native inputs | C | — | Done |
 | [C4](C4-data-cache.md) | Shared community-data cache | C | — | Done |
 | [C5](C5-trip-form-disclosure.md) | Trip form progressive disclosure | C | C3 | Done |

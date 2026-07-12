@@ -98,7 +98,7 @@ export default function NewTripLogPage() {
     supabase
       .from('trip_logs')
       .select('*')
-      .eq('id', id)
+      .eq('id', id!)
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
@@ -109,7 +109,7 @@ export default function NewTripLogPage() {
           setDestination(data.destination)
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
           setTripDate(data.trip_date)
-          setModel(data.model ?? '')
+          setModel((data.model as Model | null) ?? '')
           setStartingCharge(data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : '')
           setEndingCharge(data.ending_charge_percentage != null ? String(data.ending_charge_percentage) : '')
           setAverageSpeed(data.average_speed_kmh != null ? String(data.average_speed_kmh) : '')
@@ -222,7 +222,7 @@ export default function NewTripLogPage() {
     }
 
     const { error } = isEdit
-      ? await supabase.from('trip_logs').update(payload).eq('id', id)
+      ? await supabase.from('trip_logs').update(payload).eq('id', id!)
       : await supabase.from('trip_logs').insert({ ...payload, user_id: user.id })
 
     setSubmitting(false)

@@ -41,7 +41,7 @@ export default function NewPartPurchasePage() {
     supabase
       .from('part_purchases')
       .select('*')
-      .eq('id', id)
+      .eq('id', id!)
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
@@ -102,7 +102,7 @@ export default function NewPartPurchasePage() {
     }
 
     const { error } = isEdit
-      ? await supabase.from('part_purchases').update(payload).eq('id', id)
+      ? await supabase.from('part_purchases').update(payload).eq('id', id!)
       : await supabase.from('part_purchases').insert({ ...payload, user_id: user.id })
 
     setSubmitting(false)

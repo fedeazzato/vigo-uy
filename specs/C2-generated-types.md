@@ -1,6 +1,6 @@
 # C2 — Generated database types
 
-**Status:** TODO · **Phase:** C · **Depends on:** C1 (linked project)
+**Status:** Done (2026-07-12) · **Phase:** C · **Depends on:** C1 (linked project)
 
 ## Context
 

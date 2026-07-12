@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b --noEmit",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "gen:types": "supabase gen types typescript --linked > src/lib/database.types.ts"

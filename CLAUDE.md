@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev          # Start dev server at http://localhost:5173/vigo-uy/
 npm run build        # Production build
-npm run type-check   # TypeScript type checking (tsc --noEmit)
+npm run type-check   # TypeScript type checking (tsc -b --noEmit; plain `tsc --noEmit` checks NOTHING against this solution-style tsconfig)
+npm run gen:types    # Regenerate src/lib/database.types.ts from the linked Supabase project (run after every migration)
 npm run deploy       # Build + push to gh-pages branch (GitHub Pages)
 ```
 
@@ -29,7 +30,7 @@ Each page imports its JSON file, casts it to the matching TypeScript interface f
 
 ### Key conventions
 
-- **`src/types.ts`** — single source of truth for all data shapes. Every JSON file has a corresponding interface here. When a JSON file changes structure, update the interface too.
+- **`src/types.ts`** — single source of truth for all data shapes. Every JSON file has a corresponding interface here. When a JSON file changes structure, update the interface too. DB-backed shapes are aliases of the generated `src/lib/database.types.ts` (with narrow overrides for `Model`/`Color` unions, the `charging_stops` jsonb, and view/RPC nullability) — don't hand-write a DB row shape from scratch.
 - **`src/components/UI.tsx`** — all reusable primitives (`PageHeader`, `Card`, `CardTitle`, `TipList`, `Badge`, `Alert`, `StatGrid`, `SectionDivider`). New display patterns should be added here before being used in pages.
 - **JSON imports are cast**, not inferred: `import rawData from '../data/foo.json'` followed by `const data = rawData as FooData`. This is intentional — TypeScript infers string literals from JSON instead of the union types defined in `src/types.ts`.
 - **Routing** uses `HashRouter` (required for GitHub Pages). All routes are defined in `src/App.tsx`.

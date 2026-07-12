@@ -31,7 +31,7 @@ export default function DashboardPage() {
       .order('service_date', { ascending: false })
       .then(({ data, error }) => {
         if (error) setError(toFriendlyError(error))
-        else setEntries((data ?? []) as ServiceEntry[])
+        else setEntries(data ?? [])
         setLoadingEntries(false)
       })
 
@@ -53,7 +53,7 @@ export default function DashboardPage() {
       .order('purchase_date', { ascending: false })
       .then(({ data, error }) => {
         if (error) setError(toFriendlyError(error))
-        else setPurchases((data ?? []) as PartPurchase[])
+        else setPurchases(data ?? [])
         setLoadingPurchases(false)
       })
   }, [user])

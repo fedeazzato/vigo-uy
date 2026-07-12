@@ -1,7 +1,7 @@
 # C1 — Supabase CLI migration workflow
 
-**Status:** Done (2026-07-12) — code/docs complete; the link + baseline steps
-below require the maintainer's Supabase access token · **Phase:** C ·
+**Status:** Done (2026-07-12) — linked and baselined; migration list in sync.
+Drift audit (db diff) deferred: requires Docker, not installed · **Phase:** C ·
 **Depends on:** nothing
 
 ## Maintainer checklist (run once, ~5 minutes)

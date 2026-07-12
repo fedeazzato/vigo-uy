@@ -47,7 +47,8 @@ export default function VehicleCard() {
     loadVehicle()
   }, [loadVehicle])
 
-  async function run(action: () => Promise<{ error: { message: string } | null }>, successMsg: string) {
+  // PromiseLike, not Promise: supabase query builders are thenables.
+  async function run(action: () => PromiseLike<{ error: { message: string } | null }>, successMsg: string) {
     if (!supabase) return
     setBusy(true)
     setError(null)

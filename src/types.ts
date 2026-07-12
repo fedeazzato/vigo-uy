@@ -253,45 +253,46 @@ export interface MantenimientoData {
   warrantyNote: string
 }
 
-// ── Auth profile (Supabase-backed) ──────────────────────────────────────────
+// ── Supabase-backed shapes (derived from generated DB types) ────────────────
+// The base shapes come from src/lib/database.types.ts (regenerate with
+// `npm run gen:types` after every migration) so schema drift becomes a
+// compile error. Hand-written overrides exist only where we know more than
+// the codegen:
+//  - `model`/`color` are narrowed from `string` to their union types;
+//  - `charging_stops` is jsonb, narrowed to TripChargingStop[] (the cast at
+//    the fetch boundary is the only place that shape is asserted);
+//  - view columns are all `| null` in codegen (Postgres can't prove view
+//    nullability) but several are coalesced/aggregated and never null in
+//    practice — NonNullableRow re-tightens those.
 
-export interface Profile {
-  id: string
-  display_name: string
-  city: string | null
+import type { Database } from './lib/database.types'
+
+type Tables = Database['public']['Tables']
+type Views = Database['public']['Views']
+
+type NonNullableRow<T> = { [K in keyof T]-?: NonNullable<T[K]> }
+
+// ── Auth profile ─────────────────────────────────────────────────────────────
+
+export type Profile = Omit<Tables['profiles']['Row'], 'model' | 'color'> & {
   model: Model | null
   color: Color | null
-  is_moderator: boolean
-  banned_at: string | null
-  created_at: string
 }
 
 // Minimal author info exposed to everyone (incl. anonymous visitors) through
-// the public_profiles view — never the full profiles table.
-export interface PublicProfile {
-  id: string
-  display_name: string
-}
+// the public_profiles view — never the full profiles table. Both columns come
+// from NOT NULL profile columns, so the view's codegen nulls are spurious.
+export type PublicProfile = NonNullableRow<Views['public_profiles']['Row']>
 
-// ── Service entries (Supabase-backed, user-submitted) ───────────────────────
+// ── User-submitted content ───────────────────────────────────────────────────
 
-export interface ServiceEntry {
-  id: string
-  user_id: string
-  service_date: string
-  odometer_km: number
-  dealer: string
-  service_type: string
-  cost_uyu: number
-  city: string | null
-  notes: string | null
-  is_public: boolean
-  hidden: boolean
-  vehicle_id: string | null
-  created_at: string
-}
+export type ServiceEntry = Tables['service_entries']['Row']
 
-export interface TripChargingStop {
+export type PartPurchase = Tables['part_purchases']['Row']
+
+// Shape of one element of trip_logs.charging_stops (jsonb — no generated
+// shape; this is the one hand-maintained DB shape left).
+export type TripChargingStop = {
   name: string
   note?: string
   distance_from_previous_km?: number
@@ -301,103 +302,47 @@ export interface TripChargingStop {
   average_speed_kmh?: number
 }
 
-export interface TripLog {
-  id: string
-  user_id: string
-  title: string
-  origin: string
-  destination: string
-  distance_km: number | null
-  trip_date: string
+export type TripLog = Omit<Tables['trip_logs']['Row'], 'model' | 'charging_stops'> & {
   model: Model | null
-  starting_charge_percentage: number | null
-  ending_charge_percentage: number | null
-  average_speed_kmh: number | null
   charging_stops: TripChargingStop[]
-  rating: number | null
-  notes: string | null
-  is_public: boolean
-  hidden: boolean
-  vehicle_id: string | null
-  created_at: string
 }
 
-// ── Part purchases (Supabase-backed, user-submitted) ────────────────────────
-
-export interface PartPurchase {
-  id: string
-  user_id: string
-  purchase_date: string
-  category: string
-  item: string
-  store: string
-  price_uyu: number
-  odometer_km: number | null
-  city: string | null
-  rating: number | null
-  notes: string | null
-  is_public: boolean
-  hidden: boolean
-  vehicle_id: string | null
-  created_at: string
-}
-
-// ── Vehicles (Supabase-backed, shared cars) ─────────────────────────────────
+// ── Vehicles (shared cars) ───────────────────────────────────────────────────
 
 // Vehicles have no public name: the leaderboard labels them by their
 // members' display names. `plate` is optional and, like join_code, only
 // visible to the vehicle's own members (members-only RLS).
-export interface Vehicle {
-  id: string
-  plate: string | null
+export type Vehicle = Omit<Tables['vehicles']['Row'], 'model'> & {
   model: Model | null
-  color: string | null
-  join_code: string
-  created_by: string | null
-  created_at: string
 }
 
 // Row shape of the vehicle_km_leaderboard view (public; never join_code/plate).
-export interface VehicleLeaderboardEntry {
-  vehicle_id: string
-  total_km: number
-  trip_count: number
-  member_names: string[]
-}
+// Every column is grouped/coalesced — never null despite the view codegen.
+export type VehicleLeaderboardEntry = NonNullableRow<Views['vehicle_km_leaderboard']['Row']>
 
 // ── Community aggregates (Supabase views) ────────────────────────────────────
 
-export interface CityCostStat {
-  city: string
-  entry_count: number
-  avg_cost_uyu: number
-}
+// city is filtered non-null in the view; the aggregates never are.
+export type CityCostStat = NonNullableRow<Views['service_cost_stats_by_city']['Row']>
 
-export interface ModelTripStat {
-  model: string
-  trip_count: number
-  avg_distance_km: number | null
-  avg_speed_kmh: number | null
-}
+// model is filtered non-null and trip_count is count(*), but the medians are
+// genuinely nullable (a group whose trips all lack distance/speed).
+export type ModelTripStat = NonNullableRow<
+  Pick<Views['trip_stats_by_model']['Row'], 'model' | 'trip_count'>
+> &
+  Pick<Views['trip_stats_by_model']['Row'], 'avg_distance_km' | 'avg_speed_kmh'>
 
-export interface CommunityTotals {
-  total_trips: number
-  total_km: number
-  contributor_count: number
-}
+export type CommunityTotals = NonNullableRow<Views['community_totals']['Row']>
 
 // ── Moderation (admin_list_users RPC) ───────────────────────────────────────
 
-export interface AdminUserRow {
-  id: string
-  display_name: string
+// Function return types carry no nullability in codegen, so re-widen the
+// columns that really can be null, and narrow `model` to its union.
+export type AdminUserRow = Omit<
+  Database['public']['Functions']['admin_list_users']['Returns'][number],
+  'banned_at' | 'city' | 'model'
+> & {
+  banned_at: string | null
   city: string | null
   model: Model | null
-  is_moderator: boolean
-  banned_at: string | null
-  created_at: string
-  service_count: number
-  trip_count: number
-  purchase_count: number
-  vehicle_member_count: number
 }

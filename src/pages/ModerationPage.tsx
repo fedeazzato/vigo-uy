@@ -45,9 +45,9 @@ export default function ModerationPage() {
       return
     }
 
-    const entriesData = (entriesRes.data ?? []) as ServiceEntry[]
+    const entriesData = entriesRes.data ?? []
     const tripsData = (tripsRes.data ?? []) as TripLog[]
-    const purchasesData = (purchasesRes.data ?? []) as PartPurchase[]
+    const purchasesData = purchasesRes.data ?? []
     setEntries(entriesData)
     setTrips(tripsData)
     setPurchases(purchasesData)

@@ -86,7 +86,7 @@ export function fetchPublicServiceEntries(
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(limit)
-      return { entries: (data ?? []) as ServiceEntry[], error: error ? toFriendlyError(error) : null }
+      return { entries: data ?? [], error: error ? toFriendlyError(error) : null }
     },
     (r) => r.error !== null
   )
@@ -106,7 +106,7 @@ export function fetchPublicPartPurchases(
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(limit)
-      return { purchases: (data ?? []) as PartPurchase[], error: error ? toFriendlyError(error) : null }
+      return { purchases: data ?? [], error: error ? toFriendlyError(error) : null }
     },
     (r) => r.error !== null
   )
