@@ -143,6 +143,21 @@ export interface CostsData {
   insurance: InsuranceData
 }
 
+// ── Parts catalog data ───────────────────────────────────────────────────────
+
+export interface PartCategory {
+  id: string
+  icon: string
+  title: string
+  spec?: string
+  tips?: TipItem[]
+}
+
+export interface PartsData {
+  intro: string
+  categories: PartCategory[]
+}
+
 // ── Accessories data ─────────────────────────────────────────────────────────
 
 export interface Category {
@@ -247,7 +262,15 @@ export interface Profile {
   model: Model | null
   color: Color | null
   is_moderator: boolean
+  banned_at: string | null
   created_at: string
+}
+
+// Minimal author info exposed to everyone (incl. anonymous visitors) through
+// the public_profiles view — never the full profiles table.
+export interface PublicProfile {
+  id: string
+  display_name: string
 }
 
 // ── Service entries (Supabase-backed, user-submitted) ───────────────────────
@@ -264,6 +287,7 @@ export interface ServiceEntry {
   notes: string | null
   is_public: boolean
   hidden: boolean
+  vehicle_id: string | null
   created_at: string
 }
 
@@ -294,5 +318,86 @@ export interface TripLog {
   notes: string | null
   is_public: boolean
   hidden: boolean
+  vehicle_id: string | null
   created_at: string
+}
+
+// ── Part purchases (Supabase-backed, user-submitted) ────────────────────────
+
+export interface PartPurchase {
+  id: string
+  user_id: string
+  purchase_date: string
+  category: string
+  item: string
+  store: string
+  price_uyu: number
+  odometer_km: number | null
+  city: string | null
+  rating: number | null
+  notes: string | null
+  is_public: boolean
+  hidden: boolean
+  vehicle_id: string | null
+  created_at: string
+}
+
+// ── Vehicles (Supabase-backed, shared cars) ─────────────────────────────────
+
+// Vehicles have no public name: the leaderboard labels them by their
+// members' display names. `plate` is optional and, like join_code, only
+// visible to the vehicle's own members (members-only RLS).
+export interface Vehicle {
+  id: string
+  plate: string | null
+  model: Model | null
+  color: string | null
+  join_code: string
+  created_by: string | null
+  created_at: string
+}
+
+// Row shape of the vehicle_km_leaderboard view (public; never join_code/plate).
+export interface VehicleLeaderboardEntry {
+  vehicle_id: string
+  total_km: number
+  trip_count: number
+  member_names: string[]
+}
+
+// ── Community aggregates (Supabase views) ────────────────────────────────────
+
+export interface CityCostStat {
+  city: string
+  entry_count: number
+  avg_cost_uyu: number
+}
+
+export interface ModelTripStat {
+  model: string
+  trip_count: number
+  avg_distance_km: number | null
+  avg_speed_kmh: number | null
+}
+
+export interface CommunityTotals {
+  total_trips: number
+  total_km: number
+  contributor_count: number
+}
+
+// ── Moderation (admin_list_users RPC) ───────────────────────────────────────
+
+export interface AdminUserRow {
+  id: string
+  display_name: string
+  city: string | null
+  model: Model | null
+  is_moderator: boolean
+  banned_at: string | null
+  created_at: string
+  service_count: number
+  trip_count: number
+  purchase_count: number
+  vehicle_member_count: number
 }

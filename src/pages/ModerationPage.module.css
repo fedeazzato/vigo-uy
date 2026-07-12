@@ -1,3 +1,29 @@
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabBtn {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tabBtn:hover {
+  border-color: var(--text-tertiary);
+}
+.tabActive {
+  background: var(--green-50);
+  border-color: var(--green-400);
+  color: var(--text-primary);
+}
+
 .sectionTitle {
   font-family: var(--font-display);
   font-size: 16px;

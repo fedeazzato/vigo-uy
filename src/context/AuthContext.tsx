@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import type { AuthError, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
 import type { Profile } from '../types'
@@ -12,6 +12,9 @@ interface AuthContextValue {
   sendOtp: (email: string, captchaToken?: string | null) => Promise<{ error: AuthError | null }>
   verifyOtp: (email: string, token: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
+  // Re-fetches the profile row (e.g. after ProfilePage saves changes) so the
+  // sidebar and role-gated UI reflect the latest data.
+  refreshProfile: () => Promise<void>
   // Passkeys are a Supabase Auth Beta feature ("may change without notice"),
   // so every call here is wrapped defensively — email OTP always remains the
   // primary, permanent login path regardless of whether these work.
@@ -43,18 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.subscription.unsubscribe()
   }, [])
 
-  useEffect(() => {
+  const refreshProfile = useCallback(async () => {
     if (!supabase || !user) {
       setProfile(null)
       return
     }
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => setProfile((data as Profile) ?? null))
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    setProfile((data as Profile) ?? null)
   }, [user])
+
+  useEffect(() => {
+    refreshProfile()
+  }, [refreshProfile])
 
   async function sendOtp(email: string, captchaToken?: string | null) {
     if (!supabase) return { error: new Error('Supabase no configurado') as AuthError }
@@ -104,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, status, sendOtp, verifyOtp, signOut, passkeysSupported, registerPasskey, signInWithPasskey }}
+      value={{ user, profile, status, sendOtp, verifyOtp, signOut, refreshProfile, passkeysSupported, registerPasskey, signInWithPasskey }}
     >
       {children}
     </AuthContext.Provider>

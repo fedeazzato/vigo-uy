@@ -1,0 +1,98 @@
+{
+  "intro": "Consumibles y repuestos que la Vigo puede necesitar, con lo que se sabe de cada uno. Los precios y lugares de compra reales vienen de las compras registradas por la comunidad, más abajo.",
+  "categories": [
+    {
+      "id": "cubiertas",
+      "icon": "🛞",
+      "title": "Cubiertas",
+      "spec": "205/55 R16 según el manual (ambas versiones). Reportado por el grupo: E2 con rin 17″ (215/60 R17) y E2+ con rin 18″ (215/55 R18) — verificar la medida física antes de comprar.",
+      "tips": [
+        { "bold": "Presión:", "text": "2,25 bar con 2 ocupantes, 2,6 bar a carga completa. En ruta la comunidad recomienda 2,76 bar (40 PSI)." },
+        { "bold": "Rotación:", "text": "Al ser tracción delantera y con el par instantáneo del motor eléctrico, las delanteras se gastan más rápido — conviene rotar en cada service." }
+      ]
+    },
+    {
+      "id": "filtro-cabina",
+      "icon": "🌬️",
+      "title": "Filtro de cabina",
+      "spec": "Filtro de aire de cabina (polen). Al ser 100% eléctrico, la Vigo no lleva filtro de aire de motor ni filtro de aceite: este es el único filtro de reposición periódica.",
+      "tips": [
+        { "text": "Se cambia en los services programados, pero es de los pocos repuestos que se pueden cambiar en casa sin afectar la garantía del resto del vehículo." }
+      ]
+    },
+    {
+      "id": "escobillas",
+      "icon": "🌧️",
+      "title": "Escobillas limpiaparabrisas",
+      "tips": [
+        { "text": "Consumible estándar: verificá el largo de las tuyas antes de comprar y registrá la medida acá para ayudar al resto." }
+      ]
+    },
+    {
+      "id": "bateria-12v",
+      "icon": "🔋",
+      "title": "Batería de 12V",
+      "spec": "Batería auxiliar convencional que alimenta la electrónica. El testigo amarillo \"Batería de 12V\" del tablero avisa si está baja o si falla el conversor DC-DC.",
+      "tips": [
+        { "text": "Es una batería común de plomo-ácido, no la batería de tracción — se consigue y cambia como en cualquier auto." }
+      ]
+    },
+    {
+      "id": "pastillas-freno",
+      "icon": "🛑",
+      "title": "Pastillas y discos de freno",
+      "tips": [
+        { "bold": "Duran más que en un auto a combustión:", "text": "el frenado regenerativo hace la mayor parte del trabajo. Igual conviene revisarlas en cada service porque el poco uso puede oxidar los discos." }
+      ]
+    },
+    {
+      "id": "parabrisas",
+      "icon": "🪟",
+      "title": "Parabrisas",
+      "tips": [
+        { "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía propia (del concesionario, no de fábrica)." },
+        { "text": "Si tenés seguro, revisá si tu póliza cubre rotura de cristales antes de pagar de tu bolsillo." }
+      ]
+    },
+    {
+      "id": "vidrios-laterales",
+      "icon": "🚪",
+      "title": "Vidrios laterales",
+      "tips": [
+        { "text": "Repuesto de importación: registrá dónde lo conseguiste y el plazo de entrega, es de los datos más útiles para la comunidad." }
+      ]
+    },
+    {
+      "id": "espejos",
+      "icon": "🪞",
+      "title": "Espejos retrovisores",
+      "tips": [
+        { "text": "Anotá si conseguiste el espejo completo o solo el cristal/carcasa — cambia mucho el precio." }
+      ]
+    },
+    {
+      "id": "carroceria",
+      "icon": "🚗",
+      "title": "Carrocería (guardabarros, paragolpes)",
+      "tips": [
+        { "text": "Piezas de chapa y plástico: suelen pedirse al importador. Compartí plazos y precios para que otros sepan qué esperar." }
+      ]
+    },
+    {
+      "id": "luces",
+      "icon": "💡",
+      "title": "Luces y ópticas",
+      "tips": [
+        { "text": "Las ópticas son LED integradas: ante una falla conviene consultar primero si cubre la garantía (7 años / 300.000 km para el primer dueño)." }
+      ]
+    },
+    {
+      "id": "otros",
+      "icon": "📦",
+      "title": "Otros repuestos",
+      "tips": [
+        { "text": "¿Compraste algo que no está en la lista? Registralo igual en esta categoría." }
+      ]
+    }
+  ]
+}

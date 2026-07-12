@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { to: '/rutas',          label: 'Rutas',          icon: '🗺️' },
   { to: '/costos',         label: 'Costos',         icon: '💰' },
   { to: '/mantenimiento',  label: 'Mantenimiento',  icon: '🛠️' },
+  { to: '/repuestos',      label: 'Repuestos',      icon: '🔩' },
   { to: '/accesorios',     label: 'Accesorios',     icon: '🔧' },
   { to: '/tecnologia',     label: 'Tecnología',     icon: '📱' },
   { to: '/faq',            label: 'FAQ',            icon: '💬' },

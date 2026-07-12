@@ -4,15 +4,18 @@ import { PageHeader, Card, Alert } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toCsv, downloadCsv } from '../lib/csvExport'
-import type { ServiceEntry, TripLog } from '../types'
+import { partCategoryTitle } from '../lib/partsCatalog'
+import type { PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 
 export default function DashboardPage() {
   const { user, passkeysSupported, registerPasskey } = useAuth()
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
+  const [purchases, setPurchases] = useState<PartPurchase[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [loadingTrips, setLoadingTrips] = useState(true)
+  const [loadingPurchases, setLoadingPurchases] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null)
   const [registeringPasskey, setRegisteringPasskey] = useState(false)
@@ -40,6 +43,17 @@ export default function DashboardPage() {
         else setTrips((data ?? []) as TripLog[])
         setLoadingTrips(false)
       })
+
+    supabase
+      .from('part_purchases')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('purchase_date', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) setError(error.message)
+        else setPurchases((data ?? []) as PartPurchase[])
+        setLoadingPurchases(false)
+      })
   }, [user])
 
   async function handleDeleteEntry(entryId: string) {
@@ -64,6 +78,18 @@ export default function DashboardPage() {
       return
     }
     setTrips((prev) => prev.filter((t) => t.id !== tripId))
+  }
+
+  async function handleDeletePurchase(purchaseId: string) {
+    if (!supabase) return
+    if (!confirm('¿Eliminar esta compra?')) return
+
+    const { error } = await supabase.from('part_purchases').delete().eq('id', purchaseId)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setPurchases((prev) => prev.filter((p) => p.id !== purchaseId))
   }
 
   async function handleRegisterPasskey() {
@@ -98,9 +124,18 @@ export default function DashboardPage() {
     downloadCsv('viajes.csv', toCsv(headers, rows))
   }
 
+  function exportPurchasesCsv() {
+    const headers = ['Fecha', 'Categoría', 'Artículo', 'Comercio', 'Precio (UYU)', 'Kilometraje', 'Ciudad', 'Calificación', 'Notas', 'Público']
+    const rows = purchases.map((p) => [
+      p.purchase_date, partCategoryTitle(p.category), p.item, p.store, p.price_uyu,
+      p.odometer_km, p.city, p.rating, p.notes, p.is_public ? 'Sí' : 'No',
+    ])
+    downloadCsv('repuestos.csv', toCsv(headers, rows))
+  }
+
   return (
     <div>
-      <PageHeader title="📋 Mi actividad" subtitle="Tus costos y viajes registrados." />
+      <PageHeader title="📋 Mi actividad" subtitle="Tus costos, repuestos y viajes registrados." />
 
       {error && <Alert type="danger">{error}</Alert>}
 
@@ -147,6 +182,45 @@ export default function DashboardPage() {
                 <div className={styles.itemActions}>
                   <Link to={`/costos/${entry.id}/editar`} className={styles.actionLink}>Editar</Link>
                   <button className={styles.actionLink} onClick={() => handleDeleteEntry(entry.id)}>Eliminar</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
+          <div className={styles.sectionActions}>
+            {purchases.length > 0 && (
+              <button className={styles.addLink} onClick={exportPurchasesCsv}>Exportar CSV</button>
+            )}
+            <Link to="/repuestos/nuevo" className={styles.addLink}>+ Nueva compra</Link>
+          </div>
+        </div>
+
+        {loadingPurchases ? (
+          <p className={styles.empty}>Cargando…</p>
+        ) : purchases.length === 0 ? (
+          <p className={styles.empty}>Todavía no registraste ninguna compra de repuestos.</p>
+        ) : (
+          <ul className={styles.list}>
+            {purchases.map((purchase) => (
+              <li key={purchase.id} className={styles.item}>
+                <div>
+                  <div className={styles.itemTitle}>{purchase.item}</div>
+                  <div className={styles.itemMeta}>
+                    {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                    {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                  </div>
+                </div>
+                <div className={styles.itemCost}>
+                  ${purchase.price_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className={styles.itemActions}>
+                  <Link to={`/repuestos/${purchase.id}/editar`} className={styles.actionLink}>Editar</Link>
+                  <button className={styles.actionLink} onClick={() => handleDeletePurchase(purchase.id)}>Eliminar</button>
                 </div>
               </li>
             ))}

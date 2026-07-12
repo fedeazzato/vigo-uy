@@ -1,95 +1,94 @@
-import { useEffect, useState } from 'react'
-import { PageHeader, Card, Alert, StatGrid } from '../components/UI'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { PageHeader, Card, Alert, StatGrid, SectionDivider } from '../components/UI'
+import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
-import type { ServiceEntry, TripLog, StatItem } from '../types'
+import { useAuth } from '../context/AuthContext'
+import { fetchCommunityStats, fetchLeaderboard, useCommunityContent } from '../lib/communityData'
+import { partCategoryTitle } from '../lib/partsCatalog'
+import type { StatItem, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
+import formStyles from '../styles/formControls.module.css'
 
-interface CityCostStat {
-  city: string
-  entry_count: number
-  avg_cost_uyu: number
-}
-
-interface ModelTripStat {
-  model: string
-  trip_count: number
-  avg_distance_km: number | null
-  avg_speed_kmh: number | null
-}
+type TypeFilter = 'todos' | 'viajes' | 'services' | 'repuestos'
+type ModelFilter = 'todos' | 'E2' | 'E2+'
+type SortOrder = 'recientes' | 'puntuacion'
 
 export default function CommunityFeedPage() {
+  const { status } = useAuth()
+  // 100 rows is plenty at current community size; paginate when it grows.
+  const { trips, entries, purchases, names, loading, error } = useCommunityContent({
+    purchases: true,
+    limit: 100,
+  })
   const [stats, setStats] = useState<StatItem[]>([])
-  const [entries, setEntries] = useState<ServiceEntry[]>([])
-  const [trips, setTrips] = useState<TripLog[]>([])
-  const [names, setNames] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [leaderboard, setLeaderboard] = useState<VehicleLeaderboardEntry[]>([])
+
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('todos')
+  const [modelFilter, setModelFilter] = useState<ModelFilter>('todos')
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<SortOrder>('recientes')
 
   useEffect(() => {
     if (!supabase) return
 
-    async function load() {
-      const [cityStats, modelStats, entriesRes, tripsRes] = await Promise.all([
-        supabase!.from('service_cost_stats_by_city').select('*'),
-        supabase!.from('trip_stats_by_model').select('*'),
-        supabase!
-          .from('service_entries')
-          .select('*')
-          .eq('is_public', true)
-          .order('created_at', { ascending: false })
-          .limit(30),
-        supabase!
-          .from('trip_logs')
-          .select('*')
-          .eq('is_public', true)
-          .order('created_at', { ascending: false })
-          .limit(30),
-      ])
-
-      if (cityStats.error || modelStats.error || entriesRes.error || tripsRes.error) {
-        setError(
-          cityStats.error?.message ??
-            modelStats.error?.message ??
-            entriesRes.error?.message ??
-            tripsRes.error?.message ??
-            'Error desconocido'
-        )
-        setLoading(false)
-        return
-      }
-
-      const statItems: StatItem[] = [
-        ...(cityStats.data as CityCostStat[]).map((s) => ({
+    fetchCommunityStats().then(({ cityStats, modelStats }) => {
+      setStats([
+        ...cityStats.map((s) => ({
           value: `$${Math.round(s.avg_cost_uyu).toLocaleString('es-UY')}`,
           label: `Costo medio de service en ${s.city} (${s.entry_count})`,
         })),
-        ...(modelStats.data as ModelTripStat[])
+        ...modelStats
           .filter((s) => s.avg_speed_kmh != null)
           .map((s) => ({
             value: `${Math.round(s.avg_speed_kmh!)} km/h`,
             label: `Velocidad media ${s.model} (${s.trip_count} viajes)`,
           })),
-      ]
-      setStats(statItems)
+      ])
+    })
 
-      const entriesData = (entriesRes.data ?? []) as ServiceEntry[]
-      const tripsData = (tripsRes.data ?? []) as TripLog[]
-      setEntries(entriesData)
-      setTrips(tripsData)
-
-      const userIds = [...new Set([...entriesData.map((e) => e.user_id), ...tripsData.map((t) => t.user_id)])]
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase!.from('profiles').select('id, display_name').in('id', userIds)
-        const map: Record<string, string> = {}
-        for (const p of profilesData ?? []) map[p.id] = p.display_name
-        setNames(map)
-      }
-
-      setLoading(false)
-    }
-
-    load()
+    fetchLeaderboard().then(({ rows }) => setLeaderboard(rows))
   }, [])
+
+  const filteredTrips = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const result = trips.filter((trip) => {
+      if (modelFilter !== 'todos' && trip.model !== modelFilter) return false
+      if (q && ![trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q))) return false
+      return true
+    })
+    if (sort === 'puntuacion') {
+      return [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    }
+    return result
+  }, [trips, modelFilter, query, sort])
+
+  const filteredEntries = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return entries
+    return entries.filter((entry) =>
+      [entry.service_type, entry.dealer, entry.city ?? ''].some((f) => f.toLowerCase().includes(q))
+    )
+  }, [entries, query])
+
+  const filteredPurchases = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const result = q
+      ? purchases.filter((p) =>
+          [p.item, p.store, partCategoryTitle(p.category), p.city ?? ''].some((f) =>
+            f.toLowerCase().includes(q)
+          )
+        )
+      : purchases
+    if (sort === 'puntuacion') {
+      return [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    }
+    return result
+  }, [purchases, query, sort])
+
+  const showTrips = typeFilter === 'todos' || typeFilter === 'viajes'
+  const showEntries = typeFilter === 'todos' || typeFilter === 'services'
+  const showPurchases = typeFilter === 'todos' || typeFilter === 'repuestos'
 
   if (loading) return null
 
@@ -100,7 +99,30 @@ export default function CommunityFeedPage() {
         subtitle="Costos y viajes compartidos por otros dueños de Vigo."
       />
 
+      {!supabase && <Alert type="info">La sección de comunidad no está disponible en esta instalación.</Alert>}
       {error && <Alert type="danger">{error}</Alert>}
+
+      {supabase && (
+        <Card className={styles.ctaCard}>
+          {status === 'signedIn' ? (
+            <>
+              <span>¿Hiciste un viaje o un service? Compartilo con la comunidad.</span>
+              <div className={styles.ctaActions}>
+                <Link to="/viajes/nuevo" className={styles.ctaBtn}>+ Viaje</Link>
+                <Link to="/costos/nuevo" className={styles.ctaBtn}>+ Service</Link>
+                <Link to="/repuestos/nuevo" className={styles.ctaBtn}>+ Repuesto</Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <span>Iniciá sesión para compartir tus viajes y costos con la comunidad.</span>
+              <div className={styles.ctaActions}>
+                <Link to="/login" className={styles.ctaBtn}>Iniciar sesión</Link>
+              </div>
+            </>
+          )}
+        </Card>
+      )}
 
       {stats.length > 0 && (
         <Card>
@@ -109,55 +131,154 @@ export default function CommunityFeedPage() {
         </Card>
       )}
 
-      <Card>
-        <h2 className={styles.sectionTitle}>Costos de service</h2>
-        {entries.length === 0 ? (
-          <p className={styles.empty}>Todavía no hay costos compartidos por la comunidad.</p>
-        ) : (
-          <ul className={styles.list}>
-            {entries.map((entry) => (
-              <li key={entry.id} className={styles.item}>
-                <div>
-                  <div className={styles.itemTitle}>{entry.service_type}</div>
-                  <div className={styles.itemMeta}>
-                    {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
-                    {entry.city && ` · ${entry.city}`}
-                  </div>
-                </div>
-                <div>
-                  <div className={styles.itemCost}>
-                    ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <div className={styles.author}>por {names[entry.user_id] ?? 'un usuario'}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      {leaderboard.length > 0 && (
+        <>
+          <SectionDivider label="Ranking de kilómetros" />
+          <Card>
+            <h2 className={styles.sectionTitle}>🏁 Vehículos con más km compartidos</h2>
+            <VehicleLeaderboard rows={leaderboard} />
+          </Card>
+        </>
+      )}
 
-      <Card>
-        <h2 className={styles.sectionTitle}>Viajes</h2>
-        {trips.length === 0 ? (
-          <p className={styles.empty}>Todavía no hay viajes compartidos por la comunidad.</p>
-        ) : (
-          <ul className={styles.list}>
-            {trips.map((trip) => (
-              <li key={trip.id} className={styles.item}>
-                <div>
-                  <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
-                  <div className={styles.itemMeta}>
-                    {trip.trip_date} · {trip.origin} → {trip.destination}
-                    {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                    {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
+      <SectionDivider label="Aportes de la comunidad" />
+
+      <div className={styles.toolbar}>
+        <input
+          type="search"
+          className={`${formStyles.chInput} ${styles.searchInput}`}
+          placeholder="Buscar por título, lugar, taller…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Buscar"
+        />
+        <select
+          className={formStyles.chInput}
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
+          aria-label="Tipo"
+        >
+          <option value="todos">Todo</option>
+          <option value="viajes">Viajes</option>
+          <option value="services">Services</option>
+          <option value="repuestos">Repuestos</option>
+        </select>
+        <select
+          className={formStyles.chInput}
+          value={modelFilter}
+          onChange={(e) => setModelFilter(e.target.value as ModelFilter)}
+          aria-label="Modelo"
+        >
+          <option value="todos">Ambos modelos</option>
+          <option value="E2">E2</option>
+          <option value="E2+">E2+</option>
+        </select>
+        <select
+          className={formStyles.chInput}
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortOrder)}
+          aria-label="Orden"
+        >
+          <option value="recientes">Más recientes</option>
+          <option value="puntuacion">Mejor puntuados</option>
+        </select>
+      </div>
+
+      {showTrips && (
+        <Card>
+          <h2 className={styles.sectionTitle}>Viajes</h2>
+          {filteredTrips.length === 0 ? (
+            <p className={styles.empty}>
+              {trips.length === 0
+                ? 'Todavía no hay viajes compartidos por la comunidad.'
+                : 'No hay viajes que coincidan con los filtros.'}
+            </p>
+          ) : (
+            <ul className={styles.list}>
+              {filteredTrips.map((trip) => (
+                <li key={trip.id} className={styles.item}>
+                  <div>
+                    <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
+                    <div className={styles.itemMeta}>
+                      {trip.trip_date} · {trip.origin} → {trip.destination}
+                      {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
+                      {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
+                    </div>
                   </div>
-                </div>
-                <div className={styles.author}>por {names[trip.user_id] ?? 'un usuario'}</div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+                  <div className={styles.author}>por {names[trip.user_id] ?? 'un usuario'}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      )}
+
+      {showPurchases && (
+        <Card>
+          <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
+          {filteredPurchases.length === 0 ? (
+            <p className={styles.empty}>
+              {purchases.length === 0
+                ? 'Todavía no hay compras compartidas por la comunidad.'
+                : 'No hay compras que coincidan con los filtros.'}
+            </p>
+          ) : (
+            <ul className={styles.list}>
+              {filteredPurchases.map((purchase) => (
+                <li key={purchase.id} className={styles.item}>
+                  <div>
+                    <div className={styles.itemTitle}>{purchase.item}</div>
+                    <div className={styles.itemMeta}>
+                      {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                      {purchase.city && ` · ${purchase.city}`}
+                      {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                    </div>
+                  </div>
+                  <div>
+                    <div className={styles.itemCost}>
+                      ${purchase.price_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className={styles.author}>por {names[purchase.user_id] ?? 'un usuario'}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      )}
+
+      {showEntries && (
+        <Card>
+          <h2 className={styles.sectionTitle}>Costos de service</h2>
+          {filteredEntries.length === 0 ? (
+            <p className={styles.empty}>
+              {entries.length === 0
+                ? 'Todavía no hay costos compartidos por la comunidad.'
+                : 'No hay services que coincidan con los filtros.'}
+            </p>
+          ) : (
+            <ul className={styles.list}>
+              {filteredEntries.map((entry) => (
+                <li key={entry.id} className={styles.item}>
+                  <div>
+                    <div className={styles.itemTitle}>{entry.service_type}</div>
+                    <div className={styles.itemMeta}>
+                      {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
+                      {entry.city && ` · ${entry.city}`}
+                    </div>
+                  </div>
+                  <div>
+                    <div className={styles.itemCost}>
+                      ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className={styles.author}>por {names[entry.user_id] ?? 'un usuario'}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      )}
     </div>
   )
 }
