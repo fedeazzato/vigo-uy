@@ -1,0 +1,71 @@
+/* Community block styles, moved from MyVigoPage.module.css when the
+   totals + latest-trips block moved to Inicio (B2). */
+
+.communityList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.communityItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.communityItem:last-child { border-bottom: none; }
+
+.communityTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.communityMeta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.emptyNote {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 12px 0 0;
+}
+
+.communityCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.communityCtaBtn {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--green-400);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.communityCtaBtn:hover {
+  background: var(--green-600);
+  text-decoration: none;
+}
+
+.communityLink {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.guideMore {
+  margin-top: 10px;
+  text-align: right;
+}

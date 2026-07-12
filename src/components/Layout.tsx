@@ -1,12 +1,16 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import ErrorBoundary from './ErrorBoundary'
+import OfflineBanner from './OfflineBanner'
+import { GUIDE_LINKS } from './GuideLinks'
 import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
 import { useAuth } from '../context/AuthContext'
 
 const THEME_ICON: Record<EffectiveTheme, string> = {
-  light: '☀',
-  dark: '☾',
+  light: '☀️',
+  dark: '🌙',
 }
 
 const THEME_LABEL: Record<EffectiveTheme, string> = {
@@ -18,33 +22,47 @@ interface NavItem {
   to: string
   label: string
   icon: string
+  end?: boolean
 }
 
-const NAV: NavItem[] = [
-  { to: '/mi-vigo',        label: 'Mi Vigo',        icon: '🚗' },
-  { to: '/ficha-tecnica',  label: 'Ficha técnica',  icon: '📋' },
-  { to: '/carga',          label: 'Carga',          icon: '⚡' },
-  { to: '/rutas',          label: 'Rutas',          icon: '🗺️' },
-  { to: '/costos',         label: 'Costos',         icon: '💰' },
-  { to: '/mantenimiento',  label: 'Mantenimiento',  icon: '🛠️' },
-  { to: '/repuestos',      label: 'Repuestos',      icon: '🔩' },
-  { to: '/accesorios',     label: 'Accesorios',     icon: '🔧' },
-  { to: '/tecnologia',     label: 'Tecnología',     icon: '📱' },
-  { to: '/faq',            label: 'FAQ',            icon: '💬' },
-  { to: '/mi-actividad',   label: 'Mi actividad',   icon: '📋' },
-  { to: '/comunidad',      label: 'Comunidad',      icon: '🌐' },
+// App-like destinations. The static reference pages live under the Guía
+// group (sidebar) / the /guia page (mobile), not here.
+const PRIMARY_NAV: NavItem[] = [
+  { to: '/',             label: 'Inicio',       icon: '🏠', end: true },
+  { to: '/comunidad',    label: 'Comunidad',    icon: '🌐' },
+  { to: '/mi-actividad', label: 'Mi actividad', icon: '🗒️' },
+  { to: '/mi-vigo',      label: 'Mi Vigo',      icon: '🚗' },
 ]
+
+const MODERATION_ITEM: NavItem = { to: '/moderacion', label: 'Moderación', icon: '🛡️' }
 
 export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
   const { user, profile, status, signOut } = useAuth()
-
-  const nav = profile?.is_moderator
-    ? [...NAV, { to: '/moderacion', label: 'Moderación', icon: '🛡️' }]
-    : NAV
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   function toggleTheme() {
     setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')
+  }
+
+  function closeSheet() {
+    setSheetOpen(false)
+  }
+
+  function renderNavLink({ to, label, icon, end }: NavItem, extraClass = '') {
+    return (
+      <NavLink
+        key={to}
+        to={to}
+        end={end}
+        className={({ isActive }) =>
+          `${styles.navLink} ${extraClass} ${isActive ? styles.active : ''}`
+        }
+      >
+        <span className={styles.navIcon}>{icon}</span>
+        <span>{label}</span>
+      </NavLink>
+    )
   }
 
   return (
@@ -74,18 +92,12 @@ export default function Layout() {
         )}
 
         <nav className={styles.nav}>
-          {nav.map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `${styles.navLink} ${isActive ? styles.active : ''}`
-              }
-            >
-              <span className={styles.navIcon}>{icon}</span>
-              <span>{label}</span>
-            </NavLink>
-          ))}
+          {PRIMARY_NAV.map((item) => renderNavLink(item))}
+
+          <div className={styles.navGroupLabel}>Guía</div>
+          {GUIDE_LINKS.map((item) => renderNavLink(item, styles.navLinkGuide))}
+
+          {profile?.is_moderator && renderNavLink(MODERATION_ITEM)}
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -155,29 +167,105 @@ export default function Layout() {
             >
               {THEME_ICON[effectiveTheme]}
             </button>
-          </div>
-        </div>
-        <nav className={styles.mobileNav}>
-          {nav.map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `${styles.mobileNavLink} ${isActive ? styles.active : ''}`
+            {/* Always the car icon (a stable anchor for users); the selected
+                vehicle color only tints the button background. */}
+            <Link
+              to="/mi-vigo"
+              className={styles.miVigoLinkMobile}
+              title="Mi Vigo"
+              style={
+                color
+                  ? {
+                      background: COLOR_HEX[color],
+                      borderColor: COLOR_BORDER[color] ?? 'transparent',
+                    }
+                  : undefined
               }
             >
-              <span className={styles.navIcon}>{icon}</span>
-              <span className={styles.mobileNavLabel}>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
+              🚗
+            </Link>
+          </div>
+        </div>
       </div>
 
       <main className={styles.main}>
         <div className={styles.content}>
-          <Outlet />
+          {/* Inside the content area so the sidebar/header survive a page crash. */}
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
+
+      {/* Mobile bottom tab bar (hidden on desktop via CSS). */}
+      {sheetOpen && <div className={styles.sheetBackdrop} onClick={closeSheet} />}
+      {sheetOpen && (
+        <div className={styles.sheet}>
+          {status === 'signedIn' ? (
+            <>
+              <Link to="/viajes/nuevo" className={styles.sheetLink} onClick={closeSheet}>
+                🗺️ Viaje
+              </Link>
+              <Link to="/costos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
+                🛠️ Service
+              </Link>
+              <Link to="/repuestos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
+                🔩 Repuesto
+              </Link>
+            </>
+          ) : (
+            <Link to="/login" className={styles.sheetLink} onClick={closeSheet}>
+              🔑 Iniciá sesión para registrar
+            </Link>
+          )}
+        </div>
+      )}
+      <nav className={styles.tabBar}>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
+          onClick={closeSheet}
+        >
+          <span className={styles.tabIcon}>🏠</span>
+          <span className={styles.tabLabel}>Inicio</span>
+        </NavLink>
+        <NavLink
+          to="/comunidad"
+          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
+          onClick={closeSheet}
+        >
+          <span className={styles.tabIcon}>🌐</span>
+          <span className={styles.tabLabel}>Comunidad</span>
+        </NavLink>
+        <button
+          type="button"
+          className={styles.tabLink}
+          onClick={() => setSheetOpen((o) => !o)}
+          aria-expanded={sheetOpen}
+        >
+          <span className={`${styles.tabIcon} ${styles.tabRegisterIcon}`}>➕</span>
+          <span className={styles.tabLabel}>Registrar</span>
+        </button>
+        <NavLink
+          to="/mi-actividad"
+          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
+          onClick={closeSheet}
+        >
+          <span className={styles.tabIcon}>🗒️</span>
+          <span className={styles.tabLabel}>Mi actividad</span>
+        </NavLink>
+        <NavLink
+          to="/guia"
+          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
+          onClick={closeSheet}
+        >
+          <span className={styles.tabIcon}>📖</span>
+          <span className={styles.tabLabel}>Guía</span>
+        </NavLink>
+      </nav>
+
+      <OfflineBanner />
     </div>
   )
 }

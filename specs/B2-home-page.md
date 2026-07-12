@@ -1,6 +1,6 @@
 # B2 — Inicio home page (replace the redirect to Mi Vigo)
 
-**Status:** TODO · **Phase:** B · **Depends on:** nothing (B1 depends on this)
+**Status:** Done (2026-07-12) · **Phase:** B · **Depends on:** nothing (B1 depends on this)
 
 ## Context
 

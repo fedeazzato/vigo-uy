@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { PageHeader, Card, Alert, Badge } from '../components/UI'
+import { PageHeader, Card, Alert, Badge, Skeleton } from '../components/UI'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { AdminUserRow, PartPurchase, ServiceEntry, TripLog } from '../types'
@@ -37,11 +38,7 @@ export default function ModerationPage() {
 
     if (entriesRes.error || tripsRes.error || purchasesRes.error || usersRes.error) {
       setError(
-        entriesRes.error?.message ??
-          tripsRes.error?.message ??
-          purchasesRes.error?.message ??
-          usersRes.error?.message ??
-          'Error desconocido'
+        toFriendlyError(entriesRes.error ?? tripsRes.error ?? purchasesRes.error ?? usersRes.error)
       )
       setLoading(false)
       return
@@ -76,7 +73,7 @@ export default function ModerationPage() {
     if (!supabase) return
     const { error } = await supabase.from(table).update({ hidden: !currentHidden }).eq('id', id)
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     if (table === 'service_entries') {
@@ -93,7 +90,7 @@ export default function ModerationPage() {
     if (!confirm('¿Eliminar definitivamente esta entrada?')) return
     const { error } = await supabase.from(table).delete().eq('id', id)
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     if (table === 'service_entries') setEntries((prev) => prev.filter((e) => e.id !== id))
@@ -111,7 +108,7 @@ export default function ModerationPage() {
       make_moderator: makeModerator,
     })
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setUsers((prev) => prev.map((u) => (u.id === target.id ? { ...u, is_moderator: makeModerator } : u)))
@@ -127,15 +124,13 @@ export default function ModerationPage() {
       banned,
     })
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setUsers((prev) =>
       prev.map((u) => (u.id === target.id ? { ...u, banned_at: banned ? new Date().toISOString() : null } : u))
     )
   }
-
-  if (loading) return null
 
   return (
     <div>
@@ -161,7 +156,13 @@ export default function ModerationPage() {
         </button>
       </div>
 
-      {tab === 'contenido' && (
+      {tab === 'contenido' && (loading ? (
+        <div aria-busy="true">
+          <Skeleton lines={4} />
+          <Skeleton lines={4} />
+          <Skeleton lines={4} />
+        </div>
+      ) : (
         <>
           <Card>
             <h2 className={styles.sectionTitle}>Costos de service</h2>
@@ -266,9 +267,11 @@ export default function ModerationPage() {
             )}
           </Card>
         </>
-      )}
+      ))}
 
-      {tab === 'usuarios' && (
+      {tab === 'usuarios' && (loading ? (
+        <Skeleton lines={5} />
+      ) : (
         <Card>
           <h2 className={styles.sectionTitle}>Usuarios</h2>
           {users.length === 0 ? (
@@ -315,7 +318,7 @@ export default function ModerationPage() {
             </ul>
           )}
         </Card>
-      )}
+      ))}
     </div>
   )
 }

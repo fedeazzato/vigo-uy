@@ -100,6 +100,22 @@ export function StatGrid({ stats }: StatGridProps) {
   )
 }
 
+interface SkeletonProps {
+  lines?: number
+}
+
+// Loading placeholder: shimmer bars inside a card, shown instead of a blank
+// area while Supabase-backed content is being fetched.
+export function Skeleton({ lines = 3 }: SkeletonProps) {
+  return (
+    <div className={styles.card} aria-busy="true">
+      {Array.from({ length: lines }, (_, i) => (
+        <div key={i} className={styles.skeletonBar} />
+      ))}
+    </div>
+  )
+}
+
 interface SectionDividerProps {
   label: string
 }

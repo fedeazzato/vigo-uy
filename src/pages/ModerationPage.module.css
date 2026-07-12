@@ -97,4 +97,13 @@
     grid-template-columns: 1fr;
     gap: 6px;
   }
+  /* Comfortable touch targets between adjacent actions (B3). */
+  .itemActions {
+    gap: 16px;
+  }
+  .actionLink {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }

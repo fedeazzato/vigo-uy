@@ -1,9 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, Alert } from '../components/UI'
+import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
 import styles from './NewServiceEntryPage.module.css'
@@ -105,13 +106,25 @@ export default function NewServiceEntryPage() {
     setSubmitting(false)
 
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     navigate('/mi-actividad')
   }
 
-  if (loading) return null
+  // Edit mode: show the header + a skeleton instead of a blank screen while
+  // the entry being edited loads.
+  if (loading) {
+    return (
+      <div>
+        <PageHeader
+          title={isEdit ? '🛠️ Editar costo de service' : '🛠️ Nuevo costo de service'}
+          subtitle="Registrá una visita al taller para llevar tu historial y aportar a la comunidad."
+        />
+        <Skeleton lines={6} />
+      </div>
+    )
+  }
 
   return (
     <div>

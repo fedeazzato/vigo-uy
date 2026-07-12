@@ -2,6 +2,7 @@ import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { Card, CardTitle, Alert } from './UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import { fetchAuthorNames } from '../lib/communityData'
 import type { Vehicle } from '../types'
@@ -55,7 +56,7 @@ export default function VehicleCard() {
     const { error: actionError } = await action()
     setBusy(false)
     if (actionError) {
-      setError(actionError.message)
+      setError(toFriendlyError(actionError))
       return
     }
     setMessage(successMsg)

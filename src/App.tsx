@@ -3,6 +3,8 @@ import Layout from './components/Layout'
 import ProfilePrefsSync from './components/ProfilePrefsSync'
 import RequireAuth from './components/RequireAuth'
 import RequireModerator from './components/RequireModerator'
+import HomePage from './pages/HomePage'
+import GuidePage from './pages/GuidePage'
 import ChargingPage from './pages/ChargingPage'
 import RoutesPage from './pages/RoutesPage'
 import CostsPage from './pages/CostsPage'
@@ -27,7 +29,8 @@ export default function App() {
     <ProfilePrefsSync />
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/mi-vigo" replace />} />
+        <Route index element={<HomePage />} />
+        <Route path="guia" element={<GuidePage />} />
         <Route path="mi-vigo" element={<MyVigoPage />} />
         <Route path="ficha-tecnica" element={<FichaTecnicaPage />} />
         <Route path="carga" element={<ChargingPage />} />

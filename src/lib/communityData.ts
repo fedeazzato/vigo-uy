@@ -5,6 +5,7 @@
 // pages render curated JSON only when the backend isn't configured.
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { toFriendlyError } from './errors'
 import type {
   CityCostStat,
   CommunityTotals,
@@ -24,7 +25,7 @@ export async function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(limit)
-  return { trips: (data ?? []) as TripLog[], error: error?.message ?? null }
+  return { trips: (data ?? []) as TripLog[], error: error ? toFriendlyError(error) : null }
 }
 
 export async function fetchPublicServiceEntries(
@@ -37,7 +38,7 @@ export async function fetchPublicServiceEntries(
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(limit)
-  return { entries: (data ?? []) as ServiceEntry[], error: error?.message ?? null }
+  return { entries: (data ?? []) as ServiceEntry[], error: error ? toFriendlyError(error) : null }
 }
 
 export async function fetchPublicPartPurchases(
@@ -50,7 +51,7 @@ export async function fetchPublicPartPurchases(
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(limit)
-  return { purchases: (data ?? []) as PartPurchase[], error: error?.message ?? null }
+  return { purchases: (data ?? []) as PartPurchase[], error: error ? toFriendlyError(error) : null }
 }
 
 // Resolves author display names through the public_profiles view, which is
@@ -76,20 +77,24 @@ export async function fetchCommunityStats(): Promise<{
   return {
     cityStats: (cityRes.data ?? []) as CityCostStat[],
     modelStats: (modelRes.data ?? []) as ModelTripStat[],
-    error: cityRes.error?.message ?? modelRes.error?.message ?? null,
+    error: cityRes.error
+      ? toFriendlyError(cityRes.error)
+      : modelRes.error
+      ? toFriendlyError(modelRes.error)
+      : null,
   }
 }
 
 export async function fetchLeaderboard(): Promise<{ rows: VehicleLeaderboardEntry[]; error: string | null }> {
   if (!supabase) return { rows: [], error: null }
   const { data, error } = await supabase.from('vehicle_km_leaderboard').select('*')
-  return { rows: (data ?? []) as VehicleLeaderboardEntry[], error: error?.message ?? null }
+  return { rows: (data ?? []) as VehicleLeaderboardEntry[], error: error ? toFriendlyError(error) : null }
 }
 
 export async function fetchCommunityTotals(): Promise<{ totals: CommunityTotals | null; error: string | null }> {
   if (!supabase) return { totals: null, error: null }
   const { data, error } = await supabase.from('community_totals').select('*').single()
-  return { totals: (data as CommunityTotals) ?? null, error: error?.message ?? null }
+  return { totals: (data as CommunityTotals) ?? null, error: error ? toFriendlyError(error) : null }
 }
 
 export interface CommunityContent {

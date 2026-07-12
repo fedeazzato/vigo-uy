@@ -32,9 +32,12 @@ function estimateConsumption(trips: TripLog[], model: Model, batteryKwh: number)
     (t) =>
       (((t.starting_charge_percentage! - t.ending_charge_percentage!) / 100) * batteryKwh / t.distance_km!) * 100
   )
-  const avg = perTrip.reduce((a, b) => a + b, 0) / perTrip.length
+  // Median, not mean: a single absurd trip shouldn't drag the estimate.
+  const sorted = [...perTrip].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  const median = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
   return {
-    value: `${avg.toLocaleString('es-UY', { maximumFractionDigits: 1 })} kWh/100km`,
+    value: `${median.toLocaleString('es-UY', { maximumFractionDigits: 1 })} kWh/100km`,
     label: `Consumo estimado ${model} (${qualifying.length} viajes)`,
   }
 }

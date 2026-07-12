@@ -160,3 +160,32 @@
   .statGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .statGrid .stat:last-child:nth-child(odd) { grid-column: span 2; }
 }
+
+/* ── Skeleton ── */
+
+.skeletonBar {
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonBar + .skeletonBar {
+  margin-top: 12px;
+}
+
+.skeletonBar:nth-child(even) { width: 85%; }
+.skeletonBar:last-child { width: 60%; }
+
+@keyframes skeletonShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBar {
+    animation: none;
+    background: var(--gray-100);
+  }
+}

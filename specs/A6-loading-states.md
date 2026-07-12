@@ -1,6 +1,6 @@
 # A6 — Loading skeletons (kill blank screens)
 
-**Status:** TODO · **Phase:** A · **Depends on:** nothing
+**Status:** Done (2026-07-12) · **Phase:** A · **Depends on:** nothing
 
 ## Context
 

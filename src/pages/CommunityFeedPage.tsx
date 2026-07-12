@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, Alert, StatGrid, SectionDivider } from '../components/UI'
+import { PageHeader, Card, Alert, StatGrid, SectionDivider, Skeleton } from '../components/UI'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
@@ -89,8 +89,6 @@ export default function CommunityFeedPage() {
   const showTrips = typeFilter === 'todos' || typeFilter === 'viajes'
   const showEntries = typeFilter === 'todos' || typeFilter === 'services'
   const showPurchases = typeFilter === 'todos' || typeFilter === 'repuestos'
-
-  if (loading) return null
 
   return (
     <div>
@@ -184,7 +182,9 @@ export default function CommunityFeedPage() {
         </select>
       </div>
 
-      {showTrips && (
+      {showTrips && (loading ? (
+        <Skeleton lines={4} />
+      ) : (
         <Card>
           <h2 className={styles.sectionTitle}>Viajes</h2>
           {filteredTrips.length === 0 ? (
@@ -211,9 +211,11 @@ export default function CommunityFeedPage() {
             </ul>
           )}
         </Card>
-      )}
+      ))}
 
-      {showPurchases && (
+      {showPurchases && (loading ? (
+        <Skeleton lines={4} />
+      ) : (
         <Card>
           <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
           {filteredPurchases.length === 0 ? (
@@ -245,9 +247,11 @@ export default function CommunityFeedPage() {
             </ul>
           )}
         </Card>
-      )}
+      ))}
 
-      {showEntries && (
+      {showEntries && (loading ? (
+        <Skeleton lines={4} />
+      ) : (
         <Card>
           <h2 className={styles.sectionTitle}>Costos de service</h2>
           {filteredEntries.length === 0 ? (
@@ -278,7 +282,7 @@ export default function CommunityFeedPage() {
             </ul>
           )}
         </Card>
-      )}
+      ))}
     </div>
   )
 }

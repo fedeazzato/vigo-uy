@@ -110,6 +110,24 @@
   flex-shrink: 0;
 }
 
+.navGroupLabel {
+  margin: 12px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.navLinkGuide {
+  padding: 6px 12px 6px 18px;
+  font-size: 13px;
+}
+
+.navLinkGuide .navIcon {
+  font-size: 14px;
+}
+
 .sidebarFooter {
   padding: 0.75rem 1rem 1rem;
   border-top: 1px solid var(--border);
@@ -209,6 +227,18 @@
   display: none;
 }
 
+.tabBar {
+  display: none;
+}
+
+.sheetBackdrop {
+  display: none;
+}
+
+.sheet {
+  display: none;
+}
+
 @media (max-width: 700px) {
   .shell {
     flex-direction: column;
@@ -251,60 +281,123 @@
     flex-shrink: 0;
   }
 
+  /* ≥ 44px touch targets (B3). */
   .themeToggleMobile,
-  .suggestLinkMobile {
+  .suggestLinkMobile,
+  .miVigoLinkMobile {
     font-size: 18px;
-    padding: 6px 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     background: var(--surface-secondary);
     border: 1px solid var(--border);
     line-height: 1;
     flex-shrink: 0;
-  }
-
-  .suggestLinkMobile {
-    display: inline-flex;
-    align-items: center;
     text-decoration: none;
   }
 
-  .mobileNav {
-    display: flex;
-    overflow-x: auto;
-    padding: 0 0.5rem 0.5rem;
-    gap: 2px;
-    scrollbar-width: none;
+  /* Room for the fixed tab bar below the content. */
+  .content {
+    padding: 1.25rem 1rem calc(3rem + 64px + env(safe-area-inset-bottom));
   }
-  .mobileNav::-webkit-scrollbar { display: none; }
 
-  .mobileNavLink {
+  /* ── Bottom tab bar ── */
+  .tabBar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tabLink {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
-    padding: 6px 8px;
-    border-radius: var(--radius-md);
-    font-size: 11px;
+    min-height: 56px;
+    padding: 6px 2px;
     color: var(--text-secondary);
+    background: none;
+    border: none;
     text-decoration: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: background 0.12s;
+    cursor: pointer;
+    font-family: inherit;
   }
 
-  .mobileNavLink:hover { background: var(--surface-secondary); }
-  .mobileNavLink.active {
-    background: var(--green-50);
+  .tabIcon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .tabRegisterIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--green-400);
+    color: #fff;
+    font-size: 16px;
+  }
+
+  .tabLabel {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .tabLink.tabActive {
     color: var(--green-600);
+    font-weight: 600;
+  }
+
+  /* ── Registrar sheet ── */
+  .sheetBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    z-index: 195;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+  }
+
+  .sheetLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 15px;
     font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
   }
-
-  .mobileNavLabel {
-    font-size: 10px;
-  }
-
-  .content {
-    padding: 1.25rem 1rem 3rem;
-  }
+  .sheetLink:last-child { border-bottom: none; }
+  .sheetLink:hover { background: var(--surface-secondary); text-decoration: none; }
 }

@@ -1,10 +1,11 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, Alert } from '../components/UI'
+import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import type { TripChargingStop, Model } from '../types'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -215,13 +216,25 @@ export default function NewTripLogPage() {
     setSubmitting(false)
 
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     navigate('/mi-actividad')
   }
 
-  if (loading) return null
+  // Edit mode: show the header + a skeleton instead of a blank screen while
+  // the trip being edited loads.
+  if (loading) {
+    return (
+      <div>
+        <PageHeader
+          title={isEdit ? '🗺️ Editar viaje' : '🗺️ Nuevo viaje'}
+          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+        />
+        <Skeleton lines={8} />
+      </div>
+    )
+  }
 
   return (
     <div>

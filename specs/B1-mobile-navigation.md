@@ -1,6 +1,6 @@
 # B1 — Mobile bottom tab bar + "Guía" section
 
-**Status:** TODO · **Phase:** B · **Depends on:** B2 (needs Inicio to exist)
+**Status:** Done (2026-07-12) · **Phase:** B · **Depends on:** B2 (needs Inicio to exist)
 
 ## Context
 

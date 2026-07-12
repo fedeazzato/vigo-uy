@@ -1,5 +1,9 @@
 function escapeCsvValue(value: string | number | null | undefined): string {
-  const str = value == null ? '' : String(value)
+  let str = value == null ? '' : String(value)
+  // Formula-injection guard: a cell starting with =, +, -, @, tab or CR runs
+  // as a formula in Excel/Sheets, so prefix a quote to force literal text.
+  // Only for values that were strings — a numeric -500 must stay -500.
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(str)) str = `'${str}`
   if (/["\n,]/.test(str)) return `"${str.replace(/"/g, '""')}"`
   return str
 }

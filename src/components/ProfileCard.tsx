@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import { Card, CardTitle, Alert } from './UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import styles from './accountCards.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -43,7 +44,7 @@ export default function ProfileCard() {
       .eq('id', user.id)
     setSaving(false)
     if (saveError) {
-      setError(saveError.message)
+      setError(toFriendlyError(saveError))
       return
     }
     await refreshProfile()

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { toFriendlyError } from '../lib/errors'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
@@ -28,7 +29,7 @@ export default function DashboardPage() {
       .eq('user_id', user.id)
       .order('service_date', { ascending: false })
       .then(({ data, error }) => {
-        if (error) setError(error.message)
+        if (error) setError(toFriendlyError(error))
         else setEntries((data ?? []) as ServiceEntry[])
         setLoadingEntries(false)
       })
@@ -39,7 +40,7 @@ export default function DashboardPage() {
       .eq('user_id', user.id)
       .order('trip_date', { ascending: false })
       .then(({ data, error }) => {
-        if (error) setError(error.message)
+        if (error) setError(toFriendlyError(error))
         else setTrips((data ?? []) as TripLog[])
         setLoadingTrips(false)
       })
@@ -50,7 +51,7 @@ export default function DashboardPage() {
       .eq('user_id', user.id)
       .order('purchase_date', { ascending: false })
       .then(({ data, error }) => {
-        if (error) setError(error.message)
+        if (error) setError(toFriendlyError(error))
         else setPurchases((data ?? []) as PartPurchase[])
         setLoadingPurchases(false)
       })
@@ -62,7 +63,7 @@ export default function DashboardPage() {
 
     const { error } = await supabase.from('service_entries').delete().eq('id', entryId)
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setEntries((prev) => prev.filter((e) => e.id !== entryId))
@@ -74,7 +75,7 @@ export default function DashboardPage() {
 
     const { error } = await supabase.from('trip_logs').delete().eq('id', tripId)
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setTrips((prev) => prev.filter((t) => t.id !== tripId))
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
     const { error } = await supabase.from('part_purchases').delete().eq('id', purchaseId)
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setPurchases((prev) => prev.filter((p) => p.id !== purchaseId))
@@ -135,7 +136,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="📋 Mi actividad" subtitle="Tus costos, repuestos y viajes registrados." />
+      <PageHeader title="🗒️ Mi actividad" subtitle="Tus costos, repuestos y viajes registrados." />
 
       {error && <Alert type="danger">{error}</Alert>}
 

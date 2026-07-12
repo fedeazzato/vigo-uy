@@ -1,6 +1,6 @@
 # B3 — Touch targets, icon fixes, offline notice
 
-**Status:** TODO · **Phase:** B · **Depends on:** A5 (error mapper) helps but
+**Status:** Done (2026-07-12) · **Phase:** B · **Depends on:** A5 (error mapper) helps but
 is not required
 
 ## Context

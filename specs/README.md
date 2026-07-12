@@ -21,15 +21,15 @@ requirements, files to touch, and acceptance criteria.
 
 | ID | Title | Phase | Depends on | Status |
 |----|-------|-------|-----------|--------|
-| [A1](A1-db-hardening.md) | DB sanity constraints, indexes, robust stats | A | — | TODO |
-| [A2](A2-display-name-privacy.md) | Neutral default display names + name prompt | A | — | TODO |
-| [A3](A3-otp-resend-captcha.md) | Fix OTP resend CAPTCHA bypass | A | — | TODO |
-| [A4](A4-csv-injection.md) | CSV formula-injection guard | A | — | TODO |
-| [A5](A5-error-handling.md) | Friendly Spanish errors + error boundary | A | — | TODO |
-| [A6](A6-loading-states.md) | Loading skeletons (kill blank screens) | A | — | TODO |
-| [B1](B1-mobile-navigation.md) | Bottom tab bar + Guía section | B | B2 | TODO |
-| [B2](B2-home-page.md) | Inicio home page (replace redirect to Mi Vigo) | B | — | TODO |
-| [B3](B3-mobile-polish.md) | Touch targets, icons, offline notice | B | A5 | TODO |
+| [A1](A1-db-hardening.md) | DB sanity constraints, indexes, robust stats | A | — | Done |
+| [A2](A2-display-name-privacy.md) | Neutral default display names + name prompt | A | — | Done |
+| [A3](A3-otp-resend-captcha.md) | Fix OTP resend CAPTCHA bypass | A | — | Done |
+| [A4](A4-csv-injection.md) | CSV formula-injection guard | A | — | Done |
+| [A5](A5-error-handling.md) | Friendly Spanish errors + error boundary | A | — | Done |
+| [A6](A6-loading-states.md) | Loading skeletons (kill blank screens) | A | — | Done |
+| [B1](B1-mobile-navigation.md) | Bottom tab bar + Guía section | B | B2 | Done |
+| [B2](B2-home-page.md) | Inicio home page (replace redirect to Mi Vigo) | B | — | Done |
+| [B3](B3-mobile-polish.md) | Touch targets, icons, offline notice | B | A5 | Done |
 | [C1](C1-migration-workflow.md) | Supabase CLI migration workflow | C | — | TODO |
 | [C2](C2-generated-types.md) | Generated DB types | C | C1 | TODO |
 | [C3](C3-native-inputs.md) | Replace ChEdit with native inputs | C | — | TODO |

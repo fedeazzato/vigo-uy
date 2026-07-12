@@ -1,6 +1,6 @@
 # A3 — Fix OTP resend CAPTCHA bypass
 
-**Status:** TODO · **Phase:** A · **Depends on:** nothing
+**Status:** Done (2026-07-12) · **Phase:** A · **Depends on:** nothing
 
 ## Context
 

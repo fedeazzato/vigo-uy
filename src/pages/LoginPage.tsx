@@ -4,6 +4,7 @@ import { PageHeader, Card, Alert } from '../components/UI'
 import { ChEdit } from '../lib/chameleon/ChEdit'
 import { TurnstileWidget, TURNSTILE_ENABLED } from '../components/TurnstileWidget'
 import { useAuth } from '../context/AuthContext'
+import { toFriendlyError } from '../lib/errors'
 import styles from './LoginPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -59,7 +60,7 @@ export default function LoginPage() {
     setTurnstileKey((k) => k + 1)
 
     if (error) {
-      setError(error.message)
+      setError(toFriendlyError(error))
       return
     }
     setEmail(value)
@@ -78,7 +79,7 @@ export default function LoginPage() {
     const { error } = await verifyOtp(email, code)
     setSubmitting(false)
 
-    if (error) setError(error.message)
+    if (error) setError(toFriendlyError(error))
   }
 
   async function handlePasskeySignIn() {
@@ -93,11 +94,19 @@ export default function LoginPage() {
 
   async function handleResend() {
     if (cooldown > 0) return
+    // Resend goes through the same CAPTCHA gate as the first send — otherwise
+    // it would be a Turnstile bypass (or always fail if Supabase enforces
+    // CAPTCHA server-side).
+    if (TURNSTILE_ENABLED && !captchaToken) return
     setSubmitting(true)
     setError(null)
-    const { error } = await sendOtp(email)
+    const { error } = await sendOtp(email, captchaToken)
     setSubmitting(false)
-    if (error) setError(error.message)
+    // Turnstile tokens are single-use: clear it and remount the widget so the
+    // next resend needs a fresh one.
+    setCaptchaToken(null)
+    setTurnstileKey((k) => k + 1)
+    if (error) setError(toFriendlyError(error))
     else setCooldown(RESEND_COOLDOWN_SECONDS)
   }
 
@@ -163,12 +172,13 @@ export default function LoginPage() {
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
               {submitting ? 'Verificando…' : 'Verificar'}
             </button>
+            {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
             <div className={styles.secondaryActions}>
               <button
                 type="button"
                 className={styles.linkBtn}
                 onClick={handleResend}
-                disabled={submitting || cooldown > 0}
+                disabled={submitting || cooldown > 0 || (TURNSTILE_ENABLED && !captchaToken)}
               >
                 {cooldown > 0 ? `Reenviar código (${cooldown}s)` : 'Reenviar código'}
               </button>
