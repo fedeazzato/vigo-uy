@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, Alert, StatGrid, SectionDivider, Skeleton } from '../components/UI'
+import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } from '../components/UI'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-import { fetchCommunityStats, fetchLeaderboard, useCommunityContent } from '../lib/communityData'
+import { fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { StatItem, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
@@ -58,16 +58,18 @@ export default function CommunityFeedPage() {
       return true
     })
     if (sort === 'puntuacion') {
-      return [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      return verifiedFirst([...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)))
     }
-    return result
+    return verifiedFirst(result)
   }, [trips, modelFilter, query, sort])
 
   const filteredEntries = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return entries
-    return entries.filter((entry) =>
-      [entry.service_type, entry.dealer, entry.city ?? ''].some((f) => f.toLowerCase().includes(q))
+    if (!q) return verifiedFirst(entries)
+    return verifiedFirst(
+      entries.filter((entry) =>
+        [entry.service_type, entry.dealer, entry.city ?? ''].some((f) => f.toLowerCase().includes(q))
+      )
     )
   }, [entries, query])
 
@@ -81,9 +83,9 @@ export default function CommunityFeedPage() {
         )
       : purchases
     if (sort === 'puntuacion') {
-      return [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      return verifiedFirst([...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)))
     }
-    return result
+    return verifiedFirst(result)
   }, [purchases, query, sort])
 
   const showTrips = typeFilter === 'todos' || typeFilter === 'viajes'
@@ -198,7 +200,10 @@ export default function CommunityFeedPage() {
               {filteredTrips.map((trip) => (
                 <li key={trip.id} className={styles.item}>
                   <div>
-                    <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
+                    <div className={styles.itemTitle}>
+                      {trip.title}{trip.model && ` (${trip.model})`}
+                      {trip.verified && <Badge color="blue">Oficial</Badge>}
+                    </div>
                     <div className={styles.itemMeta}>
                       {trip.trip_date} · {trip.origin} → {trip.destination}
                       {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
@@ -229,7 +234,10 @@ export default function CommunityFeedPage() {
               {filteredPurchases.map((purchase) => (
                 <li key={purchase.id} className={styles.item}>
                   <div>
-                    <div className={styles.itemTitle}>{purchase.item}</div>
+                    <div className={styles.itemTitle}>
+                      {purchase.item}
+                      {purchase.verified && <Badge color="blue">Oficial</Badge>}
+                    </div>
                     <div className={styles.itemMeta}>
                       {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}
                       {purchase.city && ` · ${purchase.city}`}
@@ -265,7 +273,10 @@ export default function CommunityFeedPage() {
               {filteredEntries.map((entry) => (
                 <li key={entry.id} className={styles.item}>
                   <div>
-                    <div className={styles.itemTitle}>{entry.service_type}</div>
+                    <div className={styles.itemTitle}>
+                      {entry.service_type}
+                      {entry.verified && <Badge color="blue">Oficial</Badge>}
+                    </div>
                     <div className={styles.itemMeta}>
                       {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
                       {entry.city && ` · ${entry.city}`}

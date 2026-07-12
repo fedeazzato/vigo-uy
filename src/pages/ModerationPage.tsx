@@ -45,27 +45,19 @@ export default function ModerationPage() {
       return
     }
 
-    const entriesData = entriesRes.data ?? []
-    const tripsData = (tripsRes.data ?? []) as TripLog[]
-    const purchasesData = purchasesRes.data ?? []
-    setEntries(entriesData)
-    setTrips(tripsData)
-    setPurchases(purchasesData)
-    setUsers((usersRes.data ?? []) as AdminUserRow[])
+    setEntries(entriesRes.data ?? [])
+    setTrips((tripsRes.data ?? []) as TripLog[])
+    setPurchases(purchasesRes.data ?? [])
 
-    const userIds = [
-      ...new Set([
-        ...entriesData.map((e) => e.user_id),
-        ...tripsData.map((t) => t.user_id),
-        ...purchasesData.map((p) => p.user_id),
-      ]),
-    ]
-    if (userIds.length > 0) {
-      const { data: profilesData } = await supabase.from('profiles').select('id, display_name').in('id', userIds)
-      const map: Record<string, string> = {}
-      for (const p of profilesData ?? []) map[p.id] = p.display_name
-      setNames(map)
-    }
+    const usersData = (usersRes.data ?? []) as AdminUserRow[]
+    setUsers(usersData)
+
+    // Author names come from admin_list_users: it covers every user
+    // (including banned ones, whom public_profiles excludes), and the
+    // profiles table is own-row readable only since migration 0021.
+    const map: Record<string, string> = {}
+    for (const u of usersData) map[u.id] = u.display_name
+    setNames(map)
 
     setLoading(false)
   }
@@ -84,6 +76,25 @@ export default function ModerationPage() {
       setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, hidden: !currentHidden } : t)))
     } else {
       setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, hidden: !currentHidden } : p)))
+    }
+  }
+
+  async function toggleVerified(table: ContentTable, id: string, currentVerified: boolean) {
+    if (!supabase) return
+    // Normal UPDATE: the moderator RLS policy allows it, and the
+    // prevent_unauthorized_verify trigger reverts it for anyone else.
+    const { error } = await supabase.from(table).update({ verified: !currentVerified }).eq('id', id)
+    if (error) {
+      setError(toFriendlyError(error))
+      return
+    }
+    invalidateCommunityCache()
+    if (table === 'service_entries') {
+      setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, verified: !currentVerified } : e)))
+    } else if (table === 'trip_logs') {
+      setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, verified: !currentVerified } : t)))
+    } else {
+      setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, verified: !currentVerified } : p)))
     }
   }
 
@@ -180,6 +191,7 @@ export default function ModerationPage() {
                     <div>
                       <div className={styles.itemTitle}>
                         {entry.service_type}
+                        {entry.verified && <Badge color="blue">Verificado</Badge>}
                         {entry.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
                       <div className={styles.itemMeta}>
@@ -187,6 +199,12 @@ export default function ModerationPage() {
                       </div>
                     </div>
                     <div className={styles.itemActions}>
+                      <button
+                        className={styles.actionLink}
+                        onClick={() => toggleVerified('service_entries', entry.id, entry.verified)}
+                      >
+                        {entry.verified ? 'Quitar verificación' : 'Verificar'}
+                      </button>
                       <button
                         className={styles.actionLink}
                         onClick={() => toggleHidden('service_entries', entry.id, entry.hidden)}
@@ -214,6 +232,7 @@ export default function ModerationPage() {
                     <div>
                       <div className={styles.itemTitle}>
                         {purchase.item}
+                        {purchase.verified && <Badge color="blue">Verificado</Badge>}
                         {purchase.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
                       <div className={styles.itemMeta}>
@@ -222,6 +241,12 @@ export default function ModerationPage() {
                       </div>
                     </div>
                     <div className={styles.itemActions}>
+                      <button
+                        className={styles.actionLink}
+                        onClick={() => toggleVerified('part_purchases', purchase.id, purchase.verified)}
+                      >
+                        {purchase.verified ? 'Quitar verificación' : 'Verificar'}
+                      </button>
                       <button
                         className={styles.actionLink}
                         onClick={() => toggleHidden('part_purchases', purchase.id, purchase.hidden)}
@@ -249,6 +274,7 @@ export default function ModerationPage() {
                     <div>
                       <div className={styles.itemTitle}>
                         {trip.title}
+                        {trip.verified && <Badge color="blue">Verificado</Badge>}
                         {trip.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
                       <div className={styles.itemMeta}>
@@ -256,6 +282,12 @@ export default function ModerationPage() {
                       </div>
                     </div>
                     <div className={styles.itemActions}>
+                      <button
+                        className={styles.actionLink}
+                        onClick={() => toggleVerified('trip_logs', trip.id, trip.verified)}
+                      >
+                        {trip.verified ? 'Quitar verificación' : 'Verificar'}
+                      </button>
                       <button
                         className={styles.actionLink}
                         onClick={() => toggleHidden('trip_logs', trip.id, trip.hidden)}

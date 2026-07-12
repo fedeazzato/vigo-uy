@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { useCommunityContent } from '../lib/communityData'
+import { useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { partsCatalog, partCategoryTitle } from '../lib/partsCatalog'
 import type { StatItem } from '../types'
 import styles from './PartsPage.module.css'
@@ -36,7 +36,10 @@ export default function PartsPage() {
       }))
   }, [purchases])
 
-  const recentPurchases = purchases.slice(0, 15)
+  // TODO(D1): parts.json carries no curated prices today (only specs/tips),
+  // so there is nothing to gate yet. If curated price references are ever
+  // added, gate them per category against part_purchases counts (≥3).
+  const recentPurchases = verifiedFirst(purchases).slice(0, 15)
 
   return (
     <div>
@@ -89,6 +92,7 @@ export default function PartsPage() {
                 <div>
                   <div className={styles.itemTitle}>
                     {p.item} <Badge color="gray">{partCategoryTitle(p.category)}</Badge>
+                    {p.verified && <Badge color="blue">Oficial</Badge>}
                   </div>
                   <div className={styles.itemMeta}>
                     {p.purchase_date} · {p.store}

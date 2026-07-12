@@ -4,7 +4,7 @@ import rawData from '../data/costs.json'
 import { PageHeader, Card, CardTitle, Alert, Badge, SectionDivider, StatGrid } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import { fetchCommunityStats, useCommunityContent } from '../lib/communityData'
+import { fetchCommunityStats, preferCommunity, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import styles from './Pages.module.css'
 import type { CityCostStat, CostsData, Model, StatItem, TripLog } from '../types'
 
@@ -68,7 +68,13 @@ export default function CostsPage() {
       .filter((s): s is StatItem => s !== null),
   ]
 
-  const communityEntries = entries.slice(0, 10)
+  const communityEntries = verifiedFirst(entries).slice(0, 10)
+
+  // D1 gate: with enough real service entries, the transcribed-from-WhatsApp
+  // cases retire and the section becomes community-only (see
+  // specs/CONTENT-MIGRATION.md).
+  const communityFirst =
+    preferCommunity({ curated: realCases, community: entries, minSamples: 5 }).source === 'comunidad'
 
   return (
     <div>
@@ -133,16 +139,25 @@ export default function CostsPage() {
 
       <Card>
         <p className={styles.realCaseConditions}>
-          Los casos marcados como oficiales son verificados por el grupo; los de la comunidad
-          vienen directo de otros usuarios. <Link to="/comunidad">Mirá la comunidad</Link> para
-          ver el listado completo.
+          {communityFirst ? (
+            <>
+              Estos datos vienen de la comunidad: services reales registrados por otros dueños.
+              Los marcados como oficiales fueron verificados por moderadores.{' '}
+            </>
+          ) : (
+            <>
+              Los casos marcados como oficiales son verificados por el grupo; los de la comunidad
+              vienen directo de otros usuarios.{' '}
+            </>
+          )}
+          <Link to="/comunidad">Mirá la comunidad</Link> para ver el listado completo.
           {supabase && communityEntries.length === 0 && (
             <> Todavía no hay services compartidos — <Link to="/costos/nuevo">registrá el tuyo</Link>.</>
           )}
         </p>
       </Card>
 
-      {realCases.map((c, i) => (
+      {!communityFirst && realCases.map((c, i) => (
         <Card key={i}>
           <div className={styles.realCaseHeader}>
             <span className={styles.realCaseTitle}>
@@ -171,7 +186,10 @@ export default function CostsPage() {
         <Card key={entry.id}>
           <div className={styles.realCaseHeader}>
             <span className={styles.realCaseTitle}>
-              {entry.service_type} <Badge color="gray">Comunidad</Badge>
+              {entry.service_type}{' '}
+              <Badge color={entry.verified ? 'blue' : 'gray'}>
+                {entry.verified ? 'Oficial' : 'Comunidad'}
+              </Badge>
             </span>
             <span className={styles.realCaseCost}>
               ${entry.cost_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}

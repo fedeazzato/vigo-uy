@@ -82,10 +82,14 @@ export default function VehicleCard() {
     e.preventDefault()
     if (!joinCode.trim()) return
     if (!confirm('Vas a dejar tu vehículo actual y unirte al de otra persona. ¿Continuar?')) return
-    await run(
-      () => supabase!.rpc('join_vehicle_by_code', { code: joinCode.trim() }),
-      'Ahora compartís vehículo con ese grupo.'
-    )
+    await run(async () => {
+      const { data, error } = await supabase!.rpc('join_vehicle_by_code', { code: joinCode.trim() })
+      if (error) return { error }
+      // An invalid code returns null instead of raising, so the server can
+      // record the failed attempt for rate limiting (migration 0021).
+      if (!data) return { error: { message: 'Código no válido.' } }
+      return { error: null }
+    }, 'Ahora compartís vehículo con ese grupo.')
     setJoinCode('')
   }
 

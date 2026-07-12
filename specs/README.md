@@ -35,9 +35,9 @@ requirements, files to touch, and acceptance criteria.
 | [C3](C3-native-inputs.md) | Replace ChEdit with native inputs | C | — | Done |
 | [C4](C4-data-cache.md) | Shared community-data cache | C | — | Done |
 | [C5](C5-trip-form-disclosure.md) | Trip form progressive disclosure | C | C3 | Done |
-| [D1](D1-prefer-community.md) | `preferCommunity` gate + retirement tracker | D | — | TODO |
-| [D2](D2-verified-content.md) | Moderator-verified content ("Oficial" flag) | D | A1 | TODO |
-| [D3](D3-security-followups.md) | Minor security follow-ups | D | — | TODO |
+| [D1](D1-prefer-community.md) | `preferCommunity` gate + retirement tracker | D | — | Done |
+| [D2](D2-verified-content.md) | Moderator-verified content ("Oficial" flag) | D | A1 | Done |
+| [D3](D3-security-followups.md) | Minor security follow-ups | D | — | Done |
 
 ## Recommended execution order
 

@@ -4,7 +4,7 @@ import rawData from '../data/mantenimiento.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { fetchCommunityStats, useCommunityContent } from '../lib/communityData'
+import { fetchCommunityStats, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import styles from './Pages.module.css'
 import type { CityCostStat, MantenimientoData, StatItem } from '../types'
 
@@ -54,6 +54,11 @@ export default function MantenimientoPage() {
       <SectionDivider label="Precio del service por concesionario" />
 
       <Card>
+        <div className={styles.realCaseHeader}>
+          <span className={styles.realCaseTitle}>
+            Precios de referencia <Badge color="blue">Oficial</Badge>
+          </span>
+        </div>
         <div className={styles.patentTable}>
           {data.dealerPrices.map((row, i) => (
             <div key={i} className={styles.patentRow}>
@@ -96,11 +101,14 @@ export default function MantenimientoPage() {
             </Card>
           )}
 
-          {entries.map((entry) => (
+          {verifiedFirst(entries).map((entry) => (
             <Card key={entry.id}>
               <div className={styles.realCaseHeader}>
                 <span className={styles.realCaseTitle}>
-                  {entry.service_type} <Badge color="gray">Comunidad</Badge>
+                  {entry.service_type}{' '}
+                  <Badge color={entry.verified ? 'blue' : 'gray'}>
+                    {entry.verified ? 'Oficial' : 'Comunidad'}
+                  </Badge>
                 </span>
                 <span className={styles.realCaseCost}>
                   ${entry.cost_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}

@@ -56,6 +56,7 @@ export type Database = {
           store: string
           user_id: string
           vehicle_id: string | null
+          verified: boolean
         }
         Insert: {
           category: string
@@ -73,6 +74,7 @@ export type Database = {
           store: string
           user_id: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Update: {
           category?: string
@@ -90,6 +92,7 @@ export type Database = {
           store?: string
           user_id?: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Relationships: [
           {
@@ -156,6 +159,7 @@ export type Database = {
           service_type: string
           user_id: string
           vehicle_id: string | null
+          verified: boolean
         }
         Insert: {
           city?: string | null
@@ -171,6 +175,7 @@ export type Database = {
           service_type: string
           user_id: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Update: {
           city?: string | null
@@ -186,6 +191,7 @@ export type Database = {
           service_type?: string
           user_id?: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Relationships: [
           {
@@ -224,6 +230,7 @@ export type Database = {
           trip_date: string
           user_id: string
           vehicle_id: string | null
+          verified: boolean
         }
         Insert: {
           average_speed_kmh?: number | null
@@ -244,6 +251,7 @@ export type Database = {
           trip_date: string
           user_id: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Update: {
           average_speed_kmh?: number | null
@@ -264,6 +272,7 @@ export type Database = {
           trip_date?: string
           user_id?: string
           vehicle_id?: string | null
+          verified?: boolean
         }
         Relationships: [
           {
@@ -426,6 +435,7 @@ export type Database = {
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
       current_user_vehicle_id: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
+      is_active_moderator: { Args: { uid: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
       remove_vehicle_member: {

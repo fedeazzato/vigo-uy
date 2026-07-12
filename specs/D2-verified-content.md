@@ -1,6 +1,6 @@
 # D2 — Moderator-verified content (the end state for "Oficial")
 
-**Status:** TODO · **Phase:** D · **Depends on:** A1 (migration numbering) —
+**Status:** Done (2026-07-12) · **Phase:** D · **Depends on:** A1 (migration numbering) —
 content-wise independent
 
 ## Context

@@ -1,6 +1,6 @@
 # D3 — Minor security follow-ups
 
-**Status:** TODO · **Phase:** D · **Depends on:** nothing
+**Status:** Done (2026-07-12) · **Phase:** D · **Depends on:** nothing
 
 ## Context
 

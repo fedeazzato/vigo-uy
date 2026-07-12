@@ -52,6 +52,30 @@ export function invalidateCommunityCache(): void {
   cache.clear()
 }
 
+// The static→dynamic gate (audit item D1): curated JSON is placeholder
+// filler transcribed from the WhatsApp group; once a section has enough
+// real community rows, the community data takes over. Trivial on purpose —
+// the value is the uniform convention and the tagged `source` forcing
+// callers to render provenance. Thresholds per section are documented in
+// specs/CONTENT-MIGRATION.md.
+// TODO(D2 hook): thresholds may later count only moderator-verified rows.
+export function preferCommunity<T, U>(options: {
+  curated: T
+  community: U[]
+  minSamples: number
+}): { source: 'comunidad'; data: U[] } | { source: 'grupo'; data: T } {
+  const { curated, community, minSamples } = options
+  if (community.length >= minSamples) return { source: 'comunidad', data: community }
+  return { source: 'grupo', data: curated }
+}
+
+// Moderator-verified rows first, otherwise preserving the given order
+// (Array.prototype.sort is stable). Used wherever community content renders
+// so "Oficial" entries lead their section.
+export function verifiedFirst<T extends { verified: boolean }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => Number(b.verified) - Number(a.verified))
+}
+
 // ── Fetch helpers ─────────────────────────────────────────────────────────
 
 export function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; error: string | null }> {
