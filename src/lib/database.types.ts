@@ -96,6 +96,21 @@ export type Database = {
         }
         Relationships: []
       }
+      join_code_attempts: {
+        Row: {
+          attempted_at: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       part_purchases: {
         Row: {
           category: string
@@ -499,7 +514,15 @@ export type Database = {
           report_count: number | null
           station_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "station_reports_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trip_stats_by_model: {
         Row: {
