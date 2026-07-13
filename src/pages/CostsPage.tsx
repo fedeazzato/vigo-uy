@@ -15,7 +15,8 @@ const data = rawData as CostsData
 // energy drawn from the pack). Skipped below a minimum sample size.
 const MIN_CONSUMPTION_SAMPLES = 3
 
-function estimateConsumption(trips: TripLog[], model: Model, batteryKwh: number): StatItem | null {
+// Exported for tests.
+export function estimateConsumption(trips: TripLog[], model: Model, batteryKwh: number): StatItem | null {
   const qualifying = trips.filter(
     (t) =>
       t.model === model &&

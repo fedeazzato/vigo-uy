@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev          # Start dev server at http://localhost:5173/vigo-uy/
 npm run build        # Production build
 npm run type-check   # TypeScript type checking (tsc -b --noEmit; plain `tsc --noEmit` checks NOTHING against this solution-style tsconfig)
+npm test             # Vitest (unit + jsdom component tests, colocated *.test.ts(x) under src/)
 npm run gen:types    # Regenerate src/lib/database.types.ts from the linked Supabase project (run after every migration)
 npm run deploy       # Build + push to gh-pages branch (GitHub Pages)
 ```

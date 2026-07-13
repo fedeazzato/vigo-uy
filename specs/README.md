@@ -13,7 +13,8 @@ requirements, files to touch, and acceptance criteria.
    the Supabase CLI since C1: create with `npx supabase migration new <name>`,
    apply with `npx supabase db push`. New migrations must be
    idempotent-friendly; never edit an applied migration.
-3. `npm run type-check` and `npm run build` must pass when you finish.
+3. `npm run type-check`, `npm test` and `npm run build` must pass when you
+   finish.
 4. When a spec is done, update its **Status** line and check it off in the
    table below.
 
