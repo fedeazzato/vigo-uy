@@ -13,9 +13,12 @@ vi.mock('./supabaseClient', () => ({
 import {
   fetchLeaderboard,
   invalidateCommunityCache,
+  pickCostStat,
   preferCommunity,
+  reliabilityLevel,
   verifiedFirst,
 } from './communityData'
+import type { ChargingCostStat, StationReliability } from '../types'
 
 describe('preferCommunity', () => {
   const curated = { anything: true }
@@ -50,6 +53,68 @@ describe('verifiedFirst', () => {
     ]
     verifiedFirst(rows)
     expect(rows.map((r) => r.id)).toEqual(['a', 'b'])
+  })
+})
+
+describe('pickCostStat', () => {
+  const stationStat: ChargingCostStat = {
+    network: 'ute',
+    station_id: 'st-1',
+    avg_cost_per_kwh: 12.5,
+    sample_count: 4,
+  }
+  const networkStat: ChargingCostStat = {
+    network: 'ute',
+    station_id: null,
+    avg_cost_per_kwh: 11.2,
+    sample_count: 9,
+  }
+
+  it('prefers the station-level average when it has enough samples', () => {
+    expect(pickCostStat([networkStat, stationStat], 'ute', 'st-1')).toBe(stationStat)
+  })
+
+  it('falls back to the network rollup below the station sample floor', () => {
+    const thinStation = { ...stationStat, sample_count: 2 }
+    expect(pickCostStat([networkStat, thinStation], 'ute', 'st-1')).toBe(networkStat)
+  })
+
+  it('returns null when neither level reaches the floor', () => {
+    const thin = [
+      { ...stationStat, sample_count: 1 },
+      { ...networkStat, sample_count: 2 },
+    ]
+    expect(pickCostStat(thin, 'ute', 'st-1')).toBeNull()
+  })
+
+  it('never borrows another network’s rollup', () => {
+    expect(pickCostStat([networkStat], 'eone', 'st-9')).toBeNull()
+  })
+})
+
+describe('reliabilityLevel', () => {
+  function rel(overrides: Partial<StationReliability>): StationReliability {
+    return {
+      station_id: 'st-1',
+      report_count: 5,
+      failure_count: 0,
+      failure_ratio: 0,
+      last_report_at: '2026-07-01T00:00:00Z',
+      ...overrides,
+    }
+  }
+
+  it('is unknown without reports or below three of them', () => {
+    expect(reliabilityLevel(undefined)).toBe('unknown')
+    expect(reliabilityLevel(rel({ report_count: 2, failure_ratio: 1 }))).toBe('unknown')
+  })
+
+  it('is flaky above 30% failures', () => {
+    expect(reliabilityLevel(rel({ failure_ratio: 0.4, failure_count: 2 }))).toBe('flaky')
+  })
+
+  it('is ok at or below 30% failures', () => {
+    expect(reliabilityLevel(rel({ failure_ratio: 0.3, failure_count: 1 }))).toBe('ok')
   })
 })
 

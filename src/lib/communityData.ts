@@ -7,12 +7,16 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import { toFriendlyError } from './errors'
 import type {
+  ChargingCostStat,
+  ChargingStation,
   CityCostStat,
   CommunityTotals,
   ModelTripStat,
   PartPurchase,
   PublicProfile,
   ServiceEntry,
+  StationNetwork,
+  StationReliability,
   TripLog,
   VehicleLeaderboardEntry,
 } from '../types'
@@ -202,6 +206,79 @@ export function fetchCommunityTotals(): Promise<{ totals: CommunityTotals | null
     },
     (r) => r.error !== null
   )
+}
+
+// ── Charging stations (D4) ────────────────────────────────────────────────
+
+export function fetchChargingStations(): Promise<{ stations: ChargingStation[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ stations: [], error: null })
+  return cached(
+    'chargingStations',
+    async () => {
+      const { data, error } = await client
+        .from('charging_stations')
+        .select('*')
+        .order('network')
+        .order('name')
+      return { stations: (data ?? []) as ChargingStation[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export function fetchChargingCostStats(): Promise<{ stats: ChargingCostStat[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ stats: [], error: null })
+  return cached(
+    'chargingCostStats',
+    async () => {
+      const { data, error } = await client.from('charging_cost_stats').select('*')
+      return { stats: (data ?? []) as ChargingCostStat[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export function fetchStationReliability(): Promise<{ rows: StationReliability[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ rows: [], error: null })
+  return cached(
+    'stationReliability',
+    async () => {
+      const { data, error } = await client.from('station_reliability').select('*')
+      return { rows: (data ?? []) as StationReliability[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+// Prices only render at this many real charges; below it the curated text
+// stays (see specs/CONTENT-MIGRATION.md).
+export const MIN_COST_SAMPLES = 3
+
+// Station-level average preferred; per-network rollup (station_id null) as
+// fallback; null when neither reaches the sample floor.
+export function pickCostStat(
+  stats: ChargingCostStat[],
+  network: StationNetwork,
+  stationId: string
+): ChargingCostStat | null {
+  const station = stats.find((s) => s.station_id === stationId && s.sample_count >= MIN_COST_SAMPLES)
+  if (station) return station
+  return (
+    stats.find(
+      (s) => s.network === network && s.station_id === null && s.sample_count >= MIN_COST_SAMPLES
+    ) ?? null
+  )
+}
+
+export type ReliabilityLevel = 'ok' | 'flaky' | 'unknown'
+
+// >30% failures over >=3 reports in the last 90 days reads as flaky.
+export function reliabilityLevel(rel: StationReliability | undefined): ReliabilityLevel {
+  if (!rel || rel.report_count < 3) return 'unknown'
+  return rel.failure_ratio > 0.3 ? 'flaky' : 'ok'
 }
 
 export interface CommunityContent {

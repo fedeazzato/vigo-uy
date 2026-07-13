@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
-import { invalidateCommunityCache } from '../lib/communityData'
-import type { TripChargingStop, Model } from '../types'
+import { fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
+import type { ChargingStation, StationNetwork, TripChargingStop, Model } from '../types'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -14,9 +14,18 @@ function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+const NETWORK_LABELS: Record<StationNetwork, string> = {
+  ute: 'UTE',
+  eone: 'EONE',
+  dmc: 'DMC',
+  evergo: 'EverGo',
+  eosvolt: 'EOSVOLT',
+  otro: 'Otros',
+}
+
 // Form state keeps every value as a string; numbers are parsed only on
 // submit.
-interface StopDraft {
+export interface StopDraft {
   name: string
   note: string
   distanceFromPrevious: string
@@ -24,6 +33,9 @@ interface StopDraft {
   departurePercentage: string
   durationMinutes: string
   averageSpeed: string
+  cost: string
+  energyKwh: string
+  stationId: string
 }
 
 function emptyStop(): StopDraft {
@@ -35,6 +47,9 @@ function emptyStop(): StopDraft {
     departurePercentage: '',
     durationMinutes: '',
     averageSpeed: '',
+    cost: '',
+    energyKwh: '',
+    stationId: '',
   }
 }
 
@@ -47,6 +62,9 @@ function stopToDraft(stop: TripChargingStop): StopDraft {
     departurePercentage: stop.departure_percentage != null ? String(stop.departure_percentage) : '',
     durationMinutes: stop.duration_minutes != null ? String(stop.duration_minutes) : '',
     averageSpeed: stop.average_speed_kmh != null ? String(stop.average_speed_kmh) : '',
+    cost: stop.cost_uyu != null ? String(stop.cost_uyu) : '',
+    energyKwh: stop.energy_kwh != null ? String(stop.energy_kwh) : '',
+    stationId: stop.station_id ?? '',
   }
 }
 
@@ -63,6 +81,49 @@ function parseOptionalNumber(value: string): number | undefined {
 
 function isValidPercentage(n: number | undefined): boolean {
   return n === undefined || (n >= 0 && n <= 100)
+}
+
+// Converts the string drafts into the charging_stops jsonb payload,
+// validating as it goes. Stops without a name are skipped. Exported for
+// tests: this is the exact shape sent to the database.
+export function parseStopDrafts(
+  stops: StopDraft[]
+): { stops: TripChargingStop[] } | { error: string } {
+  const cleanStops: TripChargingStop[] = []
+  for (const s of stops) {
+    if (!s.name.trim()) continue
+    const arrival = parseOptionalNumber(s.arrivalPercentage)
+    const departure = parseOptionalNumber(s.departurePercentage)
+    if (!isValidPercentage(arrival) || !isValidPercentage(departure)) {
+      return { error: 'Los porcentajes de batería en las paradas deben estar entre 0 y 100.' }
+    }
+    const stopSpeed = parseOptionalNumber(s.averageSpeed)
+    if (!isValidNonNegative(stopSpeed)) {
+      return { error: 'La velocidad media entre paradas debe ser un número válido.' }
+    }
+    const cost = parseOptionalNumber(s.cost)
+    if (!isValidNonNegative(cost)) {
+      return { error: 'El costo de la carga debe ser un número válido.' }
+    }
+    const energy = parseOptionalNumber(s.energyKwh)
+    if (energy !== undefined && energy <= 0) {
+      return { error: 'La energía cargada (kWh) debe ser mayor a cero.' }
+    }
+    const stop: TripChargingStop = { name: s.name.trim() }
+    if (s.note.trim()) stop.note = s.note.trim()
+    const distanceFromPrevious = parseOptionalNumber(s.distanceFromPrevious)
+    if (distanceFromPrevious !== undefined) stop.distance_from_previous_km = distanceFromPrevious
+    if (arrival !== undefined) stop.arrival_percentage = arrival
+    if (departure !== undefined) stop.departure_percentage = departure
+    const duration = parseOptionalNumber(s.durationMinutes)
+    if (duration !== undefined) stop.duration_minutes = duration
+    if (stopSpeed !== undefined) stop.average_speed_kmh = stopSpeed
+    if (cost !== undefined) stop.cost_uyu = cost
+    if (energy !== undefined) stop.energy_kwh = energy
+    if (s.stationId) stop.station_id = s.stationId
+    cleanStops.push(stop)
+  }
+  return { stops: cleanStops }
 }
 
 export default function NewTripLogPage() {
@@ -92,6 +153,25 @@ export default function NewTripLogPage() {
   const [loading, setLoading] = useState(isEdit)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [stations, setStations] = useState<ChargingStation[]>([])
+
+  useEffect(() => {
+    if (!supabase) return
+    fetchChargingStations().then(({ stations: s }) => setStations(s))
+  }, [])
+
+  // Selecting a community station also fills the free-text name when the
+  // user hasn't typed one (the name is what makes a stop count).
+  function setStopStation(index: number, stationId: string) {
+    const station = stations.find((s) => s.id === stationId)
+    setStops((prev) =>
+      prev.map((s, i) =>
+        i === index
+          ? { ...s, stationId, name: s.name.trim() || (station?.name ?? s.name) }
+          : s
+      )
+    )
+  }
 
   useEffect(() => {
     if (!isEdit || !supabase) return
@@ -176,31 +256,12 @@ export default function NewTripLogPage() {
       return
     }
 
-    const cleanStops: TripChargingStop[] = []
-    for (const s of stops) {
-      if (!s.name.trim()) continue
-      const arrival = parseOptionalNumber(s.arrivalPercentage)
-      const departure = parseOptionalNumber(s.departurePercentage)
-      if (!isValidPercentage(arrival) || !isValidPercentage(departure)) {
-        setError('Los porcentajes de batería en las paradas deben estar entre 0 y 100.')
-        return
-      }
-      const stopSpeed = parseOptionalNumber(s.averageSpeed)
-      if (!isValidNonNegative(stopSpeed)) {
-        setError('La velocidad media entre paradas debe ser un número válido.')
-        return
-      }
-      const stop: TripChargingStop = { name: s.name.trim() }
-      if (s.note.trim()) stop.note = s.note.trim()
-      const distanceFromPrevious = parseOptionalNumber(s.distanceFromPrevious)
-      if (distanceFromPrevious !== undefined) stop.distance_from_previous_km = distanceFromPrevious
-      if (arrival !== undefined) stop.arrival_percentage = arrival
-      if (departure !== undefined) stop.departure_percentage = departure
-      const duration = parseOptionalNumber(s.durationMinutes)
-      if (duration !== undefined) stop.duration_minutes = duration
-      if (stopSpeed !== undefined) stop.average_speed_kmh = stopSpeed
-      cleanStops.push(stop)
+    const parsed = parseStopDrafts(stops)
+    if ('error' in parsed) {
+      setError(parsed.error)
+      return
     }
+    const cleanStops = parsed.stops
 
     setSubmitting(true)
     setError(null)
@@ -416,6 +477,32 @@ export default function NewTripLogPage() {
                         </div>
                       </div>
 
+                      {stations.length > 0 && (
+                        <div className={styles.field}>
+                          <label className={styles.smallLabel}>Estación de la comunidad (opcional)</label>
+                          <select
+                            className={formStyles.input}
+                            value={stop.stationId}
+                            onChange={(e) => setStopStation(index, e.target.value)}
+                          >
+                            <option value="">No está en la lista / otro cargador</option>
+                            {(Object.keys(NETWORK_LABELS) as StationNetwork[]).map((net) => {
+                              const options = stations.filter((s) => s.network === net)
+                              if (options.length === 0) return null
+                              return (
+                                <optgroup key={net} label={NETWORK_LABELS[net]}>
+                                  {options.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                      {s.name}{s.city ? ` — ${s.city}` : ''}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              )
+                            })}
+                          </select>
+                        </div>
+                      )}
+
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>
                           <label className={styles.smallLabel}>Distancia desde la parada anterior (km)</label>
@@ -462,6 +549,31 @@ export default function NewTripLogPage() {
                             value={stop.departurePercentage}
                             onChange={(e) => updateStop(index, 'departurePercentage', e.target.value)}
                             placeholder="80"
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.stopMainRow}>
+                        <div className={styles.field}>
+                          <label className={styles.smallLabel}>Costo de la carga (UYU)</label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            className={formStyles.input}
+                            value={stop.cost}
+                            onChange={(e) => updateStop(index, 'cost', e.target.value)}
+                            placeholder="450"
+                          />
+                        </div>
+                        <div className={styles.field}>
+                          <label className={styles.smallLabel}>Energía cargada (kWh, según el cargador)</label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            className={formStyles.input}
+                            value={stop.energyKwh}
+                            onChange={(e) => updateStop(index, 'energyKwh', e.target.value)}
+                            placeholder="28.5"
                           />
                         </div>
                       </div>

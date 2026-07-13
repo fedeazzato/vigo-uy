@@ -4,29 +4,74 @@
     "source": "WhatsApp - Amantes de la Vigo Uruguay 🇺🇾 + Manual de uso oficial Dongfeng VIGO"
   },
   "stats": [
-    { "value": "~6 km", "label": "por kWh" },
-    { "value": "44,94 kWh", "label": "batería E2", "model": "E2" },
-    { "value": "51,87 kWh", "label": "batería E2+", "model": "E2+" }
+    {
+      "value": "~6 km",
+      "label": "por kWh"
+    },
+    {
+      "value": "44,94 kWh",
+      "label": "batería E2",
+      "model": "E2"
+    },
+    {
+      "value": "51,87 kWh",
+      "label": "batería E2+",
+      "model": "E2+"
+    }
   ],
   "autonomy": {
-    "standards": ["CLTC", "NEDC", "WLTP"],
+    "standards": [
+      "CLTC",
+      "NEDC",
+      "WLTP"
+    ],
     "models": {
       "E2": {
-        "CLTC": { "km": 401, "note": "Ciclo chino — el único que figura en el manual oficial" },
-        "NEDC": { "km": 361, "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador" },
-        "WLTP": { "km": 306, "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador" }
+        "CLTC": {
+          "km": 401,
+          "note": "Ciclo chino — el único que figura en el manual oficial"
+        },
+        "NEDC": {
+          "km": 361,
+          "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador"
+        },
+        "WLTP": {
+          "km": 306,
+          "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador"
+        }
       },
       "E2+": {
-        "CLTC": { "km": 471, "note": "Ciclo chino — el único que figura en el manual oficial" },
-        "NEDC": { "km": 411, "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador" },
-        "WLTP": { "km": 349, "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador" }
+        "CLTC": {
+          "km": 471,
+          "note": "Ciclo chino — el único que figura en el manual oficial"
+        },
+        "NEDC": {
+          "km": 411,
+          "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador"
+        },
+        "WLTP": {
+          "km": 349,
+          "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador"
+        }
       }
     },
     "realConsumption": [
-      { "value": "9–10 kWh", "label": "Ciudad (por 100 km)" },
-      { "value": "12,4–12,6 kWh", "label": "Homologado CLTC (por 100 km)" },
-      { "value": "14–16 kWh", "label": "Ruta con aire (por 100 km)" },
-      { "value": "~22 kWh", "label": "Frío / invierno (por 100 km)" }
+      {
+        "value": "9–10 kWh",
+        "label": "Ciudad (por 100 km)"
+      },
+      {
+        "value": "12,4–12,6 kWh",
+        "label": "Homologado CLTC (por 100 km)"
+      },
+      {
+        "value": "14–16 kWh",
+        "label": "Ruta con aire (por 100 km)"
+      },
+      {
+        "value": "~22 kWh",
+        "label": "Frío / invierno (por 100 km)"
+      }
     ],
     "disclaimer": "La autonomía real varía según velocidad, temperatura y uso del aire acondicionado. Para estimar cuánto falta en un viaje, conviene usar el consumo del último tramo recorrido en vez del promedio histórico del auto."
   },
@@ -76,7 +121,8 @@
         "badge": "Lento",
         "badgeColor": "amber",
         "details": "$10,4/kWh + cargo base $54,8. Carga 0-100%: E2 ≈ $522 / E2+ ≈ $594. Velocidad máxima limitada por el auto: 6,6 kW.",
-        "tips": "Disponibles en muchas ciudades. Usar tarjeta UTE (sacarla en sucursal) — los QR suelen estar dañados o robados."
+        "tips": "Disponibles en muchas ciudades. Usar tarjeta UTE (sacarla en sucursal) — los QR suelen estar dañados o robados.",
+        "network": "ute"
       },
       {
         "name": "UTE DC (rápida)",
@@ -84,42 +130,48 @@
         "badgeColor": "amber",
         "source": "comunidad",
         "details": "$11,8/kWh + cargo base $132,9. Carga 0-100%: E2 ≈ $663 / E2+ ≈ $744. El manual no especifica una potencia máxima de carga DC — la comunidad reporta hasta 60 kW según el equipo.",
-        "tips": "Los equipos de 30 kW (Ecotap) son los más reportados con fallas (se desconectan solos o marcan 'completado' sin cargar) — preferir un equipo de 60 kW o más si hay opción. Es normal que la velocidad baje notoriamente después del 80% — es protección térmica de la batería, no una falla."
+        "tips": "Los equipos de 30 kW (Ecotap) son los más reportados con fallas (se desconectan solos o marcan 'completado' sin cargar) — preferir un equipo de 60 kW o más si hay opción. Es normal que la velocidad baje notoriamente después del 80% — es protección térmica de la batería, no una falla.",
+        "network": "ute"
       },
       {
         "name": "EONE",
         "badge": "Recomendado",
         "badgeColor": "green",
         "details": "Sin cargo base. Algunos cargadores llegan a 120 kW. Precio variable por kWh.",
-        "tips": "Muy recomendados por el grupo. Usar la app EONE — seleccionar 'Dongfeng Forthing' o 'Yuan Pro' si la Vigo no aparece."
+        "tips": "Muy recomendados por el grupo. Usar la app EONE — seleccionar 'Dongfeng Forthing' o 'Yuan Pro' si la Vigo no aparece.",
+        "network": "eone"
       },
       {
         "name": "DMC",
         "badge": "Recomendado",
         "badgeColor": "green",
         "details": "Red privada en expansión (Skate Park de Carrasco, Plaza Paul Harris, entre otros puntos nuevos en 2026).",
-        "tips": "Considerada más confiable que UTE por el grupo, especialmente como alternativa cuando los equipos de UTE fallan."
+        "tips": "Considerada más confiable que UTE por el grupo, especialmente como alternativa cuando los equipos de UTE fallan.",
+        "network": "dmc"
       },
       {
         "name": "EverGo",
         "badge": "Recomendado",
         "badgeColor": "green",
         "details": "Red privada de carga rápida.",
-        "tips": "Recomendada como alternativa en zonas donde UTE da problemas (Rocha, Maldonado)."
+        "tips": "Recomendada como alternativa en zonas donde UTE da problemas (Rocha, Maldonado).",
+        "network": "evergo"
       },
       {
         "name": "EOSVOLT",
         "badge": "Barato",
         "badgeColor": "green",
         "details": "~$18/kWh, sin cargo fijo de inicio. Ubicados en Reserva Talice.",
-        "tips": "Casi siempre vacíos. Bajar la app EOSVOLT para usarlos."
+        "tips": "Casi siempre vacíos. Bajar la app EOSVOLT para usarlos.",
+        "network": "eosvolt"
       },
       {
         "name": "Devoto / Privados",
         "badge": "Variable",
         "badgeColor": "blue",
         "details": "Sin cargo base. En 15 min carga ~25%. Para cargas cortas suele ser más barato que UTE.",
-        "tips": "Precios varían por operador. Algunos aceptan débito/crédito o app."
+        "tips": "Precios varían por operador. Algunos aceptan débito/crédito o app.",
+        "network": "otro"
       }
     ],
     "alerts": [
@@ -153,13 +205,34 @@
   "troubleshooting": {
     "title": "Solución de problemas al cargar",
     "tips": [
-      { "bold": "No empieza a cargar — \"hora programada\":", "text": "Hay una carga programada activa que todavía no llegó a su horario. Desactivarla o ajustar el límite desde el menú de energía." },
-      { "bold": "Corta antes de llegar al 100%:", "text": "El límite de carga (SOC) configurado ya se alcanzó — es esperado, no es una falla." },
-      { "bold": "Corta y dice \"completado\" de golpe:", "text": "Puede ser la batería ya llena, o el cargador/estación con falla — probar otro equipo antes de descartar el auto." },
-      { "bold": "No carga por temperatura:", "text": "La batería está fuera del rango -20°C a 45°C. Esperar a que se regule la temperatura (a la sombra en verano, en un garage en invierno)." },
-      { "bold": "No arranca el auto después de cargar:", "text": "La batería de 12V puede estar descargada. Necesita arranque con puente, igual que un auto a combustión — no afecta a la batería de tracción." },
-      { "bold": "El cargador de pared no reconoce el enchufe:", "text": "Verificar que el tomacorriente tenga tierra — sin conexión a tierra el auto no inicia la carga." },
-      { "bold": "Nada de lo anterior funciona:", "text": "Falla del auto o del cargador AC — contactar al service oficial." }
+      {
+        "bold": "No empieza a cargar — \"hora programada\":",
+        "text": "Hay una carga programada activa que todavía no llegó a su horario. Desactivarla o ajustar el límite desde el menú de energía."
+      },
+      {
+        "bold": "Corta antes de llegar al 100%:",
+        "text": "El límite de carga (SOC) configurado ya se alcanzó — es esperado, no es una falla."
+      },
+      {
+        "bold": "Corta y dice \"completado\" de golpe:",
+        "text": "Puede ser la batería ya llena, o el cargador/estación con falla — probar otro equipo antes de descartar el auto."
+      },
+      {
+        "bold": "No carga por temperatura:",
+        "text": "La batería está fuera del rango -20°C a 45°C. Esperar a que se regule la temperatura (a la sombra en verano, en un garage en invierno)."
+      },
+      {
+        "bold": "No arranca el auto después de cargar:",
+        "text": "La batería de 12V puede estar descargada. Necesita arranque con puente, igual que un auto a combustión — no afecta a la batería de tracción."
+      },
+      {
+        "bold": "El cargador de pared no reconoce el enchufe:",
+        "text": "Verificar que el tomacorriente tenga tierra — sin conexión a tierra el auto no inicia la carga."
+      },
+      {
+        "bold": "Nada de lo anterior funciona:",
+        "text": "Falla del auto o del cargador AC — contactar al service oficial."
+      }
     ]
   }
 }

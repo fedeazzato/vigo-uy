@@ -39,6 +39,9 @@ export interface Charger {
   details: string
   tips?: string
   source?: SourceTag
+  // Slug linking the curated card to community charging_stations data, so
+  // the computed $/kWh (D4) can render on it once samples exist.
+  network?: StationNetwork
 }
 
 export interface PublicChargingData {
@@ -300,12 +303,52 @@ export type TripChargingStop = {
   departure_percentage?: number
   duration_minutes?: number
   average_speed_kmh?: number
+  // D4: what the charge cost. energy_kwh is the charger-billed figure the
+  // user read off the equipment (NOT derived from battery percentages —
+  // charging losses would overstate $/kWh). Both present -> the stop feeds
+  // charging_cost_stats. station_id links a community charging station.
+  cost_uyu?: number
+  energy_kwh?: number
+  station_id?: string
 }
 
 export type TripLog = Omit<Tables['trip_logs']['Row'], 'model' | 'charging_stops'> & {
   model: Model | null
   charging_stops: TripChargingStop[]
 }
+
+// ── Charging stations (D4, community-maintained) ────────────────────────────
+
+export type StationNetwork = 'ute' | 'eone' | 'dmc' | 'evergo' | 'eosvolt' | 'otro'
+export type StationConnector = 'Tipo 2' | 'CCS2' | 'GB/T' | 'otro'
+export type StationCurrentType = 'AC' | 'DC'
+export type StationReportStatus = 'funciono' | 'fallo' | 'ocupado'
+
+export type ChargingStation = Omit<
+  Tables['charging_stations']['Row'],
+  'network' | 'connector' | 'current_type'
+> & {
+  network: StationNetwork
+  connector: StationConnector
+  current_type: StationCurrentType
+}
+
+export type StationReport = Omit<Tables['station_reports']['Row'], 'status'> & {
+  status: StationReportStatus
+}
+
+// Rolling-365-day average of what members actually paid. station_id is null
+// on the per-network rollup rows (GROUPING SETS); everything else is
+// aggregate output and never null.
+export type ChargingCostStat = Omit<
+  NonNullableRow<Views['charging_cost_stats']['Row']>,
+  'network' | 'station_id'
+> & {
+  network: StationNetwork
+  station_id: string | null
+}
+
+export type StationReliability = NonNullableRow<Views['station_reliability']['Row']>
 
 // ── Vehicles (shared cars) ───────────────────────────────────────────────────
 

@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import rawData from '../data/charging.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
+import CommunityStations from '../components/CommunityStations'
 import { useUserPrefs } from '../context/UserPrefsContext'
+import { supabase } from '../lib/supabaseClient'
+import { fetchChargingCostStats, MIN_COST_SAMPLES } from '../lib/communityData'
 import styles from './Pages.module.css'
-import type { ChargingData, AutonomyStandard } from '../types'
+import type { ChargingCostStat, ChargingData, AutonomyStandard } from '../types'
 
 const data = rawData as ChargingData
 
@@ -17,6 +20,23 @@ export default function ChargingPage() {
   const { model } = useUserPrefs()
   const { stats, autonomy, homeCharging, publicCharging } = data
   const [standard, setStandard] = useState<AutonomyStandard>('WLTP')
+  const [costStats, setCostStats] = useState<ChargingCostStat[]>([])
+
+  useEffect(() => {
+    if (!supabase) return
+    fetchChargingCostStats().then(({ stats: cs }) => setCostStats(cs))
+  }, [])
+
+  // Rolling-year network average from real charges (D4). When present, it
+  // takes visual precedence over the hardcoded price text in the card.
+  function networkAverage(network?: string): ChargingCostStat | null {
+    if (!network) return null
+    return (
+      costStats.find(
+        (s) => s.network === network && s.station_id === null && s.sample_count >= MIN_COST_SAMPLES
+      ) ?? null
+    )
+  }
 
   const visibleStats = model
     ? stats.filter(s => !s.model || s.model === model)
@@ -81,23 +101,42 @@ export default function ChargingPage() {
 
       <Alert type="warning">{publicCharging.alert}</Alert>
 
-      {publicCharging.chargers.map((c, i) => (
-        <Card key={i}>
-          <div className={styles.chargerHeader}>
-            <span className={styles.chargerName}>{c.name}</span>
-            <div>
-              {c.source && (
-                <Badge color={c.source === 'manual' ? 'blue' : 'gray'}>
-                  {c.source === 'manual' ? 'Oficial' : 'Comunidad'}
-                </Badge>
-              )}{' '}
-              <Badge color={c.badgeColor}>{c.badge}</Badge>
+      {publicCharging.chargers.map((c, i) => {
+        const avg = networkAverage(c.network)
+        return (
+          <Card key={i}>
+            <div className={styles.chargerHeader}>
+              <span className={styles.chargerName}>{c.name}</span>
+              <div>
+                {c.source && (
+                  <Badge color={c.source === 'manual' ? 'blue' : 'gray'}>
+                    {c.source === 'manual' ? 'Oficial' : 'Comunidad'}
+                  </Badge>
+                )}{' '}
+                <Badge color={c.badgeColor}>{c.badge}</Badge>
+              </div>
             </div>
-          </div>
-          <p className={styles.chargerDetails}>{c.details}</p>
-          {c.tips && <p className={styles.chargerTip}>💡 {c.tips}</p>}
-        </Card>
-      ))}
+            <p className={styles.chargerDetails}>{c.details}</p>
+            {avg && (
+              <p className={styles.chargerDetails}>
+                💰 Promedio real pagado por la comunidad:{' '}
+                <strong>
+                  ${avg.avg_cost_per_kwh.toLocaleString('es-UY', { maximumFractionDigits: 1 })}/kWh
+                </strong>{' '}
+                ({avg.sample_count} {avg.sample_count === 1 ? 'carga' : 'cargas'}, último año)
+              </p>
+            )}
+            {c.tips && <p className={styles.chargerTip}>💡 {c.tips}</p>}
+          </Card>
+        )
+      })}
+
+      {supabase && (
+        <>
+          <SectionDivider label="Estaciones de la comunidad" />
+          <CommunityStations />
+        </>
+      )}
 
       <SectionDivider label="Advertencias importantes" />
 

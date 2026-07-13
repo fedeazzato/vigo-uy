@@ -1,6 +1,6 @@
 # D4 — Community charging stations + computed cost per kWh
 
-**Status:** TODO · **Phase:** D (post-audit follow-up) · **Depends on:** D2
+**Status:** Done (2026-07-13) — code complete; migration 0022 pending apply (CLI blocked by Windows App Control — paste into SQL Editor, then `migration repair --status applied 0022`) · **Phase:** D (post-audit follow-up) · **Depends on:** D2
 (verified pattern), C1/C2 (CLI migrations + generated types)
 
 ## Context

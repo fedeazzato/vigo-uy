@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
-import NewTripLogPage from './NewTripLogPage'
+import NewTripLogPage, { parseStopDrafts, StopDraft } from './NewTripLogPage'
 
 // supabase is null in tests (no VITE_SUPABASE_* env), so the page never
 // fetches; we only exercise the form's client-side behavior.
@@ -72,5 +72,57 @@ describe('NewTripLogPage progressive disclosure', () => {
     renderNewTrip()
     fireEvent.click(screen.getByRole('checkbox'))
     expect(screen.queryByText(/Elegí E2 o E2\+ para poder compartir/)).toBeNull()
+  })
+})
+
+describe('parseStopDrafts (charging_stops payload)', () => {
+  function draft(overrides: Partial<StopDraft>): StopDraft {
+    return {
+      name: 'UTE Rocha',
+      note: '',
+      distanceFromPrevious: '',
+      arrivalPercentage: '',
+      departurePercentage: '',
+      durationMinutes: '',
+      averageSpeed: '',
+      cost: '',
+      energyKwh: '',
+      stationId: '',
+      ...overrides,
+    }
+  }
+
+  it('skips stops without a name and keeps only entered fields', () => {
+    const result = parseStopDrafts([draft({ name: '  ' }), draft({ durationMinutes: '35' })])
+    expect(result).toEqual({ stops: [{ name: 'UTE Rocha', duration_minutes: 35 }] })
+  })
+
+  it('carries cost, energy and station link when provided (D4)', () => {
+    const result = parseStopDrafts([
+      draft({ cost: '450', energyKwh: '28.5', stationId: 'st-1' }),
+    ])
+    expect(result).toEqual({
+      stops: [{ name: 'UTE Rocha', cost_uyu: 450, energy_kwh: 28.5, station_id: 'st-1' }],
+    })
+  })
+
+  it('omits cost/energy keys entirely when blank, so the stats view never sees them', () => {
+    const result = parseStopDrafts([draft({})])
+    if ('error' in result) throw new Error('unexpected error')
+    expect('cost_uyu' in result.stops[0]).toBe(false)
+    expect('energy_kwh' in result.stops[0]).toBe(false)
+    expect('station_id' in result.stops[0]).toBe(false)
+  })
+
+  it('rejects invalid values in Spanish', () => {
+    expect(parseStopDrafts([draft({ arrivalPercentage: '140' })])).toEqual({
+      error: 'Los porcentajes de batería en las paradas deben estar entre 0 y 100.',
+    })
+    expect(parseStopDrafts([draft({ cost: '-5' })])).toEqual({
+      error: 'El costo de la carga debe ser un número válido.',
+    })
+    expect(parseStopDrafts([draft({ energyKwh: '0' })])).toEqual({
+      error: 'La energía cargada (kWh) debe ser mayor a cero.',
+    })
   })
 })

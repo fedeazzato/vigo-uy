@@ -39,6 +39,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      charging_stations: {
+        Row: {
+          access_notes: string | null
+          address: string | null
+          city: string | null
+          connector: string
+          created_at: string
+          current_type: string
+          hidden: boolean
+          id: string
+          lat: number | null
+          lng: number | null
+          max_power_kw: number | null
+          name: string
+          network: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          access_notes?: string | null
+          address?: string | null
+          city?: string | null
+          connector: string
+          created_at?: string
+          current_type: string
+          hidden?: boolean
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          max_power_kw?: number | null
+          name: string
+          network: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          access_notes?: string | null
+          address?: string | null
+          city?: string | null
+          connector?: string
+          created_at?: string
+          current_type?: string
+          hidden?: boolean
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          max_power_kw?: number | null
+          name?: string
+          network?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       part_purchases: {
         Row: {
           category: string
@@ -210,6 +267,44 @@ export type Database = {
           },
         ]
       }
+      station_reports: {
+        Row: {
+          achieved_kw: number | null
+          created_at: string
+          id: string
+          note: string | null
+          station_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          achieved_kw?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          station_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          achieved_kw?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          station_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_reports_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_logs: {
         Row: {
           average_speed_kmh: number | null
@@ -356,6 +451,15 @@ export type Database = {
       }
     }
     Views: {
+      charging_cost_stats: {
+        Row: {
+          avg_cost_per_kwh: number | null
+          network: string | null
+          sample_count: number | null
+          station_id: string | null
+        }
+        Relationships: []
+      }
       community_totals: {
         Row: {
           contributor_count: number | null
@@ -384,6 +488,16 @@ export type Database = {
           avg_cost_uyu: number | null
           city: string | null
           entry_count: number | null
+        }
+        Relationships: []
+      }
+      station_reliability: {
+        Row: {
+          failure_count: number | null
+          failure_ratio: number | null
+          last_report_at: string | null
+          report_count: number | null
+          station_id: string | null
         }
         Relationships: []
       }
