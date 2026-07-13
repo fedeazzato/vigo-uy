@@ -160,16 +160,13 @@ export default function NewTripLogPage() {
     fetchChargingStations().then(({ stations: s }) => setStations(s))
   }, [])
 
-  // Selecting a community station also fills the free-text name when the
-  // user hasn't typed one (the name is what makes a stop count).
+  // The free-text name is hidden while a station is selected, so it must
+  // mirror the station's name (the name is what makes a stop count in the
+  // payload). Deselecting clears it for the user to type their own.
   function setStopStation(index: number, stationId: string) {
     const station = stations.find((s) => s.id === stationId)
     setStops((prev) =>
-      prev.map((s, i) =>
-        i === index
-          ? { ...s, stationId, name: s.name.trim() || (station?.name ?? s.name) }
-          : s
-      )
+      prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s))
     )
   }
 
@@ -453,39 +450,15 @@ export default function NewTripLogPage() {
                         </button>
                       </div>
 
-                      <div className={styles.stopMainRow}>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel}>Nombre del cargador</label>
-                          <input
-                            type="text"
-                            className={formStyles.input}
-                            value={stop.name}
-                            onChange={(e) => updateStop(index, 'name', e.target.value)}
-                            placeholder="Nombre del cargador"
-                          />
-                        </div>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel}>Minutos cargando</label>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            className={formStyles.input}
-                            value={stop.durationMinutes}
-                            onChange={(e) => updateStop(index, 'durationMinutes', e.target.value)}
-                            placeholder="35"
-                          />
-                        </div>
-                      </div>
-
                       {stations.length > 0 && (
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Estación de la comunidad (opcional)</label>
+                          <label className={styles.smallLabel}>Cargador</label>
                           <select
                             className={formStyles.input}
                             value={stop.stationId}
                             onChange={(e) => setStopStation(index, e.target.value)}
                           >
-                            <option value="">No está en la lista / otro cargador</option>
+                            <option value="">No está en la lista</option>
                             {(Object.keys(NETWORK_LABELS) as StationNetwork[]).map((net) => {
                               const options = stations.filter((s) => s.network === net)
                               if (options.length === 0) return null
@@ -502,6 +475,32 @@ export default function NewTripLogPage() {
                           </select>
                         </div>
                       )}
+
+                      <div className={styles.stopMainRow}>
+                        {!stop.stationId && (
+                          <div className={styles.field}>
+                            <label className={styles.smallLabel}>Nombre del cargador</label>
+                            <input
+                              type="text"
+                              className={formStyles.input}
+                              value={stop.name}
+                              onChange={(e) => updateStop(index, 'name', e.target.value)}
+                              placeholder="Nombre del cargador"
+                            />
+                          </div>
+                        )}
+                        <div className={styles.field}>
+                          <label className={styles.smallLabel}>Minutos cargando</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            className={formStyles.input}
+                            value={stop.durationMinutes}
+                            onChange={(e) => updateStop(index, 'durationMinutes', e.target.value)}
+                            placeholder="35"
+                          />
+                        </div>
+                      </div>
 
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>

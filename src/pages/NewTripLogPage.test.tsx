@@ -10,6 +10,35 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'user-1' }, profile: null, status: 'signedIn' }),
 }))
 
+// One known community station so the stop's charger selector renders.
+vi.mock('../lib/communityData', () => ({
+  invalidateCommunityCache: vi.fn(),
+  fetchChargingStations: () =>
+    Promise.resolve({
+      stations: [
+        {
+          id: 'st-1',
+          user_id: 'user-2',
+          name: 'EONE Punta Shopping',
+          network: 'eone',
+          city: 'Maldonado',
+          address: null,
+          lat: null,
+          lng: null,
+          connector: 'Tipo 2',
+          current_type: 'DC',
+          max_power_kw: 120,
+          access_notes: null,
+          hidden: false,
+          verified: true,
+          created_at: '2026-07-01T00:00:00Z',
+          updated_at: '2026-07-01T00:00:00Z',
+        },
+      ],
+      error: null,
+    }),
+}))
+
 function renderNewTrip() {
   return render(
     <MemoryRouter initialEntries={['/viajes/nuevo']}>
@@ -57,6 +86,25 @@ describe('NewTripLogPage progressive disclosure', () => {
     expect(screen.getByText('Parada 1')).toBeTruthy()
     fireEvent.click(screen.getByText('Quitar'))
     expect(screen.queryByText('Parada 1')).toBeNull()
+  })
+
+  it('puts the charger selector first and only shows the free-text name when unlisted', async () => {
+    renderNewTrip()
+    fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+    fireEvent.click(screen.getByText('+ Agregar parada'))
+
+    // Selector present (stations mocked), name visible while nothing picked.
+    const selector = await screen.findByRole('combobox')
+    expect(screen.getByPlaceholderText('Nombre del cargador')).toBeTruthy()
+
+    // Picking a listed charger hides the free-text name.
+    fireEvent.change(selector, { target: { value: 'st-1' } })
+    expect(screen.queryByPlaceholderText('Nombre del cargador')).toBeNull()
+
+    // Back to "not listed": the name input returns, empty.
+    fireEvent.change(selector, { target: { value: '' } })
+    const nameInput = screen.getByPlaceholderText('Nombre del cargador') as HTMLInputElement
+    expect(nameInput.value).toBe('')
   })
 
   it('shows the model hint before submit while public and no model is picked', () => {
