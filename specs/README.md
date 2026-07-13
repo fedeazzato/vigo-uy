@@ -39,6 +39,7 @@ requirements, files to touch, and acceptance criteria.
 | [D1](D1-prefer-community.md) | `preferCommunity` gate + retirement tracker | D | — | Done |
 | [D2](D2-verified-content.md) | Moderator-verified content ("Oficial" flag) | D | A1 | Done |
 | [D3](D3-security-followups.md) | Minor security follow-ups | D | — | Done |
+| [D4](D4-charging-stations.md) | Community charging stations + computed $/kWh | D | D2 | TODO |
 
 ## Recommended execution order
 

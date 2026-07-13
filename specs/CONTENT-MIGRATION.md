@@ -13,7 +13,8 @@ file is finally deleted.
 | costs.json (realCases) | service_entries | ≥5 public entries | gated (D1) |
 | routes.json (route cards) | trip_logs | ≥5 public trips | gated (D1) |
 | parts.json prices | part_purchases | per-category ≥3 | pending — parts.json carries no prices yet (`TODO(D1)` in PartsPage) |
-| charging.json | needs a `charging_stations` community table | — | future work |
+| charging.json (chargers + alerts) | `charging_stations` + `station_reports` + computed `charging_cost_stats` | per-network ≥3 charges with cost+kWh | specced ([D4](D4-charging-stations.md)) |
+| charging.json (home/V2L/troubleshooting/autonomy) | permanently curated | n/a | keep |
 | mantenimiento.json (dealerPrices) | service_entries by type | — | future work |
 | ficha-tecnica.json, tech-faq.json, accessories.json | permanently curated | n/a | keep |
 
