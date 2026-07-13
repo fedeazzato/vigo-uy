@@ -6,21 +6,13 @@ import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
-import type { ChargingStation, StationNetwork, TripChargingStop, Model } from '../types'
+import { NETWORK_LABELS, NETWORKS } from '../lib/stations'
+import type { ChargingStation, TripChargingStop, Model } from '../types'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
 function today(): string {
   return new Date().toISOString().slice(0, 10)
-}
-
-const NETWORK_LABELS: Record<StationNetwork, string> = {
-  ute: 'UTE',
-  eone: 'EONE',
-  dmc: 'DMC',
-  evergo: 'EverGo',
-  eosvolt: 'EOSVOLT',
-  otro: 'Otros',
 }
 
 // Form state keeps every value as a string; numbers are parsed only on
@@ -459,7 +451,7 @@ export default function NewTripLogPage() {
                             onChange={(e) => setStopStation(index, e.target.value)}
                           >
                             <option value="">No está en la lista</option>
-                            {(Object.keys(NETWORK_LABELS) as StationNetwork[]).map((net) => {
+                            {NETWORKS.map((net) => {
                               const options = stations.filter((s) => s.network === net)
                               if (options.length === 0) return null
                               return (

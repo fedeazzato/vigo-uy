@@ -24,18 +24,13 @@ import type {
 import styles from './CommunityStations.module.css'
 import formStyles from '../styles/formControls.module.css'
 
-export const NETWORK_LABELS: Record<StationNetwork, string> = {
-  ute: 'UTE',
-  eone: 'EONE',
-  dmc: 'DMC',
-  evergo: 'EverGo',
-  eosvolt: 'EOSVOLT',
-  otro: 'Otros',
-}
-
-const NETWORKS = Object.keys(NETWORK_LABELS) as StationNetwork[]
-const CONNECTORS: StationConnector[] = ['Tipo 2', 'CCS2', 'GB/T', 'otro']
-const CURRENT_TYPES: StationCurrentType[] = ['AC', 'DC']
+import {
+  CONNECTORS_BY_CURRENT,
+  CURRENT_TYPES,
+  DEFAULT_CONNECTOR,
+  NETWORK_LABELS,
+  NETWORKS,
+} from '../lib/stations'
 
 // Community-maintained charging stations (D4): locations submitted by
 // members, reliability from one-tap reports, and cost per kWh COMPUTED from
@@ -53,8 +48,17 @@ export default function CommunityStations() {
   const [name, setName] = useState('')
   const [network, setNetwork] = useState<StationNetwork>('ute')
   const [city, setCity] = useState('')
-  const [connector, setConnector] = useState<StationConnector>('Tipo 2')
   const [currentType, setCurrentType] = useState<StationCurrentType>('DC')
+  const [connector, setConnector] = useState<StationConnector>(DEFAULT_CONNECTOR.DC)
+
+  // Connector depends on the current type: switching AC/DC resets the
+  // connector when the current pick doesn't exist on that side.
+  function changeCurrentType(next: StationCurrentType) {
+    setCurrentType(next)
+    if (!CONNECTORS_BY_CURRENT[next].includes(connector)) {
+      setConnector(DEFAULT_CONNECTOR[next])
+    }
+  }
   const [maxPowerKw, setMaxPowerKw] = useState('')
   const [accessNotes, setAccessNotes] = useState('')
   const [busy, setBusy] = useState(false)
@@ -205,15 +209,15 @@ export default function CommunityStations() {
                 </select>
               </div>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-connector">Conector</label>
+                <label className={styles.label} htmlFor="station-current">Corriente</label>
                 <select
-                  id="station-connector"
+                  id="station-current"
                   className={formStyles.input}
-                  value={connector}
-                  onChange={(e) => setConnector(e.target.value as StationConnector)}
+                  value={currentType}
+                  onChange={(e) => changeCurrentType(e.target.value as StationCurrentType)}
                 >
-                  {CONNECTORS.map((c) => (
-                    <option key={c} value={c}>{c === 'otro' ? 'Otro' : c}</option>
+                  {CURRENT_TYPES.map((c) => (
+                    <option key={c} value={c}>{c === 'AC' ? 'AC (lenta)' : 'DC (rápida)'}</option>
                   ))}
                 </select>
               </div>
@@ -221,15 +225,15 @@ export default function CommunityStations() {
 
             <div className={styles.formRow}>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-current">Corriente</label>
+                <label className={styles.label} htmlFor="station-connector">Conector</label>
                 <select
-                  id="station-current"
+                  id="station-connector"
                   className={formStyles.input}
-                  value={currentType}
-                  onChange={(e) => setCurrentType(e.target.value as StationCurrentType)}
+                  value={connector}
+                  onChange={(e) => setConnector(e.target.value as StationConnector)}
                 >
-                  {CURRENT_TYPES.map((c) => (
-                    <option key={c} value={c}>{c === 'AC' ? 'AC (lenta)' : 'DC (rápida)'}</option>
+                  {CONNECTORS_BY_CURRENT[currentType].map((c) => (
+                    <option key={c} value={c}>{c === 'otro' ? 'Otro' : c}</option>
                   ))}
                 </select>
               </div>

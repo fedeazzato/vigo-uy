@@ -319,8 +319,30 @@ export type TripLog = Omit<Tables['trip_logs']['Row'], 'model' | 'charging_stops
 
 // ── Charging stations (D4, community-maintained) ────────────────────────────
 
-export type StationNetwork = 'ute' | 'eone' | 'dmc' | 'evergo' | 'eosvolt' | 'otro'
-export type StationConnector = 'Tipo 2' | 'CCS2' | 'GB/T' | 'otro'
+// Uruguayan networks plus the Argentina/Brazil providers members hit on
+// international trips. Mirrors the DB CHECK constraint (0023).
+export type StationNetwork =
+  | 'ute'
+  | 'eone'
+  | 'dmc'
+  | 'evergo'
+  | 'eosvolt'
+  | 'ypf'
+  | 'tupinamba'
+  | 'zletric'
+  | 'edp'
+  | 'otro'
+// Pairing with current_type is enforced by a DB constraint (0023):
+// Tipo 2 / Tipo 1 / Sin cable are AC, CCS2 / CCS1 are DC, GB/T and otro fit
+// both. Keep CONNECTORS_BY_CURRENT (CommunityStations) in sync.
+export type StationConnector =
+  | 'Tipo 2'
+  | 'Tipo 1'
+  | 'CCS2'
+  | 'CCS1'
+  | 'GB/T'
+  | 'Sin cable'
+  | 'otro'
 export type StationCurrentType = 'AC' | 'DC'
 export type StationReportStatus = 'funciono' | 'fallo' | 'ocupado'
 
