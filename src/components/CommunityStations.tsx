@@ -180,32 +180,6 @@ export default function CommunityStations() {
             <CityDatalist />
             <div className={styles.formRow}>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-name">Nombre / ubicación</label>
-                <input
-                  id="station-name"
-                  type="text"
-                  className={formStyles.input}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: UTE Rocha centro"
-                />
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-city">Ciudad</label>
-                <input
-                  id="station-city"
-                  type="text"
-                  list={UY_CITIES_LIST_ID}
-                  className={formStyles.input}
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Rocha"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.field}>
                 <label className={styles.label} htmlFor="station-network">Red</label>
                 <select
                   id="station-network"
@@ -227,6 +201,33 @@ export default function CommunityStations() {
                 </select>
               </div>
               <div className={styles.field}>
+                <label className={styles.label} htmlFor="station-city">Ciudad</label>
+                <input
+                  id="station-city"
+                  type="text"
+                  list={UY_CITIES_LIST_ID}
+                  className={formStyles.input}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Rocha"
+                />
+              </div>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="station-name">Nombre / ubicación</label>
+              <input
+                id="station-name"
+                type="text"
+                className={formStyles.input}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ej: UTE Rocha centro"
+              />
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.field}>
                 <label className={styles.label} htmlFor="station-current">Corriente</label>
                 <select
                   id="station-current"
@@ -239,9 +240,6 @@ export default function CommunityStations() {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className={styles.formRow}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="station-connector">Conector</label>
                 <select
@@ -251,10 +249,13 @@ export default function CommunityStations() {
                   onChange={(e) => setConnector(e.target.value as StationConnector)}
                 >
                   {CONNECTORS_BY_CURRENT[currentType].map((c) => (
-                    <option key={c} value={c}>{c === 'otro' ? 'Otro' : c}</option>
+                    <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className={styles.formRow}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="station-power">Potencia máx. (kW, opcional)</label>
                 <input
@@ -323,7 +324,7 @@ export default function CommunityStations() {
                   <div className={styles.stationMeta}>
                     {[
                       station.city,
-                      station.connector === 'otro' ? 'conector no estándar' : station.connector,
+                      station.connector,
                       station.current_type,
                       station.max_power_kw != null ? `${station.max_power_kw} kW` : null,
                     ]

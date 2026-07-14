@@ -327,9 +327,9 @@ export type NetworkCountry = 'UY' | 'AR' | 'BR' | 'otro'
 export type ChargingNetwork = Omit<Tables['charging_networks']['Row'], 'country'> & {
   country: NetworkCountry
 }
-// Pairing with current_type is enforced by a DB constraint (0023):
-// Tipo 2 / Tipo 1 / Sin cable are AC, CCS2 / CCS1 are DC, GB/T and otro fit
-// both. Keep CONNECTORS_BY_CURRENT (CommunityStations) in sync.
+// Pairing with current_type is enforced by a DB constraint (0025):
+// Tipo 2 / Tipo 1 are AC, CCS2 / CCS1 are DC, GB/T and Sin cable fit both.
+// Keep CONNECTORS_BY_CURRENT (src/lib/stations.ts) in sync.
 export type StationConnector =
   | 'Tipo 2'
   | 'Tipo 1'
@@ -337,7 +337,6 @@ export type StationConnector =
   | 'CCS1'
   | 'GB/T'
   | 'Sin cable'
-  | 'otro'
 export type StationCurrentType = 'AC' | 'DC'
 export type StationReportStatus = 'funciono' | 'fallo' | 'ocupado'
 

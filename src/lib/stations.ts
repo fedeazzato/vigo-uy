@@ -6,10 +6,10 @@ import type { NetworkCountry, StationConnector, StationCurrentType } from '../ty
 export const CURRENT_TYPES: StationCurrentType[] = ['AC', 'DC']
 
 // Which connectors a station can physically have, by current type — mirrors
-// the DB constraint charging_stations_connector_matches_current (0023).
+// the DB constraint charging_stations_connector_matches_current (0025).
 export const CONNECTORS_BY_CURRENT: Record<StationCurrentType, StationConnector[]> = {
-  AC: ['Tipo 2', 'Tipo 1', 'GB/T', 'Sin cable', 'otro'],
-  DC: ['CCS2', 'CCS1', 'GB/T', 'otro'],
+  AC: ['Tipo 2', 'Tipo 1', 'GB/T', 'Sin cable'],
+  DC: ['CCS2', 'CCS1', 'GB/T', 'Sin cable'],
 }
 
 export const DEFAULT_CONNECTOR: Record<StationCurrentType, StationConnector> = {
