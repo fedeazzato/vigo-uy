@@ -9,6 +9,7 @@ import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
 import styles from './NewServiceEntryPage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
 const mantenimiento = rawMantenimiento as MantenimientoData
 const KNOWN_DEALERS = [...new Set(mantenimiento.dealerPrices.map((d) => d.dealer))]
@@ -138,6 +139,7 @@ export default function NewServiceEntryPage() {
         {error && <Alert type="danger">{error}</Alert>}
 
         <form className={styles.form} onSubmit={handleSubmit}>
+          <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="service-date">Fecha</label>
@@ -206,6 +208,7 @@ export default function NewServiceEntryPage() {
               <input
                 id="service-city"
                 type="text"
+                list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}

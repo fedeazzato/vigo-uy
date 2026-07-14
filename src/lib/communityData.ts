@@ -8,6 +8,7 @@ import { supabase } from './supabaseClient'
 import { toFriendlyError } from './errors'
 import type {
   ChargingCostStat,
+  ChargingNetwork,
   ChargingStation,
   CityCostStat,
   CommunityTotals,
@@ -15,7 +16,6 @@ import type {
   PartPurchase,
   PublicProfile,
   ServiceEntry,
-  StationNetwork,
   StationReliability,
   TripLog,
   VehicleLeaderboardEntry,
@@ -210,6 +210,25 @@ export function fetchCommunityTotals(): Promise<{ totals: CommunityTotals | null
 
 // ── Charging stations (D4) ────────────────────────────────────────────────
 
+// Providers with their per-network usage instructions (0024). Sorted by
+// sort_order: Uruguay first, then AR/BR, 'otro' last.
+export function fetchChargingNetworks(): Promise<{ networks: ChargingNetwork[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ networks: [], error: null })
+  return cached(
+    'chargingNetworks',
+    async () => {
+      const { data, error } = await client
+        .from('charging_networks')
+        .select('*')
+        .order('sort_order')
+        .order('name')
+      return { networks: (data ?? []) as ChargingNetwork[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
 export function fetchChargingStations(): Promise<{ stations: ChargingStation[]; error: string | null }> {
   const client = supabase
   if (!client) return Promise.resolve({ stations: [], error: null })
@@ -261,7 +280,7 @@ export const MIN_COST_SAMPLES = 3
 // fallback; null when neither reaches the sample floor.
 export function pickCostStat(
   stats: ChargingCostStat[],
-  network: StationNetwork,
+  network: string,
   stationId: string
 ): ChargingCostStat | null {
   const station = stats.find((s) => s.station_id === stationId && s.sample_count >= MIN_COST_SAMPLES)

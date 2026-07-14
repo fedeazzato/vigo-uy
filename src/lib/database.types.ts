@@ -39,6 +39,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      charging_networks: {
+        Row: {
+          country: string
+          created_at: string
+          instructions: string | null
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          instructions?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          instructions?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       charging_stations: {
         Row: {
           access_notes: string | null
@@ -94,7 +121,15 @@ export type Database = {
           user_id?: string
           verified?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "charging_stations_network_fkey"
+            columns: ["network"]
+            isOneToOne: false
+            referencedRelation: "charging_networks"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       join_code_attempts: {
         Row: {
@@ -473,7 +508,15 @@ export type Database = {
           sample_count: number | null
           station_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "charging_stations_network_fkey"
+            columns: ["network"]
+            isOneToOne: false
+            referencedRelation: "charging_networks"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       community_totals: {
         Row: {

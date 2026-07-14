@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
 import {
+  fetchChargingNetworks,
   fetchChargingStations,
   fetchChargingCostStats,
   fetchStationReliability,
@@ -14,22 +15,22 @@ import {
 } from '../lib/communityData'
 import type {
   ChargingCostStat,
+  ChargingNetwork,
   ChargingStation,
   StationConnector,
   StationCurrentType,
-  StationNetwork,
   StationReliability,
   StationReportStatus,
 } from '../types'
 import styles from './CommunityStations.module.css'
 import formStyles from '../styles/formControls.module.css'
-
+import CityDatalist, { UY_CITIES_LIST_ID } from './CityDatalist'
 import {
   CONNECTORS_BY_CURRENT,
+  COUNTRIES,
+  COUNTRY_LABELS,
   CURRENT_TYPES,
   DEFAULT_CONNECTOR,
-  NETWORK_LABELS,
-  NETWORKS,
 } from '../lib/stations'
 
 // Community-maintained charging stations (D4): locations submitted by
@@ -38,6 +39,7 @@ import {
 export default function CommunityStations() {
   const { user, status } = useAuth()
 
+  const [networks, setNetworks] = useState<ChargingNetwork[]>([])
   const [stations, setStations] = useState<ChargingStation[]>([])
   const [costStats, setCostStats] = useState<ChargingCostStat[]>([])
   const [reliability, setReliability] = useState<StationReliability[]>([])
@@ -46,7 +48,7 @@ export default function CommunityStations() {
 
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
-  const [network, setNetwork] = useState<StationNetwork>('ute')
+  const [network, setNetwork] = useState('ute')
   const [city, setCity] = useState('')
   const [currentType, setCurrentType] = useState<StationCurrentType>('DC')
   const [connector, setConnector] = useState<StationConnector>(DEFAULT_CONNECTOR.DC)
@@ -64,15 +66,17 @@ export default function CommunityStations() {
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
-    const [stationsRes, statsRes, reliabilityRes] = await Promise.all([
+    const [networksRes, stationsRes, statsRes, reliabilityRes] = await Promise.all([
+      fetchChargingNetworks(),
       fetchChargingStations(),
       fetchChargingCostStats(),
       fetchStationReliability(),
     ])
+    setNetworks(networksRes.networks)
     setStations(stationsRes.stations)
     setCostStats(statsRes.stats)
     setReliability(reliabilityRes.rows)
-    setError(stationsRes.error ?? statsRes.error ?? reliabilityRes.error)
+    setError(networksRes.error ?? stationsRes.error ?? statsRes.error ?? reliabilityRes.error)
   }, [])
 
   useEffect(() => {
@@ -140,10 +144,14 @@ export default function CommunityStations() {
 
   if (!supabase) return null
 
-  const byNetwork = NETWORKS.map((net) => ({
-    network: net,
-    stations: stations.filter((s) => s.network === net),
-  })).filter((group) => group.stations.length > 0)
+  // Networks arrive sorted (UY first, 'otro' last); only non-empty groups
+  // render.
+  const byNetwork = networks
+    .map((net) => ({
+      network: net,
+      stations: stations.filter((s) => s.network === net.slug),
+    }))
+    .filter((group) => group.stations.length > 0)
 
   return (
     <>
@@ -169,6 +177,7 @@ export default function CommunityStations() {
 
         {showForm && (
           <form className={styles.form} onSubmit={addStation}>
+            <CityDatalist />
             <div className={styles.formRow}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="station-name">Nombre / ubicación</label>
@@ -186,6 +195,7 @@ export default function CommunityStations() {
                 <input
                   id="station-city"
                   type="text"
+                  list={UY_CITIES_LIST_ID}
                   className={formStyles.input}
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
@@ -201,11 +211,19 @@ export default function CommunityStations() {
                   id="station-network"
                   className={formStyles.input}
                   value={network}
-                  onChange={(e) => setNetwork(e.target.value as StationNetwork)}
+                  onChange={(e) => setNetwork(e.target.value)}
                 >
-                  {NETWORKS.map((n) => (
-                    <option key={n} value={n}>{NETWORK_LABELS[n]}</option>
-                  ))}
+                  {COUNTRIES.map((country) => {
+                    const options = networks.filter((n) => n.country === country)
+                    if (options.length === 0) return null
+                    return (
+                      <optgroup key={country} label={COUNTRY_LABELS[country]}>
+                        {options.map((n) => (
+                          <option key={n.slug} value={n.slug}>{n.name}</option>
+                        ))}
+                      </optgroup>
+                    )
+                  })}
                 </select>
               </div>
               <div className={styles.field}>
@@ -252,14 +270,14 @@ export default function CommunityStations() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="station-notes">Cómo se usa (opcional)</label>
+              <label className={styles.label} htmlFor="station-notes">Notas del lugar (opcional)</label>
               <textarea
                 id="station-notes"
                 rows={2}
                 className={`${formStyles.input} ${formStyles.textarea}`}
                 value={accessNotes}
                 onChange={(e) => setAccessNotes(e.target.value)}
-                placeholder="App necesaria, tarjeta UTE, horarios, etc."
+                placeholder="QR dañado, horarios del estacionamiento, etc. (las instrucciones de la red van aparte)"
               />
             </div>
 
@@ -273,8 +291,16 @@ export default function CommunityStations() {
       </Card>
 
       {byNetwork.map(({ network: net, stations: netStations }) => (
-        <Card key={net}>
-          <CardTitle icon="🔌">{NETWORK_LABELS[net]}</CardTitle>
+        <Card key={net.slug}>
+          <CardTitle icon="🔌">
+            {net.name}
+            {net.country !== 'UY' && net.country !== 'otro' && (
+              <> <Badge color="gray">{COUNTRY_LABELS[net.country]}</Badge></>
+            )}
+          </CardTitle>
+          {/* Usage instructions are per-provider (charging_networks), not
+              per-station — every post of the network works the same way. */}
+          {net.instructions && <p className={styles.intro}>📱 {net.instructions}</p>}
           <ul className={styles.stationList}>
             {netStations.map((station) => {
               const price = pickCostStat(costStats, station.network, station.id)

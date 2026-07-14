@@ -8,6 +8,7 @@ import { invalidateCommunityCache } from '../lib/communityData'
 import { partsCatalog } from '../lib/partsCatalog'
 import styles from './NewPartPurchasePage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
@@ -140,6 +141,7 @@ export default function NewPartPurchasePage() {
         {error && <Alert type="danger">{error}</Alert>}
 
         <form className={styles.form} onSubmit={handleSubmit}>
+          <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="purchase-date">Fecha</label>
@@ -223,6 +225,7 @@ export default function NewPartPurchasePage() {
               <input
                 id="purchase-city"
                 type="text"
+                list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}

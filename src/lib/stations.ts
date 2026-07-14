@@ -1,24 +1,7 @@
-// Shared catalogs for community charging stations (D4). These mirror the
-// CHECK constraints on charging_stations (migrations 0022/0023) — extend
-// both together.
-import type { StationConnector, StationCurrentType, StationNetwork } from '../types'
-
-// Ordered: Uruguayan networks first, then Argentina/Brazil for
-// international trips, 'otro' last.
-export const NETWORK_LABELS: Record<StationNetwork, string> = {
-  ute: 'UTE',
-  eone: 'EONE',
-  dmc: 'DMC',
-  evergo: 'EverGo',
-  eosvolt: 'EOSVOLT',
-  ypf: 'YPF (Argentina)',
-  tupinamba: 'Tupinambá (Brasil)',
-  zletric: 'Zletric (Brasil)',
-  edp: 'EDP (Brasil)',
-  otro: 'Otros',
-}
-
-export const NETWORKS = Object.keys(NETWORK_LABELS) as StationNetwork[]
+// Shared catalogs for community charging stations (D4). Networks live in
+// the charging_networks table (0024) and are fetched at runtime; only the
+// physics stays hardcoded here.
+import type { NetworkCountry, StationConnector, StationCurrentType } from '../types'
 
 export const CURRENT_TYPES: StationCurrentType[] = ['AC', 'DC']
 
@@ -33,3 +16,12 @@ export const DEFAULT_CONNECTOR: Record<StationCurrentType, StationConnector> = {
   AC: 'Tipo 2',
   DC: 'CCS2',
 }
+
+export const COUNTRY_LABELS: Record<NetworkCountry, string> = {
+  UY: 'Uruguay',
+  AR: 'Argentina',
+  BR: 'Brasil',
+  otro: 'Otros',
+}
+
+export const COUNTRIES: NetworkCountry[] = ['UY', 'AR', 'BR', 'otro']

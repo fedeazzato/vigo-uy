@@ -41,7 +41,7 @@ export interface Charger {
   source?: SourceTag
   // Slug linking the curated card to community charging_stations data, so
   // the computed $/kWh (D4) can render on it once samples exist.
-  network?: StationNetwork
+  network?: string
 }
 
 export interface PublicChargingData {
@@ -319,19 +319,14 @@ export type TripLog = Omit<Tables['trip_logs']['Row'], 'model' | 'charging_stops
 
 // ── Charging stations (D4, community-maintained) ────────────────────────────
 
-// Uruguayan networks plus the Argentina/Brazil providers members hit on
-// international trips. Mirrors the DB CHECK constraint (0023).
-export type StationNetwork =
-  | 'ute'
-  | 'eone'
-  | 'dmc'
-  | 'evergo'
-  | 'eosvolt'
-  | 'ypf'
-  | 'tupinamba'
-  | 'zletric'
-  | 'edp'
-  | 'otro'
+// Networks live in the charging_networks table since 0024 (moderators can
+// add providers with an INSERT), so the slug is an open string — the FK is
+// the real constraint.
+export type NetworkCountry = 'UY' | 'AR' | 'BR' | 'otro'
+
+export type ChargingNetwork = Omit<Tables['charging_networks']['Row'], 'country'> & {
+  country: NetworkCountry
+}
 // Pairing with current_type is enforced by a DB constraint (0023):
 // Tipo 2 / Tipo 1 / Sin cable are AC, CCS2 / CCS1 are DC, GB/T and otro fit
 // both. Keep CONNECTORS_BY_CURRENT (CommunityStations) in sync.
@@ -348,9 +343,8 @@ export type StationReportStatus = 'funciono' | 'fallo' | 'ocupado'
 
 export type ChargingStation = Omit<
   Tables['charging_stations']['Row'],
-  'network' | 'connector' | 'current_type'
+  'connector' | 'current_type'
 > & {
-  network: StationNetwork
   connector: StationConnector
   current_type: StationCurrentType
 }
@@ -364,9 +358,8 @@ export type StationReport = Omit<Tables['station_reports']['Row'], 'status'> & {
 // aggregate output and never null.
 export type ChargingCostStat = Omit<
   NonNullableRow<Views['charging_cost_stats']['Row']>,
-  'network' | 'station_id'
+  'station_id'
 > & {
-  network: StationNetwork
   station_id: string | null
 }
 

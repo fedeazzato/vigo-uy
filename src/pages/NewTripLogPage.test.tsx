@@ -10,9 +10,23 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'user-1' }, profile: null, status: 'signedIn' }),
 }))
 
-// One known community station so the stop's charger selector renders.
+// One known network + station so the stop's charger selector renders.
 vi.mock('../lib/communityData', () => ({
   invalidateCommunityCache: vi.fn(),
+  fetchChargingNetworks: () =>
+    Promise.resolve({
+      networks: [
+        {
+          slug: 'eone',
+          name: 'EONE',
+          country: 'UY',
+          instructions: null,
+          sort_order: 11,
+          created_at: '2026-07-01T00:00:00Z',
+        },
+      ],
+      error: null,
+    }),
   fetchChargingStations: () =>
     Promise.resolve({
       stations: [

@@ -5,9 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
-import { fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
-import { NETWORK_LABELS, NETWORKS } from '../lib/stations'
-import type { ChargingStation, TripChargingStop, Model } from '../types'
+import { fetchChargingNetworks, fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
+import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -146,10 +145,12 @@ export default function NewTripLogPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stations, setStations] = useState<ChargingStation[]>([])
+  const [networks, setNetworks] = useState<ChargingNetwork[]>([])
 
   useEffect(() => {
     if (!supabase) return
     fetchChargingStations().then(({ stations: s }) => setStations(s))
+    fetchChargingNetworks().then(({ networks: n }) => setNetworks(n))
   }, [])
 
   // The free-text name is hidden while a station is selected, so it must
@@ -451,11 +452,11 @@ export default function NewTripLogPage() {
                             onChange={(e) => setStopStation(index, e.target.value)}
                           >
                             <option value="">No está en la lista</option>
-                            {NETWORKS.map((net) => {
-                              const options = stations.filter((s) => s.network === net)
+                            {networks.map((net) => {
+                              const options = stations.filter((s) => s.network === net.slug)
                               if (options.length === 0) return null
                               return (
-                                <optgroup key={net} label={NETWORK_LABELS[net]}>
+                                <optgroup key={net.slug} label={net.name}>
                                   {options.map((s) => (
                                     <option key={s.id} value={s.id}>
                                       {s.name}{s.city ? ` — ${s.city}` : ''}

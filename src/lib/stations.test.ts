@@ -1,11 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import {
-  CONNECTORS_BY_CURRENT,
-  DEFAULT_CONNECTOR,
-  NETWORK_LABELS,
-  NETWORKS,
-} from './stations'
+import { CONNECTORS_BY_CURRENT, DEFAULT_CONNECTOR } from './stations'
 
+// Networks themselves live in the charging_networks table since 0024 — only
+// the physical connector/current pairing stays hardcoded (and DB-enforced).
 describe('station catalogs (mirror DB constraints 0022/0023)', () => {
   it('pairs connectors with the right current type', () => {
     // AC-only connectors never appear under DC and vice versa.
@@ -31,17 +28,5 @@ describe('station catalogs (mirror DB constraints 0022/0023)', () => {
   it('defaults are valid for their current type', () => {
     expect(CONNECTORS_BY_CURRENT.AC).toContain(DEFAULT_CONNECTOR.AC)
     expect(CONNECTORS_BY_CURRENT.DC).toContain(DEFAULT_CONNECTOR.DC)
-  })
-
-  it('lists the Argentina/Brazil networks for international trips', () => {
-    expect(NETWORKS).toContain('ypf')
-    expect(NETWORKS).toContain('tupinamba')
-    expect(NETWORKS).toContain('zletric')
-    expect(NETWORKS).toContain('edp')
-    // Country is visible in the label so members pick the right one abroad.
-    expect(NETWORK_LABELS.ypf).toContain('Argentina')
-    expect(NETWORK_LABELS.tupinamba).toContain('Brasil')
-    // 'otro' stays last as the escape hatch.
-    expect(NETWORKS[NETWORKS.length - 1]).toBe('otro')
   })
 })
