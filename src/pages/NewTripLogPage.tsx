@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { fetchChargingNetworks, fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
 import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
+import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -311,6 +312,7 @@ export default function NewTripLogPage() {
         {error && <Alert type="danger">{error}</Alert>}
 
         <form className={styles.form} onSubmit={handleSubmit}>
+          <CityDatalist />
           <div className={styles.field}>
             <label className={styles.label} htmlFor="trip-title">Título</label>
             <input
@@ -329,6 +331,7 @@ export default function NewTripLogPage() {
               <input
                 id="trip-origin"
                 type="text"
+                list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
@@ -340,6 +343,7 @@ export default function NewTripLogPage() {
               <input
                 id="trip-destination"
                 type="text"
+                list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
