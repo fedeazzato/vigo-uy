@@ -451,6 +451,7 @@ export default function NewTripLogPage() {
                         <div className={styles.field}>
                           <label className={styles.smallLabel}>Cargador</label>
                           <select
+                            aria-label="Cargador"
                             className={formStyles.input}
                             value={stop.stationId}
                             onChange={(e) => setStopStation(index, e.target.value)}

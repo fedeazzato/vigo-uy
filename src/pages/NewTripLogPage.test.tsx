@@ -108,7 +108,8 @@ describe('NewTripLogPage progressive disclosure', () => {
     fireEvent.click(screen.getByText('+ Agregar parada'))
 
     // Selector present (stations mocked), name visible while nothing picked.
-    const selector = await screen.findByRole('combobox')
+    // Note: inputs with list= also have role combobox, hence the name filter.
+    const selector = await screen.findByRole('combobox', { name: 'Cargador' })
     expect(screen.getByPlaceholderText('Nombre del cargador')).toBeTruthy()
 
     // Picking a listed charger hides the free-text name.
