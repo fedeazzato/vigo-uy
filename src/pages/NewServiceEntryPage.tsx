@@ -142,9 +142,10 @@ export default function NewServiceEntryPage() {
           <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-date">Fecha</label>
+              <label className={styles.label} htmlFor="service-date">📅 Fecha</label>
               <input
                 id="service-date"
+                required
                 type="date"
                 className={formStyles.input}
                 value={serviceDate}
@@ -152,9 +153,10 @@ export default function NewServiceEntryPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-km">Kilometraje</label>
+              <label className={styles.label} htmlFor="service-km">📏 Kilometraje</label>
               <input
                 id="service-km"
+                required
                 type="text"
                 inputMode="numeric"
                 className={formStyles.input}
@@ -166,9 +168,10 @@ export default function NewServiceEntryPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-dealer">Taller</label>
+            <label className={styles.label} htmlFor="service-dealer">🔧 Taller</label>
             <input
               id="service-dealer"
+              required
               type="text"
               className={formStyles.input}
               value={dealer}
@@ -179,9 +182,10 @@ export default function NewServiceEntryPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-type">Tipo de service</label>
+            <label className={styles.label} htmlFor="service-type">🛠️ Tipo de service</label>
             <input
               id="service-type"
+              required
               type="text"
               className={formStyles.input}
               value={serviceType}
@@ -192,9 +196,10 @@ export default function NewServiceEntryPage() {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-cost">Costo (UYU)</label>
+              <label className={styles.label} htmlFor="service-cost">💰 Costo (UYU)</label>
               <input
                 id="service-cost"
+                required
                 type="text"
                 inputMode="decimal"
                 className={formStyles.input}
@@ -204,7 +209,7 @@ export default function NewServiceEntryPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-city">Ciudad</label>
+              <label className={styles.label} htmlFor="service-city">📍 Ciudad</label>
               <input
                 id="service-city"
                 type="text"
@@ -218,7 +223,7 @@ export default function NewServiceEntryPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-notes">Notas (opcional)</label>
+            <label className={styles.label} htmlFor="service-notes">💬 Notas</label>
             <textarea
               id="service-notes"
               rows={3}

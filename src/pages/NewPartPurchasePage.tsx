@@ -144,9 +144,10 @@ export default function NewPartPurchasePage() {
           <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-date">Fecha</label>
+              <label className={styles.label} htmlFor="purchase-date">📅 Fecha</label>
               <input
                 id="purchase-date"
+                required
                 type="date"
                 className={formStyles.input}
                 value={purchaseDate}
@@ -154,7 +155,7 @@ export default function NewPartPurchasePage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-category">Categoría</label>
+              <label className={styles.label} htmlFor="purchase-category">🗂️ Categoría</label>
               <select
                 id="purchase-category"
                 className={formStyles.input}
@@ -169,9 +170,10 @@ export default function NewPartPurchasePage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="purchase-item">¿Qué compraste?</label>
+            <label className={styles.label} htmlFor="purchase-item">🔩 ¿Qué compraste?</label>
             <input
               id="purchase-item"
+              required
               type="text"
               className={formStyles.input}
               value={item}
@@ -183,9 +185,10 @@ export default function NewPartPurchasePage() {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-store">¿Dónde?</label>
+              <label className={styles.label} htmlFor="purchase-store">🏪 ¿Dónde?</label>
               <input
                 id="purchase-store"
+                required
                 type="text"
                 className={formStyles.input}
                 value={store}
@@ -194,9 +197,10 @@ export default function NewPartPurchasePage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-price">Precio (UYU)</label>
+              <label className={styles.label} htmlFor="purchase-price">💰 Precio (UYU)</label>
               <input
                 id="purchase-price"
+                required
                 type="text"
                 inputMode="decimal"
                 className={formStyles.input}
@@ -209,7 +213,7 @@ export default function NewPartPurchasePage() {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-km">Kilometraje (opcional)</label>
+              <label className={styles.label} htmlFor="purchase-km">📏 Kilometraje</label>
               <input
                 id="purchase-km"
                 type="text"
@@ -221,7 +225,7 @@ export default function NewPartPurchasePage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-city">Ciudad (opcional)</label>
+              <label className={styles.label} htmlFor="purchase-city">📍 Ciudad</label>
               <input
                 id="purchase-city"
                 type="text"
@@ -257,7 +261,7 @@ export default function NewPartPurchasePage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="purchase-notes">Notas (opcional)</label>
+            <label className={styles.label} htmlFor="purchase-notes">💬 Notas</label>
             <textarea
               id="purchase-notes"
               rows={3}

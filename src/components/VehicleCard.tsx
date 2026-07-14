@@ -143,7 +143,7 @@ export default function VehicleCard() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="vehicle-plate">Matrícula (opcional)</label>
+            <label className={styles.label} htmlFor="vehicle-plate">🚘 Matrícula</label>
             <div className={styles.inlineRow}>
               <input
                 id="vehicle-plate"

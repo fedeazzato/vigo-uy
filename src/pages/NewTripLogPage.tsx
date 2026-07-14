@@ -314,9 +314,10 @@ export default function NewTripLogPage() {
         <form className={styles.form} onSubmit={handleSubmit}>
           <CityDatalist />
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="trip-title">Título</label>
+            <label className={styles.label} htmlFor="trip-title">📝 Título</label>
             <input
               id="trip-title"
+              required
               type="text"
               className={formStyles.input}
               value={title}
@@ -327,9 +328,10 @@ export default function NewTripLogPage() {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-origin">Origen</label>
+              <label className={styles.label} htmlFor="trip-origin">📍 Origen</label>
               <input
                 id="trip-origin"
+                required
                 type="text"
                 list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
@@ -339,9 +341,10 @@ export default function NewTripLogPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-destination">Destino</label>
+              <label className={styles.label} htmlFor="trip-destination">🏁 Destino</label>
               <input
                 id="trip-destination"
+                required
                 type="text"
                 list={UY_CITIES_LIST_ID}
                 className={formStyles.input}
@@ -354,9 +357,10 @@ export default function NewTripLogPage() {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-date">Fecha</label>
+              <label className={styles.label} htmlFor="trip-date">📅 Fecha</label>
               <input
                 id="trip-date"
+                required
                 type="date"
                 className={formStyles.input}
                 value={tripDate}
@@ -364,7 +368,7 @@ export default function NewTripLogPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-distance">Distancia (km, opcional)</label>
+              <label className={styles.label} htmlFor="trip-distance">📏 Distancia (km)</label>
               <input
                 id="trip-distance"
                 type="text"
@@ -392,7 +396,7 @@ export default function NewTripLogPage() {
             <div className={styles.detailsSection}>
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label className={styles.label} htmlFor="trip-starting-charge">Batería al salir (%, opcional)</label>
+                  <label className={styles.label} htmlFor="trip-starting-charge">🔋 Batería al salir (%)</label>
                   <input
                     id="trip-starting-charge"
                     type="text"
@@ -404,7 +408,7 @@ export default function NewTripLogPage() {
                   />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label} htmlFor="trip-ending-charge">Batería al llegar (%, opcional)</label>
+                  <label className={styles.label} htmlFor="trip-ending-charge">🪫 Batería al llegar (%)</label>
                   <input
                     id="trip-ending-charge"
                     type="text"
@@ -418,7 +422,7 @@ export default function NewTripLogPage() {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="trip-avg-speed">Velocidad media del viaje (km/h, opcional)</label>
+                <label className={styles.label} htmlFor="trip-avg-speed">⏱️ Velocidad media del viaje (km/h)</label>
                 <input
                   id="trip-avg-speed"
                   type="text"
@@ -431,7 +435,7 @@ export default function NewTripLogPage() {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Paradas de carga (opcional)</label>
+                <label className={styles.label}>⚡ Paradas de carga</label>
                 {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
                 <div className={styles.stopsList}>
                   {stops.map((stop, index) => (
@@ -449,7 +453,7 @@ export default function NewTripLogPage() {
 
                       {stations.length > 0 && (
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Cargador</label>
+                          <label className={styles.smallLabel}>🔌 Cargador</label>
                           <select
                             aria-label="Cargador"
                             className={formStyles.input}
@@ -488,7 +492,7 @@ export default function NewTripLogPage() {
                           </div>
                         )}
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Minutos cargando</label>
+                          <label className={styles.smallLabel}>⏳ Minutos cargando</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -552,7 +556,7 @@ export default function NewTripLogPage() {
 
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Costo de la carga (UYU)</label>
+                          <label className={styles.smallLabel}>💰 Costo de la carga (UYU)</label>
                           <input
                             type="text"
                             inputMode="decimal"
@@ -563,7 +567,7 @@ export default function NewTripLogPage() {
                           />
                         </div>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Energía cargada (kWh, según el cargador)</label>
+                          <label className={styles.smallLabel}>🔌 Energía cargada (kWh, según el cargador)</label>
                           <input
                             type="text"
                             inputMode="decimal"
@@ -576,7 +580,7 @@ export default function NewTripLogPage() {
                       </div>
 
                       <div className={styles.field}>
-                        <label className={styles.smallLabel}>Nota (opcional)</label>
+                        <label className={styles.smallLabel}>💬 Nota</label>
                         <textarea
                           rows={3}
                           className={`${formStyles.input} ${formStyles.textarea}`}
@@ -596,7 +600,7 @@ export default function NewTripLogPage() {
           )}
 
           <div className={styles.field}>
-            <label className={styles.label}>Calificación (opcional)</label>
+            <label className={styles.label}>⭐ Calificación</label>
             <div className={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -613,7 +617,7 @@ export default function NewTripLogPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="trip-notes">Notas (opcional)</label>
+            <label className={styles.label} htmlFor="trip-notes">💬 Notas</label>
             <textarea
               id="trip-notes"
               rows={3}
@@ -627,7 +631,7 @@ export default function NewTripLogPage() {
           <div className={styles.shareBlock}>
             <div className={styles.field}>
               <label className={styles.label}>
-                Modelo{isPublic && ' (obligatorio para compartir)'}
+                🚙 Modelo
               </label>
               <div className={styles.modelRow}>
                 {MODELS.map((m) => (

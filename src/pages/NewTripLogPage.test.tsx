@@ -73,10 +73,10 @@ describe('NewTripLogPage progressive disclosure', () => {
   it('hides the battery/charge details behind the disclosure by default', () => {
     renderNewTrip()
     // Basics visible…
-    expect(screen.getByLabelText('Título')).toBeTruthy()
-    expect(screen.getByLabelText('Distancia (km, opcional)')).toBeTruthy()
+    expect(screen.getByLabelText('📝 Título')).toBeTruthy()
+    expect(screen.getByLabelText('📏 Distancia (km)')).toBeTruthy()
     // …power-user fields collapsed.
-    expect(screen.queryByLabelText('Batería al salir (%, opcional)')).toBeNull()
+    expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
     expect(screen.queryByText('+ Agregar parada')).toBeNull()
   })
 
@@ -86,11 +86,11 @@ describe('NewTripLogPage progressive disclosure', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
 
     fireEvent.click(toggle)
-    expect(screen.getByLabelText('Batería al salir (%, opcional)')).toBeTruthy()
+    expect(screen.getByLabelText('🔋 Batería al salir (%)')).toBeTruthy()
     expect(screen.getByText('+ Agregar parada')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /Ocultar detalles de batería y carga/ }))
-    expect(screen.queryByLabelText('Batería al salir (%, opcional)')).toBeNull()
+    expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
   })
 
   it('lets stops be added and removed inside the expanded section', () => {
