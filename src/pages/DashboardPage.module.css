@@ -94,6 +94,49 @@
 }
 .actionLink:hover { color: var(--green-600); }
 
+/* ── First-run empty state ── */
+
+.emptyState {
+  text-align: center;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.emptyStateIcon {
+  font-size: 34px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.emptyStateTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.emptyStateText {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.emptyStateBtn {
+  min-height: 46px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--green-400);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.emptyStateBtn:hover { background: var(--green-600); }
+
 @media (max-width: 500px) {
   .item {
     grid-template-columns: 1fr;

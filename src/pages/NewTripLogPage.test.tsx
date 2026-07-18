@@ -65,25 +65,73 @@ function renderNewTrip() {
   )
 }
 
-describe('NewTripLogPage progressive disclosure', () => {
+// Wizard helpers: fill the required basics and advance with the single
+// primary button ("Siguiente" until the last step).
+function fillBasics() {
+  fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+  fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+}
+
+function clickNext() {
+  fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }))
+}
+
+function goToShareStep() {
+  fillBasics()
+  clickNext() // -> paso 2 (¿Cómo estuvo?)
+  clickNext() // -> paso 3 (Compartir)
+}
+
+describe('NewTripLogPage wizard', () => {
   beforeEach(() => {
     localStorage.clear()
   })
 
-  it('hides the battery/charge details behind the disclosure by default', () => {
+  it('starts on "Lo básico" with only the basics on screen', () => {
     renderNewTrip()
-    // Basics visible…
+    expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
     expect(screen.getByLabelText('📍 Origen')).toBeTruthy()
     expect(screen.getByLabelText('📏 Distancia (km)')).toBeTruthy()
-    // …no title field: it's derived from origin/destination on save.
+    // No title field: it's derived from origin/destination on save.
     expect(screen.queryByLabelText(/Título/)).toBeNull()
-    // …power-user fields collapsed.
+    // Later-step fields are not mounted yet.
+    expect(screen.queryByText('⭐ ¿Cómo estuvo el viaje?')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'E2' })).toBeNull()
     expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
-    expect(screen.queryByText('+ Agregar parada')).toBeNull()
   })
 
-  it('expands and collapses via the toggle', () => {
+  it('validates the basics before advancing', () => {
     renderNewTrip()
+    // Whitespace passes native required but not the trim check.
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: '   ' } })
+    fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    clickNext()
+    expect(screen.getByText('Completá origen y destino.')).toBeTruthy()
+    expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
+  })
+
+  it('walks the three steps and keeps earlier answers when going back', () => {
+    renderNewTrip()
+    fillBasics()
+    clickNext()
+    expect(screen.getByText('Paso 2 de 3')).toBeTruthy()
+    expect(screen.getByText('⭐ ¿Cómo estuvo el viaje?')).toBeTruthy()
+    clickNext()
+    expect(screen.getByText('Paso 3 de 3')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Guardar viaje' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: /Atrás/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Atrás/ }))
+    expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
+    expect((screen.getByLabelText('📍 Origen') as HTMLInputElement).value).toBe('Montevideo')
+  })
+
+  it('hides the battery/charge details behind the disclosure on the share step', () => {
+    renderNewTrip()
+    goToShareStep()
+    expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
+    expect(screen.queryByText('+ Agregar parada')).toBeNull()
+
     const toggle = screen.getByRole('button', { name: /Agregar detalles de batería y carga/ })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
 
@@ -97,6 +145,7 @@ describe('NewTripLogPage progressive disclosure', () => {
 
   it('lets stops be added and removed inside the expanded section', () => {
     renderNewTrip()
+    goToShareStep()
     fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
     fireEvent.click(screen.getByText('+ Agregar parada'))
     expect(screen.getByText('Parada 1')).toBeTruthy()
@@ -106,6 +155,7 @@ describe('NewTripLogPage progressive disclosure', () => {
 
   it('puts the charger selector first and only shows the free-text name when unlisted', async () => {
     renderNewTrip()
+    goToShareStep()
     fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
     fireEvent.click(screen.getByText('+ Agregar parada'))
 
@@ -124,8 +174,9 @@ describe('NewTripLogPage progressive disclosure', () => {
     expect(nameInput.value).toBe('')
   })
 
-  it('shows the model hint before submit while public and no model is picked', () => {
+  it('shows the model hint on the share step while public and no model is picked', () => {
     renderNewTrip()
+    goToShareStep()
     // No preferred model in prefs, sharing on by default -> hint visible.
     expect(screen.getByText(/Elegí E2 o E2\+ para poder compartir/)).toBeTruthy()
 
@@ -135,6 +186,7 @@ describe('NewTripLogPage progressive disclosure', () => {
 
   it('hides the model hint when sharing is off', () => {
     renderNewTrip()
+    goToShareStep()
     fireEvent.click(screen.getByRole('checkbox'))
     expect(screen.queryByText(/Elegí E2 o E2\+ para poder compartir/)).toBeNull()
   })

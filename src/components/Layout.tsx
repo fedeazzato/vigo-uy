@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary'
 import OfflineBanner from './OfflineBanner'
@@ -7,6 +7,7 @@ import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
 import { useAuth } from '../context/AuthContext'
+import { RegisterSheetContext } from '../context/RegisterSheetContext'
 
 const THEME_ICON: Record<EffectiveTheme, string> = {
   light: '☀️',
@@ -49,6 +50,18 @@ export default function Layout() {
     setSheetOpen(false)
   }
 
+  const registerSheet = useMemo(() => ({ openRegisterSheet: () => setSheetOpen(true) }), [])
+
+  // The sheet doubles as a dialog on desktop — close it with Escape.
+  useEffect(() => {
+    if (!sheetOpen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSheetOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [sheetOpen])
+
   function renderNavLink({ to, label, icon, end }: NavItem, extraClass = '') {
     return (
       <NavLink
@@ -66,6 +79,7 @@ export default function Layout() {
   }
 
   return (
+    <RegisterSheetContext.Provider value={registerSheet}>
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
@@ -202,25 +216,42 @@ export default function Layout() {
         </div>
       </main>
 
-      {/* Mobile bottom tab bar (hidden on desktop via CSS). */}
+      {/* Registrar sheet: bottom sheet on mobile, centered dialog on desktop. */}
       {sheetOpen && <div className={styles.sheetBackdrop} onClick={closeSheet} aria-hidden="true" />}
       {sheetOpen && (
-        <div className={styles.sheet}>
+        <div className={styles.sheet} role="dialog" aria-label="¿Qué querés registrar?">
+          <div className={styles.sheetHeader}>¿Qué querés registrar?</div>
           {status === 'signedIn' ? (
             <>
               <Link to="/viajes/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                🗺️ Viaje
+                <span className={styles.sheetIcon} aria-hidden="true">🗺️</span>
+                <span>
+                  <span className={styles.sheetTitle}>Un viaje</span>
+                  <span className={styles.sheetDesc}>Cuánto recorriste y hacia dónde</span>
+                </span>
               </Link>
               <Link to="/costos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                🛠️ Service
+                <span className={styles.sheetIcon} aria-hidden="true">🛠️</span>
+                <span>
+                  <span className={styles.sheetTitle}>Un service</span>
+                  <span className={styles.sheetDesc}>Qué le hiciste y cuánto costó</span>
+                </span>
               </Link>
               <Link to="/repuestos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                🔩 Repuesto
+                <span className={styles.sheetIcon} aria-hidden="true">🔩</span>
+                <span>
+                  <span className={styles.sheetTitle}>Un repuesto</span>
+                  <span className={styles.sheetDesc}>Qué compraste y dónde lo conseguiste</span>
+                </span>
               </Link>
             </>
           ) : (
             <Link to="/login" className={styles.sheetLink} onClick={closeSheet}>
-              🔑 Iniciá sesión para registrar
+              <span className={styles.sheetIcon} aria-hidden="true">🔑</span>
+              <span>
+                <span className={styles.sheetTitle}>Iniciá sesión para registrar</span>
+                <span className={styles.sheetDesc}>Solo necesitás tu email, sin contraseña</span>
+              </span>
             </Link>
           )}
         </div>
@@ -272,5 +303,6 @@ export default function Layout() {
 
       <OfflineBanner />
     </div>
+    </RegisterSheetContext.Provider>
   )
 }

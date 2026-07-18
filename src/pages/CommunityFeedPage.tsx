@@ -4,6 +4,7 @@ import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } fr
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { formatDate } from '../lib/format'
 import { fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { partCategoryTitle } from '../lib/partsCatalog'
@@ -15,8 +16,16 @@ type TypeFilter = 'todos' | 'viajes' | 'services' | 'repuestos'
 type ModelFilter = 'todos' | 'E2' | 'E2+'
 type SortOrder = 'recientes' | 'puntuacion'
 
+const TYPE_CHIPS: { key: TypeFilter; label: string }[] = [
+  { key: 'todos', label: 'Todo' },
+  { key: 'viajes', label: 'Viajes' },
+  { key: 'services', label: 'Services' },
+  { key: 'repuestos', label: 'Repuestos' },
+]
+
 export default function CommunityFeedPage() {
   const { status } = useAuth()
+  const { openRegisterSheet } = useRegisterSheet()
   // 100 rows is plenty at current community size; paginate when it grows.
   const { trips, entries, purchases, names, loading, error } = useCommunityContent({
     purchases: true,
@@ -109,9 +118,9 @@ export default function CommunityFeedPage() {
             <>
               <span>¿Hiciste un viaje o un service? Compartilo con la comunidad.</span>
               <div className={styles.ctaActions}>
-                <Link to="/viajes/nuevo" className={styles.ctaBtn}>+ Viaje</Link>
-                <Link to="/costos/nuevo" className={styles.ctaBtn}>+ Service</Link>
-                <Link to="/repuestos/nuevo" className={styles.ctaBtn}>+ Repuesto</Link>
+                <button type="button" className={styles.ctaBtn} onClick={openRegisterSheet}>
+                  + Compartir
+                </button>
               </div>
             </>
           ) : (
@@ -144,6 +153,21 @@ export default function CommunityFeedPage() {
 
       <SectionDivider label="Aportes de la comunidad" />
 
+      {/* Type filter as chips (mobile redesign): one tap, no dropdown. */}
+      <div className={styles.chipsRow} role="group" aria-label="Mostrar">
+        {TYPE_CHIPS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            className={`${styles.chip} ${typeFilter === key ? styles.chipActive : ''}`}
+            onClick={() => setTypeFilter(key)}
+            aria-pressed={typeFilter === key}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className={styles.toolbar}>
         <div className={`${styles.toolbarField} ${styles.searchInput}`}>
           <label className={styles.toolbarLabel} htmlFor="feed-search">Buscar</label>
@@ -155,20 +179,6 @@ export default function CommunityFeedPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-        </div>
-        <div className={styles.toolbarField}>
-          <label className={styles.toolbarLabel} htmlFor="feed-type">Mostrar</label>
-          <select
-            id="feed-type"
-            className={formStyles.input}
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-          >
-            <option value="todos">Todo</option>
-            <option value="viajes">Viajes</option>
-            <option value="services">Services</option>
-            <option value="repuestos">Repuestos</option>
-          </select>
         </div>
         <div className={styles.toolbarField}>
           <label className={styles.toolbarLabel} htmlFor="feed-model">Modelo</label>

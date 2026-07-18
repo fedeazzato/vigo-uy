@@ -16,6 +16,15 @@ function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+// The form is a 3-step wizard (mobile redesign): short screens beat one long
+// scroll. Step 1 holds the required basics, everything after is optional.
+const STEP_TITLES: Record<number, string> = {
+  1: 'Lo básico',
+  2: '¿Cómo estuvo?',
+  3: 'Compartir',
+}
+const LAST_STEP = 3
+
 // Form state keeps every value as a string; numbers are parsed only on
 // submit.
 export interface StopDraft {
@@ -125,6 +134,7 @@ export default function NewTripLogPage() {
   const { model: preferredModel } = useUserPrefs()
   const navigate = useNavigate()
 
+  const [step, setStep] = useState(1)
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
@@ -222,12 +232,50 @@ export default function NewTripLogPage() {
     navigate('/mi-actividad')
   }
 
+  // "← Atrás": previous step, or leave the form from step 1.
+  function handleBack() {
+    if (step > 1) {
+      setStep((s) => s - 1)
+      setError(null)
+      return
+    }
+    handleCancel()
+  }
+
+  // Step 1 fields are validated when leaving the step, so later steps never
+  // fail on a field that's no longer on screen.
+  function validateBasics(): string | null {
+    if (!origin.trim() || !destination.trim()) return 'Completá origen y destino.'
+    const distance = parseLocaleNumber(distanceKm) ?? null
+    if (distance !== null && (!Number.isFinite(distance) || distance < 0)) {
+      return 'La distancia debe ser un número válido.'
+    }
+    return null
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+
+    // Steps 1 and 2 only advance; the trip is saved from the last step.
+    if (step < LAST_STEP) {
+      if (step === 1) {
+        const basicsError = validateBasics()
+        if (basicsError) {
+          setError(basicsError)
+          return
+        }
+      }
+      setError(null)
+      setStep((s) => s + 1)
+      return
+    }
+
     if (!supabase || !user) return
 
-    if (!origin.trim() || !destination.trim()) {
-      setError('Completá origen y destino.')
+    const basicsError = validateBasics()
+    if (basicsError) {
+      setError(basicsError)
+      setStep(1)
       return
     }
     if (isPublic && !model) {
@@ -235,10 +283,6 @@ export default function NewTripLogPage() {
       return
     }
     const distance = parseLocaleNumber(distanceKm) ?? null
-    if (distance !== null && (!Number.isFinite(distance) || distance < 0)) {
-      setError('La distancia debe ser un número válido.')
-      return
-    }
     const startCharge = parseLocaleNumber(startingCharge)
     if (!isValidPercentage(startCharge)) {
       setError('La batería al salir debe estar entre 0 y 100.')
@@ -313,15 +357,23 @@ export default function NewTripLogPage() {
 
   return (
     <div>
+      <div className={styles.wizardTop}>
+        <button type="button" className={styles.backBtn} onClick={handleBack} disabled={submitting}>
+          ← Atrás
+        </button>
+        <span className={styles.stepCounter}>Paso {step} de {LAST_STEP}</span>
+      </div>
       <PageHeader
-        title={isEdit ? '🗺️ Editar viaje' : '🗺️ Nuevo viaje'}
-        subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+        title={`🗺️ ${STEP_TITLES[step]}`}
+        subtitle={isEdit ? 'Estás editando un viaje guardado.' : undefined}
       />
 
       <Card>
         {error && <FormError>{error}</FormError>}
 
         <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+          {step === 1 && (
+          <>
           <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
@@ -376,6 +428,45 @@ export default function NewTripLogPage() {
                 placeholder="140"
               />
             </div>
+          </div>
+          </>
+          )}
+
+          {step === 3 && (
+          <>
+          <div className={styles.shareBlock}>
+            <div className={styles.field}>
+              <span className={styles.label}>
+                🚙 Modelo
+              </span>
+              <div className={styles.modelRow}>
+                {MODELS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
+                    onClick={() => { setModel(m); setDirty(true) }}
+                    aria-pressed={model === m}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+              {isPublic && !model && (
+                <span className={styles.modelHint}>
+                  Elegí E2 o E2+ para poder compartir el viaje con la comunidad.
+                </span>
+              )}
+            </div>
+
+            <label className={styles.checkboxRow}>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
+            </label>
           </div>
 
           <button
@@ -605,9 +696,13 @@ export default function NewTripLogPage() {
               </div>
             </div>
           )}
+          </>
+          )}
 
+          {step === 2 && (
+          <>
           <div className={styles.field}>
-            <span className={styles.label}>⭐ Calificación</span>
+            <span className={styles.label}>⭐ ¿Cómo estuvo el viaje?</span>
             <div className={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -641,58 +736,21 @@ export default function NewTripLogPage() {
               className={`${formStyles.input} ${formStyles.textarea}`}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Detalles adicionales..."
+              placeholder="Contanos cómo te fue..."
             />
           </div>
+          </>
+          )}
 
-          <div className={styles.shareBlock}>
-            <div className={styles.field}>
-              <span className={styles.label}>
-                🚙 Modelo
-              </span>
-              <div className={styles.modelRow}>
-                {MODELS.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
-                    onClick={() => { setModel(m); setDirty(true) }}
-                    aria-pressed={model === m}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-              {isPublic && !model && (
-                <span className={styles.modelHint}>
-                  Elegí E2 o E2+ para poder compartir el viaje con la comunidad.
-                </span>
-              )}
-            </div>
-
-            <label className={styles.checkboxRow}>
-              <input
-                type="checkbox"
-                checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
-              />
-              Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
-            </label>
-          </div>
-
-          <div className={styles.actions}>
-            <button type="submit" className={styles.submitBtn} disabled={submitting}>
-              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-            </button>
-            <button
-              type="button"
-              className={styles.cancelBtn}
-              onClick={handleCancel}
-              disabled={submitting}
-            >
-              Cancelar
-            </button>
-          </div>
+          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+            {step < LAST_STEP
+              ? 'Siguiente'
+              : submitting
+                ? 'Guardando…'
+                : isEdit
+                  ? 'Guardar cambios'
+                  : 'Guardar viaje'}
+          </button>
         </form>
       </Card>
     </div>

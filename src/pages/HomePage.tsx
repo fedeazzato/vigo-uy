@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, StatGrid, SectionDivider } from '../components/UI'
 import { GuideLinks, GUIDE_LINKS } from '../components/GuideLinks'
 import { useAuth } from '../context/AuthContext'
+import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
 import { fetchCommunityTotals, useCommunityContent } from '../lib/communityData'
 import type { CommunityTotals } from '../types'
@@ -15,6 +16,7 @@ const QUICK_GUIDE = GUIDE_LINKS.filter(({ to }) => QUICK_GUIDE_ROUTES.includes(t
 
 export default function HomePage() {
   const { status } = useAuth()
+  const { openRegisterSheet } = useRegisterSheet()
   const { trips, names } = useCommunityContent({ entries: false, limit: 3 })
   const [totals, setTotals] = useState<CommunityTotals | null>(null)
 
@@ -64,7 +66,9 @@ export default function HomePage() {
           )}
           <div className={styles.communityCta}>
             {status === 'signedIn' ? (
-              <Link to="/viajes/nuevo" className={styles.communityCtaBtn}>Registrá tu viaje</Link>
+              <button type="button" className={styles.communityCtaBtn} onClick={openRegisterSheet}>
+                Compartí tu viaje
+              </button>
             ) : (
               <Link to="/login" state={{ from: '/viajes/nuevo' }} className={styles.communityCtaBtn}>
                 Iniciá sesión para compartir

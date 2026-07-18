@@ -6,6 +6,10 @@ import { cleanup } from '@testing-library/react'
 // test leaks its DOM into the next one.
 afterEach(cleanup)
 
+// jsdom does not implement scrollIntoView; FormError calls it to bring the
+// message on screen when it appears.
+window.HTMLElement.prototype.scrollIntoView = () => {}
+
 // jsdom does not implement matchMedia; UserPrefsContext reads it for the
 // prefers-color-scheme fallback, so give it a minimal static stub.
 window.matchMedia = (query: string): MediaQueryList =>

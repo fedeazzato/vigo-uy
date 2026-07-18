@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
+import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { formatDate } from '../lib/format'
@@ -24,6 +25,7 @@ const SAVED_MESSAGES: Record<string, string> = {
 
 export default function DashboardPage() {
   const { user, passkeysSupported, registerPasskey } = useAuth()
+  const { openRegisterSheet } = useRegisterSheet()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -174,6 +176,12 @@ export default function DashboardPage() {
     downloadCsv('repuestos.csv', toCsv(headers, rows))
   }
 
+  // Nothing registered at all: show one friendly empty state instead of
+  // three empty section cards (mobile redesign).
+  const nothingYet =
+    !loadingEntries && !loadingTrips && !loadingPurchases && !error &&
+    entries.length === 0 && trips.length === 0 && purchases.length === 0
+
   return (
     <div>
       <PageHeader
@@ -206,6 +214,21 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {nothingYet && (
+        <Card className={styles.emptyState}>
+          <div className={styles.emptyStateIcon} aria-hidden="true">📭</div>
+          <div className={styles.emptyStateTitle}>Todavía no registraste nada</div>
+          <p className={styles.emptyStateText}>
+            Sumá tu primer viaje, service o repuesto para llevar la cuenta acá.
+          </p>
+          <button type="button" className={styles.emptyStateBtn} onClick={openRegisterSheet}>
+            Registrar algo
+          </button>
+        </Card>
+      )}
+
+      {!nothingYet && (
+      <>
       <Card>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Costos de service</h2>
@@ -355,6 +378,8 @@ export default function DashboardPage() {
           </ul>
         )}
       </Card>
+      </>
+      )}
     </div>
   )
 }

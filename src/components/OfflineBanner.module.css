@@ -17,6 +17,6 @@
 /* On mobile the bottom tab bar occupies the bottom edge — float above it. */
 @media (max-width: 700px) {
   .banner {
-    bottom: calc(68px + env(safe-area-inset-bottom));
+    bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }
