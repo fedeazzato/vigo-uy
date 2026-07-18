@@ -94,6 +94,37 @@
 }
 .actionLink:hover { color: var(--green-600); }
 
+/* ── Save toast ("Viaje guardado ✓") ── */
+
+@keyframes toastUp {
+  from { transform: translate(-50%, 10px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.saveToast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 250;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--gray-800);
+  color: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  animation: toastUp 0.15s ease-out;
+}
+
+/* Float above the mobile tab bar. */
+@media (max-width: 700px) {
+  .saveToast {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ── First-run empty state ── */
 
 .emptyState {

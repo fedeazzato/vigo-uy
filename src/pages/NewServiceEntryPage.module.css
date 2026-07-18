@@ -36,42 +36,41 @@
   color: var(--text-secondary);
 }
 
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
+/* "← Volver" above the header replaces the old Cancelar button. */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
 }
+.backBtn:hover:not(:disabled) { color: var(--text-primary); }
+.backBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* One primary button per screen: full width. */
 .submitBtn {
+  width: 100%;
+  margin-top: 8px;
   background: var(--green-400);
   color: #fff;
   border: none;
   border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 13px 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 .submitBtn:hover:not(:disabled) { background: var(--green-600); }
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.cancelBtn {
-  background: var(--surface);
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.cancelBtn:hover:not(:disabled) {
-  background: var(--surface-secondary);
-  border-color: var(--text-tertiary);
-}
-.cancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media (max-width: 400px) {
   .row {

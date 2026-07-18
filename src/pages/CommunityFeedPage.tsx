@@ -168,18 +168,19 @@ export default function CommunityFeedPage() {
         ))}
       </div>
 
+      <div className={styles.searchRow}>
+        <input
+          id="feed-search"
+          type="search"
+          aria-label="Buscar en los aportes"
+          className={formStyles.input}
+          placeholder="Buscar título, lugar, taller…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       <div className={styles.toolbar}>
-        <div className={`${styles.toolbarField} ${styles.searchInput}`}>
-          <label className={styles.toolbarLabel} htmlFor="feed-search">Buscar</label>
-          <input
-            id="feed-search"
-            type="search"
-            className={formStyles.input}
-            placeholder="Título, lugar, taller…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
         <div className={styles.toolbarField}>
           <label className={styles.toolbarLabel} htmlFor="feed-model">Modelo</label>
           <select
@@ -214,7 +215,7 @@ export default function CommunityFeedPage() {
         <Skeleton lines={4} />
       ) : (
         <Card>
-          <h2 className={styles.sectionTitle}>Viajes</h2>
+          <h2 className={styles.groupTitle}>Viajes</h2>
           {filteredTrips.length === 0 ? (
             <p className={styles.empty}>
               {trips.length === 0
@@ -248,7 +249,7 @@ export default function CommunityFeedPage() {
         <Skeleton lines={4} />
       ) : (
         <Card>
-          <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
+          <h2 className={styles.groupTitle}>Repuestos</h2>
           {filteredPurchases.length === 0 ? (
             <p className={styles.empty}>
               {purchases.length === 0
@@ -287,7 +288,7 @@ export default function CommunityFeedPage() {
         <Skeleton lines={4} />
       ) : (
         <Card>
-          <h2 className={styles.sectionTitle}>Costos de service</h2>
+          <h2 className={styles.groupTitle}>Services</h2>
           {filteredEntries.length === 0 ? (
             <p className={styles.empty}>
               {entries.length === 0

@@ -98,9 +98,10 @@
 
 .chip {
   flex-shrink: 0;
-  padding: 8px 14px;
+  min-height: 44px; /* comfortable tap target */
+  padding: 8px 16px;
   border: none;
-  border-radius: 20px;
+  border-radius: 22px;
   background: var(--surface);
   color: var(--text-secondary);
   font-family: inherit;
@@ -117,9 +118,23 @@
   color: var(--green-600);
 }
 
+.searchRow {
+  margin-bottom: 10px;
+}
+
+/* Uppercase small-caps labels for the feed groups, matching the chips. */
+.groupTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
 .toolbar {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -134,19 +149,6 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
-}
-
-.searchInput {
-  width: 100%;
-}
-
-@media (max-width: 700px) {
-  .toolbar {
-    grid-template-columns: 1fr 1fr;
-  }
-  .searchInput {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 500px) {

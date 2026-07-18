@@ -245,9 +245,11 @@ export default function NewTripLogPage() {
   // Step 1 fields are validated when leaving the step, so later steps never
   // fail on a field that's no longer on screen.
   function validateBasics(): string | null {
-    if (!origin.trim() || !destination.trim()) return 'Completá origen y destino.'
-    const distance = parseLocaleNumber(distanceKm) ?? null
-    if (distance !== null && (!Number.isFinite(distance) || distance < 0)) {
+    if (!origin.trim() || !destination.trim() || !distanceKm.trim()) {
+      return 'Completá origen, destino y distancia.'
+    }
+    const distance = parseLocaleNumber(distanceKm)
+    if (distance === undefined || !Number.isFinite(distance) || distance < 0) {
       return 'La distancia debe ser un número válido.'
     }
     return null
@@ -420,6 +422,7 @@ export default function NewTripLogPage() {
               <label className={styles.label} htmlFor="trip-distance">📏 Distancia (km)</label>
               <input
                 id="trip-distance"
+                required
                 type="text"
                 inputMode="numeric"
                 className={formStyles.input}

@@ -140,6 +140,9 @@ export default function NewPartPurchasePage() {
 
   return (
     <div>
+      <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
+        ← Volver
+      </button>
       <PageHeader
         title={isEdit ? '🔩 Editar compra de repuesto' : '🔩 Nueva compra de repuesto'}
         subtitle="Registrá lo que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
@@ -294,19 +297,9 @@ export default function NewPartPurchasePage() {
             Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
           </label>
 
-          <div className={styles.actions}>
-            <button type="submit" className={styles.submitBtn} disabled={submitting}>
-              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-            </button>
-            <button
-              type="button"
-              className={styles.cancelBtn}
-              onClick={handleCancel}
-              disabled={submitting}
-            >
-              Cancelar
-            </button>
-          </div>
+          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+            {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
+          </button>
         </form>
       </Card>
     </div>

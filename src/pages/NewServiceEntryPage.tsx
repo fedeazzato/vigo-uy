@@ -138,6 +138,9 @@ export default function NewServiceEntryPage() {
 
   return (
     <div>
+      <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
+        ← Volver
+      </button>
       <PageHeader
         title={isEdit ? '🛠️ Editar costo de service' : '🛠️ Nuevo costo de service'}
         subtitle="Registrá una visita al taller para llevar tu historial y aportar a la comunidad."
@@ -251,19 +254,9 @@ export default function NewServiceEntryPage() {
             Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
           </label>
 
-          <div className={styles.actions}>
-            <button type="submit" className={styles.submitBtn} disabled={submitting}>
-              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-            </button>
-            <button
-              type="button"
-              className={styles.cancelBtn}
-              onClick={handleCancel}
-              disabled={submitting}
-            >
-              Cancelar
-            </button>
-          </div>
+          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+            {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
+          </button>
         </form>
       </Card>
     </div>

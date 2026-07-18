@@ -70,6 +70,7 @@ function renderNewTrip() {
 function fillBasics() {
   fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
   fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+  fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
 }
 
 function clickNext() {
@@ -105,8 +106,18 @@ describe('NewTripLogPage wizard', () => {
     // Whitespace passes native required but not the trim check.
     fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: '   ' } })
     fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
     clickNext()
-    expect(screen.getByText('Completá origen y destino.')).toBeTruthy()
+    expect(screen.getByText('Completá origen, destino y distancia.')).toBeTruthy()
+    expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
+  })
+
+  it('rejects a non-numeric distance on step 1', () => {
+    renderNewTrip()
+    fillBasics()
+    fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: 'abc' } })
+    clickNext()
+    expect(screen.getByText('La distancia debe ser un número válido.')).toBeTruthy()
     expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
   })
 

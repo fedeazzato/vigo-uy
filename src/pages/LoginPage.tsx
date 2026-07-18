@@ -169,7 +169,7 @@ export default function LoginPage() {
               autoComplete="one-time-code"
               pattern="[0-9]*"
               maxLength={10}
-              className={formStyles.input}
+              className={`${formStyles.input} ${styles.codeInput}`}
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value)}
               placeholder="12345678"

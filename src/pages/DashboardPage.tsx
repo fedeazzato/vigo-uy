@@ -16,12 +16,14 @@ import styles from './DashboardPage.module.css'
 // prompt card on every visit.
 const PASSKEY_PROMPT_KEY = 'vigo-passkey-prompt-dismissed'
 
-// What the forms put in location.state.saved → the banner text.
+// What the forms put in location.state.saved → the toast text.
 const SAVED_MESSAGES: Record<string, string> = {
-  viaje: 'Viaje guardado.',
-  service: 'Service guardado.',
-  compra: 'Compra guardada.',
+  viaje: 'Viaje guardado ✓',
+  service: 'Service guardado ✓',
+  compra: 'Repuesto guardado ✓',
 }
+
+const SAVED_TOAST_MS = 2200
 
 export default function DashboardPage() {
   const { user, passkeysSupported, registerPasskey } = useAuth()
@@ -31,7 +33,7 @@ export default function DashboardPage() {
 
   // Save confirmation carried over from the submit forms. Cleared from
   // history state right away so a refresh doesn't re-announce it.
-  const [savedMessage] = useState<string | null>(() => {
+  const [savedMessage, setSavedMessage] = useState<string | null>(() => {
     const saved = (location.state as { saved?: string } | null)?.saved
     return saved ? SAVED_MESSAGES[saved] ?? null : null
   })
@@ -40,6 +42,12 @@ export default function DashboardPage() {
       navigate(location.pathname, { replace: true, state: null })
     }
   }, [location, navigate])
+  // Shown as a toast that dismisses itself (mobile redesign).
+  useEffect(() => {
+    if (!savedMessage) return
+    const id = setTimeout(() => setSavedMessage(null), SAVED_TOAST_MS)
+    return () => clearTimeout(id)
+  }, [savedMessage])
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
@@ -194,7 +202,9 @@ export default function DashboardPage() {
         }
       />
 
-      {savedMessage && <Alert type="success">{savedMessage}</Alert>}
+      {savedMessage && (
+        <div className={styles.saveToast} role="status">{savedMessage}</div>
+      )}
       {error && <Alert type="danger">{error}</Alert>}
 
       {passkeysSupported && (!passkeyDismissed || passkeyMessage) && (
