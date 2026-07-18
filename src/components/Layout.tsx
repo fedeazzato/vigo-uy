@@ -59,7 +59,7 @@ export default function Layout() {
           `${styles.navLink} ${extraClass} ${isActive ? styles.active : ''}`
         }
       >
-        <span className={styles.navIcon}>{icon}</span>
+        <span className={styles.navIcon} aria-hidden="true">{icon}</span>
         <span>{label}</span>
       </NavLink>
     )
@@ -69,7 +69,7 @@ export default function Layout() {
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <div className={styles.brandIcon}>⚡</div>
+          <div className={styles.brandIcon} aria-hidden="true">⚡</div>
           <div>
             <div className={styles.brandName}>Wiki Vigo</div>
             <div className={styles.brandSub}>Uruguay 🇺🇾</div>
@@ -81,6 +81,7 @@ export default function Layout() {
             {color && (
               <span
                 className={styles.vigoTagDot}
+                aria-hidden="true"
                 style={{
                   background: COLOR_HEX[color],
                   border: COLOR_BORDER[color] ? `1.5px solid ${COLOR_BORDER[color]}` : undefined,
@@ -112,9 +113,10 @@ export default function Layout() {
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}
-            title={THEME_LABEL[effectiveTheme]}
+            title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
+            aria-label={`Tema actual: ${THEME_LABEL[effectiveTheme]}. Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
           >
-            <span className={styles.themeIcon}>{THEME_ICON[effectiveTheme]}</span>
+            <span className={styles.themeIcon} aria-hidden="true">{THEME_ICON[effectiveTheme]}</span>
             <span>{THEME_LABEL[effectiveTheme]}</span>
           </button>
           <div className={styles.footerLinks}>
@@ -145,7 +147,7 @@ export default function Layout() {
       <div className={styles.mobileHeader}>
         <div className={styles.mobileHeaderTop}>
           <div className={styles.brand} style={{ padding: '0 1rem' }}>
-            <div className={styles.brandIcon}>⚡</div>
+            <div className={styles.brandIcon} aria-hidden="true">⚡</div>
             <div>
               <div className={styles.brandName}>Wiki Vigo Uruguay</div>
             </div>
@@ -157,13 +159,15 @@ export default function Layout() {
               rel="noopener noreferrer"
               className={styles.suggestLinkMobile}
               title="Sugerir info"
+              aria-label="Sugerir info (abre un formulario)"
             >
               💬
             </a>
             <button
               className={styles.themeToggleMobile}
               onClick={toggleTheme}
-              title={THEME_LABEL[effectiveTheme]}
+              title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
+              aria-label={`Tema actual: ${THEME_LABEL[effectiveTheme]}. Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
             >
               {THEME_ICON[effectiveTheme]}
             </button>
@@ -173,6 +177,7 @@ export default function Layout() {
               to="/mi-vigo"
               className={styles.miVigoLinkMobile}
               title="Mi Vigo"
+              aria-label="Mi Vigo"
               style={
                 color
                   ? {
@@ -198,7 +203,7 @@ export default function Layout() {
       </main>
 
       {/* Mobile bottom tab bar (hidden on desktop via CSS). */}
-      {sheetOpen && <div className={styles.sheetBackdrop} onClick={closeSheet} />}
+      {sheetOpen && <div className={styles.sheetBackdrop} onClick={closeSheet} aria-hidden="true" />}
       {sheetOpen && (
         <div className={styles.sheet}>
           {status === 'signedIn' ? (
@@ -227,7 +232,7 @@ export default function Layout() {
           className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
           onClick={closeSheet}
         >
-          <span className={styles.tabIcon}>🏠</span>
+          <span className={styles.tabIcon} aria-hidden="true">🏠</span>
           <span className={styles.tabLabel}>Inicio</span>
         </NavLink>
         <NavLink
@@ -235,7 +240,7 @@ export default function Layout() {
           className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
           onClick={closeSheet}
         >
-          <span className={styles.tabIcon}>🌐</span>
+          <span className={styles.tabIcon} aria-hidden="true">🌐</span>
           <span className={styles.tabLabel}>Comunidad</span>
         </NavLink>
         <button
@@ -244,7 +249,7 @@ export default function Layout() {
           onClick={() => setSheetOpen((o) => !o)}
           aria-expanded={sheetOpen}
         >
-          <span className={`${styles.tabIcon} ${styles.tabRegisterIcon}`}>➕</span>
+          <span className={`${styles.tabIcon} ${styles.tabRegisterIcon}`} aria-hidden="true">➕</span>
           <span className={styles.tabLabel}>Registrar</span>
         </button>
         <NavLink
@@ -252,7 +257,7 @@ export default function Layout() {
           className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
           onClick={closeSheet}
         >
-          <span className={styles.tabIcon}>🗒️</span>
+          <span className={styles.tabIcon} aria-hidden="true">🗒️</span>
           <span className={styles.tabLabel}>Mi actividad</span>
         </NavLink>
         <NavLink
@@ -260,7 +265,7 @@ export default function Layout() {
           className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
           onClick={closeSheet}
         >
-          <span className={styles.tabIcon}>📖</span>
+          <span className={styles.tabIcon} aria-hidden="true">📖</span>
           <span className={styles.tabLabel}>Guía</span>
         </NavLink>
       </nav>

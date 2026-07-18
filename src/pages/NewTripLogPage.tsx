@@ -1,10 +1,11 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
+import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { parseLocaleNumber } from '../lib/format'
 import { fetchChargingNetworks, fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
 import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
@@ -64,13 +65,6 @@ function isValidNonNegative(n: number | undefined): boolean {
   return n === undefined || n >= 0
 }
 
-function parseOptionalNumber(value: string): number | undefined {
-  const trimmed = value.trim()
-  if (!trimmed) return undefined
-  const n = Number(trimmed)
-  return Number.isFinite(n) ? n : undefined
-}
-
 function isValidPercentage(n: number | undefined): boolean {
   return n === undefined || (n >= 0 && n <= 100)
 }
@@ -84,30 +78,36 @@ export function parseStopDrafts(
   const cleanStops: TripChargingStop[] = []
   for (const s of stops) {
     if (!s.name.trim()) continue
-    const arrival = parseOptionalNumber(s.arrivalPercentage)
-    const departure = parseOptionalNumber(s.departurePercentage)
+    const arrival = parseLocaleNumber(s.arrivalPercentage)
+    const departure = parseLocaleNumber(s.departurePercentage)
     if (!isValidPercentage(arrival) || !isValidPercentage(departure)) {
       return { error: 'Los porcentajes de batería en las paradas deben estar entre 0 y 100.' }
     }
-    const stopSpeed = parseOptionalNumber(s.averageSpeed)
+    const stopSpeed = parseLocaleNumber(s.averageSpeed)
     if (!isValidNonNegative(stopSpeed)) {
       return { error: 'La velocidad media entre paradas debe ser un número válido.' }
     }
-    const cost = parseOptionalNumber(s.cost)
+    const cost = parseLocaleNumber(s.cost)
     if (!isValidNonNegative(cost)) {
       return { error: 'El costo de la carga debe ser un número válido.' }
     }
-    const energy = parseOptionalNumber(s.energyKwh)
-    if (energy !== undefined && energy <= 0) {
+    const energy = parseLocaleNumber(s.energyKwh)
+    if (energy !== undefined && !(energy > 0)) {
       return { error: 'La energía cargada (kWh) debe ser mayor a cero.' }
     }
     const stop: TripChargingStop = { name: s.name.trim() }
     if (s.note.trim()) stop.note = s.note.trim()
-    const distanceFromPrevious = parseOptionalNumber(s.distanceFromPrevious)
+    const distanceFromPrevious = parseLocaleNumber(s.distanceFromPrevious)
+    if (!isValidNonNegative(distanceFromPrevious)) {
+      return { error: 'La distancia entre paradas debe ser un número válido.' }
+    }
     if (distanceFromPrevious !== undefined) stop.distance_from_previous_km = distanceFromPrevious
     if (arrival !== undefined) stop.arrival_percentage = arrival
     if (departure !== undefined) stop.departure_percentage = departure
-    const duration = parseOptionalNumber(s.durationMinutes)
+    const duration = parseLocaleNumber(s.durationMinutes)
+    if (!isValidNonNegative(duration)) {
+      return { error: 'Los minutos de carga deben ser un número válido.' }
+    }
     if (duration !== undefined) stop.duration_minutes = duration
     if (stopSpeed !== undefined) stop.average_speed_kmh = stopSpeed
     if (cost !== undefined) stop.cost_uyu = cost
@@ -125,7 +125,6 @@ export default function NewTripLogPage() {
   const { model: preferredModel } = useUserPrefs()
   const navigate = useNavigate()
 
-  const [title, setTitle] = useState('')
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
@@ -147,6 +146,8 @@ export default function NewTripLogPage() {
   const [error, setError] = useState<string | null>(null)
   const [stations, setStations] = useState<ChargingStation[]>([])
   const [networks, setNetworks] = useState<ChargingNetwork[]>([])
+  // Any change flips this on; Cancel then asks before discarding.
+  const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
     if (!supabase) return
@@ -162,6 +163,7 @@ export default function NewTripLogPage() {
     setStops((prev) =>
       prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s))
     )
+    setDirty(true)
   }
 
   useEffect(() => {
@@ -175,7 +177,6 @@ export default function NewTripLogPage() {
         if (error || !data) {
           setError('No se pudo cargar el viaje.')
         } else {
-          setTitle(data.title)
           setOrigin(data.origin)
           setDestination(data.destination)
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
@@ -204,6 +205,7 @@ export default function NewTripLogPage() {
 
   function addStop() {
     setStops((prev) => [...prev, emptyStop()])
+    setDirty(true)
   }
 
   function updateStop(index: number, field: keyof StopDraft, value: string) {
@@ -212,36 +214,42 @@ export default function NewTripLogPage() {
 
   function removeStop(index: number) {
     setStops((prev) => prev.filter((_, i) => i !== index))
+    setDirty(true)
+  }
+
+  function handleCancel() {
+    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
+    navigate('/mi-actividad')
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!supabase || !user) return
 
-    if (!title.trim() || !origin.trim() || !destination.trim()) {
-      setError('Completá título, origen y destino.')
+    if (!origin.trim() || !destination.trim()) {
+      setError('Completá origen y destino.')
       return
     }
     if (isPublic && !model) {
       setError('Seleccioná el modelo (E2 o E2+) para compartir con la comunidad.')
       return
     }
-    const distance = distanceKm.trim() ? Number(distanceKm) : null
+    const distance = parseLocaleNumber(distanceKm) ?? null
     if (distance !== null && (!Number.isFinite(distance) || distance < 0)) {
       setError('La distancia debe ser un número válido.')
       return
     }
-    const startCharge = parseOptionalNumber(startingCharge)
+    const startCharge = parseLocaleNumber(startingCharge)
     if (!isValidPercentage(startCharge)) {
       setError('La batería al salir debe estar entre 0 y 100.')
       return
     }
-    const endCharge = parseOptionalNumber(endingCharge)
+    const endCharge = parseLocaleNumber(endingCharge)
     if (!isValidPercentage(endCharge)) {
       setError('La batería al llegar debe estar entre 0 y 100.')
       return
     }
-    const avgSpeed = parseOptionalNumber(averageSpeed)
+    const avgSpeed = parseLocaleNumber(averageSpeed)
     if (!isValidNonNegative(avgSpeed)) {
       setError('La velocidad media debe ser un número válido.')
       return
@@ -258,7 +266,9 @@ export default function NewTripLogPage() {
     setError(null)
 
     const payload = {
-      title: title.trim(),
+      // The title is derived, not asked for: nobody knows what to "title" a
+      // trip, and origin/destination already say it all.
+      title: `${origin.trim()} - ${destination.trim()}`,
       origin: origin.trim(),
       destination: destination.trim(),
       distance_km: distance,
@@ -284,7 +294,7 @@ export default function NewTripLogPage() {
       return
     }
     invalidateCommunityCache()
-    navigate('/mi-actividad')
+    navigate('/mi-actividad', { state: { saved: 'viaje' } })
   }
 
   // Edit mode: show the header + a skeleton instead of a blank screen while
@@ -309,23 +319,10 @@ export default function NewTripLogPage() {
       />
 
       <Card>
-        {error && <Alert type="danger">{error}</Alert>}
+        {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           <CityDatalist />
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="trip-title">📝 Título</label>
-            <input
-              id="trip-title"
-              required
-              type="text"
-              className={formStyles.input}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej: Montevideo - Punta del Este"
-            />
-          </div>
-
           <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="trip-origin">📍 Origen</label>
@@ -435,7 +432,7 @@ export default function NewTripLogPage() {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>⚡ Paradas de carga</label>
+                <span className={styles.label}>⚡ Paradas de carga</span>
                 {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
                 <div className={styles.stopsList}>
                   {stops.map((stop, index) => (
@@ -453,8 +450,9 @@ export default function NewTripLogPage() {
 
                       {stations.length > 0 && (
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>🔌 Cargador</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>🔌 Cargador</label>
                           <select
+                            id={`stop-${index}-station`}
                             aria-label="Cargador"
                             className={formStyles.input}
                             value={stop.stationId}
@@ -481,8 +479,9 @@ export default function NewTripLogPage() {
                       <div className={styles.stopMainRow}>
                         {!stop.stationId && (
                           <div className={styles.field}>
-                            <label className={styles.smallLabel}>Nombre del cargador</label>
+                            <label className={styles.smallLabel} htmlFor={`stop-${index}-name`}>Nombre del cargador</label>
                             <input
+                              id={`stop-${index}-name`}
                               type="text"
                               className={formStyles.input}
                               value={stop.name}
@@ -492,8 +491,9 @@ export default function NewTripLogPage() {
                           </div>
                         )}
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>⏳ Minutos cargando</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-duration`}>⏳ Minutos cargando</label>
                           <input
+                            id={`stop-${index}-duration`}
                             type="text"
                             inputMode="numeric"
                             className={formStyles.input}
@@ -506,8 +506,9 @@ export default function NewTripLogPage() {
 
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Distancia desde la parada anterior (km)</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-distance`}>Distancia desde la parada anterior (km)</label>
                           <input
+                            id={`stop-${index}-distance`}
                             type="text"
                             inputMode="numeric"
                             className={formStyles.input}
@@ -517,8 +518,9 @@ export default function NewTripLogPage() {
                           />
                         </div>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>Velocidad media hasta acá (km/h)</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-speed`}>Velocidad media hasta acá (km/h)</label>
                           <input
+                            id={`stop-${index}-speed`}
                             type="text"
                             inputMode="decimal"
                             className={formStyles.input}
@@ -531,8 +533,9 @@ export default function NewTripLogPage() {
 
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>% al llegar</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-arrival`}>% al llegar</label>
                           <input
+                            id={`stop-${index}-arrival`}
                             type="text"
                             inputMode="numeric"
                             className={formStyles.input}
@@ -542,8 +545,9 @@ export default function NewTripLogPage() {
                           />
                         </div>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>% al salir</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-departure`}>% al salir</label>
                           <input
+                            id={`stop-${index}-departure`}
                             type="text"
                             inputMode="numeric"
                             className={formStyles.input}
@@ -556,8 +560,9 @@ export default function NewTripLogPage() {
 
                       <div className={styles.stopMainRow}>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>💰 Costo de la carga (UYU)</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-cost`}>💰 Costo de la carga (UYU)</label>
                           <input
+                            id={`stop-${index}-cost`}
                             type="text"
                             inputMode="decimal"
                             className={formStyles.input}
@@ -567,21 +572,23 @@ export default function NewTripLogPage() {
                           />
                         </div>
                         <div className={styles.field}>
-                          <label className={styles.smallLabel}>🔌 Energía cargada (kWh, según el cargador)</label>
+                          <label className={styles.smallLabel} htmlFor={`stop-${index}-energy`}>🔌 Energía cargada (kWh, según el cargador)</label>
                           <input
+                            id={`stop-${index}-energy`}
                             type="text"
                             inputMode="decimal"
                             className={formStyles.input}
                             value={stop.energyKwh}
                             onChange={(e) => updateStop(index, 'energyKwh', e.target.value)}
-                            placeholder="28.5"
+                            placeholder="28,5"
                           />
                         </div>
                       </div>
 
                       <div className={styles.field}>
-                        <label className={styles.smallLabel}>💬 Nota</label>
+                        <label className={styles.smallLabel} htmlFor={`stop-${index}-note`}>💬 Nota</label>
                         <textarea
+                          id={`stop-${index}-note`}
                           rows={3}
                           className={`${formStyles.input} ${formStyles.textarea}`}
                           value={stop.note}
@@ -600,19 +607,29 @@ export default function NewTripLogPage() {
           )}
 
           <div className={styles.field}>
-            <label className={styles.label}>⭐ Calificación</label>
+            <span className={styles.label}>⭐ Calificación</span>
             <div className={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
                   type="button"
                   className={`${styles.starBtn} ${rating != null && n <= rating ? styles.filled : ''}`}
-                  onClick={() => setRating(rating === n ? null : n)}
+                  onClick={() => { setRating(rating === n ? null : n); setDirty(true) }}
                   aria-label={`${n} estrellas`}
+                  aria-pressed={rating != null && n <= rating}
                 >
                   ★
                 </button>
               ))}
+              {rating != null && (
+                <button
+                  type="button"
+                  className={styles.clearRating}
+                  onClick={() => { setRating(null); setDirty(true) }}
+                >
+                  Quitar
+                </button>
+              )}
             </div>
           </div>
 
@@ -630,16 +647,17 @@ export default function NewTripLogPage() {
 
           <div className={styles.shareBlock}>
             <div className={styles.field}>
-              <label className={styles.label}>
+              <span className={styles.label}>
                 🚙 Modelo
-              </label>
+              </span>
               <div className={styles.modelRow}>
                 {MODELS.map((m) => (
                   <button
                     key={m}
                     type="button"
                     className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
-                    onClick={() => setModel(m)}
+                    onClick={() => { setModel(m); setDirty(true) }}
+                    aria-pressed={model === m}
                   >
                     {m}
                   </button>
@@ -669,7 +687,7 @@ export default function NewTripLogPage() {
             <button
               type="button"
               className={styles.cancelBtn}
-              onClick={() => navigate('/mi-actividad')}
+              onClick={handleCancel}
               disabled={submitting}
             >
               Cancelar

@@ -1,17 +1,43 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { formatDate } from '../lib/format'
 import { invalidateCommunityCache } from '../lib/communityData'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 
+// Once the user registers a passkey (or says "not now"), stop showing the
+// prompt card on every visit.
+const PASSKEY_PROMPT_KEY = 'vigo-passkey-prompt-dismissed'
+
+// What the forms put in location.state.saved → the banner text.
+const SAVED_MESSAGES: Record<string, string> = {
+  viaje: 'Viaje guardado.',
+  service: 'Service guardado.',
+  compra: 'Compra guardada.',
+}
+
 export default function DashboardPage() {
   const { user, passkeysSupported, registerPasskey } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Save confirmation carried over from the submit forms. Cleared from
+  // history state right away so a refresh doesn't re-announce it.
+  const [savedMessage] = useState<string | null>(() => {
+    const saved = (location.state as { saved?: string } | null)?.saved
+    return saved ? SAVED_MESSAGES[saved] ?? null : null
+  })
+  useEffect(() => {
+    if ((location.state as { saved?: string } | null)?.saved) {
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location, navigate])
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
@@ -21,6 +47,9 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null)
   const [registeringPasskey, setRegisteringPasskey] = useState(false)
+  const [passkeyDismissed, setPasskeyDismissed] = useState(
+    () => localStorage.getItem(PASSKEY_PROMPT_KEY) === '1'
+  )
 
   useEffect(() => {
     if (!supabase || !user) return
@@ -105,6 +134,13 @@ export default function DashboardPage() {
     setPasskeyMessage(
       error ? 'No se pudo registrar la llave de acceso.' : 'Llave de acceso registrada. La próxima vez podés entrar sin código.'
     )
+    // Registered: the prompt did its job, don't show it on future visits.
+    if (!error) localStorage.setItem(PASSKEY_PROMPT_KEY, '1')
+  }
+
+  function dismissPasskeyPrompt() {
+    localStorage.setItem(PASSKEY_PROMPT_KEY, '1')
+    setPasskeyDismissed(true)
   }
 
   function exportEntriesCsv() {
@@ -140,14 +176,28 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="🗒️ Mi actividad" subtitle="Tus costos, repuestos y viajes registrados." />
+      <PageHeader
+        title="🗒️ Mi actividad"
+        subtitle={
+          <>
+            Tus costos, repuestos y viajes registrados. Tu perfil y vehículo están en{' '}
+            <Link to="/mi-vigo">Mi Vigo</Link>.
+          </>
+        }
+      />
 
+      {savedMessage && <Alert type="success">{savedMessage}</Alert>}
       {error && <Alert type="danger">{error}</Alert>}
 
-      {passkeysSupported && (
+      {passkeysSupported && (!passkeyDismissed || passkeyMessage) && (
         <Card>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Acceso rápido</h2>
+            {!passkeyMessage && (
+              <button className={styles.addLink} onClick={dismissPasskeyPrompt}>
+                Ahora no
+              </button>
+            )}
           </div>
           {passkeyMessage && <p className={styles.empty}>{passkeyMessage}</p>}
           <button className={styles.addLink} onClick={handleRegisterPasskey} disabled={registeringPasskey}>
@@ -161,7 +211,7 @@ export default function DashboardPage() {
           <h2 className={styles.sectionTitle}>Costos de service</h2>
           <div className={styles.sectionActions}>
             {entries.length > 0 && (
-              <button className={styles.addLink} onClick={exportEntriesCsv}>Exportar CSV</button>
+              <button className={styles.addLink} onClick={exportEntriesCsv}>Descargar planilla (CSV)</button>
             )}
             <Link to="/costos/nuevo" className={styles.addLink}>+ Nueva entrada</Link>
           </div>
@@ -178,15 +228,27 @@ export default function DashboardPage() {
                 <div>
                   <div className={styles.itemTitle}>{entry.service_type}</div>
                   <div className={styles.itemMeta}>
-                    {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
+                    {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
                   </div>
                 </div>
                 <div className={styles.itemCost}>
                   ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className={styles.itemActions}>
-                  <Link to={`/costos/${entry.id}/editar`} className={styles.actionLink}>Editar</Link>
-                  <button className={styles.actionLink} onClick={() => handleDeleteEntry(entry.id)}>Eliminar</button>
+                  <Link
+                    to={`/costos/${entry.id}/editar`}
+                    className={styles.actionLink}
+                    aria-label={`Editar ${entry.service_type}`}
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    className={styles.actionLink}
+                    onClick={() => handleDeleteEntry(entry.id)}
+                    aria-label={`Eliminar ${entry.service_type}`}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </li>
             ))}
@@ -199,7 +261,7 @@ export default function DashboardPage() {
           <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
           <div className={styles.sectionActions}>
             {purchases.length > 0 && (
-              <button className={styles.addLink} onClick={exportPurchasesCsv}>Exportar CSV</button>
+              <button className={styles.addLink} onClick={exportPurchasesCsv}>Descargar planilla (CSV)</button>
             )}
             <Link to="/repuestos/nuevo" className={styles.addLink}>+ Nueva compra</Link>
           </div>
@@ -216,7 +278,7 @@ export default function DashboardPage() {
                 <div>
                   <div className={styles.itemTitle}>{purchase.item}</div>
                   <div className={styles.itemMeta}>
-                    {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                    {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
                     {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
                   </div>
                 </div>
@@ -224,8 +286,20 @@ export default function DashboardPage() {
                   ${purchase.price_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className={styles.itemActions}>
-                  <Link to={`/repuestos/${purchase.id}/editar`} className={styles.actionLink}>Editar</Link>
-                  <button className={styles.actionLink} onClick={() => handleDeletePurchase(purchase.id)}>Eliminar</button>
+                  <Link
+                    to={`/repuestos/${purchase.id}/editar`}
+                    className={styles.actionLink}
+                    aria-label={`Editar ${purchase.item}`}
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    className={styles.actionLink}
+                    onClick={() => handleDeletePurchase(purchase.id)}
+                    aria-label={`Eliminar ${purchase.item}`}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </li>
             ))}
@@ -238,7 +312,7 @@ export default function DashboardPage() {
           <h2 className={styles.sectionTitle}>Viajes</h2>
           <div className={styles.sectionActions}>
             {trips.length > 0 && (
-              <button className={styles.addLink} onClick={exportTripsCsv}>Exportar CSV</button>
+              <button className={styles.addLink} onClick={exportTripsCsv}>Descargar planilla (CSV)</button>
             )}
             <Link to="/viajes/nuevo" className={styles.addLink}>+ Nuevo viaje</Link>
           </div>
@@ -255,14 +329,26 @@ export default function DashboardPage() {
                 <div>
                   <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
                   <div className={styles.itemMeta}>
-                    {trip.trip_date} · {trip.origin} → {trip.destination}
+                    {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
                     {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
                     {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
                   </div>
                 </div>
                 <div className={styles.itemActions}>
-                  <Link to={`/viajes/${trip.id}/editar`} className={styles.actionLink}>Editar</Link>
-                  <button className={styles.actionLink} onClick={() => handleDeleteTrip(trip.id)}>Eliminar</button>
+                  <Link
+                    to={`/viajes/${trip.id}/editar`}
+                    className={styles.actionLink}
+                    aria-label={`Editar ${trip.title}`}
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    className={styles.actionLink}
+                    onClick={() => handleDeleteTrip(trip.id)}
+                    aria-label={`Eliminar ${trip.title}`}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </li>
             ))}

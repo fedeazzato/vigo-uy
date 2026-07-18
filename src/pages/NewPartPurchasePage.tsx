@@ -1,9 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
+import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { parseLocaleNumber } from '../lib/format'
 import { invalidateCommunityCache } from '../lib/communityData'
 import { partsCatalog } from '../lib/partsCatalog'
 import styles from './NewPartPurchasePage.module.css'
@@ -36,6 +37,8 @@ export default function NewPartPurchasePage() {
   const [loading, setLoading] = useState(isEdit)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Any change flips this on; Cancel then asks before discarding.
+  const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
     if (!isEdit || !supabase) return
@@ -71,12 +74,12 @@ export default function NewPartPurchasePage() {
       setError('La fecha debe tener el formato AAAA-MM-DD.')
       return
     }
-    const price = Number(priceUyu)
-    if (!Number.isFinite(price) || price < 0) {
+    const price = parseLocaleNumber(priceUyu)
+    if (price === undefined || !Number.isFinite(price) || price < 0) {
       setError('El precio debe ser un número válido.')
       return
     }
-    const km = odometerKm.trim() ? Number(odometerKm) : null
+    const km = parseLocaleNumber(odometerKm) ?? null
     if (km != null && (!Number.isFinite(km) || km < 0)) {
       setError('El kilometraje debe ser un número válido.')
       return
@@ -113,6 +116,11 @@ export default function NewPartPurchasePage() {
       return
     }
     invalidateCommunityCache()
+    navigate('/mi-actividad', { state: { saved: 'compra' } })
+  }
+
+  function handleCancel() {
+    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
     navigate('/mi-actividad')
   }
 
@@ -138,9 +146,9 @@ export default function NewPartPurchasePage() {
       />
 
       <Card>
-        {error && <Alert type="danger">{error}</Alert>}
+        {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
@@ -247,13 +255,18 @@ export default function NewPartPurchasePage() {
                   type="button"
                   className={styles.starBtn}
                   aria-label={`${n} de 5`}
-                  onClick={() => setRating(rating === n ? null : n)}
+                  aria-pressed={rating != null && n <= rating}
+                  onClick={() => { setRating(rating === n ? null : n); setDirty(true) }}
                 >
                   {rating != null && n <= rating ? '★' : '☆'}
                 </button>
               ))}
               {rating != null && (
-                <button type="button" className={styles.clearRating} onClick={() => setRating(null)}>
+                <button
+                  type="button"
+                  className={styles.clearRating}
+                  onClick={() => { setRating(null); setDirty(true) }}
+                >
                   Quitar
                 </button>
               )}
@@ -288,7 +301,7 @@ export default function NewPartPurchasePage() {
             <button
               type="button"
               className={styles.cancelBtn}
-              onClick={() => navigate('/mi-actividad')}
+              onClick={handleCancel}
               disabled={submitting}
             >
               Cancelar

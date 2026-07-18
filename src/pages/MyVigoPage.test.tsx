@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
 import type { Profile } from '../types'
 import MyVigoPage from './MyVigoPage'
@@ -34,10 +35,13 @@ function renderSignedIn(displayName: string) {
     status: 'signedIn',
     refreshProfile: vi.fn(),
   }
+  // MemoryRouter because the page header links to /mi-actividad.
   return render(
-    <UserPrefsProvider>
-      <MyVigoPage />
-    </UserPrefsProvider>
+    <MemoryRouter>
+      <UserPrefsProvider>
+        <MyVigoPage />
+      </UserPrefsProvider>
+    </MemoryRouter>
   )
 }
 

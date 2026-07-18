@@ -30,12 +30,13 @@ export default function VehicleLeaderboard({ rows, compact = false }: VehicleLea
     <ol className={styles.board}>
       {shown.map((row, i) => (
         <li key={row.vehicle_id} className={styles.row}>
-          <span className={styles.rank}>{i < MEDALS.length ? MEDALS[i] : i + 1}</span>
+          {/* The <ol> already conveys the position; medals are decoration. */}
+          <span className={styles.rank} aria-hidden="true">{i < MEDALS.length ? MEDALS[i] : i + 1}</span>
           <div className={styles.info}>
             <div className={styles.nameRow}>
               <span className={styles.name}>{memberLabel(row.member_names)}</span>
             </div>
-            <div className={styles.barTrack}>
+            <div className={styles.barTrack} aria-hidden="true">
               <div
                 className={styles.bar}
                 style={{ width: maxKm > 0 ? `${Math.max((row.total_km / maxKm) * 100, 2)}%` : '2%' }}

@@ -4,6 +4,7 @@ import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } fr
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { formatDate } from '../lib/format'
 import { fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { StatItem, VehicleLeaderboardEntry } from '../types'
@@ -144,44 +145,59 @@ export default function CommunityFeedPage() {
       <SectionDivider label="Aportes de la comunidad" />
 
       <div className={styles.toolbar}>
-        <input
-          type="search"
-          className={`${formStyles.input} ${styles.searchInput}`}
-          placeholder="Buscar por título, lugar, taller…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Buscar"
-        />
-        <select
-          className={formStyles.input}
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-          aria-label="Tipo"
-        >
-          <option value="todos">Todo</option>
-          <option value="viajes">Viajes</option>
-          <option value="services">Services</option>
-          <option value="repuestos">Repuestos</option>
-        </select>
-        <select
-          className={formStyles.input}
-          value={modelFilter}
-          onChange={(e) => setModelFilter(e.target.value as ModelFilter)}
-          aria-label="Modelo"
-        >
-          <option value="todos">Ambos modelos</option>
-          <option value="E2">E2</option>
-          <option value="E2+">E2+</option>
-        </select>
-        <select
-          className={formStyles.input}
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortOrder)}
-          aria-label="Orden"
-        >
-          <option value="recientes">Más recientes</option>
-          <option value="puntuacion">Mejor puntuados</option>
-        </select>
+        <div className={`${styles.toolbarField} ${styles.searchInput}`}>
+          <label className={styles.toolbarLabel} htmlFor="feed-search">Buscar</label>
+          <input
+            id="feed-search"
+            type="search"
+            className={formStyles.input}
+            placeholder="Título, lugar, taller…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className={styles.toolbarField}>
+          <label className={styles.toolbarLabel} htmlFor="feed-type">Mostrar</label>
+          <select
+            id="feed-type"
+            className={formStyles.input}
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
+          >
+            <option value="todos">Todo</option>
+            <option value="viajes">Viajes</option>
+            <option value="services">Services</option>
+            <option value="repuestos">Repuestos</option>
+          </select>
+        </div>
+        <div className={styles.toolbarField}>
+          <label className={styles.toolbarLabel} htmlFor="feed-model">Modelo</label>
+          <select
+            id="feed-model"
+            className={formStyles.input}
+            value={modelFilter}
+            onChange={(e) => setModelFilter(e.target.value as ModelFilter)}
+          >
+            <option value="todos">Ambos</option>
+            <option value="E2">E2</option>
+            <option value="E2+">E2+</option>
+          </select>
+        </div>
+        {/* Services have no rating, so sorting makes no sense there. */}
+        {typeFilter !== 'services' && (
+          <div className={styles.toolbarField}>
+            <label className={styles.toolbarLabel} htmlFor="feed-sort">Ordenar por</label>
+            <select
+              id="feed-sort"
+              className={formStyles.input}
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortOrder)}
+            >
+              <option value="recientes">Más recientes</option>
+              <option value="puntuacion">Mejor puntuados</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {showTrips && (loading ? (
@@ -205,7 +221,7 @@ export default function CommunityFeedPage() {
                       {trip.verified && <Badge color="blue">Oficial</Badge>}
                     </div>
                     <div className={styles.itemMeta}>
-                      {trip.trip_date} · {trip.origin} → {trip.destination}
+                      {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
                       {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
                       {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
                     </div>
@@ -239,7 +255,7 @@ export default function CommunityFeedPage() {
                       {purchase.verified && <Badge color="blue">Oficial</Badge>}
                     </div>
                     <div className={styles.itemMeta}>
-                      {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                      {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
                       {purchase.city && ` · ${purchase.city}`}
                       {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
                     </div>
@@ -278,7 +294,7 @@ export default function CommunityFeedPage() {
                       {entry.verified && <Badge color="blue">Oficial</Badge>}
                     </div>
                     <div className={styles.itemMeta}>
-                      {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
+                      {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
                       {entry.city && ` · ${entry.city}`}
                     </div>
                   </div>

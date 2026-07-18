@@ -1,9 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
+import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
+import { parseLocaleNumber } from '../lib/format'
 import { invalidateCommunityCache } from '../lib/communityData'
 import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
@@ -38,6 +39,8 @@ export default function NewServiceEntryPage() {
   const [loading, setLoading] = useState(isEdit)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Any change flips this on; Cancel then asks before discarding.
+  const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
     if (!isEdit || !supabase) return
@@ -71,13 +74,13 @@ export default function NewServiceEntryPage() {
       setError('La fecha debe tener el formato AAAA-MM-DD.')
       return
     }
-    const km = Number(odometerKm)
-    const cost = Number(costUyu)
-    if (!Number.isFinite(km) || km < 0) {
+    const km = parseLocaleNumber(odometerKm)
+    const cost = parseLocaleNumber(costUyu)
+    if (km === undefined || !Number.isFinite(km) || km < 0) {
       setError('El kilometraje debe ser un número válido.')
       return
     }
-    if (!Number.isFinite(cost) || cost < 0) {
+    if (cost === undefined || !Number.isFinite(cost) || cost < 0) {
       setError('El costo debe ser un número válido.')
       return
     }
@@ -111,6 +114,11 @@ export default function NewServiceEntryPage() {
       return
     }
     invalidateCommunityCache()
+    navigate('/mi-actividad', { state: { saved: 'service' } })
+  }
+
+  function handleCancel() {
+    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
     navigate('/mi-actividad')
   }
 
@@ -136,9 +144,9 @@ export default function NewServiceEntryPage() {
       />
 
       <Card>
-        {error && <Alert type="danger">{error}</Alert>}
+        {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           <CityDatalist />
           <div className={styles.row}>
             <div className={styles.field}>
@@ -250,7 +258,7 @@ export default function NewServiceEntryPage() {
             <button
               type="button"
               className={styles.cancelBtn}
-              onClick={() => navigate('/mi-actividad')}
+              onClick={handleCancel}
               disabled={submitting}
             >
               Cancelar

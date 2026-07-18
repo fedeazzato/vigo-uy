@@ -31,7 +31,7 @@ export function GuideLinks({ links = GUIDE_LINKS }: GuideLinksProps) {
     <div className={styles.grid}>
       {links.map(({ to, label, icon, description }) => (
         <Link key={to} to={to} className={styles.item}>
-          <span className={styles.icon}>{icon}</span>
+          <span className={styles.icon} aria-hidden="true">{icon}</span>
           <span className={styles.text}>
             <span className={styles.label}>{label}</span>
             <span className={styles.description}>{description}</span>

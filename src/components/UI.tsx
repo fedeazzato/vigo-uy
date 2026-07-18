@@ -1,16 +1,31 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import styles from './UI.module.css'
 import type { TipItem, StatItem } from '../types'
 
 interface PageHeaderProps {
   title: string
-  subtitle?: string
+  subtitle?: ReactNode
 }
 
+// Page titles start with a decorative emoji ("🚗 Mi Vigo"). Split it out so
+// screen readers don't announce "automobile Mi Vigo" on every page.
+// VS16 (️) and ZWJ (‍) keep multi-codepoint emoji sequences together.
+const LEADING_EMOJI = /^(\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s+/u
+
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
+  const match = LEADING_EMOJI.exec(title)
   return (
     <div className={styles.pageHeader}>
-      <h1 className={styles.pageTitle}>{title}</h1>
+      <h1 className={styles.pageTitle}>
+        {match ? (
+          <>
+            <span aria-hidden="true">{match[1]} </span>
+            {title.slice(match[0].length)}
+          </>
+        ) : (
+          title
+        )}
+      </h1>
       {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
     </div>
   )
@@ -33,7 +48,7 @@ interface CardTitleProps {
 export function CardTitle({ icon, children }: CardTitleProps) {
   return (
     <div className={styles.cardTitle}>
-      {icon && <span className={styles.cardIcon}>{icon}</span>}
+      {icon && <span className={styles.cardIcon} aria-hidden="true">{icon}</span>}
       <span>{children}</span>
     </div>
   )
@@ -65,7 +80,14 @@ export function Badge({ children, color = 'green' }: BadgeProps) {
   return <span className={`${styles.badge} ${styles[`badge_${color}`]}`}>{children}</span>
 }
 
-type AlertType = 'warning' | 'danger' | 'info'
+type AlertType = 'warning' | 'danger' | 'info' | 'success'
+
+const ALERT_ICON: Record<AlertType, string> = {
+  warning: '⚠️',
+  danger: '🚨',
+  info: 'ℹ️',
+  success: '✅',
+}
 
 interface AlertProps {
   children: ReactNode
@@ -74,11 +96,32 @@ interface AlertProps {
 
 export function Alert({ children, type = 'warning' }: AlertProps) {
   return (
-    <div className={`${styles.alert} ${styles[`alert_${type}`]}`}>
-      <span className={styles.alertIcon}>
-        {type === 'warning' ? '⚠️' : type === 'danger' ? '🚨' : 'ℹ️'}
-      </span>
+    // Problems interrupt the screen reader; info/success just get queued.
+    <div
+      className={`${styles.alert} ${styles[`alert_${type}`]}`}
+      role={type === 'danger' || type === 'warning' ? 'alert' : 'status'}
+    >
+      <span className={styles.alertIcon} aria-hidden="true">{ALERT_ICON[type]}</span>
       <span>{children}</span>
+    </div>
+  )
+}
+
+interface FormErrorProps {
+  children: ReactNode
+}
+
+// Submit-validation error for forms whose button sits below the fold: same
+// look as a danger Alert, but scrolls itself into view so the user actually
+// sees why nothing happened.
+export function FormError({ children }: FormErrorProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [children])
+  return (
+    <div ref={ref}>
+      <Alert type="danger">{children}</Alert>
     </div>
   )
 }

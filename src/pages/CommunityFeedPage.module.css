@@ -90,6 +90,18 @@
   margin-bottom: 16px;
 }
 
+.toolbarField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toolbarLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .searchInput {
   width: 100%;
 }

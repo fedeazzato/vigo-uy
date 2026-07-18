@@ -73,8 +73,10 @@ describe('NewTripLogPage progressive disclosure', () => {
   it('hides the battery/charge details behind the disclosure by default', () => {
     renderNewTrip()
     // Basics visible…
-    expect(screen.getByLabelText('📝 Título')).toBeTruthy()
+    expect(screen.getByLabelText('📍 Origen')).toBeTruthy()
     expect(screen.getByLabelText('📏 Distancia (km)')).toBeTruthy()
+    // …no title field: it's derived from origin/destination on save.
+    expect(screen.queryByLabelText(/Título/)).toBeNull()
     // …power-user fields collapsed.
     expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
     expect(screen.queryByText('+ Agregar parada')).toBeNull()
@@ -166,6 +168,21 @@ describe('parseStopDrafts (charging_stops payload)', () => {
     ])
     expect(result).toEqual({
       stops: [{ name: 'UTE Rocha', cost_uyu: 450, energy_kwh: 28.5, station_id: 'st-1' }],
+    })
+  })
+
+  it('accepts comma decimals and dot thousands, the way people type here', () => {
+    const result = parseStopDrafts([
+      draft({ energyKwh: '28,5', cost: '1.450' }),
+    ])
+    expect(result).toEqual({
+      stops: [{ name: 'UTE Rocha', cost_uyu: 1450, energy_kwh: 28.5 }],
+    })
+  })
+
+  it('rejects garbage instead of silently dropping it', () => {
+    expect(parseStopDrafts([draft({ durationMinutes: 'abc' })])).toEqual({
+      error: 'Los minutos de carga deben ser un número válido.',
     })
   })
 

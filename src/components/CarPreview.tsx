@@ -20,7 +20,7 @@ export function CarPreview({ color }: CarPreviewProps) {
     <div className={styles.wrapper}>
       <img
         src={color ? CAR_IMAGE[color] : `${BASE}car-blanco.jpg`}
-        alt="Nammi 06"
+        alt={`Vigo color ${color ?? 'Blanco'}`}
         className={styles.base}
         draggable={false}
       />

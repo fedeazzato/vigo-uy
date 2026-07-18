@@ -4,6 +4,7 @@ import { Card, CardTitle, Alert, Badge } from './UI'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
+import { parseLocaleNumber } from '../lib/format'
 import {
   fetchChargingNetworks,
   fetchChargingStations,
@@ -91,7 +92,7 @@ export default function CommunityStations() {
       setError('Poné un nombre que identifique la estación.')
       return
     }
-    const power = maxPowerKw.trim() ? Number(maxPowerKw) : null
+    const power = parseLocaleNumber(maxPowerKw) ?? null
     if (power != null && (!Number.isFinite(power) || power < 0)) {
       setError('La potencia debe ser un número válido.')
       return

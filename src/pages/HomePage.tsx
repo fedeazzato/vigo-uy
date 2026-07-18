@@ -66,7 +66,9 @@ export default function HomePage() {
             {status === 'signedIn' ? (
               <Link to="/viajes/nuevo" className={styles.communityCtaBtn}>Registrá tu viaje</Link>
             ) : (
-              <Link to="/login" className={styles.communityCtaBtn}>Iniciá sesión para compartir</Link>
+              <Link to="/login" state={{ from: '/viajes/nuevo' }} className={styles.communityCtaBtn}>
+                Iniciá sesión para compartir
+              </Link>
             )}
             <Link to="/comunidad" className={styles.communityLink}>Ver toda la comunidad →</Link>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { TurnstileWidget, TURNSTILE_ENABLED } from '../components/TurnstileWidget'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +14,10 @@ type Step = 'email' | 'code'
 export default function LoginPage() {
   const { sendOtp, verifyOtp, status, passkeysSupported, signInWithPasskey } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  // Where RequireAuth bounced the user from, if anywhere; go back there
+  // after signing in instead of always landing on Mi actividad.
+  const from = (location.state as { from?: string } | null)?.from
 
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
@@ -28,8 +32,8 @@ export default function LoginPage() {
   const [turnstileKey, setTurnstileKey] = useState(0)
 
   useEffect(() => {
-    if (status === 'signedIn') navigate('/mi-actividad', { replace: true })
-  }, [status, navigate])
+    if (status === 'signedIn') navigate(from ?? '/mi-actividad', { replace: true })
+  }, [status, navigate, from])
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -112,6 +116,9 @@ export default function LoginPage() {
       />
 
       <Card>
+        {from && status !== 'signedIn' && (
+          <Alert type="info">Para esa sección necesitás iniciar sesión. Es rápido: solo tu email.</Alert>
+        )}
         {error && <Alert type="danger">{error}</Alert>}
 
         {step === 'email' && passkeysSupported && (
@@ -150,7 +157,10 @@ export default function LoginPage() {
           </form>
         ) : (
           <form className={styles.form} onSubmit={handleVerifyOtp}>
-            <p className={styles.hint}>Enviamos un código a <strong>{email}</strong></p>
+            <p className={styles.hint}>
+              Enviamos un código de 8 dígitos a <strong>{email}</strong>. Si no llega en un
+              minuto, revisá la carpeta de spam.
+            </p>
             <label className={styles.label} htmlFor="login-code">Código de verificación</label>
             <input
               id="login-code"
@@ -162,7 +172,7 @@ export default function LoginPage() {
               className={formStyles.input}
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value)}
-              placeholder="Código"
+              placeholder="12345678"
               autoFocus
               disabled={submitting}
             />
@@ -170,6 +180,12 @@ export default function LoginPage() {
               {submitting ? 'Verificando…' : 'Verificar'}
             </button>
             {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
+            {/* Explain the disabled resend button instead of leaving it mute. */}
+            {TURNSTILE_ENABLED && !captchaToken && cooldown === 0 && (
+              <p className={styles.hint}>
+                Para reenviar el código, primero completá la verificación de seguridad de arriba.
+              </p>
+            )}
             <div className={styles.secondaryActions}>
               <button
                 type="button"

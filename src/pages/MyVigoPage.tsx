@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useUserPrefs, MODELS, COLORS, COLOR_HEX, COLOR_DARK_TEXT, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { Model, TripLog } from '../types'
 import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../components/UI'
@@ -7,6 +8,7 @@ import ProfileCard from '../components/ProfileCard'
 import VehicleCard from '../components/VehicleCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { formatDate } from '../lib/format'
 import styles from './MyVigoPage.module.css'
 
 const MODEL_INFO: Record<Model, { battery: string; extra: string }> = {
@@ -59,7 +61,12 @@ export default function MyVigoPage() {
     <div>
       <PageHeader
         title="🚗 Mi Vigo"
-        subtitle="Configurá tu modelo y color para personalizar la información."
+        subtitle={
+          <>
+            Configurá tu modelo y color para personalizar la información. ¿Buscás tus viajes y
+            costos? Están en <Link to="/mi-actividad">Mi actividad</Link>.
+          </>
+        }
       />
 
       {(model || color) && (
@@ -67,6 +74,7 @@ export default function MyVigoPage() {
           {color && (
             <span
               className={styles.colorDot}
+              aria-hidden="true"
               style={{
                 background: COLOR_HEX[color],
                 border: COLOR_BORDER[color] ? `1.5px solid ${COLOR_BORDER[color]}` : undefined,
@@ -93,6 +101,7 @@ export default function MyVigoPage() {
               key={m}
               className={`${styles.modelCard} ${model === m ? styles.selected : ''}`}
               onClick={() => setModel(m)}
+              aria-pressed={model === m}
             >
               <div className={styles.modelName}>{m}</div>
               <div className={styles.modelBattery}>{MODEL_INFO[m].battery}</div>
@@ -111,9 +120,11 @@ export default function MyVigoPage() {
               key={c}
               className={`${styles.swatchBtn} ${color === c ? styles.selected : ''}`}
               onClick={() => setColor(c)}
+              aria-pressed={color === c}
             >
               <span
                 className={styles.swatch}
+                aria-hidden="true"
                 style={{
                   background: COLOR_HEX[c],
                   borderColor: COLOR_BORDER[c] ?? 'transparent',
@@ -154,11 +165,11 @@ export default function MyVigoPage() {
             <ol className={styles.topTrips}>
               {topTrips.map((trip, i) => (
                 <li key={trip.id} className={styles.topTripRow}>
-                  <span className={styles.topTripMedal}>{['🥇', '🥈', '🥉'][i]}</span>
+                  <span className={styles.topTripMedal} aria-hidden="true">{['🥇', '🥈', '🥉'][i]}</span>
                   <span className={styles.topTripInfo}>
                     <span className={styles.topTripTitle}>{trip.title}</span>
                     <span className={styles.topTripMeta}>
-                      {trip.origin} → {trip.destination} · {trip.trip_date}
+                      {trip.origin} → {trip.destination} · {formatDate(trip.trip_date)}
                     </span>
                   </span>
                   <span className={styles.topTripKm}>
