@@ -427,8 +427,16 @@
     line-height: 1;
   }
 
+  /* Subtle pill highlight on hover instead of the global link underline;
+     tokens keep it working in both themes. */
+  .tabLink:hover {
+    text-decoration: none;
+    background: var(--surface-secondary);
+  }
+
   /* Active tab: colored pill, not just tinted text. */
-  .tabLink.tabActive {
+  .tabLink.tabActive,
+  .tabLink.tabActive:hover {
     background: var(--green-50);
     color: var(--green-600);
     font-weight: 600;
