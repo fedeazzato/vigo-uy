@@ -366,6 +366,22 @@
     line-height: 1;
     flex-shrink: 0;
     text-decoration: none;
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  /* Subtle highlight on hover, no link underline; tokens cover both themes. */
+  .themeToggleMobile:hover,
+  .suggestLinkMobile:hover,
+  .miVigoLinkMobile:hover {
+    text-decoration: none;
+    background: var(--gray-100);
+    border-color: var(--border-strong);
+  }
+
+  /* The Mi Vigo button's background may be the selected car color (inline
+     style, which beats the hover background) — dim it slightly instead. */
+  .miVigoLinkMobile:hover {
+    filter: brightness(0.95);
   }
 
   /* Room for the fixed tab bar below the content. */
