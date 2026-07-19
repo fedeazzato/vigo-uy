@@ -624,6 +624,20 @@
   color: var(--text-tertiary);
 }
 
+/* Wide desktop: short task bullets flow into two columns instead of
+   leaving the card's right half empty. */
+@media (min-width: 1100px) {
+  .scheduleTasks {
+    display: block;
+    column-count: 2;
+    column-gap: 40px;
+  }
+  .scheduleTask {
+    break-inside: avoid;
+    padding-bottom: 5px; /* replaces the flex gap between items */
+  }
+}
+
 @media (max-width: 600px) {
   .chargeCompare {
     grid-template-columns: 1fr;
