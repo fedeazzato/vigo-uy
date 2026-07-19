@@ -1,6 +1,14 @@
 // Locale-aware formatting/parsing helpers for user-facing values.
 // All user-visible output follows es-UY conventions.
 
+// The shape the entry forms accept and store (`YYYY-MM-DD`).
+export const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+/** Today as an ISO `YYYY-MM-DD` string, the entry forms' default date. */
+export function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 // Uruguayan Spanish month abbreviations (note "set" for setiembre).
 const MONTHS_ES_UY = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic']
 
@@ -19,6 +27,18 @@ export function formatDate(isoDate: string, now: Date = new Date()): string {
   if (month < 1 || month > 12) return isoDate
   const base = `${day} ${MONTHS_ES_UY[month - 1]}`
   return year === now.getFullYear() ? base : `${base} ${year}`
+}
+
+/**
+ * Formats a peso amount as "$1.500" (es-UY grouping). Community views show
+ * whole pesos (default); pass `fractionDigits: 2` for the user's own records,
+ * which keep exact cents.
+ */
+export function formatCurrency(value: number, fractionDigits = 0): string {
+  return `$${value.toLocaleString('es-UY', {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })}`
 }
 
 /**

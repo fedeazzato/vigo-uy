@@ -1,27 +1,5 @@
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 480px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.hint {
-  font-size: 12px;
-  color: var(--text-tertiary);
-}
-
+/* Form layout (.form/.field/.label/.hint) comes from the shared
+   formControls.module.css; only account-specific pieces live here. */
 .inlineRow {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -98,20 +76,6 @@
   padding: 10px 14px;
   text-align: center;
 }
-
-.submitBtn {
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.submitBtn:hover:not(:disabled) { background: var(--green-600); }
-.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .secondaryBtn {
   background: var(--surface);

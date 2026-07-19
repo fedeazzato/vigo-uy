@@ -127,6 +127,30 @@ export function TripDetail({ trip }: TripDetailProps) {
   )
 }
 
+interface TripSummaryButtonProps {
+  trip: TripLog
+  expanded: boolean
+  onToggle: () => void
+}
+
+// The collapsed one-line trip summary that expands in place to TripDetail,
+// shared by the Comunidad feed and Mi actividad.
+export function TripSummaryButton({ trip, expanded, onToggle }: TripSummaryButtonProps) {
+  return (
+    <button type="button" className={styles.summaryToggle} onClick={onToggle} aria-expanded={expanded}>
+      <div className={styles.summaryTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
+      <div className={styles.summaryMeta}>
+        {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
+        {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
+        {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
+      </div>
+      <span className={styles.summaryHint} aria-hidden="true">
+        {expanded ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
+      </span>
+    </button>
+  )
+}
+
 interface TripCardProps {
   trip: TripLog
   authorName?: string

@@ -203,3 +203,35 @@
     background: var(--gray-100);
   }
 }
+
+/* ── StarRating ── */
+
+.starRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.starBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--border-strong);
+}
+
+.starBtn.starFilled { color: var(--amber-400); }
+
+.clearRating {
+  background: none;
+  border: none;
+  padding: 0 0 0 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clearRating:hover { color: var(--text-secondary); }

@@ -171,6 +171,7 @@
   font-weight: 500;
   padding: 2px 7px;
   border-radius: 20px;
+  /* fallow-ignore-next-line code-duplication -- badge color token mapping repeats the UI primitive palette by design */
   white-space: nowrap;
 }
 

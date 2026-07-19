@@ -5,7 +5,9 @@
   margin-bottom: 12px;
 }
 
-.sectionTitle {
+/* Like the shared .sectionTitle but without its bottom margin — the
+   surrounding .sectionHeader provides the spacing. */
+.sectionHeaderTitle {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
@@ -31,81 +33,12 @@
 }
 .addLink:hover { text-decoration: underline; }
 
-.empty {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  padding: 8px 0;
-}
+/* List/item chrome comes from the shared listPatterns.module.css; only
+   dashboard-specific pieces live here. */
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.item {
-  display: grid;
+/* Rows with a trailing cost column (services, purchases). */
+.itemThreeCol {
   grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.item:last-child { border-bottom: none; }
-
-/* Same row layout, but for items with no cost column (e.g. trips) */
-.itemTwoCol {
-  grid-template-columns: 1fr auto;
-}
-
-.itemTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.itemMeta {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
-
-.itemCost {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--green-600);
-  white-space: nowrap;
-}
-
-.itemActions {
-  display: flex;
-  gap: 10px;
-}
-
-/* Expandable trip rows: the summary is a button revealing the full
-   TripCard beneath (same pattern as the Comunidad feed). */
-.itemToggle {
-  display: block;
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-.itemToggleHint {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green-600);
-}
-.itemToggle:hover .itemToggleHint {
-  text-decoration: underline;
 }
 
 .itemDetail {
@@ -115,18 +48,6 @@
 .itemDetail > * {
   margin-bottom: 0;
 }
-
-.actionLink {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 12px;
-  color: var(--text-tertiary);
-  text-decoration: underline;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.actionLink:hover { color: var(--green-600); }
 
 /* ── Save toast ("Viaje guardado ✓") ── */
 
@@ -204,20 +125,7 @@
 .emptyStateBtn:hover { background: var(--green-600); }
 
 @media (max-width: 500px) {
-  .item {
+  .itemThreeCol {
     grid-template-columns: 1fr;
-    gap: 6px;
-  }
-  /* Comfortable touch targets between adjacent actions (B3). */
-  .itemActions {
-    gap: 16px;
-  }
-  .actionLink {
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-  }
-  .itemActions {
-    justify-content: flex-start;
   }
 }

@@ -11,6 +11,7 @@ vi.mock('./supabaseClient', () => ({
 }))
 
 import {
+  cityCostStatItems,
   fetchLeaderboard,
   invalidateCommunityCache,
   pickCostStat,
@@ -18,7 +19,7 @@ import {
   reliabilityLevel,
   verifiedFirst,
 } from './communityData'
-import type { ChargingCostStat, StationReliability } from '../types'
+import type { ChargingCostStat, CityCostStat, StationReliability } from '../types'
 
 describe('preferCommunity', () => {
   const curated = { anything: true }
@@ -32,6 +33,19 @@ describe('preferCommunity', () => {
     const community = [1, 2, 3, 4, 5]
     const result = preferCommunity({ curated, community, minSamples: 5 })
     expect(result).toEqual({ source: 'comunidad', data: community })
+  })
+})
+
+describe('cityCostStatItems', () => {
+  it('renders one rounded-peso stat per city', () => {
+    const stats: CityCostStat[] = [
+      { city: 'Montevideo', avg_cost_uyu: 4890.6, entry_count: 12 },
+      { city: 'Maldonado', avg_cost_uyu: 5200, entry_count: 3 },
+    ]
+    expect(cityCostStatItems(stats)).toEqual([
+      { value: '$4.891', label: 'Costo medio de service en Montevideo (12)' },
+      { value: '$5.200', label: 'Costo medio de service en Maldonado (3)' },
+    ])
   })
 })
 

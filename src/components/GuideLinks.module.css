@@ -49,7 +49,7 @@
   min-width: 0;
 }
 
-.label {
+.linkLabel {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);

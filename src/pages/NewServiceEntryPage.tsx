@@ -1,25 +1,18 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
+import { FormError } from '../components/UI'
+import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { toFriendlyError } from '../lib/errors'
-import { parseLocaleNumber } from '../lib/format'
-import { invalidateCommunityCache } from '../lib/communityData'
+import { ISO_DATE_PATTERN, parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { useEntrySubmit } from '../lib/useEntrySubmit'
 import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
-import styles from './NewServiceEntryPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
 const mantenimiento = rawMantenimiento as MantenimientoData
 const KNOWN_DEALERS = [...new Set(mantenimiento.dealerPrices.map((d) => d.dealer))]
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export default function NewServiceEntryPage() {
   const { id } = useParams()
@@ -27,7 +20,7 @@ export default function NewServiceEntryPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [serviceDate, setServiceDate] = useState(today())
+  const [serviceDate, setServiceDate] = useState(todayIsoDate())
   const [odometerKm, setOdometerKm] = useState('')
   const [dealer, setDealer] = useState('')
   const [serviceType, setServiceType] = useState('')
@@ -37,8 +30,7 @@ export default function NewServiceEntryPage() {
   const [isPublic, setIsPublic] = useState(true)
 
   const [loading, setLoading] = useState(isEdit)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, submit } = useEntrySubmit('service')
   // Any change flips this on; Cancel then asks before discarding.
   const [dirty, setDirty] = useState(false)
 
@@ -58,19 +50,20 @@ export default function NewServiceEntryPage() {
           setDealer(data.dealer)
           setServiceType(data.service_type)
           setCostUyu(String(data.cost_uyu))
+          // fallow-ignore-next-line code-duplication -- per-field edit hydration necessarily mirrors the sibling form
           setCity(data.city ?? '')
           setNotes(data.notes ?? '')
           setIsPublic(data.is_public)
         }
         setLoading(false)
       })
-  }, [id, isEdit])
+  }, [id, isEdit, setError])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!supabase || !user) return
 
-    if (!DATE_PATTERN.test(serviceDate)) {
+    if (!ISO_DATE_PATTERN.test(serviceDate)) {
       setError('La fecha debe tener el formato AAAA-MM-DD.')
       return
     }
@@ -89,9 +82,6 @@ export default function NewServiceEntryPage() {
       return
     }
 
-    setSubmitting(true)
-    setError(null)
-
     const payload = {
       service_date: serviceDate,
       odometer_km: Math.round(km),
@@ -103,18 +93,12 @@ export default function NewServiceEntryPage() {
       is_public: isPublic,
     }
 
-    const { error } = isEdit
-      ? await supabase.from('service_entries').update(payload).eq('id', id!)
-      : await supabase.from('service_entries').insert({ ...payload, user_id: user.id })
-
-    setSubmitting(false)
-
-    if (error) {
-      setError(toFriendlyError(error))
-      return
-    }
-    invalidateCommunityCache()
-    navigate('/mi-actividad', { state: { saved: 'service' } })
+    const client = supabase
+    await submit(() =>
+      isEdit
+        ? client.from('service_entries').update(payload).eq('id', id!)
+        : client.from('service_entries').insert({ ...payload, user_id: user.id })
+    )
   }
 
   function handleCancel() {
@@ -122,38 +106,22 @@ export default function NewServiceEntryPage() {
     navigate('/mi-actividad')
   }
 
-  // Edit mode: show the header + a skeleton instead of a blank screen while
-  // the entry being edited loads.
-  if (loading) {
-    return (
-      <div>
-        <PageHeader
-          title={isEdit ? '🛠️ Editar costo de service' : '🛠️ Nuevo costo de service'}
-          subtitle="Registrá una visita al taller para llevar tu historial y aportar a la comunidad."
-        />
-        <Skeleton lines={6} />
-      </div>
-    )
-  }
-
   return (
-    <div>
-      <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
-        ← Volver
-      </button>
-      <PageHeader
-        title={isEdit ? '🛠️ Editar costo de service' : '🛠️ Nuevo costo de service'}
-        subtitle="Registrá una visita al taller para llevar tu historial y aportar a la comunidad."
-      />
-
-      <Card>
+    <EntryFormShell
+      title={isEdit ? '🛠️ Editar costo de service' : '🛠️ Nuevo costo de service'}
+      subtitle="Registrá una visita al taller para llevar tu historial y aportar a la comunidad."
+      // fallow-ignore-next-line code-duplication -- both simple entry forms open with the same shell props and date field
+      loading={loading}
+      submitting={submitting}
+      onCancel={handleCancel}
+    >
         {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           <CityDatalist />
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-date">📅 Fecha</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="service-date">📅 Fecha</label>
               <input
                 id="service-date"
                 required
@@ -163,8 +131,8 @@ export default function NewServiceEntryPage() {
                 onChange={(e) => setServiceDate(e.target.value)}
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-km">📏 Kilometraje</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="service-km">📏 Kilometraje</label>
               <input
                 id="service-km"
                 required
@@ -178,8 +146,8 @@ export default function NewServiceEntryPage() {
             </div>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-dealer">🔧 Taller</label>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="service-dealer">🔧 Taller</label>
             <input
               id="service-dealer"
               required
@@ -189,11 +157,11 @@ export default function NewServiceEntryPage() {
               onChange={(e) => setDealer(e.target.value)}
               placeholder="Nombre del taller"
             />
-            <span className={styles.hint}>Talleres conocidos: {KNOWN_DEALERS.join(', ')}</span>
+            <span className={formStyles.hint}>Talleres conocidos: {KNOWN_DEALERS.join(', ')}</span>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-type">🛠️ Tipo de service</label>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="service-type">🛠️ Tipo de service</label>
             <input
               id="service-type"
               required
@@ -205,9 +173,9 @@ export default function NewServiceEntryPage() {
             />
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-cost">💰 Costo (UYU)</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="service-cost">💰 Costo (UYU)</label>
               <input
                 id="service-cost"
                 required
@@ -219,8 +187,8 @@ export default function NewServiceEntryPage() {
                 placeholder="7500"
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="service-city">📍 Ciudad</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="service-city">📍 Ciudad</label>
               <input
                 id="service-city"
                 type="text"
@@ -233,32 +201,14 @@ export default function NewServiceEntryPage() {
             </div>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="service-notes">💬 Notas</label>
-            <textarea
-              id="service-notes"
-              rows={3}
-              className={`${formStyles.input} ${formStyles.textarea}`}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Detalles adicionales..."
-            />
-          </div>
+          <NotesField id="service-notes" value={notes} onChange={setNotes} placeholder="Detalles adicionales..." />
 
-          <label className={styles.checkboxRow}>
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
-            />
-            Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
-          </label>
+          <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+          <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
             {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
           </button>
         </form>
-      </Card>
-    </div>
+    </EntryFormShell>
   )
 }

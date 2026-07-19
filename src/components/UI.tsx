@@ -126,6 +126,37 @@ export function FormError({ children }: FormErrorProps) {
   )
 }
 
+interface StarRatingProps {
+  value: number | null
+  onChange: (value: number | null) => void
+}
+
+// 1–5 star picker used by the entry forms. Clicking the current value clears
+// it, same as the "Quitar" link.
+export function StarRating({ value, onChange }: StarRatingProps) {
+  return (
+    <div className={styles.starRow}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          className={`${styles.starBtn} ${value != null && n <= value ? styles.starFilled : ''}`}
+          onClick={() => onChange(value === n ? null : n)}
+          aria-label={`${n} estrellas`}
+          aria-pressed={value != null && n <= value}
+        >
+          ★
+        </button>
+      ))}
+      {value != null && (
+        <button type="button" className={styles.clearRating} onClick={() => onChange(null)}>
+          Quitar
+        </button>
+      )}
+    </div>
+  )
+}
+
 interface StatGridProps {
   stats: StatItem[]
 }

@@ -354,10 +354,6 @@ export type ChargingStation = Omit<
   current_type: StationCurrentType
 }
 
-export type StationReport = Omit<Tables['station_reports']['Row'], 'status'> & {
-  status: StationReportStatus
-}
-
 // Rolling-365-day average of what members actually paid. station_id is null
 // on the per-network rollup rows (GROUPING SETS); everything else is
 // aggregate output and never null.

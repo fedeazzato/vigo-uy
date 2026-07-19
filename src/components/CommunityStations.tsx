@@ -82,7 +82,7 @@ export default function CommunityStations() {
 
   useEffect(() => {
     if (!supabase) return
-    load()
+    void load()
   }, [load])
 
   async function addStation(e: FormEvent) {
@@ -122,7 +122,7 @@ export default function CommunityStations() {
     setMaxPowerKw('')
     setAccessNotes('')
     setShowForm(false)
-    load()
+    void load()
   }
 
   async function report(stationId: string, reportStatus: StationReportStatus) {
@@ -140,7 +140,7 @@ export default function CommunityStations() {
     }
     invalidateCommunityCache()
     setMessage('Reporte registrado. ¡Gracias!')
-    load()
+    void load()
   }
 
   if (!supabase) return null
@@ -177,11 +177,11 @@ export default function CommunityStations() {
         )}
 
         {showForm && (
-          <form className={styles.form} onSubmit={addStation}>
+          <form className={styles.stationForm} onSubmit={addStation}>
             <CityDatalist />
             <div className={styles.formRow}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-network">🌐 Red</label>
+              <div className={styles.stationField}>
+                <label className={styles.stationLabel} htmlFor="station-network">🌐 Red</label>
                 <select
                   id="station-network"
                   className={formStyles.input}
@@ -201,8 +201,8 @@ export default function CommunityStations() {
                   })}
                 </select>
               </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-city">📍 Ciudad</label>
+              <div className={styles.stationField}>
+                <label className={styles.stationLabel} htmlFor="station-city">📍 Ciudad</label>
                 <input
                   id="station-city"
                   type="text"
@@ -215,8 +215,8 @@ export default function CommunityStations() {
               </div>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="station-name">📝 Nombre / ubicación</label>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-name">📝 Nombre / ubicación</label>
               <input
                 id="station-name"
                 required
@@ -229,8 +229,8 @@ export default function CommunityStations() {
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-current">⚡ Corriente</label>
+              <div className={styles.stationField}>
+                <label className={styles.stationLabel} htmlFor="station-current">⚡ Corriente</label>
                 <select
                   id="station-current"
                   className={formStyles.input}
@@ -242,8 +242,8 @@ export default function CommunityStations() {
                   ))}
                 </select>
               </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-connector">🔌 Conector</label>
+              <div className={styles.stationField}>
+                <label className={styles.stationLabel} htmlFor="station-connector">🔌 Conector</label>
                 <select
                   id="station-connector"
                   className={formStyles.input}
@@ -258,8 +258,8 @@ export default function CommunityStations() {
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="station-power">Potencia máx. (kW)</label>
+              <div className={styles.stationField}>
+                <label className={styles.stationLabel} htmlFor="station-power">Potencia máx. (kW)</label>
                 <input
                   id="station-power"
                   type="text"
@@ -272,8 +272,8 @@ export default function CommunityStations() {
               </div>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="station-notes">💬 Notas del lugar</label>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-notes">💬 Notas del lugar</label>
               <textarea
                 id="station-notes"
                 rows={2}
@@ -285,7 +285,7 @@ export default function CommunityStations() {
             </div>
 
             <div>
-              <button type="submit" className={styles.submitBtn} disabled={busy}>
+              <button type="submit" className={styles.stationSubmitBtn} disabled={busy}>
                 {busy ? 'Guardando…' : 'Guardar estación'}
               </button>
             </div>

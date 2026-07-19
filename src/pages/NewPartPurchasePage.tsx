@@ -1,21 +1,14 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
+import { FormError } from '../components/UI'
+import EntryFormShell, { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { toFriendlyError } from '../lib/errors'
-import { parseLocaleNumber } from '../lib/format'
-import { invalidateCommunityCache } from '../lib/communityData'
+import { ISO_DATE_PATTERN, parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { partsCatalog } from '../lib/partsCatalog'
-import styles from './NewPartPurchasePage.module.css'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export default function NewPartPurchasePage() {
   const { id } = useParams()
@@ -23,7 +16,7 @@ export default function NewPartPurchasePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [purchaseDate, setPurchaseDate] = useState(today())
+  const [purchaseDate, setPurchaseDate] = useState(todayIsoDate())
   const [category, setCategory] = useState(partsCatalog.categories[0]?.id ?? 'otros')
   const [item, setItem] = useState('')
   const [store, setStore] = useState('')
@@ -35,8 +28,7 @@ export default function NewPartPurchasePage() {
   const [isPublic, setIsPublic] = useState(true)
 
   const [loading, setLoading] = useState(isEdit)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, submit } = useEntrySubmit('compra')
   // Any change flips this on; Cancel then asks before discarding.
   const [dirty, setDirty] = useState(false)
 
@@ -64,13 +56,13 @@ export default function NewPartPurchasePage() {
         }
         setLoading(false)
       })
-  }, [id, isEdit])
+  }, [id, isEdit, setError])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!supabase || !user) return
 
-    if (!DATE_PATTERN.test(purchaseDate)) {
+    if (!ISO_DATE_PATTERN.test(purchaseDate)) {
       setError('La fecha debe tener el formato AAAA-MM-DD.')
       return
     }
@@ -89,9 +81,6 @@ export default function NewPartPurchasePage() {
       return
     }
 
-    setSubmitting(true)
-    setError(null)
-
     const payload = {
       purchase_date: purchaseDate,
       category,
@@ -105,18 +94,12 @@ export default function NewPartPurchasePage() {
       is_public: isPublic,
     }
 
-    const { error } = isEdit
-      ? await supabase.from('part_purchases').update(payload).eq('id', id!)
-      : await supabase.from('part_purchases').insert({ ...payload, user_id: user.id })
-
-    setSubmitting(false)
-
-    if (error) {
-      setError(toFriendlyError(error))
-      return
-    }
-    invalidateCommunityCache()
-    navigate('/mi-actividad', { state: { saved: 'compra' } })
+    const client = supabase
+    await submit(() =>
+      isEdit
+        ? client.from('part_purchases').update(payload).eq('id', id!)
+        : client.from('part_purchases').insert({ ...payload, user_id: user.id })
+    )
   }
 
   function handleCancel() {
@@ -124,38 +107,21 @@ export default function NewPartPurchasePage() {
     navigate('/mi-actividad')
   }
 
-  // Edit mode: show the header + a skeleton instead of a blank screen while
-  // the purchase being edited loads.
-  if (loading) {
-    return (
-      <div>
-        <PageHeader
-          title={isEdit ? '🔩 Editar compra de repuesto' : '🔩 Nueva compra de repuesto'}
-          subtitle="Registrá lo que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
-        />
-        <Skeleton lines={6} />
-      </div>
-    )
-  }
-
   return (
-    <div>
-      <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
-        ← Volver
-      </button>
-      <PageHeader
-        title={isEdit ? '🔩 Editar compra de repuesto' : '🔩 Nueva compra de repuesto'}
-        subtitle="Registrá lo que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
-      />
-
-      <Card>
+    <EntryFormShell
+      title={isEdit ? '🔩 Editar compra de repuesto' : '🔩 Nueva compra de repuesto'}
+      subtitle="Registrá lo que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
+      loading={loading}
+      submitting={submitting}
+      onCancel={handleCancel}
+    >
         {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           <CityDatalist />
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-date">📅 Fecha</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-date">📅 Fecha</label>
               <input
                 id="purchase-date"
                 required
@@ -165,8 +131,8 @@ export default function NewPartPurchasePage() {
                 onChange={(e) => setPurchaseDate(e.target.value)}
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-category">🗂️ Categoría</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-category">🗂️ Categoría</label>
               <select
                 id="purchase-category"
                 className={formStyles.input}
@@ -180,8 +146,8 @@ export default function NewPartPurchasePage() {
             </div>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="purchase-item">🔩 ¿Qué compraste?</label>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-item">🔩 ¿Qué compraste?</label>
             <input
               id="purchase-item"
               required
@@ -191,12 +157,12 @@ export default function NewPartPurchasePage() {
               onChange={(e) => setItem(e.target.value)}
               placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
             />
-            <span className={styles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
+            <span className={formStyles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-store">🏪 ¿Dónde?</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-store">🏪 ¿Dónde?</label>
               <input
                 id="purchase-store"
                 required
@@ -207,8 +173,8 @@ export default function NewPartPurchasePage() {
                 placeholder="Comercio o importador"
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-price">💰 Precio (UYU)</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-price">💰 Precio (UYU)</label>
               <input
                 id="purchase-price"
                 required
@@ -222,9 +188,9 @@ export default function NewPartPurchasePage() {
             </div>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-km">📏 Kilometraje</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-km">📏 Kilometraje</label>
               <input
                 id="purchase-km"
                 type="text"
@@ -235,8 +201,8 @@ export default function NewPartPurchasePage() {
                 placeholder="45000"
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="purchase-city">📍 Ciudad</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-city">📍 Ciudad</label>
               <input
                 id="purchase-city"
                 type="text"
@@ -249,59 +215,25 @@ export default function NewPartPurchasePage() {
             </div>
           </div>
 
-          <div className={styles.field}>
-            <span className={styles.label}>¿Recomendás la compra?</span>
-            <div className={styles.starRow}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={styles.starBtn}
-                  aria-label={`${n} de 5`}
-                  aria-pressed={rating != null && n <= rating}
-                  onClick={() => { setRating(rating === n ? null : n); setDirty(true) }}
-                >
-                  {rating != null && n <= rating ? '★' : '☆'}
-                </button>
-              ))}
-              {rating != null && (
-                <button
-                  type="button"
-                  className={styles.clearRating}
-                  onClick={() => { setRating(null); setDirty(true) }}
-                >
-                  Quitar
-                </button>
-              )}
-            </div>
-          </div>
+          <RatingField
+            label="¿Recomendás la compra?"
+            value={rating}
+            onChange={(v) => { setRating(v); setDirty(true) }}
+          />
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="purchase-notes">💬 Notas</label>
-            <textarea
-              id="purchase-notes"
-              rows={3}
-              className={`${formStyles.input} ${formStyles.textarea}`}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Plazo de entrega, atención, si volverías a comprar ahí..."
-            />
-          </div>
+          <NotesField
+            id="purchase-notes"
+            value={notes}
+            onChange={setNotes}
+            placeholder="Plazo de entrega, atención, si volverías a comprar ahí..."
+          />
 
-          <label className={styles.checkboxRow}>
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
-            />
-            Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
-          </label>
+          <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+          <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
             {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
           </button>
         </form>
-      </Card>
-    </div>
+    </EntryFormShell>
   )
 }

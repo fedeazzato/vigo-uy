@@ -24,7 +24,7 @@ export default function ChargingPage() {
 
   useEffect(() => {
     if (!supabase) return
-    fetchChargingCostStats().then(({ stats: cs }) => setCostStats(cs))
+    void fetchChargingCostStats().then(({ stats: cs }) => setCostStats(cs))
   }, [])
 
   // Rolling-year network average from real charges (D4). When present, it
@@ -61,9 +61,9 @@ export default function ChargingPage() {
               <button
                 key={s}
                 className={`${styles.standardBtn} ${standard === s ? styles.standardBtnActive : ''}`}
-                onClick={() => setStandard(s as AutonomyStandard)}
+                onClick={() => setStandard(s)}
               >
-                {STANDARD_LABELS[s as AutonomyStandard]}
+                {STANDARD_LABELS[s]}
               </button>
             ))}
           </div>

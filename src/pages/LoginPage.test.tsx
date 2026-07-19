@@ -73,7 +73,7 @@ describe('LoginPage CAPTCHA gating (A3)', () => {
     renderLogin()
     await goToCodeStep()
 
-    const resend = () => screen.getByRole('button', { name: /Reenviar código/ }) as HTMLButtonElement
+    const resend = () => screen.getByRole<HTMLButtonElement>('button', { name: /Reenviar código/ })
 
     // Cooldown running: disabled with countdown label.
     expect(resend().disabled).toBe(true)
@@ -106,7 +106,7 @@ describe('LoginPage CAPTCHA gating (A3)', () => {
     expect(sendOtp).toHaveBeenCalledTimes(2)
     expect(sendOtp).toHaveBeenLastCalledWith('ana@example.com', 'tok-123')
     // Tokens are single-use: cooldown restarted and gate closed again.
-    const resend = screen.getByRole('button', { name: /Reenviar código/ }) as HTMLButtonElement
+    const resend = screen.getByRole<HTMLButtonElement>('button', { name: /Reenviar código/ })
     expect(resend.disabled).toBe(true)
     expect(resend.textContent).toContain('(60s)')
   })

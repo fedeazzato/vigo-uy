@@ -1,0 +1,5 @@
+/* The shell's back button sits directly above the PageHeader and needs a
+   little breathing room (the trip wizard spaces its own top bar instead). */
+.backSpacing {
+  margin-bottom: 6px;
+}

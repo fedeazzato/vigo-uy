@@ -43,7 +43,7 @@ export default function ProfilePrefsSync() {
       .update({ model: localModel, color: localColor })
       .eq('id', profile.id)
       .then(({ error }) => {
-        if (!error) refreshProfile()
+        if (!error) void refreshProfile()
       })
     // setters/refreshProfile deliberately omitted: they are recreated per
     // render and the effect only needs to react to value changes.

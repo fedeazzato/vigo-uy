@@ -3,7 +3,7 @@ import type { AuthError, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
 import type { Profile } from '../types'
 
-export type AuthStatus = 'loading' | 'signedOut' | 'signedIn' | 'disabled'
+type AuthStatus = 'loading' | 'signedOut' | 'signedIn' | 'disabled'
 
 interface AuthContextValue {
   user: User | null
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabase) return
 
-    supabase.auth.getSession().then(({ data }) => {
+    void supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null)
       setStatus(data.session ? 'signedIn' : 'signedOut')
     })
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   useEffect(() => {
-    refreshProfile()
+    void refreshProfile()
   }, [refreshProfile])
 
   async function sendOtp(email: string, captchaToken?: string | null) {

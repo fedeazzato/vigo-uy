@@ -8,7 +8,7 @@ import MyVigoPage from './MyVigoPage'
 // Mutable holder so each test can vary the signed-in profile. supabase is
 // null in tests, so the page's vehicle/top-trips fetches are skipped.
 const auth = vi.hoisted(() => ({
-  current: {} as Record<string, unknown>,
+  current: {},
 }))
 
 vi.mock('../context/AuthContext', () => ({

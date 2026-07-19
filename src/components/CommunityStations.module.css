@@ -18,7 +18,9 @@
 }
 .addBtn:hover { background: var(--green-600); }
 
-.form {
+/* Station-report form: deliberately tighter variants of the shared form
+   classes (smaller gaps/labels, content-sized button). */
+.stationForm {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -33,19 +35,19 @@
   gap: 12px;
 }
 
-.field {
+.stationField {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.label {
+.stationLabel {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.submitBtn {
+.stationSubmitBtn {
   background: var(--green-400);
   color: #fff;
   border: none;
@@ -56,8 +58,8 @@
   cursor: pointer;
   font-family: inherit;
 }
-.submitBtn:hover { background: var(--green-600); }
-.submitBtn:disabled { opacity: 0.6; cursor: default; }
+.stationSubmitBtn:hover { background: var(--green-600); }
+.stationSubmitBtn:disabled { opacity: 0.6; cursor: default; }
 
 /* ── Station list ── */
 

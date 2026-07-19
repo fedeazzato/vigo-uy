@@ -151,7 +151,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Atrás/ }))
     fireEvent.click(screen.getByRole('button', { name: /Atrás/ }))
     expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
-    expect((screen.getByLabelText('📍 Origen') as HTMLInputElement).value).toBe('Montevideo')
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('Montevideo')
   })
 
   it('hides the battery/charge details behind the disclosure on the share step', () => {
@@ -198,7 +198,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
 
     // Back to "not listed": the name input returns, empty.
     fireEvent.change(selector, { target: { value: '' } })
-    const nameInput = screen.getByPlaceholderText('Nombre del cargador') as HTMLInputElement
+    const nameInput = screen.getByPlaceholderText<HTMLInputElement>('Nombre del cargador')
     expect(nameInput.value).toBe('')
   })
 

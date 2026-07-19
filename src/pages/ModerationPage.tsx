@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { AdminUserRow, PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './ModerationPage.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 
 type Tab = 'contenido' | 'usuarios'
 type ContentTable = 'service_entries' | 'trip_logs' | 'part_purchases'
@@ -23,7 +24,7 @@ export default function ModerationPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
   async function load() {
@@ -62,40 +63,28 @@ export default function ModerationPage() {
     setLoading(false)
   }
 
-  async function toggleHidden(table: ContentTable, id: string, currentHidden: boolean) {
-    if (!supabase) return
-    const { error } = await supabase.from(table).update({ hidden: !currentHidden }).eq('id', id)
-    if (error) {
-      setError(toFriendlyError(error))
-      return
-    }
-    invalidateCommunityCache()
+  function patchRows(table: ContentTable, id: string, patch: { hidden?: boolean; verified?: boolean }) {
     if (table === 'service_entries') {
-      setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, hidden: !currentHidden } : e)))
+      setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)))
     } else if (table === 'trip_logs') {
-      setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, hidden: !currentHidden } : t)))
+      setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
     } else {
-      setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, hidden: !currentHidden } : p)))
+      setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
     }
   }
 
-  async function toggleVerified(table: ContentTable, id: string, currentVerified: boolean) {
+  async function toggleFlag(table: ContentTable, id: string, field: 'hidden' | 'verified', current: boolean) {
     if (!supabase) return
-    // Normal UPDATE: the moderator RLS policy allows it, and the
-    // prevent_unauthorized_verify trigger reverts it for anyone else.
-    const { error } = await supabase.from(table).update({ verified: !currentVerified }).eq('id', id)
+    // Normal UPDATE: the moderator RLS policy allows it, and (for `verified`)
+    // the prevent_unauthorized_verify trigger reverts it for anyone else.
+    const patch = field === 'hidden' ? { hidden: !current } : { verified: !current }
+    const { error } = await supabase.from(table).update(patch).eq('id', id)
     if (error) {
       setError(toFriendlyError(error))
       return
     }
     invalidateCommunityCache()
-    if (table === 'service_entries') {
-      setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, verified: !currentVerified } : e)))
-    } else if (table === 'trip_logs') {
-      setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, verified: !currentVerified } : t)))
-    } else {
-      setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, verified: !currentVerified } : p)))
-    }
+    patchRows(table, id, patch)
   }
 
   async function deleteItem(table: ContentTable, id: string) {
@@ -181,37 +170,37 @@ export default function ModerationPage() {
       ) : (
         <>
           <Card>
-            <h2 className={styles.sectionTitle}>Costos de service</h2>
+            <h2 className={listStyles.sectionTitle}>Costos de service</h2>
             {entries.length === 0 ? (
-              <p className={styles.empty}>No hay costos públicos.</p>
+              <p className={listStyles.empty}>No hay costos públicos.</p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={listStyles.list}>
                 {entries.map((entry) => (
-                  <li key={entry.id} className={`${styles.item} ${entry.hidden ? styles.hidden : ''}`}>
+                  <li key={entry.id} className={`${listStyles.item} ${entry.hidden ? styles.hidden : ''}`}>
                     <div>
-                      <div className={styles.itemTitle}>
+                      <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
                         {entry.service_type}
                         {entry.verified && <Badge color="blue">Verificado</Badge>}
                         {entry.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
-                      <div className={styles.itemMeta}>
+                      <div className={listStyles.itemMeta}>
                         {entry.service_date} · {entry.dealer} · por {names[entry.user_id] ?? 'un usuario'}
                       </div>
                     </div>
-                    <div className={styles.itemActions}>
+                    <div className={listStyles.itemActions}>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleVerified('service_entries', entry.id, entry.verified)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('service_entries', entry.id, 'verified', entry.verified)}
                       >
                         {entry.verified ? 'Quitar verificación' : 'Verificar'}
                       </button>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleHidden('service_entries', entry.id, entry.hidden)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('service_entries', entry.id, 'hidden', entry.hidden)}
                       >
                         {entry.hidden ? 'Mostrar' : 'Ocultar'}
                       </button>
-                      <button className={styles.actionLink} onClick={() => deleteItem('service_entries', entry.id)}>
+                      <button className={listStyles.actionLink} onClick={() => deleteItem('service_entries', entry.id)}>
                         Eliminar
                       </button>
                     </div>
@@ -222,38 +211,38 @@ export default function ModerationPage() {
           </Card>
 
           <Card>
-            <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
+            <h2 className={listStyles.sectionTitle}>Repuestos y consumibles</h2>
             {purchases.length === 0 ? (
-              <p className={styles.empty}>No hay compras públicas.</p>
+              <p className={listStyles.empty}>No hay compras públicas.</p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={listStyles.list}>
                 {purchases.map((purchase) => (
-                  <li key={purchase.id} className={`${styles.item} ${purchase.hidden ? styles.hidden : ''}`}>
+                  <li key={purchase.id} className={`${listStyles.item} ${purchase.hidden ? styles.hidden : ''}`}>
                     <div>
-                      <div className={styles.itemTitle}>
+                      <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
                         {purchase.item}
                         {purchase.verified && <Badge color="blue">Verificado</Badge>}
                         {purchase.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
-                      <div className={styles.itemMeta}>
+                      <div className={listStyles.itemMeta}>
                         {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store} · por{' '}
                         {names[purchase.user_id] ?? 'un usuario'}
                       </div>
                     </div>
-                    <div className={styles.itemActions}>
+                    <div className={listStyles.itemActions}>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleVerified('part_purchases', purchase.id, purchase.verified)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('part_purchases', purchase.id, 'verified', purchase.verified)}
                       >
                         {purchase.verified ? 'Quitar verificación' : 'Verificar'}
                       </button>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleHidden('part_purchases', purchase.id, purchase.hidden)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('part_purchases', purchase.id, 'hidden', purchase.hidden)}
                       >
                         {purchase.hidden ? 'Mostrar' : 'Ocultar'}
                       </button>
-                      <button className={styles.actionLink} onClick={() => deleteItem('part_purchases', purchase.id)}>
+                      <button className={listStyles.actionLink} onClick={() => deleteItem('part_purchases', purchase.id)}>
                         Eliminar
                       </button>
                     </div>
@@ -264,37 +253,37 @@ export default function ModerationPage() {
           </Card>
 
           <Card>
-            <h2 className={styles.sectionTitle}>Viajes</h2>
+            <h2 className={listStyles.sectionTitle}>Viajes</h2>
             {trips.length === 0 ? (
-              <p className={styles.empty}>No hay viajes públicos.</p>
+              <p className={listStyles.empty}>No hay viajes públicos.</p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={listStyles.list}>
                 {trips.map((trip) => (
-                  <li key={trip.id} className={`${styles.item} ${trip.hidden ? styles.hidden : ''}`}>
+                  <li key={trip.id} className={`${listStyles.item} ${trip.hidden ? styles.hidden : ''}`}>
                     <div>
-                      <div className={styles.itemTitle}>
+                      <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
                         {trip.title}
                         {trip.verified && <Badge color="blue">Verificado</Badge>}
                         {trip.hidden && <Badge color="gray">Oculto</Badge>}
                       </div>
-                      <div className={styles.itemMeta}>
+                      <div className={listStyles.itemMeta}>
                         {trip.trip_date} · {trip.origin} → {trip.destination} · por {names[trip.user_id] ?? 'un usuario'}
                       </div>
                     </div>
-                    <div className={styles.itemActions}>
+                    <div className={listStyles.itemActions}>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleVerified('trip_logs', trip.id, trip.verified)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('trip_logs', trip.id, 'verified', trip.verified)}
                       >
                         {trip.verified ? 'Quitar verificación' : 'Verificar'}
                       </button>
                       <button
-                        className={styles.actionLink}
-                        onClick={() => toggleHidden('trip_logs', trip.id, trip.hidden)}
+                        className={listStyles.actionLink}
+                        onClick={() => toggleFlag('trip_logs', trip.id, 'hidden', trip.hidden)}
                       >
                         {trip.hidden ? 'Mostrar' : 'Ocultar'}
                       </button>
-                      <button className={styles.actionLink} onClick={() => deleteItem('trip_logs', trip.id)}>
+                      <button className={listStyles.actionLink} onClick={() => deleteItem('trip_logs', trip.id)}>
                         Eliminar
                       </button>
                     </div>
@@ -310,23 +299,23 @@ export default function ModerationPage() {
         <Skeleton lines={5} />
       ) : (
         <Card>
-          <h2 className={styles.sectionTitle}>Usuarios</h2>
+          <h2 className={listStyles.sectionTitle}>Usuarios</h2>
           {users.length === 0 ? (
-            <p className={styles.empty}>No hay usuarios registrados.</p>
+            <p className={listStyles.empty}>No hay usuarios registrados.</p>
           ) : (
-            <ul className={styles.list}>
+            <ul className={listStyles.list}>
               {users.map((u) => {
                 const isSelf = u.id === user?.id
                 return (
-                  <li key={u.id} className={`${styles.item} ${u.banned_at ? styles.hidden : ''}`}>
+                  <li key={u.id} className={`${listStyles.item} ${u.banned_at ? styles.hidden : ''}`}>
                     <div>
-                      <div className={styles.itemTitle}>
+                      <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
                         {u.display_name}
                         {u.is_moderator && <Badge color="blue">Moderador</Badge>}
                         {u.banned_at && <Badge color="red">Baneado</Badge>}
                         {isSelf && <Badge color="gray">Vos</Badge>}
                       </div>
-                      <div className={styles.itemMeta}>
+                      <div className={listStyles.itemMeta}>
                         {[
                           u.city,
                           u.model,
@@ -340,11 +329,11 @@ export default function ModerationPage() {
                       </div>
                     </div>
                     {!isSelf && (
-                      <div className={styles.itemActions}>
-                        <button className={styles.actionLink} onClick={() => setModerator(u, !u.is_moderator)}>
+                      <div className={listStyles.itemActions}>
+                        <button className={listStyles.actionLink} onClick={() => setModerator(u, !u.is_moderator)}>
                           {u.is_moderator ? 'Quitar moderación' : 'Hacer moderador'}
                         </button>
-                        <button className={styles.actionLink} onClick={() => setBanned(u, !u.banned_at)}>
+                        <button className={listStyles.actionLink} onClick={() => setBanned(u, !u.banned_at)}>
                           {u.banned_at ? 'Desbanear' : 'Banear'}
                         </button>
                       </div>

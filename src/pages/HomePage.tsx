@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient'
 import { fetchCommunityTotals, useCommunityContent } from '../lib/communityData'
 import type { CommunityTotals } from '../types'
 import styles from './HomePage.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 
 // Just the most-consulted pages; the full index lives on /guia. Keeping this
 // short is what makes Inicio and Guía different pages.
@@ -22,7 +23,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!supabase) return
-    fetchCommunityTotals().then(({ totals: t }) => setTotals(t))
+    void fetchCommunityTotals().then(({ totals: t }) => setTotals(t))
   }, [])
 
   return (
@@ -66,11 +67,11 @@ export default function HomePage() {
           )}
           <div className={styles.communityCta}>
             {status === 'signedIn' ? (
-              <button type="button" className={styles.communityCtaBtn} onClick={openRegisterSheet}>
+              <button type="button" className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`} onClick={openRegisterSheet}>
                 Compartí tu viaje
               </button>
             ) : (
-              <Link to="/login" state={{ from: '/viajes/nuevo' }} className={styles.communityCtaBtn}>
+              <Link to="/login" state={{ from: '/viajes/nuevo' }} className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`}>
                 Iniciá sesión para compartir
               </Link>
             )}

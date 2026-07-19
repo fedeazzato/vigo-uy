@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import type { Model, Color } from '../types'
 
 export type { Model, Color }
-export type Theme = 'light' | 'dark' | null  // null = follow system
+type Theme = 'light' | 'dark' | null  // null = follow system
 export type EffectiveTheme = 'light' | 'dark'
 
 export const MODELS: Model[] = ['E2', 'E2+']

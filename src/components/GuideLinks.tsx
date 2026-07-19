@@ -33,7 +33,7 @@ export function GuideLinks({ links = GUIDE_LINKS }: GuideLinksProps) {
         <Link key={to} to={to} className={styles.item}>
           <span className={styles.icon} aria-hidden="true">{icon}</span>
           <span className={styles.text}>
-            <span className={styles.label}>{label}</span>
+            <span className={styles.linkLabel}>{label}</span>
             <span className={styles.description}>{description}</span>
           </span>
         </Link>

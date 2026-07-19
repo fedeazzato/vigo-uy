@@ -37,6 +37,28 @@ const PRIMARY_NAV: NavItem[] = [
 
 const MODERATION_ITEM: NavItem = { to: '/moderacion', label: 'Moderación', icon: '🛡️' }
 
+// One bottom-bar tab. The central "Registrar" control is a <button>, not a
+// TabLink, because it opens the sheet instead of navigating.
+function TabLink({ to, end, icon, label, onClick }: {
+  to: string
+  end?: boolean
+  icon: string
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
+      onClick={onClick}
+    >
+      <span className={styles.tabIcon} aria-hidden="true">{icon}</span>
+      <span className={styles.tabLabel}>{label}</span>
+    </NavLink>
+  )
+}
+
 export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
   const { user, profile, status, signOut } = useAuth()
@@ -257,23 +279,8 @@ export default function Layout() {
         </div>
       )}
       <nav className={styles.tabBar}>
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
-          onClick={closeSheet}
-        >
-          <span className={styles.tabIcon} aria-hidden="true">🏠</span>
-          <span className={styles.tabLabel}>Inicio</span>
-        </NavLink>
-        <NavLink
-          to="/comunidad"
-          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
-          onClick={closeSheet}
-        >
-          <span className={styles.tabIcon} aria-hidden="true">🌐</span>
-          <span className={styles.tabLabel}>Comunidad</span>
-        </NavLink>
+        <TabLink to="/" end icon="🏠" label="Inicio" onClick={closeSheet} />
+        <TabLink to="/comunidad" icon="🌐" label="Comunidad" onClick={closeSheet} />
         <button
           type="button"
           className={styles.tabLink}
@@ -283,22 +290,8 @@ export default function Layout() {
           <span className={`${styles.tabIcon} ${styles.tabRegisterIcon}`} aria-hidden="true">➕</span>
           <span className={styles.tabLabel}>Registrar</span>
         </button>
-        <NavLink
-          to="/mi-actividad"
-          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
-          onClick={closeSheet}
-        >
-          <span className={styles.tabIcon} aria-hidden="true">🗒️</span>
-          <span className={styles.tabLabel}>Mi actividad</span>
-        </NavLink>
-        <NavLink
-          to="/guia"
-          className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
-          onClick={closeSheet}
-        >
-          <span className={styles.tabIcon} aria-hidden="true">📖</span>
-          <span className={styles.tabLabel}>Guía</span>
-        </NavLink>
+        <TabLink to="/mi-actividad" icon="🗒️" label="Mi actividad" onClick={closeSheet} />
+        <TabLink to="/guia" icon="📖" label="Guía" onClick={closeSheet} />
       </nav>
 
       <OfflineBanner />

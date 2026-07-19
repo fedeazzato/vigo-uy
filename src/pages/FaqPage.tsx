@@ -25,7 +25,7 @@ function FaqItem({ item, isOpen, onToggle }: FaqItemProps) {
   }, [isOpen])
 
   function copyLink() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
+    void navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })

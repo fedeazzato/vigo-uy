@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import rawData from '../data/costs.json'
 import { PageHeader, Card, CardTitle, Alert, Badge, SectionDivider, StatGrid } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import { fetchCommunityStats, preferCommunity, useCommunityContent, verifiedFirst } from '../lib/communityData'
+import ServiceEntryCard from '../components/ServiceEntryCard'
+import { cityCostStatItems, preferCommunity, useCityCostStats, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import styles from './Pages.module.css'
-import type { CityCostStat, CostsData, Model, StatItem, TripLog } from '../types'
+import type { CostsData, Model, StatItem, TripLog } from '../types'
 
 const data = rawData as CostsData
 
@@ -52,18 +52,10 @@ export default function CostsPage() {
 
   // Curated JSON renders immediately; community blocks fill in async.
   const { trips, entries, names } = useCommunityContent({ limit: 50 })
-  const [cityStats, setCityStats] = useState<CityCostStat[]>([])
-
-  useEffect(() => {
-    if (!supabase) return
-    fetchCommunityStats().then(({ cityStats: cs }) => setCityStats(cs))
-  }, [])
+  const cityStats = useCityCostStats()
 
   const communityStats: StatItem[] = [
-    ...cityStats.map((s) => ({
-      value: `$${Math.round(s.avg_cost_uyu).toLocaleString('es-UY')}`,
-      label: `Costo medio de service en ${s.city} (${s.entry_count})`,
-    })),
+    ...cityCostStatItems(cityStats),
     ...(['E2', 'E2+'] as Model[])
       .map((m) => estimateConsumption(trips, m, fullCharge[m].battery))
       .filter((s): s is StatItem => s !== null),
@@ -184,24 +176,7 @@ export default function CostsPage() {
       ))}
 
       {communityEntries.map((entry) => (
-        <Card key={entry.id}>
-          <div className={styles.realCaseHeader}>
-            <span className={styles.realCaseTitle}>
-              {entry.service_type}{' '}
-              <Badge color={entry.verified ? 'blue' : 'gray'}>
-                {entry.verified ? 'Oficial' : 'Comunidad'}
-              </Badge>
-            </span>
-            <span className={styles.realCaseCost}>
-              ${entry.cost_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}
-            </span>
-          </div>
-          <p className={styles.realCaseConditions}>
-            ⚙️ {entry.service_date} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
-            {entry.city && ` · ${entry.city}`} · por {names[entry.user_id] ?? 'un usuario'}
-          </p>
-          {entry.notes && <p className={styles.realCaseConditions}>💬 {entry.notes}</p>}
-        </Card>
+        <ServiceEntryCard key={entry.id} entry={entry} authorName={names[entry.user_id]} />
       ))}
 
       <SectionDivider label="Patente 2026" />

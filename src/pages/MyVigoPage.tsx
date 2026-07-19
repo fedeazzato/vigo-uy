@@ -51,7 +51,7 @@ export default function MyVigoPage() {
       if (!cancelled) setTopTrips((trips ?? []) as TripLog[])
     }
 
-    load()
+    void load()
     return () => {
       cancelled = true
     }

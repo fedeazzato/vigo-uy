@@ -4,18 +4,15 @@ import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import { toFriendlyError } from '../lib/errors'
-import { parseLocaleNumber } from '../lib/format'
-import { fetchChargingNetworks, fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
+import { parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { fetchChargingNetworks, fetchChargingStations } from '../lib/communityData'
+import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { useMediaQuery, MOBILE_QUERY } from '../lib/useMediaQuery'
 import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
+import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 // The form is a 3-step wizard (mobile redesign): short screens beat one long
 // scroll. Step 1 holds the required basics, everything after is optional.
@@ -128,6 +125,172 @@ export function parseStopDrafts(
   return { stops: cleanStops }
 }
 
+// One labelled text input inside a charging-stop card. The ids follow the
+// `stop-<index>-<field>` scheme the tests query by.
+function StopField({ id, label, value, onChange, placeholder, inputMode }: {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+  inputMode?: 'numeric' | 'decimal'
+}) {
+  return (
+    <div className={formStyles.field}>
+      <label className={styles.smallLabel} htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type="text"
+        inputMode={inputMode}
+        className={formStyles.input}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
+  )
+}
+
+// One charging stop's whole card: header with remove, the station picker
+// (when community stations are loaded), the numeric StopFields and the note.
+function StopCard({ index, stop, stations, networks, onUpdate, onSetStation, onRemove }: {
+  index: number
+  stop: StopDraft
+  stations: ChargingStation[]
+  networks: ChargingNetwork[]
+  onUpdate: (field: keyof StopDraft, value: string) => void
+  onSetStation: (stationId: string) => void
+  onRemove: () => void
+}) {
+  return (
+    <div className={styles.stopCard}>
+      <div className={styles.stopHeader}>
+        <span className={styles.stopHeaderLabel}>Parada {index + 1}</span>
+        <button type="button" className={styles.removeStopBtn} onClick={onRemove}>
+          Quitar
+        </button>
+      </div>
+
+      {stations.length > 0 && (
+        <div className={formStyles.field}>
+          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>🔌 Cargador</label>
+          <select
+            id={`stop-${index}-station`}
+            aria-label="Cargador"
+            className={formStyles.input}
+            value={stop.stationId}
+            onChange={(e) => onSetStation(e.target.value)}
+          >
+            <option value="">No está en la lista</option>
+            {networks.map((net) => {
+              const options = stations.filter((s) => s.network === net.slug)
+              if (options.length === 0) return null
+              return (
+                <optgroup key={net.slug} label={net.name}>
+                  {options.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}{s.city ? ` — ${s.city}` : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              )
+            })}
+          </select>
+        </div>
+      )}
+
+      <div className={styles.stopMainRow}>
+        {!stop.stationId && (
+          <StopField
+            id={`stop-${index}-name`}
+            label="Nombre del cargador"
+            value={stop.name}
+            onChange={(v) => onUpdate('name', v)}
+            placeholder="Nombre del cargador"
+          />
+        )}
+        <StopField
+          id={`stop-${index}-duration`}
+          label="⏳ Minutos cargando"
+          inputMode="numeric"
+          value={stop.durationMinutes}
+          onChange={(v) => onUpdate('durationMinutes', v)}
+          placeholder="35"
+        />
+      </div>
+
+      <div className={styles.stopMainRow}>
+        <StopField
+          id={`stop-${index}-distance`}
+          label="Distancia desde la parada anterior (km)"
+          inputMode="numeric"
+          value={stop.distanceFromPrevious}
+          onChange={(v) => onUpdate('distanceFromPrevious', v)}
+          placeholder="80"
+        />
+        <StopField
+          id={`stop-${index}-speed`}
+          label="Velocidad media hasta acá (km/h)"
+          inputMode="decimal"
+          value={stop.averageSpeed}
+          onChange={(v) => onUpdate('averageSpeed', v)}
+          placeholder="90"
+        />
+      </div>
+
+      <div className={styles.stopMainRow}>
+        <StopField
+          id={`stop-${index}-arrival`}
+          label="% al llegar"
+          inputMode="numeric"
+          value={stop.arrivalPercentage}
+          onChange={(v) => onUpdate('arrivalPercentage', v)}
+          placeholder="20"
+        />
+        <StopField
+          id={`stop-${index}-departure`}
+          label="% al salir"
+          inputMode="numeric"
+          value={stop.departurePercentage}
+          onChange={(v) => onUpdate('departurePercentage', v)}
+          placeholder="80"
+        />
+      </div>
+
+      <div className={styles.stopMainRow}>
+        <StopField
+          id={`stop-${index}-cost`}
+          label="💰 Costo de la carga (UYU)"
+          inputMode="decimal"
+          value={stop.cost}
+          onChange={(v) => onUpdate('cost', v)}
+          placeholder="450"
+        />
+        <StopField
+          id={`stop-${index}-energy`}
+          label="🔌 Energía cargada (kWh, según el cargador)"
+          inputMode="decimal"
+          value={stop.energyKwh}
+          onChange={(v) => onUpdate('energyKwh', v)}
+          placeholder="28,5"
+        />
+      </div>
+
+      <div className={formStyles.field}>
+        <label className={styles.smallLabel} htmlFor={`stop-${index}-note`}>💬 Nota</label>
+        <textarea
+          id={`stop-${index}-note`}
+          rows={3}
+          className={`${formStyles.input} ${formStyles.textarea}`}
+          value={stop.note}
+          onChange={(e) => onUpdate('note', e.target.value)}
+          placeholder="Detalles de esta parada..."
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function NewTripLogPage() {
   const { id } = useParams()
   const isEdit = Boolean(id)
@@ -142,7 +305,7 @@ export default function NewTripLogPage() {
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
-  const [tripDate, setTripDate] = useState(today())
+  const [tripDate, setTripDate] = useState(todayIsoDate())
   const [model, setModel] = useState<Model | ''>(() => (isEdit ? '' : preferredModel ?? ''))
   const [startingCharge, setStartingCharge] = useState('')
   const [endingCharge, setEndingCharge] = useState('')
@@ -156,8 +319,7 @@ export default function NewTripLogPage() {
   const [showDetails, setShowDetails] = useState(false)
 
   const [loading, setLoading] = useState(isEdit)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, submit } = useEntrySubmit('viaje')
   const [stations, setStations] = useState<ChargingStation[]>([])
   const [networks, setNetworks] = useState<ChargingNetwork[]>([])
   // Any change flips this on; Cancel then asks before discarding.
@@ -165,8 +327,8 @@ export default function NewTripLogPage() {
 
   useEffect(() => {
     if (!supabase) return
-    fetchChargingStations().then(({ stations: s }) => setStations(s))
-    fetchChargingNetworks().then(({ networks: n }) => setNetworks(n))
+    void fetchChargingStations().then(({ stations: s }) => setStations(s))
+    void fetchChargingNetworks().then(({ networks: n }) => setNetworks(n))
   }, [])
 
   // The free-text name is hidden while a station is selected, so it must
@@ -215,7 +377,7 @@ export default function NewTripLogPage() {
         }
         setLoading(false)
       })
-  }, [id, isEdit])
+  }, [id, isEdit, setError])
 
   function addStop() {
     setStops((prev) => [...prev, emptyStop()])
@@ -313,9 +475,6 @@ export default function NewTripLogPage() {
     }
     const cleanStops = parsed.stops
 
-    setSubmitting(true)
-    setError(null)
-
     const payload = {
       // The title is derived, not asked for: nobody knows what to "title" a
       // trip, and origin/destination already say it all.
@@ -334,18 +493,12 @@ export default function NewTripLogPage() {
       is_public: isPublic,
     }
 
-    const { error } = isEdit
-      ? await supabase.from('trip_logs').update(payload).eq('id', id!)
-      : await supabase.from('trip_logs').insert({ ...payload, user_id: user.id })
-
-    setSubmitting(false)
-
-    if (error) {
-      setError(toFriendlyError(error))
-      return
-    }
-    invalidateCommunityCache()
-    navigate('/mi-actividad', { state: { saved: 'viaje' } })
+    const client = supabase
+    await submit(() =>
+      isEdit
+        ? client.from('trip_logs').update(payload).eq('id', id!)
+        : client.from('trip_logs').insert({ ...payload, user_id: user.id })
+    )
   }
 
   // Edit mode: show the header + a skeleton instead of a blank screen while
@@ -367,13 +520,13 @@ export default function NewTripLogPage() {
       <div className={styles.wizardTop}>
         {isWizard ? (
           <>
-            <button type="button" className={styles.backBtn} onClick={handleBack} disabled={submitting}>
+            <button type="button" className={formStyles.backBtn} onClick={handleBack} disabled={submitting}>
               ← Atrás
             </button>
             <span className={styles.stepCounter}>Paso {step} de {LAST_STEP}</span>
           </>
         ) : (
-          <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
+          <button type="button" className={formStyles.backBtn} onClick={handleCancel} disabled={submitting}>
             ← Volver
           </button>
         )}
@@ -393,13 +546,13 @@ export default function NewTripLogPage() {
       <Card>
         {error && <FormError>{error}</FormError>}
 
-        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <form className={`${formStyles.form} ${styles.formWide}`} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
           {(!isWizard || step === 1) && (
           <>
           <CityDatalist />
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-origin">📍 Origen</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="trip-origin">📍 Origen</label>
               <input
                 id="trip-origin"
                 required
@@ -411,8 +564,8 @@ export default function NewTripLogPage() {
                 placeholder="Montevideo"
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-destination">🏁 Destino</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="trip-destination">🏁 Destino</label>
               <input
                 id="trip-destination"
                 required
@@ -426,9 +579,9 @@ export default function NewTripLogPage() {
             </div>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-date">📅 Fecha</label>
+          <div className={formStyles.row}>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="trip-date">📅 Fecha</label>
               <input
                 id="trip-date"
                 required
@@ -438,8 +591,8 @@ export default function NewTripLogPage() {
                 onChange={(e) => setTripDate(e.target.value)}
               />
             </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="trip-distance">📏 Distancia (km)</label>
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="trip-distance">📏 Distancia (km)</label>
               <input
                 id="trip-distance"
                 required
@@ -458,8 +611,8 @@ export default function NewTripLogPage() {
           {(!isWizard || step === 3) && (
           <>
           <div className={styles.shareBlock}>
-            <div className={styles.field}>
-              <span className={styles.label}>
+            <div className={formStyles.field}>
+              <span className={formStyles.label}>
                 🚙 Modelo
               </span>
               <div className={styles.modelRow}>
@@ -482,14 +635,7 @@ export default function NewTripLogPage() {
               )}
             </div>
 
-            <label className={styles.checkboxRow}>
-              <input
-                type="checkbox"
-                checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
-              />
-              Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
-            </label>
+            <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
           </div>
 
           <button
@@ -505,9 +651,9 @@ export default function NewTripLogPage() {
 
           {showDetails && (
             <div className={styles.detailsSection}>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="trip-starting-charge">🔋 Batería al salir (%)</label>
+              <div className={formStyles.row}>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-starting-charge">🔋 Batería al salir (%)</label>
                   <input
                     id="trip-starting-charge"
                     type="text"
@@ -518,8 +664,8 @@ export default function NewTripLogPage() {
                     placeholder="90"
                   />
                 </div>
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="trip-ending-charge">🪫 Batería al llegar (%)</label>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-ending-charge">🪫 Batería al llegar (%)</label>
                   <input
                     id="trip-ending-charge"
                     type="text"
@@ -532,8 +678,8 @@ export default function NewTripLogPage() {
                 </div>
               </div>
 
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="trip-avg-speed">⏱️ Velocidad media del viaje (km/h)</label>
+              <div className={formStyles.field}>
+                <label className={formStyles.label} htmlFor="trip-avg-speed">⏱️ Velocidad media del viaje (km/h)</label>
                 <input
                   id="trip-avg-speed"
                   type="text"
@@ -545,172 +691,21 @@ export default function NewTripLogPage() {
                 />
               </div>
 
-              <div className={styles.field}>
-                <span className={styles.label}>⚡ Paradas de carga</span>
+              <div className={formStyles.field}>
+                <span className={formStyles.label}>⚡ Paradas de carga</span>
                 {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
                 <div className={styles.stopsList}>
                   {stops.map((stop, index) => (
-                    <div key={index} className={styles.stopCard}>
-                      <div className={styles.stopHeader}>
-                        <span className={styles.stopHeaderLabel}>Parada {index + 1}</span>
-                        <button
-                          type="button"
-                          className={styles.removeStopBtn}
-                          onClick={() => removeStop(index)}
-                        >
-                          Quitar
-                        </button>
-                      </div>
-
-                      {stations.length > 0 && (
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>🔌 Cargador</label>
-                          <select
-                            id={`stop-${index}-station`}
-                            aria-label="Cargador"
-                            className={formStyles.input}
-                            value={stop.stationId}
-                            onChange={(e) => setStopStation(index, e.target.value)}
-                          >
-                            <option value="">No está en la lista</option>
-                            {networks.map((net) => {
-                              const options = stations.filter((s) => s.network === net.slug)
-                              if (options.length === 0) return null
-                              return (
-                                <optgroup key={net.slug} label={net.name}>
-                                  {options.map((s) => (
-                                    <option key={s.id} value={s.id}>
-                                      {s.name}{s.city ? ` — ${s.city}` : ''}
-                                    </option>
-                                  ))}
-                                </optgroup>
-                              )
-                            })}
-                          </select>
-                        </div>
-                      )}
-
-                      <div className={styles.stopMainRow}>
-                        {!stop.stationId && (
-                          <div className={styles.field}>
-                            <label className={styles.smallLabel} htmlFor={`stop-${index}-name`}>Nombre del cargador</label>
-                            <input
-                              id={`stop-${index}-name`}
-                              type="text"
-                              className={formStyles.input}
-                              value={stop.name}
-                              onChange={(e) => updateStop(index, 'name', e.target.value)}
-                              placeholder="Nombre del cargador"
-                            />
-                          </div>
-                        )}
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-duration`}>⏳ Minutos cargando</label>
-                          <input
-                            id={`stop-${index}-duration`}
-                            type="text"
-                            inputMode="numeric"
-                            className={formStyles.input}
-                            value={stop.durationMinutes}
-                            onChange={(e) => updateStop(index, 'durationMinutes', e.target.value)}
-                            placeholder="35"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.stopMainRow}>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-distance`}>Distancia desde la parada anterior (km)</label>
-                          <input
-                            id={`stop-${index}-distance`}
-                            type="text"
-                            inputMode="numeric"
-                            className={formStyles.input}
-                            value={stop.distanceFromPrevious}
-                            onChange={(e) => updateStop(index, 'distanceFromPrevious', e.target.value)}
-                            placeholder="80"
-                          />
-                        </div>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-speed`}>Velocidad media hasta acá (km/h)</label>
-                          <input
-                            id={`stop-${index}-speed`}
-                            type="text"
-                            inputMode="decimal"
-                            className={formStyles.input}
-                            value={stop.averageSpeed}
-                            onChange={(e) => updateStop(index, 'averageSpeed', e.target.value)}
-                            placeholder="90"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.stopMainRow}>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-arrival`}>% al llegar</label>
-                          <input
-                            id={`stop-${index}-arrival`}
-                            type="text"
-                            inputMode="numeric"
-                            className={formStyles.input}
-                            value={stop.arrivalPercentage}
-                            onChange={(e) => updateStop(index, 'arrivalPercentage', e.target.value)}
-                            placeholder="20"
-                          />
-                        </div>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-departure`}>% al salir</label>
-                          <input
-                            id={`stop-${index}-departure`}
-                            type="text"
-                            inputMode="numeric"
-                            className={formStyles.input}
-                            value={stop.departurePercentage}
-                            onChange={(e) => updateStop(index, 'departurePercentage', e.target.value)}
-                            placeholder="80"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.stopMainRow}>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-cost`}>💰 Costo de la carga (UYU)</label>
-                          <input
-                            id={`stop-${index}-cost`}
-                            type="text"
-                            inputMode="decimal"
-                            className={formStyles.input}
-                            value={stop.cost}
-                            onChange={(e) => updateStop(index, 'cost', e.target.value)}
-                            placeholder="450"
-                          />
-                        </div>
-                        <div className={styles.field}>
-                          <label className={styles.smallLabel} htmlFor={`stop-${index}-energy`}>🔌 Energía cargada (kWh, según el cargador)</label>
-                          <input
-                            id={`stop-${index}-energy`}
-                            type="text"
-                            inputMode="decimal"
-                            className={formStyles.input}
-                            value={stop.energyKwh}
-                            onChange={(e) => updateStop(index, 'energyKwh', e.target.value)}
-                            placeholder="28,5"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.field}>
-                        <label className={styles.smallLabel} htmlFor={`stop-${index}-note`}>💬 Nota</label>
-                        <textarea
-                          id={`stop-${index}-note`}
-                          rows={3}
-                          className={`${formStyles.input} ${formStyles.textarea}`}
-                          value={stop.note}
-                          onChange={(e) => updateStop(index, 'note', e.target.value)}
-                          placeholder="Detalles de esta parada..."
-                        />
-                      </div>
-                    </div>
+                    <StopCard
+                      key={index}
+                      index={index}
+                      stop={stop}
+                      stations={stations}
+                      networks={networks}
+                      onUpdate={(field, value) => updateStop(index, field, value)}
+                      onSetStation={(stationId) => setStopStation(index, stationId)}
+                      onRemove={() => removeStop(index)}
+                    />
                   ))}
                 </div>
                 <button type="button" className={styles.addStopBtn} onClick={addStop}>
@@ -724,48 +719,17 @@ export default function NewTripLogPage() {
 
           {(!isWizard || step === 2) && (
           <>
-          <div className={styles.field}>
-            <span className={styles.label}>⭐ ¿Cómo estuvo el viaje?</span>
-            <div className={styles.ratingRow}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`${styles.starBtn} ${rating != null && n <= rating ? styles.filled : ''}`}
-                  onClick={() => { setRating(rating === n ? null : n); setDirty(true) }}
-                  aria-label={`${n} estrellas`}
-                  aria-pressed={rating != null && n <= rating}
-                >
-                  ★
-                </button>
-              ))}
-              {rating != null && (
-                <button
-                  type="button"
-                  className={styles.clearRating}
-                  onClick={() => { setRating(null); setDirty(true) }}
-                >
-                  Quitar
-                </button>
-              )}
-            </div>
-          </div>
+          <RatingField
+            label="⭐ ¿Cómo estuvo el viaje?"
+            value={rating}
+            onChange={(v) => { setRating(v); setDirty(true) }}
+          />
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="trip-notes">💬 Notas</label>
-            <textarea
-              id="trip-notes"
-              rows={3}
-              className={`${formStyles.input} ${formStyles.textarea}`}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Contanos cómo te fue..."
-            />
-          </div>
+          <NotesField id="trip-notes" value={notes} onChange={setNotes} placeholder="Contanos cómo te fue..." />
           </>
           )}
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+          <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
             {isWizard && step < LAST_STEP
               ? 'Siguiente'
               : submitting

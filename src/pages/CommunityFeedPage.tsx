@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } from '../components/UI'
-import { TripDetail } from '../components/TripCard'
+import { TripDetail, TripSummaryButton } from '../components/TripCard'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
-import { formatDate } from '../lib/format'
-import { fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
+import { formatCurrency, formatDate } from '../lib/format'
+import { cityCostStatItems, fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
+import { useToggleSet } from '../lib/useToggleSet'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, StatItem, TripLog, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 import formStyles from '../styles/formControls.module.css'
 
 type TypeFilter = 'todos' | 'viajes' | 'services' | 'repuestos'
@@ -37,6 +39,15 @@ const KIND_META: Record<FeedItem['kind'], { icon: string; label: string }> = {
   repuesto: { icon: '🔩', label: 'Repuesto' },
 }
 
+// Shared ordering for the filter memos: "puntuación" sorts by rating first,
+// then both orders float verified rows to the top.
+function rankRows<T extends { rating: number | null; verified: boolean }>(rows: T[], sort: SortOrder): T[] {
+  if (sort === 'puntuacion') {
+    return verifiedFirst([...rows].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)))
+  }
+  return verifiedFirst(rows)
+}
+
 export default function CommunityFeedPage() {
   const { status } = useAuth()
   const { openRegisterSheet } = useRegisterSheet()
@@ -54,27 +65,14 @@ export default function CommunityFeedPage() {
   const [sort, setSort] = useState<SortOrder>('recientes')
 
   // Trip rows expand in place to the full TripCard (stops, battery, costs).
-  // A Set so opening one doesn't close another.
-  const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
-
-  function toggleTrip(id: string) {
-    setExpandedTrips((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
+  const [expandedTrips, toggleTrip] = useToggleSet()
 
   useEffect(() => {
     if (!supabase) return
 
-    fetchCommunityStats().then(({ cityStats, modelStats }) => {
+    void fetchCommunityStats().then(({ cityStats, modelStats }) => {
       setStats([
-        ...cityStats.map((s) => ({
-          value: `$${Math.round(s.avg_cost_uyu).toLocaleString('es-UY')}`,
-          label: `Costo medio de service en ${s.city} (${s.entry_count})`,
-        })),
+        ...cityCostStatItems(cityStats),
         ...modelStats
           .filter((s) => s.avg_speed_kmh != null)
           .map((s) => ({
@@ -84,7 +82,7 @@ export default function CommunityFeedPage() {
       ])
     })
 
-    fetchLeaderboard().then(({ rows }) => setLeaderboard(rows))
+    void fetchLeaderboard().then(({ rows }) => setLeaderboard(rows))
   }, [])
 
   const filteredTrips = useMemo(() => {
@@ -94,10 +92,7 @@ export default function CommunityFeedPage() {
       if (q && ![trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q))) return false
       return true
     })
-    if (sort === 'puntuacion') {
-      return verifiedFirst([...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)))
-    }
-    return verifiedFirst(result)
+    return rankRows(result, sort)
   }, [trips, modelFilter, query, sort])
 
   const filteredEntries = useMemo(() => {
@@ -119,10 +114,7 @@ export default function CommunityFeedPage() {
           )
         )
       : purchases
-    if (sort === 'puntuacion') {
-      return verifiedFirst([...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)))
-    }
-    return verifiedFirst(result)
+    return rankRows(result, sort)
   }, [purchases, query, sort])
 
   const showTrips = typeFilter === 'todos' || typeFilter === 'viajes'
@@ -166,12 +158,12 @@ export default function CommunityFeedPage() {
       {error && <Alert type="danger">{error}</Alert>}
 
       {supabase && (
-        <Card className={styles.ctaCard}>
+        <Card className={listStyles.ctaCard}>
           {status === 'signedIn' ? (
             <>
               <span>¿Hiciste un viaje o un service? Compartilo con la comunidad.</span>
               <div className={styles.ctaActions}>
-                <button type="button" className={styles.ctaBtn} onClick={openRegisterSheet}>
+                <button type="button" className={listStyles.ctaBtn} onClick={openRegisterSheet}>
                   + Compartir
                 </button>
               </div>
@@ -180,7 +172,7 @@ export default function CommunityFeedPage() {
             <>
               <span>Iniciá sesión para compartir tus viajes y costos con la comunidad.</span>
               <div className={styles.ctaActions}>
-                <Link to="/login" className={styles.ctaBtn}>Iniciar sesión</Link>
+                <Link to="/login" className={listStyles.ctaBtn}>Iniciar sesión</Link>
               </div>
             </>
           )}
@@ -189,7 +181,7 @@ export default function CommunityFeedPage() {
 
       {stats.length > 0 && (
         <Card>
-          <h2 className={styles.sectionTitle}>Estadísticas</h2>
+          <h2 className={listStyles.sectionTitle}>Estadísticas</h2>
           <StatGrid stats={stats} />
         </Card>
       )}
@@ -198,7 +190,7 @@ export default function CommunityFeedPage() {
         <>
           <SectionDivider label="Ranking de kilómetros" />
           <Card>
-            <h2 className={styles.sectionTitle}>🏁 Vehículos con más km compartidos</h2>
+            <h2 className={listStyles.sectionTitle}>🏁 Vehículos con más km compartidos</h2>
             <VehicleLeaderboard rows={leaderboard} />
           </Card>
         </>
@@ -271,7 +263,7 @@ export default function CommunityFeedPage() {
         <Skeleton lines={6} />
       ) : feedItems.length === 0 ? (
         <Card>
-          <p className={styles.empty}>
+          <p className={listStyles.empty}>
             {trips.length + entries.length + purchases.length === 0
               ? 'Todavía no hay aportes compartidos por la comunidad.'
               : 'No hay aportes que coincidan con los filtros.'}
@@ -293,31 +285,14 @@ export default function CommunityFeedPage() {
                     </span>
                     {trip.verified && <Badge color="blue">Oficial</Badge>}
                   </div>
-                  <button
-                    type="button"
-                    className={styles.itemToggle}
-                    onClick={() => toggleTrip(trip.id)}
-                    aria-expanded={expanded}
-                  >
-                    <div className={styles.itemTitle}>
-                      {trip.title}{trip.model && ` (${trip.model})`}
-                    </div>
-                    <div className={styles.itemMeta}>
-                      {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
-                      {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                      {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
-                    </div>
-                    <span className={styles.itemToggleHint} aria-hidden="true">
-                      {expanded ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
-                    </span>
-                  </button>
+                  <TripSummaryButton trip={trip} expanded={expanded} onToggle={() => toggleTrip(trip.id)} />
                   {expanded && (
                     <div className={styles.tripDetail}>
                       <TripDetail trip={trip} />
                     </div>
                   )}
                   <div className={styles.feedCardFoot}>
-                    <span className={styles.author}>por {author}</span>
+                    <span className={listStyles.author}>por {author}</span>
                   </div>
                 </Card>
               )
@@ -332,17 +307,17 @@ export default function CommunityFeedPage() {
                     </span>
                     {purchase.verified && <Badge color="blue">Oficial</Badge>}
                   </div>
-                  <div className={styles.itemTitle}>{purchase.item}</div>
-                  <div className={styles.itemMeta}>
+                  <div className={listStyles.itemTitle}>{purchase.item}</div>
+                  <div className={listStyles.itemMeta}>
                     {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
                     {purchase.city && ` · ${purchase.city}`}
                     {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
                   </div>
                   <div className={styles.feedCardFoot}>
-                    <span className={styles.itemCost}>
-                      ${purchase.price_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}
+                    <span className={listStyles.itemCost}>
+                      {formatCurrency(purchase.price_uyu)}
                     </span>
-                    <span className={styles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
+                    <span className={listStyles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
                   </div>
                 </Card>
               )
@@ -356,16 +331,16 @@ export default function CommunityFeedPage() {
                   </span>
                   {entry.verified && <Badge color="blue">Oficial</Badge>}
                 </div>
-                <div className={styles.itemTitle}>{entry.service_type}</div>
-                <div className={styles.itemMeta}>
+                <div className={listStyles.itemTitle}>{entry.service_type}</div>
+                <div className={listStyles.itemMeta}>
                   {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
                   {entry.city && ` · ${entry.city}`}
                 </div>
                 <div className={styles.feedCardFoot}>
-                  <span className={styles.itemCost}>
-                    ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className={listStyles.itemCost}>
+                    {formatCurrency(entry.cost_uyu, 2)}
                   </span>
-                  <span className={styles.author}>por {names[entry.user_id] ?? 'un usuario'}</span>
+                  <span className={listStyles.author}>por {names[entry.user_id] ?? 'un usuario'}</span>
                 </div>
               </Card>
             )

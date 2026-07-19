@@ -3,7 +3,6 @@ import { Card, CardTitle, Alert } from './UI'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
-import styles from './accountCards.module.css'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from './CityDatalist'
 
@@ -56,10 +55,10 @@ export default function ProfileCard() {
       <CardTitle icon="👤">Mi perfil</CardTitle>
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="info">{message}</Alert>}
-      <form className={styles.form} onSubmit={saveProfile}>
+      <form className={formStyles.form} onSubmit={saveProfile}>
         <CityDatalist />
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="profile-name">✏️ Nombre visible</label>
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="profile-name">✏️ Nombre visible</label>
           <input
             id="profile-name"
             required
@@ -69,11 +68,11 @@ export default function ProfileCard() {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Tu nombre en la comunidad"
           />
-          <span className={styles.hint}>Aparece junto a tus viajes y services compartidos.</span>
+          <span className={formStyles.hint}>Aparece junto a tus viajes y services compartidos.</span>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="profile-city">📍 Ciudad</label>
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="profile-city">📍 Ciudad</label>
           <input
             id="profile-city"
             type="text"
@@ -86,7 +85,7 @@ export default function ProfileCard() {
         </div>
 
         <div>
-          <button type="submit" className={styles.submitBtn} disabled={saving}>
+          <button type="submit" className={formStyles.submitBtnCompact} disabled={saving}>
             {saving ? 'Guardando…' : 'Guardar perfil'}
           </button>
         </div>

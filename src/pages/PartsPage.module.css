@@ -11,66 +11,8 @@
   margin: 0 0 10px;
 }
 
-.sectionTitle {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-}
-
-.ctaCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.ctaBtn {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  background: var(--green-400);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.ctaBtn:hover {
-  background: var(--green-600);
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.item:last-child { border-bottom: none; }
-
-.itemTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.itemMeta {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
+/* List/item/cta chrome comes from the shared listPatterns.module.css; only
+   parts-specific pieces live here. */
 
 .itemNotes {
   font-size: 12px;
@@ -78,23 +20,7 @@
   margin-top: 4px;
 }
 
-.itemCost {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--green-600);
-  white-space: nowrap;
+/* The price column is right-aligned against the author line below it. */
+.itemCostRight {
   text-align: right;
-}
-
-.author {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-}
-
-@media (max-width: 500px) {
-  .item {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
 }

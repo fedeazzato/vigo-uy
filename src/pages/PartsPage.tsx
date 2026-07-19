@@ -4,9 +4,11 @@ import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDi
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { useCommunityContent, verifiedFirst } from '../lib/communityData'
+import { formatCurrency } from '../lib/format'
 import { partsCatalog, partCategoryTitle } from '../lib/partsCatalog'
 import type { StatItem } from '../types'
 import styles from './PartsPage.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 
 // Minimum community purchases per category before showing an average price.
 const MIN_PRICE_SAMPLES = 2
@@ -31,7 +33,7 @@ export default function PartsPage() {
     return [...byCategory.entries()]
       .filter(([, prices]) => prices.length >= MIN_PRICE_SAMPLES)
       .map(([category, prices]) => ({
-        value: `$${Math.round(prices.reduce((a, b) => a + b, 0) / prices.length).toLocaleString('es-UY')}`,
+        value: formatCurrency(prices.reduce((a, b) => a + b, 0) / prices.length),
         label: `Precio medio · ${partCategoryTitle(category)} (${prices.length})`,
       }))
   }, [purchases])
@@ -61,16 +63,16 @@ export default function PartsPage() {
       <SectionDivider label="Compras de la comunidad" />
 
       {supabase && (
-        <Card className={styles.ctaCard}>
+        <Card className={listStyles.ctaCard}>
           {status === 'signedIn' ? (
             <>
               <span>¿Compraste un repuesto? Registralo para seguir tus gastos y orientar al resto.</span>
-              <Link to="/repuestos/nuevo" className={styles.ctaBtn}>+ Registrar compra</Link>
+              <Link to="/repuestos/nuevo" className={listStyles.ctaBtn}>+ Registrar compra</Link>
             </>
           ) : (
             <>
               <span>Iniciá sesión para registrar tus compras de repuestos y compartirlas.</span>
-              <Link to="/login" className={styles.ctaBtn}>Iniciar sesión</Link>
+              <Link to="/login" className={listStyles.ctaBtn}>Iniciar sesión</Link>
             </>
           )}
         </Card>
@@ -78,23 +80,23 @@ export default function PartsPage() {
 
       {priceStats.length > 0 && (
         <Card>
-          <h2 className={styles.sectionTitle}>Precios reales</h2>
+          <h2 className={listStyles.sectionTitle}>Precios reales</h2>
           <StatGrid stats={priceStats} />
         </Card>
       )}
 
       {recentPurchases.length > 0 && (
         <Card>
-          <h2 className={styles.sectionTitle}>Últimas compras</h2>
-          <ul className={styles.list}>
+          <h2 className={listStyles.sectionTitle}>Últimas compras</h2>
+          <ul className={listStyles.list}>
             {recentPurchases.map((p) => (
-              <li key={p.id} className={styles.item}>
+              <li key={p.id} className={listStyles.item}>
                 <div>
-                  <div className={styles.itemTitle}>
+                  <div className={listStyles.itemTitle}>
                     {p.item} <Badge color="gray">{partCategoryTitle(p.category)}</Badge>
                     {p.verified && <Badge color="blue">Oficial</Badge>}
                   </div>
-                  <div className={styles.itemMeta}>
+                  <div className={listStyles.itemMeta}>
                     {p.purchase_date} · {p.store}
                     {p.city && ` · ${p.city}`}
                     {p.rating != null && ` · ${'★'.repeat(p.rating)}`}
@@ -102,10 +104,10 @@ export default function PartsPage() {
                   {p.notes && <div className={styles.itemNotes}>💬 {p.notes}</div>}
                 </div>
                 <div>
-                  <div className={styles.itemCost}>
-                    ${p.price_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}
+                  <div className={`${listStyles.itemCost} ${styles.itemCostRight}`}>
+                    {formatCurrency(p.price_uyu)}
                   </div>
-                  <div className={styles.author}>por {names[p.user_id] ?? 'un usuario'}</div>
+                  <div className={listStyles.author}>por {names[p.user_id] ?? 'un usuario'}</div>
                 </div>
               </li>
             ))}

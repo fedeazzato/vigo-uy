@@ -187,3 +187,42 @@
     margin-top: 14px;
   }
 }
+
+/* ── TripSummaryButton ── */
+
+.summaryToggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.summaryTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.summaryMeta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.summaryHint {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-600);
+}
+
+.summaryToggle:hover .summaryHint {
+  text-decoration: underline;
+}

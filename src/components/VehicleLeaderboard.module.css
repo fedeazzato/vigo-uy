@@ -41,14 +41,6 @@
   text-overflow: ellipsis;
 }
 
-.members {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .barTrack {
   margin-top: 4px;
   height: 8px;
@@ -80,8 +72,3 @@
   color: var(--text-tertiary);
 }
 
-.empty {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  padding: 8px 0;
-}

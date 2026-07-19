@@ -1,5 +1,6 @@
 import type { VehicleLeaderboardEntry } from '../types'
 import styles from './VehicleLeaderboard.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
@@ -23,7 +24,7 @@ export default function VehicleLeaderboard({ rows, compact = false }: VehicleLea
   const maxKm = withKm[0]?.total_km ?? 0
 
   if (shown.length === 0) {
-    return <p className={styles.empty}>Todavía no hay kilómetros registrados por la comunidad.</p>
+    return <p className={listStyles.empty}>Todavía no hay kilómetros registrados por la comunidad.</p>
   }
 
   return (

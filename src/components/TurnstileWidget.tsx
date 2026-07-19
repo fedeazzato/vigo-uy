@@ -41,7 +41,7 @@ export function TurnstileWidget({ onToken }: TurnstileWidgetProps) {
     if (!SITE_KEY) return
     let cancelled = false
 
-    loadTurnstileScript().then(() => {
+    void loadTurnstileScript().then(() => {
       if (cancelled || !containerRef.current || !window.turnstile) return
       window.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,

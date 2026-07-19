@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
-import TripCard from '../components/TripCard'
+import TripCard, { TripSummaryButton } from '../components/TripCard'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
-import { formatDate } from '../lib/format'
+import { formatCurrency, formatDate } from '../lib/format'
 import { invalidateCommunityCache } from '../lib/communityData'
+import { useToggleSet } from '../lib/useToggleSet'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
+import listStyles from '../styles/listPatterns.module.css'
 
 // Once the user registers a passkey (or says "not now"), stop showing the
 // prompt card on every visit.
@@ -63,17 +65,8 @@ export default function DashboardPage() {
   )
 
   // Trip rows expand in place to the full TripCard (stops, battery, costs),
-  // same pattern as the Comunidad feed. A Set so several can stay open.
-  const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
-
-  function toggleTrip(id: string) {
-    setExpandedTrips((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
+  // same pattern as the Comunidad feed.
+  const [expandedTrips, toggleTrip] = useToggleSet()
 
   useEffect(() => {
     if (!supabase || !user) return
@@ -224,14 +217,14 @@ export default function DashboardPage() {
       {passkeysSupported && (!passkeyDismissed || passkeyMessage) && (
         <Card>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Acceso rápido</h2>
+            <h2 className={styles.sectionHeaderTitle}>Acceso rápido</h2>
             {!passkeyMessage && (
               <button className={styles.addLink} onClick={dismissPasskeyPrompt}>
                 Ahora no
               </button>
             )}
           </div>
-          {passkeyMessage && <p className={styles.empty}>{passkeyMessage}</p>}
+          {passkeyMessage && <p className={listStyles.empty}>{passkeyMessage}</p>}
           <button className={styles.addLink} onClick={handleRegisterPasskey} disabled={registeringPasskey}>
             {registeringPasskey ? 'Registrando…' : '🔑 Registrar llave de acceso (Face ID / huella / Windows Hello)'}
           </button>
@@ -255,7 +248,7 @@ export default function DashboardPage() {
       <>
       <Card>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Costos de service</h2>
+          <h2 className={styles.sectionHeaderTitle}>Costos de service</h2>
           <div className={styles.sectionActions}>
             {entries.length > 0 && (
               <button className={styles.addLink} onClick={exportEntriesCsv}>Descargar planilla (CSV)</button>
@@ -265,32 +258,32 @@ export default function DashboardPage() {
         </div>
 
         {loadingEntries ? (
-          <p className={styles.empty}>Cargando…</p>
+          <p className={listStyles.empty}>Cargando…</p>
         ) : entries.length === 0 ? (
-          <p className={styles.empty}>Todavía no registraste ningún service.</p>
+          <p className={listStyles.empty}>Todavía no registraste ningún service.</p>
         ) : (
-          <ul className={styles.list}>
+          <ul className={listStyles.list}>
             {entries.map((entry) => (
-              <li key={entry.id} className={styles.item}>
+              <li key={entry.id} className={`${listStyles.item} ${styles.itemThreeCol}`}>
                 <div>
-                  <div className={styles.itemTitle}>{entry.service_type}</div>
-                  <div className={styles.itemMeta}>
+                  <div className={listStyles.itemTitle}>{entry.service_type}</div>
+                  <div className={listStyles.itemMeta}>
                     {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
                   </div>
                 </div>
-                <div className={styles.itemCost}>
-                  ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <div className={listStyles.itemCost}>
+                  {formatCurrency(entry.cost_uyu, 2)}
                 </div>
-                <div className={styles.itemActions}>
+                <div className={listStyles.itemActions}>
                   <Link
                     to={`/costos/${entry.id}/editar`}
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     aria-label={`Editar ${entry.service_type}`}
                   >
                     Editar
                   </Link>
                   <button
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     onClick={() => handleDeleteEntry(entry.id)}
                     aria-label={`Eliminar ${entry.service_type}`}
                   >
@@ -305,7 +298,7 @@ export default function DashboardPage() {
 
       <Card>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Repuestos y consumibles</h2>
+          <h2 className={styles.sectionHeaderTitle}>Repuestos y consumibles</h2>
           <div className={styles.sectionActions}>
             {purchases.length > 0 && (
               <button className={styles.addLink} onClick={exportPurchasesCsv}>Descargar planilla (CSV)</button>
@@ -315,33 +308,33 @@ export default function DashboardPage() {
         </div>
 
         {loadingPurchases ? (
-          <p className={styles.empty}>Cargando…</p>
+          <p className={listStyles.empty}>Cargando…</p>
         ) : purchases.length === 0 ? (
-          <p className={styles.empty}>Todavía no registraste ninguna compra de repuestos.</p>
+          <p className={listStyles.empty}>Todavía no registraste ninguna compra de repuestos.</p>
         ) : (
-          <ul className={styles.list}>
+          <ul className={listStyles.list}>
             {purchases.map((purchase) => (
-              <li key={purchase.id} className={styles.item}>
+              <li key={purchase.id} className={`${listStyles.item} ${styles.itemThreeCol}`}>
                 <div>
-                  <div className={styles.itemTitle}>{purchase.item}</div>
-                  <div className={styles.itemMeta}>
+                  <div className={listStyles.itemTitle}>{purchase.item}</div>
+                  <div className={listStyles.itemMeta}>
                     {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
                     {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
                   </div>
                 </div>
-                <div className={styles.itemCost}>
-                  ${purchase.price_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <div className={listStyles.itemCost}>
+                  {formatCurrency(purchase.price_uyu, 2)}
                 </div>
-                <div className={styles.itemActions}>
+                <div className={listStyles.itemActions}>
                   <Link
                     to={`/repuestos/${purchase.id}/editar`}
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     aria-label={`Editar ${purchase.item}`}
                   >
                     Editar
                   </Link>
                   <button
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     onClick={() => handleDeletePurchase(purchase.id)}
                     aria-label={`Eliminar ${purchase.item}`}
                   >
@@ -356,7 +349,7 @@ export default function DashboardPage() {
 
       <Card>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Viajes</h2>
+          <h2 className={styles.sectionHeaderTitle}>Viajes</h2>
           <div className={styles.sectionActions}>
             {trips.length > 0 && (
               <button className={styles.addLink} onClick={exportTripsCsv}>Descargar planilla (CSV)</button>
@@ -366,39 +359,28 @@ export default function DashboardPage() {
         </div>
 
         {loadingTrips ? (
-          <p className={styles.empty}>Cargando…</p>
+          <p className={listStyles.empty}>Cargando…</p>
         ) : trips.length === 0 ? (
-          <p className={styles.empty}>Todavía no registraste ningún viaje.</p>
+          <p className={listStyles.empty}>Todavía no registraste ningún viaje.</p>
         ) : (
-          <ul className={styles.list}>
+          <ul className={listStyles.list}>
             {trips.map((trip) => (
-              <li key={trip.id} className={`${styles.item} ${styles.itemTwoCol}`}>
-                <button
-                  type="button"
-                  className={styles.itemToggle}
-                  onClick={() => toggleTrip(trip.id)}
-                  aria-expanded={expandedTrips.has(trip.id)}
-                >
-                  <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
-                  <div className={styles.itemMeta}>
-                    {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
-                    {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                    {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
-                  </div>
-                  <span className={styles.itemToggleHint} aria-hidden="true">
-                    {expandedTrips.has(trip.id) ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
-                  </span>
-                </button>
-                <div className={styles.itemActions}>
+              <li key={trip.id} className={listStyles.item}>
+                <TripSummaryButton
+                  trip={trip}
+                  expanded={expandedTrips.has(trip.id)}
+                  onToggle={() => toggleTrip(trip.id)}
+                />
+                <div className={listStyles.itemActions}>
                   <Link
                     to={`/viajes/${trip.id}/editar`}
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     aria-label={`Editar ${trip.title}`}
                   >
                     Editar
                   </Link>
                   <button
-                    className={styles.actionLink}
+                    className={listStyles.actionLink}
                     onClick={() => handleDeleteTrip(trip.id)}
                     aria-label={`Eliminar ${trip.title}`}
                   >

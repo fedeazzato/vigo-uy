@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDate, parseLocaleNumber } from './format'
+import { formatCurrency, formatDate, parseLocaleNumber } from './format'
 
 describe('formatDate', () => {
   const now = new Date(2026, 6, 13) // 13 jul 2026
@@ -18,6 +18,20 @@ describe('formatDate', () => {
     expect(formatDate('', now)).toBe('')
     expect(formatDate('2026-13-01', now)).toBe('2026-13-01')
     expect(formatDate('13/07/2026', now)).toBe('13/07/2026')
+  })
+})
+
+describe('formatCurrency', () => {
+  it('formats whole pesos with es-UY grouping by default', () => {
+    expect(formatCurrency(1500)).toBe('$1.500')
+    expect(formatCurrency(0)).toBe('$0')
+    expect(formatCurrency(12000.4)).toBe('$12.000')
+  })
+
+  it('rounds to the requested fraction digits', () => {
+    expect(formatCurrency(1234.5)).toBe('$1.235')
+    expect(formatCurrency(1500.5, 2)).toBe('$1.500,50')
+    expect(formatCurrency(89.9, 2)).toBe('$89,90')
   })
 })
 

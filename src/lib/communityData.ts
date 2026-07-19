@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import { toFriendlyError } from './errors'
+import { formatCurrency } from './format'
 import type {
   ChargingCostStat,
   ChargingNetwork,
@@ -16,6 +17,7 @@ import type {
   PartPurchase,
   PublicProfile,
   ServiceEntry,
+  StatItem,
   StationReliability,
   TripLog,
   VehicleLeaderboardEntry,
@@ -82,7 +84,7 @@ export function verifiedFirst<T extends { verified: boolean }>(rows: T[]): T[] {
 
 // ── Fetch helpers ─────────────────────────────────────────────────────────
 
-export function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; error: string | null }> {
+function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; error: string | null }> {
   const client = supabase
   if (!client) return Promise.resolve({ trips: [], error: null })
   return cached(
@@ -100,7 +102,7 @@ export function fetchPublicTrips(limit: number): Promise<{ trips: TripLog[]; err
   )
 }
 
-export function fetchPublicServiceEntries(
+function fetchPublicServiceEntries(
   limit: number
 ): Promise<{ entries: ServiceEntry[]; error: string | null }> {
   const client = supabase
@@ -120,7 +122,7 @@ export function fetchPublicServiceEntries(
   )
 }
 
-export function fetchPublicPartPurchases(
+function fetchPublicPartPurchases(
   limit: number
 ): Promise<{ purchases: PartPurchase[]; error: string | null }> {
   const client = supabase
@@ -180,6 +182,27 @@ export function fetchCommunityStats(): Promise<{
     },
     (r) => r.error !== null
   )
+}
+
+// Renders the per-city average service cost as StatGrid items, shared by
+// Costos, Mantenimiento, and the Comunidad feed so the wording stays in sync.
+export function cityCostStatItems(cityStats: CityCostStat[]): StatItem[] {
+  return cityStats.map((s) => ({
+    value: formatCurrency(s.avg_cost_uyu),
+    label: `Costo medio de service en ${s.city} (${s.entry_count})`,
+  }))
+}
+
+// The fetch-into-state effect that goes with cityCostStatItems, for pages
+// that only need the city stats (the feed also needs modelStats and keeps
+// its own effect).
+export function useCityCostStats(): CityCostStat[] {
+  const [cityStats, setCityStats] = useState<CityCostStat[]>([])
+  useEffect(() => {
+    if (!supabase) return
+    void fetchCommunityStats().then(({ cityStats: cs }) => setCityStats(cs))
+  }, [])
+  return cityStats
 }
 
 export function fetchLeaderboard(): Promise<{ rows: VehicleLeaderboardEntry[]; error: string | null }> {
@@ -363,7 +386,7 @@ export function useCommunityContent(options?: {
       setLoading(false)
     }
 
-    load()
+    void load()
     return () => {
       cancelled = true
     }

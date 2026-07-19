@@ -1,17 +1,13 @@
-.form {
+/* Deliberately tighter than the shared entry-form layout: the login card is
+   a single short field, so it gets a narrower column and smaller gaps. */
+.loginForm {
   display: flex;
   flex-direction: column;
   gap: 8px;
   max-width: 360px;
 }
 
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.hint {
+.loginHint {
   font-size: 14px;
   color: var(--text-secondary);
   margin-bottom: 4px;
@@ -24,20 +20,10 @@
   margin: 12px 0;
 }
 
-.submitBtn {
+/* The shared compact submit button plus login's own spacing. */
+.submitSpacing {
   margin-top: 8px;
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
 }
-.submitBtn:hover:not(:disabled) { background: var(--green-600); }
-.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .secondaryActions {
   display: flex;

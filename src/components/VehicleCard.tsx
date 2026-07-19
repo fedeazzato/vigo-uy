@@ -44,7 +44,7 @@ export default function VehicleCard() {
   }, [user])
 
   useEffect(() => {
-    loadVehicle()
+    void loadVehicle()
   }, [loadVehicle])
 
   // PromiseLike, not Promise: supabase query builders are thenables.
@@ -60,12 +60,12 @@ export default function VehicleCard() {
       return
     }
     setMessage(successMsg)
-    loadVehicle()
+    void loadVehicle()
   }
 
-  async function savePlate() {
+  function savePlate() {
     if (!vehicle) return
-    run(
+    void run(
       () => supabase!.from('vehicles').update({ plate: plate.trim() || null }).eq('id', vehicle.id),
       'Matrícula guardada.'
     )
@@ -93,14 +93,14 @@ export default function VehicleCard() {
     setJoinCode('')
   }
 
-  async function resetVehicle() {
+  function resetVehicle() {
     if (!confirm('Vas a dejar el vehículo compartido y volver a uno propio. ¿Continuar?')) return
-    run(() => supabase!.rpc('reset_my_vehicle'), 'Volviste a tu propio vehículo.')
+    void run(() => supabase!.rpc('reset_my_vehicle'), 'Volviste a tu propio vehículo.')
   }
 
-  async function removeMember(member: Member) {
+  function removeMember(member: Member) {
     if (!confirm(`¿Quitar a ${member.name} del vehículo? Va a quedar con un vehículo propio.`)) return
-    run(
+    void run(
       () => supabase!.rpc('remove_vehicle_member', { target_user: member.id }),
       `${member.name} ya no integra tu vehículo.`
     )
@@ -114,11 +114,11 @@ export default function VehicleCard() {
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="info">{message}</Alert>}
       {!vehicle ? (
-        <p className={styles.hint}>Cargando datos del vehículo…</p>
+        <p className={formStyles.hint}>Cargando datos del vehículo…</p>
       ) : (
-        <div className={styles.form}>
-          <div className={styles.field}>
-            <span className={styles.label}>Integrantes</span>
+        <div className={formStyles.form}>
+          <div className={formStyles.field}>
+            <span className={formStyles.label}>Integrantes</span>
             <ul className={styles.memberList}>
               {members.map((m) => (
                 <li key={m.id} className={styles.memberRow}>
@@ -142,8 +142,8 @@ export default function VehicleCard() {
             </ul>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="vehicle-plate">🚘 Matrícula</label>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="vehicle-plate">🚘 Matrícula</label>
             <div className={styles.inlineRow}>
               <input
                 id="vehicle-plate"
@@ -162,7 +162,7 @@ export default function VehicleCard() {
                 Guardar
               </button>
             </div>
-            <span className={styles.hint}>
+            <span className={formStyles.hint}>
               Solo la ven los integrantes de tu vehículo. Nunca se muestra en la comunidad.
             </span>
           </div>
