@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } from '../components/UI'
+import TripCard from '../components/TripCard'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
@@ -38,6 +39,19 @@ export default function CommunityFeedPage() {
   const [modelFilter, setModelFilter] = useState<ModelFilter>('todos')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortOrder>('recientes')
+
+  // Trip rows expand in place to the full TripCard (stops, battery, costs).
+  // A Set so opening one doesn't close another.
+  const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
+
+  function toggleTrip(id: string) {
+    setExpandedTrips((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (!supabase) return
@@ -228,22 +242,38 @@ export default function CommunityFeedPage() {
             </p>
           ) : (
             <ul className={styles.list}>
-              {filteredTrips.map((trip) => (
-                <li key={trip.id} className={styles.item}>
-                  <div>
-                    <div className={styles.itemTitle}>
-                      {trip.title}{trip.model && ` (${trip.model})`}
-                      {trip.verified && <Badge color="blue">Oficial</Badge>}
-                    </div>
-                    <div className={styles.itemMeta}>
-                      {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
-                      {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                      {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
-                    </div>
-                  </div>
-                  <div className={styles.author}>por {names[trip.user_id] ?? 'un usuario'}</div>
-                </li>
-              ))}
+              {filteredTrips.map((trip) => {
+                const expanded = expandedTrips.has(trip.id)
+                return (
+                  <li key={trip.id} className={styles.item}>
+                    <button
+                      type="button"
+                      className={styles.itemToggle}
+                      onClick={() => toggleTrip(trip.id)}
+                      aria-expanded={expanded}
+                    >
+                      <div className={styles.itemTitle}>
+                        {trip.title}{trip.model && ` (${trip.model})`}
+                        {trip.verified && <Badge color="blue">Oficial</Badge>}
+                      </div>
+                      <div className={styles.itemMeta}>
+                        {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
+                        {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
+                        {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
+                      </div>
+                      <span className={styles.itemToggleHint} aria-hidden="true">
+                        {expanded ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
+                      </span>
+                    </button>
+                    <div className={styles.author}>por {names[trip.user_id] ?? 'un usuario'}</div>
+                    {expanded && (
+                      <div className={styles.itemDetail}>
+                        <TripCard trip={trip} authorName={names[trip.user_id] ?? 'un usuario'} />
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
         </Card>

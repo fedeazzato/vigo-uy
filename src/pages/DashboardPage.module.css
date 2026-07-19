@@ -82,6 +82,40 @@
   gap: 10px;
 }
 
+/* Expandable trip rows: the summary is a button revealing the full
+   TripCard beneath (same pattern as the Comunidad feed). */
+.itemToggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.itemToggleHint {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-600);
+}
+.itemToggle:hover .itemToggleHint {
+  text-decoration: underline;
+}
+
+.itemDetail {
+  grid-column: 1 / -1;
+}
+/* The embedded Card brings its own bottom margin; the row doesn't need it. */
+.itemDetail > * {
+  margin-bottom: 0;
+}
+
 .actionLink {
   background: none;
   border: none;

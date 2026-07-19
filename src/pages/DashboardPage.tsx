@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
+import TripCard from '../components/TripCard'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
@@ -60,6 +61,19 @@ export default function DashboardPage() {
   const [passkeyDismissed, setPasskeyDismissed] = useState(
     () => localStorage.getItem(PASSKEY_PROMPT_KEY) === '1'
   )
+
+  // Trip rows expand in place to the full TripCard (stops, battery, costs),
+  // same pattern as the Comunidad feed. A Set so several can stay open.
+  const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
+
+  function toggleTrip(id: string) {
+    setExpandedTrips((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (!supabase || !user) return
@@ -359,14 +373,22 @@ export default function DashboardPage() {
           <ul className={styles.list}>
             {trips.map((trip) => (
               <li key={trip.id} className={`${styles.item} ${styles.itemTwoCol}`}>
-                <div>
+                <button
+                  type="button"
+                  className={styles.itemToggle}
+                  onClick={() => toggleTrip(trip.id)}
+                  aria-expanded={expandedTrips.has(trip.id)}
+                >
                   <div className={styles.itemTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
                   <div className={styles.itemMeta}>
                     {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
                     {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
                     {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
                   </div>
-                </div>
+                  <span className={styles.itemToggleHint} aria-hidden="true">
+                    {expandedTrips.has(trip.id) ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
+                  </span>
+                </button>
                 <div className={styles.itemActions}>
                   <Link
                     to={`/viajes/${trip.id}/editar`}
@@ -383,6 +405,11 @@ export default function DashboardPage() {
                     Eliminar
                   </button>
                 </div>
+                {expandedTrips.has(trip.id) && (
+                  <div className={styles.itemDetail}>
+                    <TripCard trip={trip} />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
