@@ -40,11 +40,18 @@ function RouteMap({ stops }: RouteMapProps) {
             </div>
             <div className={styles.routeStopInfo}>
               <span className={styles.routeStopName}>{stop.name}</span>
+              {stop.arrivalNote && <p className={styles.routeStopNote}>{stop.arrivalNote}</p>}
               {stop.type !== 'origin' && stop.type !== 'destination' && (
-                <Badge color={stop.type === 'charge' ? 'amber' : 'red'}>
-                  {s.label}
-                </Badge>
+                <div className={styles.routeStopBadgeRow}>
+                  <Badge color={stop.type === 'charge' ? 'amber' : 'red'}>
+                    {s.label}
+                  </Badge>
+                  {stop.chargeDetail && (
+                    <span className={styles.routeStopNote}>{stop.chargeDetail}</span>
+                  )}
+                </div>
               )}
+              {stop.departureNote && <p className={styles.routeStopNote}>{stop.departureNote}</p>}
               {stop.note && <p className={styles.routeStopNote}>{stop.note}</p>}
             </div>
           </div>
@@ -68,17 +75,20 @@ function tripToStops(trip: TripLog): Stop[] {
     },
   ]
   for (const cs of trip.charging_stops) {
-    const noteParts: string[] = []
-    if (cs.arrival_percentage != null && cs.departure_percentage != null) {
-      noteParts.push(`Llegó con ${cs.arrival_percentage}% · salió con ${cs.departure_percentage}%`)
-    } else if (cs.arrival_percentage != null) {
-      noteParts.push(`Llegó con ${cs.arrival_percentage}%`)
-    }
-    if (cs.duration_minutes != null) noteParts.push(`${cs.duration_minutes} min`)
-    if (cs.energy_kwh != null) noteParts.push(`${cs.energy_kwh.toLocaleString('es-UY')} kWh`)
-    if (cs.cost_uyu != null) noteParts.push(`$${cs.cost_uyu.toLocaleString('es-UY')}`)
-    if (cs.note) noteParts.push(cs.note)
-    stops.push({ type: 'charge', name: cs.name, note: noteParts.join(' · ') || undefined })
+    const detailParts: string[] = []
+    if (cs.duration_minutes != null) detailParts.push(`${cs.duration_minutes} min`)
+    if (cs.energy_kwh != null) detailParts.push(`${cs.energy_kwh.toLocaleString('es-UY')} kWh`)
+    if (cs.cost_uyu != null) detailParts.push(`$${cs.cost_uyu.toLocaleString('es-UY')}`)
+    stops.push({
+      type: 'charge',
+      name: cs.name,
+      arrivalNote:
+        cs.arrival_percentage != null ? `Llegó con ${cs.arrival_percentage}%` : undefined,
+      chargeDetail: detailParts.join(' · ') || undefined,
+      departureNote:
+        cs.departure_percentage != null ? `Salió con ${cs.departure_percentage}%` : undefined,
+      note: cs.note || undefined,
+    })
   }
   stops.push({
     type: 'destination',

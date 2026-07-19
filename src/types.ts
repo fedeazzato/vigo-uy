@@ -72,6 +72,12 @@ export interface Stop {
   type: StopType
   name: string
   note?: string
+  // Community-trip charge stops tell the stop chronologically: arrival
+  // battery above the badge, charge details (min · kWh · $) inline with it,
+  // departure battery below. Curated JSON stops only use `note`.
+  arrivalNote?: string
+  chargeDetail?: string
+  departureNote?: string
 }
 
 export interface Route {

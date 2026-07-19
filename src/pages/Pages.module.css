@@ -214,6 +214,14 @@
   line-height: 1.5;
 }
 
+/* Badge + inline charge details ("Cargar aquí  40 min · 35,6 kWh · $549"). */
+.routeStopBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .routeTips {
   margin-top: 14px;
   padding-top: 12px;
