@@ -57,7 +57,16 @@ function RouteMap({ stops }: RouteMapProps) {
 // Maps a community trip log onto the same Stop timeline the curated routes
 // use, so both render through RouteMap.
 function tripToStops(trip: TripLog): Stop[] {
-  const stops: Stop[] = [{ type: 'origin', name: trip.origin }]
+  const stops: Stop[] = [
+    {
+      type: 'origin',
+      name: trip.origin,
+      note:
+        trip.starting_charge_percentage != null
+          ? `Salió con ${trip.starting_charge_percentage}%`
+          : undefined,
+    },
+  ]
   for (const cs of trip.charging_stops) {
     const noteParts: string[] = []
     if (cs.arrival_percentage != null && cs.departure_percentage != null) {
@@ -66,10 +75,19 @@ function tripToStops(trip: TripLog): Stop[] {
       noteParts.push(`Llegó con ${cs.arrival_percentage}%`)
     }
     if (cs.duration_minutes != null) noteParts.push(`${cs.duration_minutes} min`)
+    if (cs.energy_kwh != null) noteParts.push(`${cs.energy_kwh.toLocaleString('es-UY')} kWh`)
+    if (cs.cost_uyu != null) noteParts.push(`$${cs.cost_uyu.toLocaleString('es-UY')}`)
     if (cs.note) noteParts.push(cs.note)
     stops.push({ type: 'charge', name: cs.name, note: noteParts.join(' · ') || undefined })
   }
-  stops.push({ type: 'destination', name: trip.destination })
+  stops.push({
+    type: 'destination',
+    name: trip.destination,
+    note:
+      trip.ending_charge_percentage != null
+        ? `Llegó con ${trip.ending_charge_percentage}%`
+        : undefined,
+  })
   return stops
 }
 
