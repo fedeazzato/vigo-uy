@@ -48,7 +48,11 @@ interface CardTitleProps {
 export function CardTitle({ icon, children }: CardTitleProps) {
   return (
     <div className={styles.cardTitle}>
-      {icon && <span className={styles.cardIcon} aria-hidden="true">{icon}</span>}
+      {icon && (
+        <span className={styles.cardIcon} aria-hidden="true">
+          {icon}
+        </span>
+      )}
       <span>{children}</span>
     </div>
   )
@@ -63,8 +67,7 @@ export function TipList({ items }: TipListProps) {
     <ul className={styles.tipList}>
       {items.map((item, i) => (
         <li key={i} className={styles.tip}>
-          {item.bold && <strong>{item.bold}</strong>}{' '}
-          {item.text}
+          {item.bold && <strong>{item.bold}</strong>} {item.text}
         </li>
       ))}
     </ul>
@@ -101,7 +104,9 @@ export function Alert({ children, type = 'warning' }: AlertProps) {
       className={`${styles.alert} ${styles[`alert_${type}`]}`}
       role={type === 'danger' || type === 'warning' ? 'alert' : 'status'}
     >
-      <span className={styles.alertIcon} aria-hidden="true">{ALERT_ICON[type]}</span>
+      <span className={styles.alertIcon} aria-hidden="true">
+        {ALERT_ICON[type]}
+      </span>
       <span>{children}</span>
     </div>
   )

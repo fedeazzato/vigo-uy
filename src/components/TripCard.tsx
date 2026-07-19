@@ -4,10 +4,10 @@ import type { Stop, StopType, TripLog } from '../types'
 import styles from './TripCard.module.css'
 
 const STOP_TYPE_STYLES: Record<StopType, { dot: string; label: string }> = {
-  origin:      { dot: '#1D9E75', label: 'Origen' },
+  origin: { dot: '#1D9E75', label: 'Origen' },
   destination: { dot: '#185FA5', label: 'Destino' },
-  charge:      { dot: '#BA7517', label: 'Cargar aquí' },
-  warning:     { dot: '#E24B4A', label: 'Cuidado' },
+  charge: { dot: '#BA7517', label: 'Cargar aquí' },
+  warning: { dot: '#E24B4A', label: 'Cuidado' },
 }
 
 interface RouteMapProps {
@@ -31,12 +31,8 @@ export function RouteMap({ stops }: RouteMapProps) {
               {stop.arrivalNote && <p className={styles.routeStopNote}>{stop.arrivalNote}</p>}
               {stop.type !== 'origin' && stop.type !== 'destination' && (
                 <div className={styles.routeStopBadgeRow}>
-                  <Badge color={stop.type === 'charge' ? 'amber' : 'red'}>
-                    {s.label}
-                  </Badge>
-                  {stop.chargeDetail && (
-                    <span className={styles.routeStopNote}>{stop.chargeDetail}</span>
-                  )}
+                  <Badge color={stop.type === 'charge' ? 'amber' : 'red'}>{s.label}</Badge>
+                  {stop.chargeDetail && <span className={styles.routeStopNote}>{stop.chargeDetail}</span>}
                 </div>
               )}
               {stop.departureNote && <p className={styles.routeStopNote}>{stop.departureNote}</p>}
@@ -57,9 +53,7 @@ function tripToStops(trip: TripLog): Stop[] {
       type: 'origin',
       name: trip.origin,
       note:
-        trip.starting_charge_percentage != null
-          ? `Salió con ${trip.starting_charge_percentage}%`
-          : undefined,
+        trip.starting_charge_percentage != null ? `Salió con ${trip.starting_charge_percentage}%` : undefined,
     },
   ]
   for (const cs of trip.charging_stops) {
@@ -70,30 +64,23 @@ function tripToStops(trip: TripLog): Stop[] {
     stops.push({
       type: 'charge',
       name: cs.name,
-      arrivalNote:
-        cs.arrival_percentage != null ? `Llegó con ${cs.arrival_percentage}%` : undefined,
+      arrivalNote: cs.arrival_percentage != null ? `Llegó con ${cs.arrival_percentage}%` : undefined,
       chargeDetail: detailParts.join(' · ') || undefined,
-      departureNote:
-        cs.departure_percentage != null ? `Salió con ${cs.departure_percentage}%` : undefined,
+      departureNote: cs.departure_percentage != null ? `Salió con ${cs.departure_percentage}%` : undefined,
       note: cs.note || undefined,
     })
   }
   stops.push({
     type: 'destination',
     name: trip.destination,
-    note:
-      trip.ending_charge_percentage != null
-        ? `Llegó con ${trip.ending_charge_percentage}%`
-        : undefined,
+    note: trip.ending_charge_percentage != null ? `Llegó con ${trip.ending_charge_percentage}%` : undefined,
   })
   return stops
 }
 
 // Sum of the recorded charge costs, or null when no stop has one.
 function tripChargeTotal(trip: TripLog): number | null {
-  const costs = trip.charging_stops
-    .map((cs) => cs.cost_uyu)
-    .filter((c): c is number => c != null)
+  const costs = trip.charging_stops.map((cs) => cs.cost_uyu).filter((c): c is number => c != null)
   if (costs.length === 0) return null
   return costs.reduce((sum, c) => sum + c, 0)
 }
@@ -120,7 +107,9 @@ export function TripDetail({ trip }: TripDetailProps) {
 
       {trip.notes && (
         <div className={styles.routeTips}>
-          <p className={styles.routeTip}><span aria-hidden="true">💡</span> {trip.notes}</p>
+          <p className={styles.routeTip}>
+            <span aria-hidden="true">💡</span> {trip.notes}
+          </p>
         </div>
       )}
     </>
@@ -138,7 +127,10 @@ interface TripSummaryButtonProps {
 export function TripSummaryButton({ trip, expanded, onToggle }: TripSummaryButtonProps) {
   return (
     <button type="button" className={styles.summaryToggle} onClick={onToggle} aria-expanded={expanded}>
-      <div className={styles.summaryTitle}>{trip.title}{trip.model && ` (${trip.model})`}</div>
+      <div className={styles.summaryTitle}>
+        {trip.title}
+        {trip.model && ` (${trip.model})`}
+      </div>
       <div className={styles.summaryMeta}>
         {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
         {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}

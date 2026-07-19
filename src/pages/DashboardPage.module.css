@@ -31,7 +31,9 @@
   cursor: pointer;
   font-family: inherit;
 }
-.addLink:hover { text-decoration: underline; }
+.addLink:hover {
+  text-decoration: underline;
+}
 
 /* List/item chrome comes from the shared listPatterns.module.css; only
    dashboard-specific pieces live here. */
@@ -52,8 +54,14 @@
 /* ── Save toast ("Viaje guardado ✓") ── */
 
 @keyframes toastUp {
-  from { transform: translate(-50%, 10px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from {
+    transform: translate(-50%, 10px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 
 .saveToast {
@@ -122,7 +130,9 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.emptyStateBtn:hover { background: var(--green-600); }
+.emptyStateBtn:hover {
+  background: var(--green-600);
+}
 
 @media (max-width: 500px) {
   .itemThreeCol {

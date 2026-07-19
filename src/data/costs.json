@@ -1,6 +1,11 @@
 {
   "perKm": [
-    { "label": "Casa — triple horario (00–07 hs)", "value": "$0,48", "badge": "Más barato", "badgeColor": "green" },
+    {
+      "label": "Casa — triple horario (00–07 hs)",
+      "value": "$0,48",
+      "badge": "Más barato",
+      "badgeColor": "green"
+    },
     { "label": "Casa — horario intermedio (07–18 hs)", "value": "~$0,80", "badge": null, "badgeColor": null },
     { "label": "Casa — hora pico (18–22 hs)", "value": "~$1,10", "badge": "Evitar", "badgeColor": "red" },
     { "label": "UTE AC (alterna, calle)", "value": "$1,45", "badge": null, "badgeColor": null },
@@ -10,17 +15,53 @@
     "E2": {
       "battery": 44.94,
       "options": [
-        { "label": "Casa — triple horario", "energy": 128, "base": 0, "total": 128, "note": "~$2,44/kWh + IVA" },
-        { "label": "UTE AC (alterna)", "energy": 467, "base": 55, "total": 522, "note": "$10,4/kWh + cargo base $54,8" },
-        { "label": "UTE DC (rápida)", "energy": 530, "base": 133, "total": 663, "note": "$11,8/kWh + cargo base $132,9" }
+        {
+          "label": "Casa — triple horario",
+          "energy": 128,
+          "base": 0,
+          "total": 128,
+          "note": "~$2,44/kWh + IVA"
+        },
+        {
+          "label": "UTE AC (alterna)",
+          "energy": 467,
+          "base": 55,
+          "total": 522,
+          "note": "$10,4/kWh + cargo base $54,8"
+        },
+        {
+          "label": "UTE DC (rápida)",
+          "energy": 530,
+          "base": 133,
+          "total": 663,
+          "note": "$11,8/kWh + cargo base $132,9"
+        }
       ]
     },
     "E2+": {
       "battery": 51.87,
       "options": [
-        { "label": "Casa — triple horario", "energy": 148, "base": 0, "total": 148, "note": "~$2,44/kWh + IVA" },
-        { "label": "UTE AC (alterna)", "energy": 539, "base": 55, "total": 594, "note": "$10,4/kWh + cargo base $54,8" },
-        { "label": "UTE DC (rápida)", "energy": 611, "base": 133, "total": 744, "note": "$11,8/kWh + cargo base $132,9" }
+        {
+          "label": "Casa — triple horario",
+          "energy": 148,
+          "base": 0,
+          "total": 148,
+          "note": "~$2,44/kWh + IVA"
+        },
+        {
+          "label": "UTE AC (alterna)",
+          "energy": 539,
+          "base": 55,
+          "total": 594,
+          "note": "$10,4/kWh + cargo base $54,8"
+        },
+        {
+          "label": "UTE DC (rápida)",
+          "energy": 611,
+          "base": 133,
+          "total": 744,
+          "note": "$11,8/kWh + cargo base $132,9"
+        }
       ]
     }
   },

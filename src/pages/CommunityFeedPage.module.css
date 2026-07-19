@@ -27,10 +27,18 @@
 }
 
 /* Colored edge + type chip identify the card's kind at a glance. */
-.feedCard { border-left: 3px solid transparent; }
-.feedCard_viaje    { border-left-color: var(--green-400); }
-.feedCard_service  { border-left-color: var(--amber-400); }
-.feedCard_repuesto { border-left-color: var(--blue-600); }
+.feedCard {
+  border-left: 3px solid transparent;
+}
+.feedCard_viaje {
+  border-left-color: var(--green-400);
+}
+.feedCard_service {
+  border-left-color: var(--amber-400);
+}
+.feedCard_repuesto {
+  border-left-color: var(--blue-600);
+}
 
 .feedCardHead {
   display: flex;
@@ -51,9 +59,18 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.typeChip_viaje    { background: var(--green-50); color: var(--green-600); }
-.typeChip_service  { background: var(--amber-50); color: var(--amber-600); }
-.typeChip_repuesto { background: var(--blue-50);  color: var(--blue-600); }
+.typeChip_viaje {
+  background: var(--green-50);
+  color: var(--green-600);
+}
+.typeChip_service {
+  background: var(--amber-50);
+  color: var(--amber-600);
+}
+.typeChip_repuesto {
+  background: var(--blue-50);
+  color: var(--blue-600);
+}
 
 .feedCardFoot {
   display: flex;
@@ -94,9 +111,13 @@
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
-.chip:hover { color: var(--text-primary); }
+.chip:hover {
+  color: var(--text-primary);
+}
 
 .chipActive,
 .chipActive:hover {
@@ -146,4 +167,3 @@
   font-weight: 600;
   color: var(--text-secondary);
 }
-

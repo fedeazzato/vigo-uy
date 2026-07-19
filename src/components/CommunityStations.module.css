@@ -16,7 +16,9 @@
   cursor: pointer;
   font-family: inherit;
 }
-.addBtn:hover { background: var(--green-600); }
+.addBtn:hover {
+  background: var(--green-600);
+}
 
 /* Station-report form: deliberately tighter variants of the shared form
    classes (smaller gaps/labels, content-sized button). */
@@ -58,8 +60,13 @@
   cursor: pointer;
   font-family: inherit;
 }
-.stationSubmitBtn:hover { background: var(--green-600); }
-.stationSubmitBtn:disabled { opacity: 0.6; cursor: default; }
+.stationSubmitBtn:hover {
+  background: var(--green-600);
+}
+.stationSubmitBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 /* ── Station list ── */
 
@@ -75,7 +82,10 @@
   padding: 12px 0;
   border-bottom: 1px solid var(--border);
 }
-.stationItem:last-child { border-bottom: none; padding-bottom: 0; }
+.stationItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
 
 .stationHeader {
   display: flex;
@@ -152,6 +162,10 @@
 }
 
 @media (max-width: 500px) {
-  .formRow { grid-template-columns: 1fr; }
-  .reportBtn { min-height: 44px; }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .reportBtn {
+    min-height: 44px;
+  }
 }

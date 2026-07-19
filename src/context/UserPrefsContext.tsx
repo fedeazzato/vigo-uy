@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import type { Model, Color } from '../types'
 
 export type { Model, Color }
-type Theme = 'light' | 'dark' | null  // null = follow system
+type Theme = 'light' | 'dark' | null // null = follow system
 export type EffectiveTheme = 'light' | 'dark'
 
 export const MODELS: Model[] = ['E2', 'E2+']
@@ -10,28 +10,28 @@ export const COLORS: Color[] = ['Blanco', 'Verde', 'Gris', 'Beige', 'Negro']
 
 export const COLOR_HEX: Record<Color, string> = {
   Blanco: '#EEEEE6',
-  Verde:  '#7A924E',  // olive green
-  Gris:   '#B8BCBF',  // silver
-  Beige:  '#FFEFD6',  // light sand
-  Negro:  '#1C1C1C',
+  Verde: '#7A924E', // olive green
+  Gris: '#B8BCBF', // silver
+  Beige: '#FFEFD6', // light sand
+  Negro: '#1C1C1C',
 }
 
 // CSS border value for each color swatch/dot, or null if no border needed
 export const COLOR_BORDER: Record<Color, string | null> = {
   Blanco: 'var(--border-strong)',
-  Verde:  null,
-  Gris:   'var(--border-strong)',
-  Beige:  'var(--border-strong)',
-  Negro:  'var(--swatch-dark-border)',
+  Verde: null,
+  Gris: 'var(--border-strong)',
+  Beige: 'var(--border-strong)',
+  Negro: 'var(--swatch-dark-border)',
 }
 
 // Whether the swatch label/checkmark needs dark text for contrast
 export const COLOR_DARK_TEXT: Record<Color, boolean> = {
   Blanco: true,
-  Verde:  true,   // olive is light enough for dark text
-  Gris:   true,   // silver is light
-  Beige:  true,
-  Negro:  false,
+  Verde: true, // olive is light enough for dark text
+  Gris: true, // silver is light
+  Beige: true,
+  Negro: false,
 }
 
 const STORAGE_KEY = 'vigo-prefs'
@@ -59,7 +59,9 @@ function load(): Prefs {
       const parsed = JSON.parse(raw) as Partial<Prefs>
       return { model: parsed.model ?? null, color: parsed.color ?? null, theme: parsed.theme ?? null }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return { model: null, color: null, theme: null }
 }
 
@@ -93,14 +95,16 @@ export function UserPrefsProvider({ children }: { children: ReactNode }) {
   }, [effectiveTheme])
 
   return (
-    <UserPrefsContext.Provider value={{
-      ...prefs,
-      effectiveTheme,
-      setModel: (model) => update({ ...prefs, model }),
-      setColor: (color) => update({ ...prefs, color }),
-      setTheme: (theme) => update({ ...prefs, theme }),
-      clear: () => update({ model: null, color: null, theme: null }),
-    }}>
+    <UserPrefsContext.Provider
+      value={{
+        ...prefs,
+        effectiveTheme,
+        setModel: (model) => update({ ...prefs, model }),
+        setColor: (color) => update({ ...prefs, color }),
+        setTheme: (theme) => update({ ...prefs, theme }),
+        clear: () => update({ model: null, color: null, theme: null }),
+      }}
+    >
       {children}
     </UserPrefsContext.Provider>
   )

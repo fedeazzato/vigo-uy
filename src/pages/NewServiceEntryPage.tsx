@@ -115,100 +115,117 @@ export default function NewServiceEntryPage() {
       submitting={submitting}
       onCancel={handleCancel}
     >
-        {error && <FormError>{error}</FormError>}
+      {error && <FormError>{error}</FormError>}
 
-        <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
-          <CityDatalist />
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="service-date">📅 Fecha</label>
-              <input
-                id="service-date"
-                required
-                type="date"
-                className={formStyles.input}
-                value={serviceDate}
-                onChange={(e) => setServiceDate(e.target.value)}
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="service-km">📏 Kilometraje</label>
-              <input
-                id="service-km"
-                required
-                type="text"
-                inputMode="numeric"
-                className={formStyles.input}
-                value={odometerKm}
-                onChange={(e) => setOdometerKm(e.target.value)}
-                placeholder="45000"
-              />
-            </div>
-          </div>
-
+      <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <CityDatalist />
+        <div className={formStyles.row}>
           <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="service-dealer">🔧 Taller</label>
+            <label className={formStyles.label} htmlFor="service-date">
+              📅 Fecha
+            </label>
             <input
-              id="service-dealer"
+              id="service-date"
               required
-              type="text"
+              type="date"
               className={formStyles.input}
-              value={dealer}
-              onChange={(e) => setDealer(e.target.value)}
-              placeholder="Nombre del taller"
-            />
-            <span className={formStyles.hint}>Talleres conocidos: {KNOWN_DEALERS.join(', ')}</span>
-          </div>
-
-          <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="service-type">🛠️ Tipo de service</label>
-            <input
-              id="service-type"
-              required
-              type="text"
-              className={formStyles.input}
-              value={serviceType}
-              onChange={(e) => setServiceType(e.target.value)}
-              placeholder="Ej: service de 15.000 km"
+              value={serviceDate}
+              onChange={(e) => setServiceDate(e.target.value)}
             />
           </div>
-
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="service-cost">💰 Costo (UYU)</label>
-              <input
-                id="service-cost"
-                required
-                type="text"
-                inputMode="decimal"
-                className={formStyles.input}
-                value={costUyu}
-                onChange={(e) => setCostUyu(e.target.value)}
-                placeholder="7500"
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="service-city">📍 Ciudad</label>
-              <input
-                id="service-city"
-                type="text"
-                list={UY_CITIES_LIST_ID}
-                className={formStyles.input}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Montevideo"
-              />
-            </div>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="service-km">
+              📏 Kilometraje
+            </label>
+            <input
+              id="service-km"
+              required
+              type="text"
+              inputMode="numeric"
+              className={formStyles.input}
+              value={odometerKm}
+              onChange={(e) => setOdometerKm(e.target.value)}
+              placeholder="45000"
+            />
           </div>
+        </div>
 
-          <NotesField id="service-notes" value={notes} onChange={setNotes} placeholder="Detalles adicionales..." />
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="service-dealer">
+            🔧 Taller
+          </label>
+          <input
+            id="service-dealer"
+            required
+            type="text"
+            className={formStyles.input}
+            value={dealer}
+            onChange={(e) => setDealer(e.target.value)}
+            placeholder="Nombre del taller"
+          />
+          <span className={formStyles.hint}>Talleres conocidos: {KNOWN_DEALERS.join(', ')}</span>
+        </div>
 
-          <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="service-type">
+            🛠️ Tipo de service
+          </label>
+          <input
+            id="service-type"
+            required
+            type="text"
+            className={formStyles.input}
+            value={serviceType}
+            onChange={(e) => setServiceType(e.target.value)}
+            placeholder="Ej: service de 15.000 km"
+          />
+        </div>
 
-          <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
-            {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-          </button>
-        </form>
+        <div className={formStyles.row}>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="service-cost">
+              💰 Costo (UYU)
+            </label>
+            <input
+              id="service-cost"
+              required
+              type="text"
+              inputMode="decimal"
+              className={formStyles.input}
+              value={costUyu}
+              onChange={(e) => setCostUyu(e.target.value)}
+              placeholder="7500"
+            />
+          </div>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="service-city">
+              📍 Ciudad
+            </label>
+            <input
+              id="service-city"
+              type="text"
+              list={UY_CITIES_LIST_ID}
+              className={formStyles.input}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Montevideo"
+            />
+          </div>
+        </div>
+
+        <NotesField
+          id="service-notes"
+          value={notes}
+          onChange={setNotes}
+          placeholder="Detalles adicionales..."
+        />
+
+        <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
+
+        <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
+          {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
+        </button>
+      </form>
     </EntryFormShell>
   )
 }

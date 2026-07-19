@@ -336,20 +336,11 @@ export type ChargingNetwork = Omit<Tables['charging_networks']['Row'], 'country'
 // Pairing with current_type is enforced by a DB constraint (0025):
 // Tipo 2 / Tipo 1 are AC, CCS2 / CCS1 are DC, GB/T and Sin cable fit both.
 // Keep CONNECTORS_BY_CURRENT (src/lib/stations.ts) in sync.
-export type StationConnector =
-  | 'Tipo 2'
-  | 'Tipo 1'
-  | 'CCS2'
-  | 'CCS1'
-  | 'GB/T'
-  | 'Sin cable'
+export type StationConnector = 'Tipo 2' | 'Tipo 1' | 'CCS2' | 'CCS1' | 'GB/T' | 'Sin cable'
 export type StationCurrentType = 'AC' | 'DC'
 export type StationReportStatus = 'funciono' | 'fallo' | 'ocupado'
 
-export type ChargingStation = Omit<
-  Tables['charging_stations']['Row'],
-  'connector' | 'current_type'
-> & {
+export type ChargingStation = Omit<Tables['charging_stations']['Row'], 'connector' | 'current_type'> & {
   connector: StationConnector
   current_type: StationCurrentType
 }
@@ -357,10 +348,7 @@ export type ChargingStation = Omit<
 // Rolling-365-day average of what members actually paid. station_id is null
 // on the per-network rollup rows (GROUPING SETS); everything else is
 // aggregate output and never null.
-export type ChargingCostStat = Omit<
-  NonNullableRow<Views['charging_cost_stats']['Row']>,
-  'station_id'
-> & {
+export type ChargingCostStat = Omit<NonNullableRow<Views['charging_cost_stats']['Row']>, 'station_id'> & {
   station_id: string | null
 }
 

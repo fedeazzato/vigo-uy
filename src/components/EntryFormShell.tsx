@@ -77,7 +77,9 @@ interface NotesFieldProps {
 export function NotesField({ id, value, onChange, placeholder }: NotesFieldProps) {
   return (
     <div className={formStyles.field}>
-      <label className={formStyles.label} htmlFor={id}>💬 Notas</label>
+      <label className={formStyles.label} htmlFor={id}>
+        💬 Notas
+      </label>
       <textarea
         id={id}
         rows={3}

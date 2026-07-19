@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useUserPrefs, MODELS, COLORS, COLOR_HEX, COLOR_DARK_TEXT, COLOR_BORDER } from '../context/UserPrefsContext'
+import {
+  useUserPrefs,
+  MODELS,
+  COLORS,
+  COLOR_HEX,
+  COLOR_DARK_TEXT,
+  COLOR_BORDER,
+} from '../context/UserPrefsContext'
 import type { Model, TripLog } from '../types'
 import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../components/UI'
 import { CarPreview } from '../components/CarPreview'
@@ -12,7 +19,7 @@ import { formatDate } from '../lib/format'
 import styles from './MyVigoPage.module.css'
 
 const MODEL_INFO: Record<Model, { battery: string; extra: string }> = {
-  'E2':  { battery: '44,94 kWh', extra: 'Autonomía estándar' },
+  E2: { battery: '44,94 kWh', extra: 'Autonomía estándar' },
   'E2+': { battery: '51,87 kWh', extra: 'Mayor autonomía · Pack ADAS' },
 }
 
@@ -63,8 +70,8 @@ export default function MyVigoPage() {
         title="🚗 Mi Vigo"
         subtitle={
           <>
-            Configurá tu modelo y color para personalizar la información. ¿Buscás tus viajes y
-            costos? Están en <Link to="/mi-actividad">Mi actividad</Link>.
+            Configurá tu modelo y color para personalizar la información. ¿Buscás tus viajes y costos? Están
+            en <Link to="/mi-actividad">Mi actividad</Link>.
           </>
         }
       />
@@ -82,62 +89,74 @@ export default function MyVigoPage() {
             />
           )}
           <span>
-            {model && color
-              ? <>Tu Vigo es <strong>{model} {color}</strong></>
-              : model
-              ? <>Modelo seleccionado: <strong>{model}</strong></>
-              : <>Color seleccionado: <strong>{color}</strong></>
-            }
+            {model && color ? (
+              <>
+                Tu Vigo es{' '}
+                <strong>
+                  {model} {color}
+                </strong>
+              </>
+            ) : model ? (
+              <>
+                Modelo seleccionado: <strong>{model}</strong>
+              </>
+            ) : (
+              <>
+                Color seleccionado: <strong>{color}</strong>
+              </>
+            )}
           </span>
-          <button className={styles.clearBtn} onClick={clear}>Limpiar</button>
+          <button className={styles.clearBtn} onClick={clear}>
+            Limpiar
+          </button>
         </div>
       )}
 
       {/* Desktop: the two pickers sit side by side (plan phase 2, item 5). */}
       <div className={styles.pickersRow}>
-      <Card>
-        <CardTitle icon="⚙️">Modelo</CardTitle>
-        <div className={styles.modelGrid}>
-          {MODELS.map((m) => (
-            <button
-              key={m}
-              className={`${styles.modelCard} ${model === m ? styles.selected : ''}`}
-              onClick={() => setModel(m)}
-              aria-pressed={model === m}
-            >
-              <div className={styles.modelName}>{m}</div>
-              <div className={styles.modelBattery}>{MODEL_INFO[m].battery}</div>
-              <div className={styles.modelExtra}>{MODEL_INFO[m].extra}</div>
-            </button>
-          ))}
-        </div>
-      </Card>
+        <Card>
+          <CardTitle icon="⚙️">Modelo</CardTitle>
+          <div className={styles.modelGrid}>
+            {MODELS.map((m) => (
+              <button
+                key={m}
+                className={`${styles.modelCard} ${model === m ? styles.selected : ''}`}
+                onClick={() => setModel(m)}
+                aria-pressed={model === m}
+              >
+                <div className={styles.modelName}>{m}</div>
+                <div className={styles.modelBattery}>{MODEL_INFO[m].battery}</div>
+                <div className={styles.modelExtra}>{MODEL_INFO[m].extra}</div>
+              </button>
+            ))}
+          </div>
+        </Card>
 
-      <Card>
-        <CarPreview color={color} />
-        <CardTitle icon="🎨">Color</CardTitle>
-        <div className={styles.colorGrid}>
-          {COLORS.map((c) => (
-            <button
-              key={c}
-              className={`${styles.swatchBtn} ${color === c ? styles.selected : ''}`}
-              onClick={() => setColor(c)}
-              aria-pressed={color === c}
-            >
-              <span
-                className={styles.swatch}
-                aria-hidden="true"
-                style={{
-                  background: COLOR_HEX[c],
-                  borderColor: COLOR_BORDER[c] ?? 'transparent',
-                  color: COLOR_DARK_TEXT[c] ? '#1a1a18' : '#fff',
-                }}
-              />
-              <span className={styles.colorLabel}>{c}</span>
-            </button>
-          ))}
-        </div>
-      </Card>
+        <Card>
+          <CarPreview color={color} />
+          <CardTitle icon="🎨">Color</CardTitle>
+          <div className={styles.colorGrid}>
+            {COLORS.map((c) => (
+              <button
+                key={c}
+                className={`${styles.swatchBtn} ${color === c ? styles.selected : ''}`}
+                onClick={() => setColor(c)}
+                aria-pressed={color === c}
+              >
+                <span
+                  className={styles.swatch}
+                  aria-hidden="true"
+                  style={{
+                    background: COLOR_HEX[c],
+                    borderColor: COLOR_BORDER[c] ?? 'transparent',
+                    color: COLOR_DARK_TEXT[c] ? '#1a1a18' : '#fff',
+                  }}
+                />
+                <span className={styles.colorLabel}>{c}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {status === 'signedIn' && (
@@ -168,16 +187,16 @@ export default function MyVigoPage() {
             <ol className={styles.topTrips}>
               {topTrips.map((trip, i) => (
                 <li key={trip.id} className={styles.topTripRow}>
-                  <span className={styles.topTripMedal} aria-hidden="true">{['🥇', '🥈', '🥉'][i]}</span>
+                  <span className={styles.topTripMedal} aria-hidden="true">
+                    {['🥇', '🥈', '🥉'][i]}
+                  </span>
                   <span className={styles.topTripInfo}>
                     <span className={styles.topTripTitle}>{trip.title}</span>
                     <span className={styles.topTripMeta}>
                       {trip.origin} → {trip.destination} · {formatDate(trip.trip_date)}
                     </span>
                   </span>
-                  <span className={styles.topTripKm}>
-                    {trip.distance_km!.toLocaleString('es-UY')} km
-                  </span>
+                  <span className={styles.topTripKm}>{trip.distance_km!.toLocaleString('es-UY')} km</span>
                 </li>
               ))}
             </ol>

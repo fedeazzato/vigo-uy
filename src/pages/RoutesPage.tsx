@@ -12,9 +12,9 @@ const data = rawData as RoutesData
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   'Muy fácil': 'green',
-  'Fácil': 'green',
-  'Media': 'amber',
-  'Avanzada': 'red',
+  Fácil: 'green',
+  Media: 'amber',
+  Avanzada: 'red',
 }
 
 export default function RoutesPage() {
@@ -51,7 +51,9 @@ export default function RoutesPage() {
         <div className={styles.routeTips}>
           <div className={styles.routeTipsTitle}>Consejos del grupo</div>
           {route.tips.map((tip, i) => (
-            <p key={i} className={styles.routeTip}><span aria-hidden="true">💡</span> {tip}</p>
+            <p key={i} className={styles.routeTip}>
+              <span aria-hidden="true">💡</span> {tip}
+            </p>
           ))}
         </div>
       )}
@@ -94,10 +96,7 @@ export default function RoutesPage() {
 
   return (
     <div>
-      <PageHeader
-        title="🗺️ Rutas"
-        subtitle="Guía de viajes con paradas de carga verificadas por el grupo."
-      />
+      <PageHeader title="🗺️ Rutas" subtitle="Guía de viajes con paradas de carga verificadas por el grupo." />
 
       {communityFirst ? (
         <>
@@ -121,9 +120,9 @@ export default function RoutesPage() {
 
       <Card>
         <p className={styles.routeStopNote}>
-          Las rutas marcadas como oficiales son verificadas por el grupo. <Link to="/comunidad">Mirá
-          la comunidad</Link> para ver todos los viajes compartidos por otros usuarios, con sus
-          paradas de carga.
+          Las rutas marcadas como oficiales son verificadas por el grupo.{' '}
+          <Link to="/comunidad">Mirá la comunidad</Link> para ver todos los viajes compartidos por otros
+          usuarios, con sus paradas de carga.
         </p>
       </Card>
     </div>

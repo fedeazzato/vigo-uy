@@ -66,7 +66,11 @@ export default function VehicleCard() {
   function savePlate() {
     if (!vehicle) return
     void run(
-      () => supabase!.from('vehicles').update({ plate: plate.trim() || null }).eq('id', vehicle.id),
+      () =>
+        supabase!
+          .from('vehicles')
+          .update({ plate: plate.trim() || null })
+          .eq('id', vehicle.id),
       'Matrícula guardada.'
     )
   }
@@ -143,7 +147,9 @@ export default function VehicleCard() {
           </div>
 
           <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="vehicle-plate">🚘 Matrícula</label>
+            <label className={formStyles.label} htmlFor="vehicle-plate">
+              🚘 Matrícula
+            </label>
             <div className={styles.inlineRow}>
               <input
                 id="vehicle-plate"
@@ -170,8 +176,8 @@ export default function VehicleCard() {
           <div className={styles.block}>
             <span className={styles.blockTitle}>Invitá a quienes comparten tu Vigo</span>
             <p className={styles.blockText}>
-              ¿Manejan el mismo auto en familia? Pasales este código: al ingresarlo se suman a este
-              vehículo y los kilómetros de todos cuentan juntos en el ranking.
+              ¿Manejan el mismo auto en familia? Pasales este código: al ingresarlo se suman a este vehículo y
+              los kilómetros de todos cuentan juntos en el ranking.
             </p>
             <div className={styles.inlineRow}>
               <code className={styles.joinCode}>{vehicle.join_code}</code>
@@ -184,8 +190,8 @@ export default function VehicleCard() {
           <form className={styles.block} onSubmit={joinVehicle}>
             <span className={styles.blockTitle}>¿Te pasaron un código?</span>
             <p className={styles.blockText}>
-              Ingresalo acá para unirte al vehículo de otra persona. Vas a dejar tu vehículo actual y
-              tus próximos viajes van a sumar al vehículo compartido.
+              Ingresalo acá para unirte al vehículo de otra persona. Vas a dejar tu vehículo actual y tus
+              próximos viajes van a sumar al vehículo compartido.
             </p>
             <div className={styles.inlineRow}>
               <input
@@ -204,12 +210,7 @@ export default function VehicleCard() {
 
           {user && vehicle.created_by !== user.id && (
             <div className={styles.block}>
-              <button
-                type="button"
-                className={styles.dangerBtn}
-                onClick={resetVehicle}
-                disabled={busy}
-              >
+              <button type="button" className={styles.dangerBtn} onClick={resetVehicle} disabled={busy}>
                 Volver a mi propio vehículo
               </button>
             </div>

@@ -16,7 +16,9 @@
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
-.communityItem:last-child { border-bottom: none; }
+.communityItem:last-child {
+  border-bottom: none;
+}
 
 .communityTitle {
   font-size: 14px;

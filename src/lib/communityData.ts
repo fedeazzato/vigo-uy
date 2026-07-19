@@ -176,8 +176,8 @@ export function fetchCommunityStats(): Promise<{
         error: cityRes.error
           ? toFriendlyError(cityRes.error)
           : modelRes.error
-          ? toFriendlyError(modelRes.error)
-          : null,
+            ? toFriendlyError(modelRes.error)
+            : null,
       }
     },
     (r) => r.error !== null
@@ -309,9 +309,8 @@ export function pickCostStat(
   const station = stats.find((s) => s.station_id === stationId && s.sample_count >= MIN_COST_SAMPLES)
   if (station) return station
   return (
-    stats.find(
-      (s) => s.network === network && s.station_id === null && s.sample_count >= MIN_COST_SAMPLES
-    ) ?? null
+    stats.find((s) => s.network === network && s.station_id === null && s.sample_count >= MIN_COST_SAMPLES) ??
+    null
   )
 }
 

@@ -8,7 +8,15 @@ function cell(value: string | number | null | undefined): string {
 
 describe('toCsv', () => {
   it('joins rows with CRLF and cells with commas', () => {
-    expect(toCsv(['a', 'b'], [['1', '2'], ['3', '4']])).toBe('a,b\r\n1,2\r\n3,4')
+    expect(
+      toCsv(
+        ['a', 'b'],
+        [
+          ['1', '2'],
+          ['3', '4'],
+        ]
+      )
+    ).toBe('a,b\r\n1,2\r\n3,4')
   })
 
   it('quotes values containing commas, quotes and newlines', () => {

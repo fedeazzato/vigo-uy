@@ -55,7 +55,9 @@
   text-decoration: underline;
   cursor: pointer;
 }
-.removeStopBtn:hover { color: var(--red-600); }
+.removeStopBtn:hover {
+  color: var(--red-600);
+}
 
 .addStopBtn {
   align-self: flex-start;
@@ -67,7 +69,9 @@
   color: var(--green-600);
   cursor: pointer;
 }
-.addStopBtn:hover { text-decoration: underline; }
+.addStopBtn:hover {
+  text-decoration: underline;
+}
 
 .emptyStops {
   font-size: 13px;
@@ -92,9 +96,14 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
-.modelBtn:hover { border-color: var(--text-tertiary); }
+.modelBtn:hover {
+  border-color: var(--text-tertiary);
+}
 .modelBtnSelected {
   background: var(--green-50);
   border-color: var(--green-400);

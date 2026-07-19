@@ -57,7 +57,8 @@ export default function HomePage() {
                   <span className={styles.communityMeta}>
                     {trip.origin} → {trip.destination}
                     {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                    {' · por '}{names[trip.user_id] ?? 'un usuario'}
+                    {' · por '}
+                    {names[trip.user_id] ?? 'un usuario'}
                   </span>
                 </li>
               ))}
@@ -67,15 +68,25 @@ export default function HomePage() {
           )}
           <div className={styles.communityCta}>
             {status === 'signedIn' ? (
-              <button type="button" className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`} onClick={openRegisterSheet}>
+              <button
+                type="button"
+                className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`}
+                onClick={openRegisterSheet}
+              >
                 Compartí tu viaje
               </button>
             ) : (
-              <Link to="/login" state={{ from: '/viajes/nuevo' }} className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`}>
+              <Link
+                to="/login"
+                state={{ from: '/viajes/nuevo' }}
+                className={`${listStyles.ctaBtn} ${styles.communityCtaBtn}`}
+              >
                 Iniciá sesión para compartir
               </Link>
             )}
-            <Link to="/comunidad" className={styles.communityLink}>Ver toda la comunidad →</Link>
+            <Link to="/comunidad" className={styles.communityLink}>
+              Ver toda la comunidad →
+            </Link>
           </div>
         </Card>
       )}
@@ -83,7 +94,9 @@ export default function HomePage() {
       <SectionDivider label="Guía rápida" />
       <GuideLinks links={QUICK_GUIDE} />
       <div className={styles.guideMore}>
-        <Link to="/guia" className={styles.communityLink}>Ver toda la guía →</Link>
+        <Link to="/guia" className={styles.communityLink}>
+          Ver toda la guía →
+        </Link>
       </div>
     </div>
   )

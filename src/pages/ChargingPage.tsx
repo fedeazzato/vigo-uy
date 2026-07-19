@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
 import rawData from '../data/charging.json'
-import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
+import {
+  PageHeader,
+  Card,
+  CardTitle,
+  TipList,
+  Badge,
+  Alert,
+  StatGrid,
+  SectionDivider,
+} from '../components/UI'
 import CommunityStations from '../components/CommunityStations'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
@@ -38,11 +47,9 @@ export default function ChargingPage() {
     )
   }
 
-  const visibleStats = model
-    ? stats.filter(s => !s.model || s.model === model)
-    : stats
+  const visibleStats = model ? stats.filter((s) => !s.model || s.model === model) : stats
 
-  const modelsToShow = (model ? [model] : (['E2', 'E2+'] as const))
+  const modelsToShow = model ? [model] : (['E2', 'E2+'] as const)
 
   return (
     <div>
@@ -75,7 +82,9 @@ export default function ChargingPage() {
             return (
               <div key={m} className={styles.autonomyModelCard}>
                 <div className={styles.autonomyModelLabel}>{m}</div>
-                <div className={styles.autonomyKm}>{entry.km} <span className={styles.autonomyKmUnit}>km</span></div>
+                <div className={styles.autonomyKm}>
+                  {entry.km} <span className={styles.autonomyKmUnit}>km</span>
+                </div>
                 <div className={styles.autonomyNote}>{entry.note}</div>
               </div>
             )
@@ -141,7 +150,9 @@ export default function ChargingPage() {
       <SectionDivider label="Advertencias importantes" />
 
       {publicCharging.alerts.map((a, i) => (
-        <Alert key={i} type={i === 0 ? 'danger' : 'warning'}>{a}</Alert>
+        <Alert key={i} type={i === 0 ? 'danger' : 'warning'}>
+          {a}
+        </Alert>
       ))}
 
       <SectionDivider label={data.troubleshooting.title} />

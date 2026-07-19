@@ -4,7 +4,13 @@ import { PageHeader, Card, CardTitle, Alert, Badge, SectionDivider, StatGrid } f
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import ServiceEntryCard from '../components/ServiceEntryCard'
-import { cityCostStatItems, preferCommunity, useCityCostStats, useCommunityContent, verifiedFirst } from '../lib/communityData'
+import {
+  cityCostStatItems,
+  preferCommunity,
+  useCityCostStats,
+  useCommunityContent,
+  verifiedFirst,
+} from '../lib/communityData'
 import styles from './Pages.module.css'
 import type { CostsData, Model, StatItem, TripLog } from '../types'
 
@@ -31,7 +37,9 @@ export function estimateConsumption(trips: TripLog[], model: Model, batteryKwh: 
 
   const perTrip = qualifying.map(
     (t) =>
-      (((t.starting_charge_percentage! - t.ending_charge_percentage!) / 100) * batteryKwh / t.distance_km!) * 100
+      ((((t.starting_charge_percentage! - t.ending_charge_percentage!) / 100) * batteryKwh) /
+        t.distance_km!) *
+      100
   )
   // Median, not mean: a single absurd trip shouldn't drag the estimate.
   const sorted = [...perTrip].sort((a, b) => a - b)
@@ -71,10 +79,7 @@ export default function CostsPage() {
 
   return (
     <div>
-      <PageHeader
-        title="💰 Costos"
-        subtitle="Comparativa de costos de carga y ahorro real vs combustible."
-      />
+      <PageHeader title="💰 Costos" subtitle="Comparativa de costos de carga y ahorro real vs combustible." />
 
       <Card>
         <CardTitle icon="📏">Costo por kilómetro</CardTitle>
@@ -89,7 +94,10 @@ export default function CostsPage() {
                   </span>
                 )}
               </div>
-              <div className={styles.priceValue}>{row.value}<span className={styles.priceUnit}>/km</span></div>
+              <div className={styles.priceValue}>
+                {row.value}
+                <span className={styles.priceUnit}>/km</span>
+              </div>
             </div>
           ))}
         </div>
@@ -134,46 +142,53 @@ export default function CostsPage() {
         <p className={styles.realCaseConditions}>
           {communityFirst ? (
             <>
-              Estos datos vienen de la comunidad: services reales registrados por otros dueños.
-              Los marcados como oficiales fueron verificados por moderadores.{' '}
+              Estos datos vienen de la comunidad: services reales registrados por otros dueños. Los marcados
+              como oficiales fueron verificados por moderadores.{' '}
             </>
           ) : (
             <>
-              Los casos marcados como oficiales son verificados por el grupo; los de la comunidad
-              vienen directo de otros usuarios.{' '}
+              Los casos marcados como oficiales son verificados por el grupo; los de la comunidad vienen
+              directo de otros usuarios.{' '}
             </>
           )}
           <Link to="/comunidad">Mirá la comunidad</Link> para ver el listado completo.
           {supabase && communityEntries.length === 0 && (
-            <> Todavía no hay services compartidos — <Link to="/costos/nuevo">registrá el tuyo</Link>.</>
+            <>
+              {' '}
+              Todavía no hay services compartidos — <Link to="/costos/nuevo">registrá el tuyo</Link>.
+            </>
           )}
         </p>
       </Card>
 
-      {!communityFirst && realCases.map((c, i) => (
-        <Card key={i}>
-          <div className={styles.realCaseHeader}>
-            <span className={styles.realCaseTitle}>
-              {c.title} <Badge color="blue">Oficial</Badge>
-            </span>
-            <span className={styles.realCaseCost}>{c.cost}<span className={styles.realCasePeriod}>/{c.period}</span></span>
-          </div>
-          <div className={styles.realCaseStats}>
-            <div className={styles.realCaseStat}>
-              <div className={styles.realCaseStatVal}>{c.km.toLocaleString('es-UY')} km</div>
-              <div className={styles.realCaseStatLbl}>recorridos</div>
+      {!communityFirst &&
+        realCases.map((c, i) => (
+          <Card key={i}>
+            <div className={styles.realCaseHeader}>
+              <span className={styles.realCaseTitle}>
+                {c.title} <Badge color="blue">Oficial</Badge>
+              </span>
+              <span className={styles.realCaseCost}>
+                {c.cost}
+                <span className={styles.realCasePeriod}>/{c.period}</span>
+              </span>
             </div>
-            <div className={styles.realCaseStat}>
-              <div className={styles.realCaseStatVal}>{c.costPerKm}</div>
-              <div className={styles.realCaseStatLbl}>por km</div>
+            <div className={styles.realCaseStats}>
+              <div className={styles.realCaseStat}>
+                <div className={styles.realCaseStatVal}>{c.km.toLocaleString('es-UY')} km</div>
+                <div className={styles.realCaseStatLbl}>recorridos</div>
+              </div>
+              <div className={styles.realCaseStat}>
+                <div className={styles.realCaseStatVal}>{c.costPerKm}</div>
+                <div className={styles.realCaseStatLbl}>por km</div>
+              </div>
             </div>
-          </div>
-          <p className={styles.realCaseConditions}>⚙️ {c.conditions}</p>
-          <div className={styles.realCaseComparison}>
-            <span>🔥</span> {c.comparison}
-          </div>
-        </Card>
-      ))}
+            <p className={styles.realCaseConditions}>⚙️ {c.conditions}</p>
+            <div className={styles.realCaseComparison}>
+              <span>🔥</span> {c.comparison}
+            </div>
+          </Card>
+        ))}
 
       {communityEntries.map((entry) => (
         <ServiceEntryCard key={entry.id} entry={entry} authorName={names[entry.user_id]} />
@@ -201,7 +216,9 @@ export default function CostsPage() {
         </div>
         <Alert type="info">{patent.note}</Alert>
         {patent.policyNotes.map((note, i) => (
-          <Alert key={i} type="warning">{note}</Alert>
+          <Alert key={i} type="warning">
+            {note}
+          </Alert>
         ))}
       </Card>
 

@@ -21,18 +21,11 @@ const MODERATION_LINK: GuideLinkItem = {
 export default function GuidePage() {
   const { profile } = useAuth()
 
-  const links = [
-    ...GUIDE_LINKS,
-    MI_VIGO_LINK,
-    ...(profile?.is_moderator ? [MODERATION_LINK] : []),
-  ]
+  const links = [...GUIDE_LINKS, MI_VIGO_LINK, ...(profile?.is_moderator ? [MODERATION_LINK] : [])]
 
   return (
     <div>
-      <PageHeader
-        title="📖 Guía"
-        subtitle="Toda la información de referencia sobre el Vigo E2 y E2+."
-      />
+      <PageHeader title="📖 Guía" subtitle="Toda la información de referencia sobre el Vigo E2 y E2+." />
       <GuideLinks links={links} />
     </div>
   )

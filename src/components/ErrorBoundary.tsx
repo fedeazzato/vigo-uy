@@ -32,9 +32,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
           <div className={styles.content}>
             <div className={styles.icon}>😵</div>
             <h2 className={styles.title}>Algo salió mal.</h2>
-            <p className={styles.text}>
-              Ocurrió un error inesperado al mostrar esta página.
-            </p>
+            <p className={styles.text}>Ocurrió un error inesperado al mostrar esta página.</p>
             <button className={styles.reloadBtn} onClick={() => location.reload()}>
               Recargar la página
             </button>

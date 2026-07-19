@@ -20,11 +20,7 @@
     }
   ],
   "autonomy": {
-    "standards": [
-      "CLTC",
-      "NEDC",
-      "WLTP"
-    ],
+    "standards": ["CLTC", "NEDC", "WLTP"],
     "models": {
       "E2": {
         "CLTC": {

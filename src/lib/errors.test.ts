@@ -13,9 +13,7 @@ describe('toFriendlyError', () => {
   })
 
   it('passes known Spanish trigger messages through even without a code', () => {
-    expect(toFriendlyError({ message: 'Tu cuenta está suspendida.' })).toBe(
-      'Tu cuenta está suspendida.'
-    )
+    expect(toFriendlyError({ message: 'Tu cuenta está suspendida.' })).toBe('Tu cuenta está suspendida.')
     expect(toFriendlyError({ message: 'Código no válido.' })).toBe('Código no válido.')
   })
 
@@ -76,8 +74,6 @@ describe('toFriendlyError', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(toFriendlyError(null)).toBe('Ocurrió un error inesperado. Intentá de nuevo.')
     expect(toFriendlyError(undefined)).toBe('Ocurrió un error inesperado. Intentá de nuevo.')
-    expect(toFriendlyError('Failed to fetch')).toBe(
-      'Sin conexión. Revisá tu internet e intentá de nuevo.'
-    )
+    expect(toFriendlyError('Failed to fetch')).toBe('Sin conexión. Revisá tu internet e intentá de nuevo.')
   })
 })

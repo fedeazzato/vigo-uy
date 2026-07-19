@@ -110,10 +110,7 @@ export default function LoginPage() {
 
   return (
     <div>
-      <PageHeader
-        title="🔑 Iniciar sesión"
-        subtitle="Sin contraseña: te enviamos un código por email."
-      />
+      <PageHeader title="🔑 Iniciar sesión" subtitle="Sin contraseña: te enviamos un código por email." />
 
       <Card>
         {from && status !== 'signedIn' && (
@@ -137,7 +134,9 @@ export default function LoginPage() {
 
         {step === 'email' ? (
           <form className={styles.loginForm} onSubmit={handleSendOtp}>
-            <label className={formStyles.label} htmlFor="login-email">Email</label>
+            <label className={formStyles.label} htmlFor="login-email">
+              Email
+            </label>
             <input
               id="login-email"
               type="email"
@@ -151,17 +150,23 @@ export default function LoginPage() {
               disabled={submitting}
             />
             {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
-            <button type="submit" className={`${formStyles.submitBtnCompact} ${styles.submitSpacing}`} disabled={submitting}>
+            <button
+              type="submit"
+              className={`${formStyles.submitBtnCompact} ${styles.submitSpacing}`}
+              disabled={submitting}
+            >
               {submitting ? 'Enviando…' : 'Enviar código'}
             </button>
           </form>
         ) : (
           <form className={styles.loginForm} onSubmit={handleVerifyOtp}>
             <p className={styles.loginHint}>
-              Enviamos un código de 8 dígitos a <strong>{email}</strong>. Si no llega en un
-              minuto, revisá la carpeta de spam.
+              Enviamos un código de 8 dígitos a <strong>{email}</strong>. Si no llega en un minuto, revisá la
+              carpeta de spam.
             </p>
-            <label className={formStyles.label} htmlFor="login-code">Código de verificación</label>
+            <label className={formStyles.label} htmlFor="login-code">
+              Código de verificación
+            </label>
             <input
               id="login-code"
               type="text"
@@ -176,7 +181,11 @@ export default function LoginPage() {
               autoFocus
               disabled={submitting}
             />
-            <button type="submit" className={`${formStyles.submitBtnCompact} ${styles.submitSpacing}`} disabled={submitting}>
+            <button
+              type="submit"
+              className={`${formStyles.submitBtnCompact} ${styles.submitSpacing}`}
+              disabled={submitting}
+            >
               {submitting ? 'Verificando…' : 'Verificar'}
             </button>
             {TURNSTILE_ENABLED && <TurnstileWidget key={turnstileKey} onToken={setCaptchaToken} />}
@@ -198,7 +207,10 @@ export default function LoginPage() {
               <button
                 type="button"
                 className={styles.linkBtn}
-                onClick={() => { setStep('email'); setError(null) }}
+                onClick={() => {
+                  setStep('email')
+                  setError(null)
+                }}
                 disabled={submitting}
               >
                 Cambiar email

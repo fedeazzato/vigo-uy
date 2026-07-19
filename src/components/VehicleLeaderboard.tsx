@@ -32,7 +32,9 @@ export default function VehicleLeaderboard({ rows, compact = false }: VehicleLea
       {shown.map((row, i) => (
         <li key={row.vehicle_id} className={styles.row}>
           {/* The <ol> already conveys the position; medals are decoration. */}
-          <span className={styles.rank} aria-hidden="true">{i < MEDALS.length ? MEDALS[i] : i + 1}</span>
+          <span className={styles.rank} aria-hidden="true">
+            {i < MEDALS.length ? MEDALS[i] : i + 1}
+          </span>
           <div className={styles.info}>
             <div className={styles.nameRow}>
               <span className={styles.name}>{memberLabel(row.member_names)}</span>

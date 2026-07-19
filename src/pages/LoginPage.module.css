@@ -40,8 +40,14 @@
   text-decoration: underline;
   cursor: pointer;
 }
-.linkBtn:hover:not(:disabled) { color: var(--green-600); }
-.linkBtn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+.linkBtn:hover:not(:disabled) {
+  color: var(--green-600);
+}
+.linkBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
 
 /* Widened digits make the 8-digit code easier to read back. */
 .codeInput {

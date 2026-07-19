@@ -115,125 +115,144 @@ export default function NewPartPurchasePage() {
       submitting={submitting}
       onCancel={handleCancel}
     >
-        {error && <FormError>{error}</FormError>}
+      {error && <FormError>{error}</FormError>}
 
-        <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
-          <CityDatalist />
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-date">📅 Fecha</label>
-              <input
-                id="purchase-date"
-                required
-                type="date"
-                className={formStyles.input}
-                value={purchaseDate}
-                onChange={(e) => setPurchaseDate(e.target.value)}
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-category">🗂️ Categoría</label>
-              <select
-                id="purchase-category"
-                className={formStyles.input}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {partsCatalog.categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.icon} {c.title}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
+      <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <CityDatalist />
+        <div className={formStyles.row}>
           <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="purchase-item">🔩 ¿Qué compraste?</label>
+            <label className={formStyles.label} htmlFor="purchase-date">
+              📅 Fecha
+            </label>
             <input
-              id="purchase-item"
+              id="purchase-date"
+              required
+              type="date"
+              className={formStyles.input}
+              value={purchaseDate}
+              onChange={(e) => setPurchaseDate(e.target.value)}
+            />
+          </div>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-category">
+              🗂️ Categoría
+            </label>
+            <select
+              id="purchase-category"
+              className={formStyles.input}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {partsCatalog.categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon} {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="purchase-item">
+            🔩 ¿Qué compraste?
+          </label>
+          <input
+            id="purchase-item"
+            required
+            type="text"
+            className={formStyles.input}
+            value={item}
+            onChange={(e) => setItem(e.target.value)}
+            placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
+          />
+          <span className={formStyles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
+        </div>
+
+        <div className={formStyles.row}>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-store">
+              🏪 ¿Dónde?
+            </label>
+            <input
+              id="purchase-store"
               required
               type="text"
               className={formStyles.input}
-              value={item}
-              onChange={(e) => setItem(e.target.value)}
-              placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
+              value={store}
+              onChange={(e) => setStore(e.target.value)}
+              placeholder="Comercio o importador"
             />
-            <span className={formStyles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
           </div>
-
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-store">🏪 ¿Dónde?</label>
-              <input
-                id="purchase-store"
-                required
-                type="text"
-                className={formStyles.input}
-                value={store}
-                onChange={(e) => setStore(e.target.value)}
-                placeholder="Comercio o importador"
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-price">💰 Precio (UYU)</label>
-              <input
-                id="purchase-price"
-                required
-                type="text"
-                inputMode="decimal"
-                className={formStyles.input}
-                value={priceUyu}
-                onChange={(e) => setPriceUyu(e.target.value)}
-                placeholder="12000"
-              />
-            </div>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-price">
+              💰 Precio (UYU)
+            </label>
+            <input
+              id="purchase-price"
+              required
+              type="text"
+              inputMode="decimal"
+              className={formStyles.input}
+              value={priceUyu}
+              onChange={(e) => setPriceUyu(e.target.value)}
+              placeholder="12000"
+            />
           </div>
+        </div>
 
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-km">📏 Kilometraje</label>
-              <input
-                id="purchase-km"
-                type="text"
-                inputMode="numeric"
-                className={formStyles.input}
-                value={odometerKm}
-                onChange={(e) => setOdometerKm(e.target.value)}
-                placeholder="45000"
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="purchase-city">📍 Ciudad</label>
-              <input
-                id="purchase-city"
-                type="text"
-                list={UY_CITIES_LIST_ID}
-                className={formStyles.input}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Montevideo"
-              />
-            </div>
+        <div className={formStyles.row}>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-km">
+              📏 Kilometraje
+            </label>
+            <input
+              id="purchase-km"
+              type="text"
+              inputMode="numeric"
+              className={formStyles.input}
+              value={odometerKm}
+              onChange={(e) => setOdometerKm(e.target.value)}
+              placeholder="45000"
+            />
           </div>
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="purchase-city">
+              📍 Ciudad
+            </label>
+            <input
+              id="purchase-city"
+              type="text"
+              list={UY_CITIES_LIST_ID}
+              className={formStyles.input}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Montevideo"
+            />
+          </div>
+        </div>
 
-          <RatingField
-            label="¿Recomendás la compra?"
-            value={rating}
-            onChange={(v) => { setRating(v); setDirty(true) }}
-          />
+        <RatingField
+          label="¿Recomendás la compra?"
+          value={rating}
+          onChange={(v) => {
+            setRating(v)
+            setDirty(true)
+          }}
+        />
 
-          <NotesField
-            id="purchase-notes"
-            value={notes}
-            onChange={setNotes}
-            placeholder="Plazo de entrega, atención, si volverías a comprar ahí..."
-          />
+        <NotesField
+          id="purchase-notes"
+          value={notes}
+          onChange={setNotes}
+          placeholder="Plazo de entrega, atención, si volverías a comprar ahí..."
+        />
 
-          <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
+        <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
 
-          <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
-            {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
-          </button>
-        </form>
+        <button type="submit" className={formStyles.submitBtn} disabled={submitting}>
+          {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar'}
+        </button>
+      </form>
     </EntryFormShell>
   )
 }

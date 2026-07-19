@@ -1,6 +1,15 @@
 import { Link } from 'react-router-dom'
 import rawData from '../data/mantenimiento.json'
-import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
+import {
+  PageHeader,
+  Card,
+  CardTitle,
+  TipList,
+  Badge,
+  Alert,
+  StatGrid,
+  SectionDivider,
+} from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import ServiceEntryCard from '../components/ServiceEntryCard'
@@ -32,7 +41,9 @@ export default function MantenimientoPage() {
           <CardTitle icon="🗓️">{item.interval}</CardTitle>
           <ul className={styles.scheduleTasks}>
             {item.tasks.map((task, j) => (
-              <li key={j} className={styles.scheduleTask}>{task}</li>
+              <li key={j} className={styles.scheduleTask}>
+                {task}
+              </li>
             ))}
           </ul>
         </Card>
@@ -55,7 +66,10 @@ export default function MantenimientoPage() {
           {data.dealerPrices.map((row, i) => (
             <div key={i} className={styles.patentRow}>
               <span className={styles.patentModel}>{row.dealer}</span>
-              <span className={styles.patentVal}>{row.service}{row.note ? ` — ${row.note}` : ''}</span>
+              <span className={styles.patentVal}>
+                {row.service}
+                {row.note ? ` — ${row.note}` : ''}
+              </span>
               <span className={styles.patentCost}>{row.price}</span>
             </div>
           ))}
@@ -85,8 +99,8 @@ export default function MantenimientoPage() {
                   </>
                 ) : (
                   <>
-                    <Link to="/login">Iniciá sesión</Link> y registrá el tuyo para que otros sepan
-                    cuánto cuesta.
+                    <Link to="/login">Iniciá sesión</Link> y registrá el tuyo para que otros sepan cuánto
+                    cuesta.
                   </>
                 )}
               </p>

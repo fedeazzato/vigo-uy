@@ -58,7 +58,9 @@ export default function ProfileCard() {
       <form className={formStyles.form} onSubmit={saveProfile}>
         <CityDatalist />
         <div className={formStyles.field}>
-          <label className={formStyles.label} htmlFor="profile-name">✏️ Nombre visible</label>
+          <label className={formStyles.label} htmlFor="profile-name">
+            ✏️ Nombre visible
+          </label>
           <input
             id="profile-name"
             required
@@ -72,7 +74,9 @@ export default function ProfileCard() {
         </div>
 
         <div className={formStyles.field}>
-          <label className={formStyles.label} htmlFor="profile-city">📍 Ciudad</label>
+          <label className={formStyles.label} htmlFor="profile-city">
+            📍 Ciudad
+          </label>
           <input
             id="profile-city"
             type="text"

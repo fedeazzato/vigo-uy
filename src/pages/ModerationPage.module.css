@@ -13,7 +13,10 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 .tabBtn:hover {
   border-color: var(--text-tertiary);
@@ -28,7 +31,9 @@
    moderation-specific pieces live here. */
 
 /* Hidden/banned rows are dimmed but stay listed for the moderator. */
-.hidden { opacity: 0.55; }
+.hidden {
+  opacity: 0.55;
+}
 
 /* Titles hold inline status badges (Verificado/Oculto/Baneado). */
 .itemTitleBadges {

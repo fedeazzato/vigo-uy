@@ -5,14 +5,38 @@
       "title": "Pantalla y sistema",
       "icon": "🖥️",
       "items": [
-        { "bold": "Sistema operativo:", "text": "Tablet Android con sistema propietario. Android Auto no está habilitado de fábrica." },
-        { "bold": "Idioma:", "text": "Comandos de voz disponibles solo en inglés (\"Open windows\", \"Close windows\", etc.) — no hay opción en español. El menú en pantalla se puede poner en español, pero algunos botones quedan en inglés." },
-        { "bold": "Wallpaper:", "text": "Solo 5 imágenes preinstaladas — deslizar con touch para cambiar. No se puede poner foto personalizada." },
-        { "bold": "Pantalla dividida:", "text": "El ícono de 4 cuadrados en la esquina inferior izquierda alterna entre una app, todos los íconos, o dos apps en paralelo (ej. Waze + Spotify)." },
-        { "bold": "Cámara 360 en rotondas:", "text": "Se activa sola a baja velocidad e interrumpe la navegación — se puede desactivar en Configuración → Cámaras → activación automática." },
-        { "bold": "Radio FM:", "text": "Funciona en modo automático. Algunas frecuencias uruguayas no aparecen en modo manual." },
-        { "bold": "Reset de pantalla:", "text": "Mantener presionado el botón MODE unos segundos resetea el sistema." },
-        { "bold": "Música por USB:", "text": "Conectar pendrive USB-C con archivos mp3 sueltos en la raíz (no en carpetas). Ir a Multimedia en el menú." }
+        {
+          "bold": "Sistema operativo:",
+          "text": "Tablet Android con sistema propietario. Android Auto no está habilitado de fábrica."
+        },
+        {
+          "bold": "Idioma:",
+          "text": "Comandos de voz disponibles solo en inglés (\"Open windows\", \"Close windows\", etc.) — no hay opción en español. El menú en pantalla se puede poner en español, pero algunos botones quedan en inglés."
+        },
+        {
+          "bold": "Wallpaper:",
+          "text": "Solo 5 imágenes preinstaladas — deslizar con touch para cambiar. No se puede poner foto personalizada."
+        },
+        {
+          "bold": "Pantalla dividida:",
+          "text": "El ícono de 4 cuadrados en la esquina inferior izquierda alterna entre una app, todos los íconos, o dos apps en paralelo (ej. Waze + Spotify)."
+        },
+        {
+          "bold": "Cámara 360 en rotondas:",
+          "text": "Se activa sola a baja velocidad e interrumpe la navegación — se puede desactivar en Configuración → Cámaras → activación automática."
+        },
+        {
+          "bold": "Radio FM:",
+          "text": "Funciona en modo automático. Algunas frecuencias uruguayas no aparecen en modo manual."
+        },
+        {
+          "bold": "Reset de pantalla:",
+          "text": "Mantener presionado el botón MODE unos segundos resetea el sistema."
+        },
+        {
+          "bold": "Música por USB:",
+          "text": "Conectar pendrive USB-C con archivos mp3 sueltos en la raíz (no en carpetas). Ir a Multimedia en el menú."
+        }
       ]
     },
     {
@@ -20,16 +44,46 @@
       "title": "Conducción y controles",
       "icon": "🚗",
       "items": [
-        { "bold": "Modo siesta:", "text": "Permite dejar el auto ventilado o climatizado sin motor en movimiento. Muy usado en verano." },
-        { "bold": "Regeneración de freno:", "text": "Configurable. En ciudad: nivel máximo para recuperar energía. En ruta: nivel bajo o cero para aprovechar la inercia." },
-        { "bold": "Control de crucero:", "text": "Se activa empujando la palanca derecha hacia abajo a la velocidad deseada; los botones +/- del volante ajustan el objetivo (máximo 130 km/h). Desactiva la regeneración mientras está encendido." },
-        { "bold": "AUTO HOLD (freno de mano electrónico):", "text": "Se activa solo al detenerse del todo, para evitar que el auto se mueva. Se libera al acelerar." },
-        { "bold": "Plegado de espejos:", "text": "Girar la rueda de control de espejos hasta el final en el sentido contrario pliega ambos espejos — funciona incluso en movimiento." },
-        { "bold": "Apertura del baúl:", "text": "Botón en el control remoto, abre solo el baúl sin destrabar las puertas. Presionar dos veces para volver a trabarlo." },
-        { "bold": "Altura de las luces:", "text": "Rueda en el lado inferior izquierdo del volante ajusta la altura del haz de luz." },
-        { "bold": "Marchas:", "text": "La posición de las marchas está al revés respecto al estándar occidental — es una queja común al principio, pero se acostumbra." },
-        { "bold": "Sonido de aviso a peatones (AVAS):", "text": "Suena obligatoriamente por debajo de ~30 km/h, por regulación de seguridad para peatones y ciclistas con baja visión. No se puede desactivar desde el menú." },
-        { "bold": "Límites de carga AC/DC:", "text": "El auto acepta hasta 60 kW en DC (dato reportado por la comunidad, no figura en el manual). En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)." }
+        {
+          "bold": "Modo siesta:",
+          "text": "Permite dejar el auto ventilado o climatizado sin motor en movimiento. Muy usado en verano."
+        },
+        {
+          "bold": "Regeneración de freno:",
+          "text": "Configurable. En ciudad: nivel máximo para recuperar energía. En ruta: nivel bajo o cero para aprovechar la inercia."
+        },
+        {
+          "bold": "Control de crucero:",
+          "text": "Se activa empujando la palanca derecha hacia abajo a la velocidad deseada; los botones +/- del volante ajustan el objetivo (máximo 130 km/h). Desactiva la regeneración mientras está encendido."
+        },
+        {
+          "bold": "AUTO HOLD (freno de mano electrónico):",
+          "text": "Se activa solo al detenerse del todo, para evitar que el auto se mueva. Se libera al acelerar."
+        },
+        {
+          "bold": "Plegado de espejos:",
+          "text": "Girar la rueda de control de espejos hasta el final en el sentido contrario pliega ambos espejos — funciona incluso en movimiento."
+        },
+        {
+          "bold": "Apertura del baúl:",
+          "text": "Botón en el control remoto, abre solo el baúl sin destrabar las puertas. Presionar dos veces para volver a trabarlo."
+        },
+        {
+          "bold": "Altura de las luces:",
+          "text": "Rueda en el lado inferior izquierdo del volante ajusta la altura del haz de luz."
+        },
+        {
+          "bold": "Marchas:",
+          "text": "La posición de las marchas está al revés respecto al estándar occidental — es una queja común al principio, pero se acostumbra."
+        },
+        {
+          "bold": "Sonido de aviso a peatones (AVAS):",
+          "text": "Suena obligatoriamente por debajo de ~30 km/h, por regulación de seguridad para peatones y ciclistas con baja visión. No se puede desactivar desde el menú."
+        },
+        {
+          "bold": "Límites de carga AC/DC:",
+          "text": "El auto acepta hasta 60 kW en DC (dato reportado por la comunidad, no figura en el manual). En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)."
+        }
       ]
     },
     {
@@ -37,14 +91,38 @@
       "title": "Soporte y contactos",
       "icon": "🛠️",
       "items": [
-        { "bold": "Fidocar (importador, locales oficiales):", "text": "Ruta Interbalnearia km 22.500 (tel. 2683 6251) · Punta del Este, Av. Roosevelt esq. Martiniano Chiossi (tel. 4226 8434) · Cuareim 2012 (tel. 095 030 437) · Av. Italia 5046 esq. A. Gallinal (tel. 094 370 985) · Luis Alberto de Herrera 1145 (tel. 2623 54 93). Service de 5.000 km gratuito y demora 3-4 horas." },
-        { "bold": "Dongfeng Las Torres:", "text": "Concesionario oficial alternativo a Fidocar para conocer y comprar los modelos Dongfeng, confirmado en el sitio oficial del importador." },
-        { "bold": "Otros lugares de service reportados:", "text": "Sole y Lorenzo también hace el service oficial según el grupo — ver precios y plazos comparados en la página de Mantenimiento." },
-        { "bold": "Dongfeng China:", "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino." },
-        { "bold": "Telegram:", "text": "t.me/ElectricosUruguay — grupo con subgrupos de viajes, modelos, instalaciones, servicios y QR de cargadores." },
-        { "bold": "PlugShare:", "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad." },
-        { "bold": "EONE App:", "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'." },
-        { "bold": "Apps para viajar al exterior:", "text": "Tupi para cargadores en Brasil (cargar reales antes de cruzar). Shell Recharge para Argentina (requiere DNI argentino y cuenta local — la app de YPF está bloqueada para extranjeros)." }
+        {
+          "bold": "Fidocar (importador, locales oficiales):",
+          "text": "Ruta Interbalnearia km 22.500 (tel. 2683 6251) · Punta del Este, Av. Roosevelt esq. Martiniano Chiossi (tel. 4226 8434) · Cuareim 2012 (tel. 095 030 437) · Av. Italia 5046 esq. A. Gallinal (tel. 094 370 985) · Luis Alberto de Herrera 1145 (tel. 2623 54 93). Service de 5.000 km gratuito y demora 3-4 horas."
+        },
+        {
+          "bold": "Dongfeng Las Torres:",
+          "text": "Concesionario oficial alternativo a Fidocar para conocer y comprar los modelos Dongfeng, confirmado en el sitio oficial del importador."
+        },
+        {
+          "bold": "Otros lugares de service reportados:",
+          "text": "Sole y Lorenzo también hace el service oficial según el grupo — ver precios y plazos comparados en la página de Mantenimiento."
+        },
+        {
+          "bold": "Dongfeng China:",
+          "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino."
+        },
+        {
+          "bold": "Telegram:",
+          "text": "t.me/ElectricosUruguay — grupo con subgrupos de viajes, modelos, instalaciones, servicios y QR de cargadores."
+        },
+        {
+          "bold": "PlugShare:",
+          "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad."
+        },
+        {
+          "bold": "EONE App:",
+          "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'."
+        },
+        {
+          "bold": "Apps para viajar al exterior:",
+          "text": "Tupi para cargadores en Brasil (cargar reales antes de cruzar). Shell Recharge para Argentina (requiere DNI argentino y cuenta local — la app de YPF está bloqueada para extranjeros)."
+        }
       ]
     }
   ],

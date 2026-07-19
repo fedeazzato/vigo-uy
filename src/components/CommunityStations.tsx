@@ -162,8 +162,8 @@ export default function CommunityStations() {
       <Card>
         <CardTitle icon="📍">Estaciones aportadas por la comunidad</CardTitle>
         <p className={styles.intro}>
-          Los precios por kWh se calculan con lo que realmente pagaron otros miembros durante el
-          último año — no son tarifas oficiales. La confiabilidad sale de los reportes de uso.
+          Los precios por kWh se calculan con lo que realmente pagaron otros miembros durante el último año —
+          no son tarifas oficiales. La confiabilidad sale de los reportes de uso.
         </p>
 
         {status === 'signedIn' ? (
@@ -181,7 +181,9 @@ export default function CommunityStations() {
             <CityDatalist />
             <div className={styles.formRow}>
               <div className={styles.stationField}>
-                <label className={styles.stationLabel} htmlFor="station-network">🌐 Red</label>
+                <label className={styles.stationLabel} htmlFor="station-network">
+                  🌐 Red
+                </label>
                 <select
                   id="station-network"
                   className={formStyles.input}
@@ -194,7 +196,9 @@ export default function CommunityStations() {
                     return (
                       <optgroup key={country} label={COUNTRY_LABELS[country]}>
                         {options.map((n) => (
-                          <option key={n.slug} value={n.slug}>{n.name}</option>
+                          <option key={n.slug} value={n.slug}>
+                            {n.name}
+                          </option>
                         ))}
                       </optgroup>
                     )
@@ -202,7 +206,9 @@ export default function CommunityStations() {
                 </select>
               </div>
               <div className={styles.stationField}>
-                <label className={styles.stationLabel} htmlFor="station-city">📍 Ciudad</label>
+                <label className={styles.stationLabel} htmlFor="station-city">
+                  📍 Ciudad
+                </label>
                 <input
                   id="station-city"
                   type="text"
@@ -216,7 +222,9 @@ export default function CommunityStations() {
             </div>
 
             <div className={styles.stationField}>
-              <label className={styles.stationLabel} htmlFor="station-name">📝 Nombre / ubicación</label>
+              <label className={styles.stationLabel} htmlFor="station-name">
+                📝 Nombre / ubicación
+              </label>
               <input
                 id="station-name"
                 required
@@ -230,7 +238,9 @@ export default function CommunityStations() {
 
             <div className={styles.formRow}>
               <div className={styles.stationField}>
-                <label className={styles.stationLabel} htmlFor="station-current">⚡ Corriente</label>
+                <label className={styles.stationLabel} htmlFor="station-current">
+                  ⚡ Corriente
+                </label>
                 <select
                   id="station-current"
                   className={formStyles.input}
@@ -238,12 +248,16 @@ export default function CommunityStations() {
                   onChange={(e) => changeCurrentType(e.target.value as StationCurrentType)}
                 >
                   {CURRENT_TYPES.map((c) => (
-                    <option key={c} value={c}>{c === 'AC' ? 'AC (lenta)' : 'DC (rápida)'}</option>
+                    <option key={c} value={c}>
+                      {c === 'AC' ? 'AC (lenta)' : 'DC (rápida)'}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className={styles.stationField}>
-                <label className={styles.stationLabel} htmlFor="station-connector">🔌 Conector</label>
+                <label className={styles.stationLabel} htmlFor="station-connector">
+                  🔌 Conector
+                </label>
                 <select
                   id="station-connector"
                   className={formStyles.input}
@@ -251,7 +265,9 @@ export default function CommunityStations() {
                   onChange={(e) => setConnector(e.target.value as StationConnector)}
                 >
                   {CONNECTORS_BY_CURRENT[currentType].map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -259,7 +275,9 @@ export default function CommunityStations() {
 
             <div className={styles.formRow}>
               <div className={styles.stationField}>
-                <label className={styles.stationLabel} htmlFor="station-power">Potencia máx. (kW)</label>
+                <label className={styles.stationLabel} htmlFor="station-power">
+                  Potencia máx. (kW)
+                </label>
                 <input
                   id="station-power"
                   type="text"
@@ -273,7 +291,9 @@ export default function CommunityStations() {
             </div>
 
             <div className={styles.stationField}>
-              <label className={styles.stationLabel} htmlFor="station-notes">💬 Notas del lugar</label>
+              <label className={styles.stationLabel} htmlFor="station-notes">
+                💬 Notas del lugar
+              </label>
               <textarea
                 id="station-notes"
                 rows={2}
@@ -298,7 +318,10 @@ export default function CommunityStations() {
           <CardTitle icon="🔌">
             {net.name}
             {net.country !== 'UY' && net.country !== 'otro' && (
-              <> <Badge color="gray">{COUNTRY_LABELS[net.country]}</Badge></>
+              <>
+                {' '}
+                <Badge color="gray">{COUNTRY_LABELS[net.country]}</Badge>
+              </>
             )}
           </CardTitle>
           {/* Usage instructions are per-provider (charging_networks), not
@@ -346,13 +369,25 @@ export default function CommunityStations() {
                   {status === 'signedIn' && (
                     <div className={styles.reportRow}>
                       <span className={styles.reportLabel}>¿Pasaste por acá?</span>
-                      <button type="button" className={styles.reportBtn} onClick={() => report(station.id, 'funciono')}>
+                      <button
+                        type="button"
+                        className={styles.reportBtn}
+                        onClick={() => report(station.id, 'funciono')}
+                      >
                         ✅ Funcionó
                       </button>
-                      <button type="button" className={styles.reportBtn} onClick={() => report(station.id, 'fallo')}>
+                      <button
+                        type="button"
+                        className={styles.reportBtn}
+                        onClick={() => report(station.id, 'fallo')}
+                      >
                         ❌ Falló
                       </button>
-                      <button type="button" className={styles.reportBtn} onClick={() => report(station.id, 'ocupado')}>
+                      <button
+                        type="button"
+                        className={styles.reportBtn}
+                        onClick={() => report(station.id, 'ocupado')}
+                      >
                         ⏳ Ocupado
                       </button>
                     </div>

@@ -24,8 +24,7 @@ export function toFriendlyError(error: unknown): string {
     code?: unknown
     status?: unknown
   }
-  const message =
-    typeof err.message === 'string' ? err.message : typeof error === 'string' ? error : ''
+  const message = typeof err.message === 'string' ? err.message : typeof error === 'string' ? error : ''
   const code = typeof err.code === 'string' ? err.code : ''
   const status = typeof err.status === 'number' ? err.status : null
 

@@ -31,7 +31,9 @@
   padding: 12px 0;
   border-bottom: 1px solid var(--border);
 }
-.item:last-child { border-bottom: none; }
+.item:last-child {
+  border-bottom: none;
+}
 
 .itemTitle {
   font-size: 14px;
@@ -73,7 +75,9 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.actionLink:hover { color: var(--green-600); }
+.actionLink:hover {
+  color: var(--green-600);
+}
 
 /* "Register yours too" call-to-action card. */
 .ctaCard {

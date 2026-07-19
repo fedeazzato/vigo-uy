@@ -32,8 +32,16 @@
         { "label": "Par máximo", "value": "230 N·m" },
         { "label": "Velocidad máxima", "value": "150 km/h" },
         { "label": "Refrigeración del motor", "value": "Líquida" },
-        { "label": "Batería E2", "value": "44,94 kWh — LFP, litio-hierro-fosfato (0QD-S32-44.94-400-139BF)", "model": "E2" },
-        { "label": "Batería E2+", "value": "51,87 kWh — LFP, litio-hierro-fosfato (0QD-S32-51.87-480-171BF)", "model": "E2+" },
+        {
+          "label": "Batería E2",
+          "value": "44,94 kWh — LFP, litio-hierro-fosfato (0QD-S32-44.94-400-139BF)",
+          "model": "E2"
+        },
+        {
+          "label": "Batería E2+",
+          "value": "51,87 kWh — LFP, litio-hierro-fosfato (0QD-S32-51.87-480-171BF)",
+          "model": "E2+"
+        },
         { "label": "Consumo homologado CLTC — E2", "value": "12,4 kWh/100 km", "model": "E2" },
         { "label": "Consumo homologado CLTC — E2+", "value": "12,6 kWh/100 km", "model": "E2+" },
         { "label": "Carga rápida DC (30%→80%) — E2", "value": "30 min", "model": "E2" },
@@ -60,52 +68,227 @@
     }
   ],
   "warningLights": [
-    { "icon": "🔴", "name": "ABS", "meaning": "Falla en el sistema de frenos antibloqueo. Requiere atención del service.", "severity": "danger" },
+    {
+      "icon": "🔴",
+      "name": "ABS",
+      "meaning": "Falla en el sistema de frenos antibloqueo. Requiere atención del service.",
+      "severity": "danger"
+    },
     { "icon": "🔴", "name": "Airbag", "meaning": "Falla en el sistema de airbags.", "severity": "danger" },
-    { "icon": "🔴", "name": "Freno / EPB", "meaning": "Falla en el sistema de frenos o el freno de mano electrónico.", "severity": "danger" },
-    { "icon": "🔴", "name": "Batería de alto voltaje", "meaning": "Falla en la batería de tracción. Detenerse de forma segura y contactar al service.", "severity": "danger" },
-    { "icon": "🔴", "name": "Motor eléctrico", "meaning": "Falla en el motor de tracción.", "severity": "danger" },
-    { "icon": "🔴", "name": "Sistema general", "meaning": "Falla general del sistema del vehículo.", "severity": "danger" },
-    { "icon": "🔴", "name": "EPS", "meaning": "Falla en la dirección asistida eléctrica.", "severity": "danger" },
-    { "icon": "🔴", "name": "ESC", "meaning": "Falla en el control electrónico de estabilidad.", "severity": "danger" },
-    { "icon": "🔴", "name": "AEB", "meaning": "Falla en el frenado de emergencia autónomo.", "severity": "danger" },
-    { "icon": "🔴", "name": "Puerta abierta", "meaning": "Una puerta no está correctamente cerrada.", "severity": "danger" },
-    { "icon": "🔴", "name": "LDW", "meaning": "Falla en el aviso de salida de carril.", "severity": "danger" },
-    { "icon": "🔴", "name": "LKA", "meaning": "Falla en el asistente de mantenimiento de carril.", "severity": "danger" },
-    { "icon": "🟡", "name": "Batería de 12V", "meaning": "Batería auxiliar baja o falla del conversor DC-DC.", "severity": "warning" },
-    { "icon": "🟡", "name": "TPMS", "meaning": "Presión de neumáticos anormal — revisar y ajustar.", "severity": "warning" },
-    { "icon": "🟡", "name": "Carga baja", "meaning": "Batería de tracción con poca carga.", "severity": "warning" },
-    { "icon": "🟡", "name": "Temperatura de batería", "meaning": "Temperatura de la batería de tracción fuera de rango — esperar a que se regule.", "severity": "warning" },
-    { "icon": "🟡", "name": "ESC desactivado", "meaning": "El control de estabilidad está apagado manualmente.", "severity": "warning" },
-    { "icon": "🟡", "name": "Modo de potencia limitada", "meaning": "El vehículo redujo la potencia disponible.", "severity": "warning" },
-    { "icon": "🟡", "name": "AEB desactivado", "meaning": "El frenado de emergencia autónomo está desactivado manualmente.", "severity": "warning" },
-    { "icon": "🟡", "name": "AVAS desactivado", "meaning": "El sonido de aviso a peatones a baja velocidad está desactivado.", "severity": "warning" },
-    { "icon": "🟢", "name": "Cable de carga conectado", "meaning": "Indica que el vehículo está cargando.", "severity": "info" },
-    { "icon": "🟢", "name": "Standby", "meaning": "El vehículo está en modo de espera (Ready).", "severity": "info" },
-    { "icon": "🟢", "name": "Luces de giro", "meaning": "Indicador de giro izquierdo o derecho activo.", "severity": "info" },
-    { "icon": "🟢", "name": "Luces de posición / cruce / altas", "meaning": "Indica qué luces están encendidas.", "severity": "info" },
-    { "icon": "🟢", "name": "AUTO HOLD", "meaning": "El freno de mano electrónico se activó automáticamente al detenerse.", "severity": "info" },
-    { "icon": "🟢", "name": "ACC", "meaning": "El control de crucero adaptativo está activo.", "severity": "info" },
-    { "icon": "🟡", "name": "ICA", "meaning": "El asistente de conducción integrado está activo.", "severity": "info" }
+    {
+      "icon": "🔴",
+      "name": "Freno / EPB",
+      "meaning": "Falla en el sistema de frenos o el freno de mano electrónico.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "Batería de alto voltaje",
+      "meaning": "Falla en la batería de tracción. Detenerse de forma segura y contactar al service.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "Motor eléctrico",
+      "meaning": "Falla en el motor de tracción.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "Sistema general",
+      "meaning": "Falla general del sistema del vehículo.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "EPS",
+      "meaning": "Falla en la dirección asistida eléctrica.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "ESC",
+      "meaning": "Falla en el control electrónico de estabilidad.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "AEB",
+      "meaning": "Falla en el frenado de emergencia autónomo.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "Puerta abierta",
+      "meaning": "Una puerta no está correctamente cerrada.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "LDW",
+      "meaning": "Falla en el aviso de salida de carril.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🔴",
+      "name": "LKA",
+      "meaning": "Falla en el asistente de mantenimiento de carril.",
+      "severity": "danger"
+    },
+    {
+      "icon": "🟡",
+      "name": "Batería de 12V",
+      "meaning": "Batería auxiliar baja o falla del conversor DC-DC.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "TPMS",
+      "meaning": "Presión de neumáticos anormal — revisar y ajustar.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "Carga baja",
+      "meaning": "Batería de tracción con poca carga.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "Temperatura de batería",
+      "meaning": "Temperatura de la batería de tracción fuera de rango — esperar a que se regule.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "ESC desactivado",
+      "meaning": "El control de estabilidad está apagado manualmente.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "Modo de potencia limitada",
+      "meaning": "El vehículo redujo la potencia disponible.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "AEB desactivado",
+      "meaning": "El frenado de emergencia autónomo está desactivado manualmente.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟡",
+      "name": "AVAS desactivado",
+      "meaning": "El sonido de aviso a peatones a baja velocidad está desactivado.",
+      "severity": "warning"
+    },
+    {
+      "icon": "🟢",
+      "name": "Cable de carga conectado",
+      "meaning": "Indica que el vehículo está cargando.",
+      "severity": "info"
+    },
+    {
+      "icon": "🟢",
+      "name": "Standby",
+      "meaning": "El vehículo está en modo de espera (Ready).",
+      "severity": "info"
+    },
+    {
+      "icon": "🟢",
+      "name": "Luces de giro",
+      "meaning": "Indicador de giro izquierdo o derecho activo.",
+      "severity": "info"
+    },
+    {
+      "icon": "🟢",
+      "name": "Luces de posición / cruce / altas",
+      "meaning": "Indica qué luces están encendidas.",
+      "severity": "info"
+    },
+    {
+      "icon": "🟢",
+      "name": "AUTO HOLD",
+      "meaning": "El freno de mano electrónico se activó automáticamente al detenerse.",
+      "severity": "info"
+    },
+    {
+      "icon": "🟢",
+      "name": "ACC",
+      "meaning": "El control de crucero adaptativo está activo.",
+      "severity": "info"
+    },
+    {
+      "icon": "🟡",
+      "name": "ICA",
+      "meaning": "El asistente de conducción integrado está activo.",
+      "severity": "info"
+    }
   ],
   "vinLocations": [
-    { "label": "VIN — parabrisas", "text": "Esquina inferior izquierda del parabrisas, visible desde afuera." },
-    { "label": "VIN — piso", "text": "Estampado en el piso bajo el asiento del acompañante (hay que retirar una tapa para verlo)." },
+    {
+      "label": "VIN — parabrisas",
+      "text": "Esquina inferior izquierda del parabrisas, visible desde afuera."
+    },
+    {
+      "label": "VIN — piso",
+      "text": "Estampado en el piso bajo el asiento del acompañante (hay que retirar una tapa para verlo)."
+    },
     { "label": "VIN — portón trasero", "text": "Centro superior del portón, visible al abrirlo." },
-    { "label": "Puerto OBD (diagnóstico)", "text": "Lado inferior izquierdo del tablero, debajo del volante." },
-    { "label": "Número de motor", "text": "Estampado en la carcasa inferior del motor de tracción, o en la etiqueta del lado derecho del compartimento delantero." }
+    {
+      "label": "Puerto OBD (diagnóstico)",
+      "text": "Lado inferior izquierdo del tablero, debajo del volante."
+    },
+    {
+      "label": "Número de motor",
+      "text": "Estampado en la carcasa inferior del motor de tracción, o en la etiqueta del lado derecho del compartimento delantero."
+    }
   ],
   "warranty": [
-    { "bold": "Vehículo (primer dueño):", "text": "7 años o 300.000 km, lo que ocurra primero — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador." },
-    { "bold": "Batería de alto voltaje (primer dueño):", "text": "10 años sin límite de kilometraje — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador." },
-    { "bold": "Vehículo (segundo dueño):", "text": "5 años o 150.000 km — según las FAQs del sitio oficial del importador." },
-    { "bold": "Batería de alto voltaje (segundo dueño):", "text": "8 años o 200.000 km — según las FAQs del sitio oficial del importador." },
-    { "bold": "Garantía anterior (manual de agosto 2025):", "text": "El manual del usuario original indicaba 8 años o 200.000 km para la batería y 8 años para el vehículo, sin distinguir primer o segundo dueño — términos más cortos que los vigentes desde mayo de 2026." },
-    { "bold": "Modificaciones:", "text": "Modificar, ajustar o desarmar el vehículo sin autorización anula la garantía de esa pieza o sistema." },
-    { "bold": "Mantenimiento programado:", "text": "No cumplir con los services en los intervalos indicados hace perder el derecho a garantía." },
-    { "bold": "Cargador:", "text": "El cargador entregado con el auto no está cubierto por la garantía del vehículo — es un accesorio aparte de Fidocar." },
-    { "bold": "Protección de parabrisas:", "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía — es un servicio del concesionario, no de fábrica." },
-    { "bold": "Transferencia:", "text": "El manual es parte integral del vehículo y debe transferirse junto con él si se vende." },
-    { "bold": "Importante:", "text": "El importador aclara que las especificaciones técnicas pueden cambiar sin previo aviso — confirmar siempre la garantía vigente al momento de la compra." }
+    {
+      "bold": "Vehículo (primer dueño):",
+      "text": "7 años o 300.000 km, lo que ocurra primero — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador."
+    },
+    {
+      "bold": "Batería de alto voltaje (primer dueño):",
+      "text": "10 años sin límite de kilometraje — vigente desde mayo de 2026, confirmado en la ficha técnica y en las FAQs del sitio oficial del importador."
+    },
+    {
+      "bold": "Vehículo (segundo dueño):",
+      "text": "5 años o 150.000 km — según las FAQs del sitio oficial del importador."
+    },
+    {
+      "bold": "Batería de alto voltaje (segundo dueño):",
+      "text": "8 años o 200.000 km — según las FAQs del sitio oficial del importador."
+    },
+    {
+      "bold": "Garantía anterior (manual de agosto 2025):",
+      "text": "El manual del usuario original indicaba 8 años o 200.000 km para la batería y 8 años para el vehículo, sin distinguir primer o segundo dueño — términos más cortos que los vigentes desde mayo de 2026."
+    },
+    {
+      "bold": "Modificaciones:",
+      "text": "Modificar, ajustar o desarmar el vehículo sin autorización anula la garantía de esa pieza o sistema."
+    },
+    {
+      "bold": "Mantenimiento programado:",
+      "text": "No cumplir con los services en los intervalos indicados hace perder el derecho a garantía."
+    },
+    {
+      "bold": "Cargador:",
+      "text": "El cargador entregado con el auto no está cubierto por la garantía del vehículo — es un accesorio aparte de Fidocar."
+    },
+    {
+      "bold": "Protección de parabrisas:",
+      "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía — es un servicio del concesionario, no de fábrica."
+    },
+    {
+      "bold": "Transferencia:",
+      "text": "El manual es parte integral del vehículo y debe transferirse junto con él si se vende."
+    },
+    {
+      "bold": "Importante:",
+      "text": "El importador aclara que las especificaciones técnicas pueden cambiar sin previo aviso — confirmar siempre la garantía vigente al momento de la compra."
+    }
   ]
 }

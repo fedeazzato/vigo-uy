@@ -57,7 +57,8 @@ function stopToDraft(stop: TripChargingStop): StopDraft {
   return {
     name: stop.name,
     note: stop.note ?? '',
-    distanceFromPrevious: stop.distance_from_previous_km != null ? String(stop.distance_from_previous_km) : '',
+    distanceFromPrevious:
+      stop.distance_from_previous_km != null ? String(stop.distance_from_previous_km) : '',
     arrivalPercentage: stop.arrival_percentage != null ? String(stop.arrival_percentage) : '',
     departurePercentage: stop.departure_percentage != null ? String(stop.departure_percentage) : '',
     durationMinutes: stop.duration_minutes != null ? String(stop.duration_minutes) : '',
@@ -79,9 +80,7 @@ function isValidPercentage(n: number | undefined): boolean {
 // Converts the string drafts into the charging_stops jsonb payload,
 // validating as it goes. Stops without a name are skipped. Exported for
 // tests: this is the exact shape sent to the database.
-export function parseStopDrafts(
-  stops: StopDraft[]
-): { stops: TripChargingStop[] } | { error: string } {
+export function parseStopDrafts(stops: StopDraft[]): { stops: TripChargingStop[] } | { error: string } {
   const cleanStops: TripChargingStop[] = []
   for (const s of stops) {
     if (!s.name.trim()) continue
@@ -127,7 +126,14 @@ export function parseStopDrafts(
 
 // One labelled text input inside a charging-stop card. The ids follow the
 // `stop-<index>-<field>` scheme the tests query by.
-function StopField({ id, label, value, onChange, placeholder, inputMode }: {
+function StopField({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  inputMode,
+}: {
   id: string
   label: string
   value: string
@@ -137,7 +143,9 @@ function StopField({ id, label, value, onChange, placeholder, inputMode }: {
 }) {
   return (
     <div className={formStyles.field}>
-      <label className={styles.smallLabel} htmlFor={id}>{label}</label>
+      <label className={styles.smallLabel} htmlFor={id}>
+        {label}
+      </label>
       <input
         id={id}
         type="text"
@@ -153,7 +161,15 @@ function StopField({ id, label, value, onChange, placeholder, inputMode }: {
 
 // One charging stop's whole card: header with remove, the station picker
 // (when community stations are loaded), the numeric StopFields and the note.
-function StopCard({ index, stop, stations, networks, onUpdate, onSetStation, onRemove }: {
+function StopCard({
+  index,
+  stop,
+  stations,
+  networks,
+  onUpdate,
+  onSetStation,
+  onRemove,
+}: {
   index: number
   stop: StopDraft
   stations: ChargingStation[]
@@ -173,7 +189,9 @@ function StopCard({ index, stop, stations, networks, onUpdate, onSetStation, onR
 
       {stations.length > 0 && (
         <div className={formStyles.field}>
-          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>🔌 Cargador</label>
+          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>
+            🔌 Cargador
+          </label>
           <select
             id={`stop-${index}-station`}
             aria-label="Cargador"
@@ -189,7 +207,8 @@ function StopCard({ index, stop, stations, networks, onUpdate, onSetStation, onR
                 <optgroup key={net.slug} label={net.name}>
                   {options.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name}{s.city ? ` — ${s.city}` : ''}
+                      {s.name}
+                      {s.city ? ` — ${s.city}` : ''}
                     </option>
                   ))}
                 </optgroup>
@@ -277,7 +296,9 @@ function StopCard({ index, stop, stations, networks, onUpdate, onSetStation, onR
       </div>
 
       <div className={formStyles.field}>
-        <label className={styles.smallLabel} htmlFor={`stop-${index}-note`}>💬 Nota</label>
+        <label className={styles.smallLabel} htmlFor={`stop-${index}-note`}>
+          💬 Nota
+        </label>
         <textarea
           id={`stop-${index}-note`}
           rows={3}
@@ -306,7 +327,7 @@ export default function NewTripLogPage() {
   const [destination, setDestination] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
   const [tripDate, setTripDate] = useState(todayIsoDate())
-  const [model, setModel] = useState<Model | ''>(() => (isEdit ? '' : preferredModel ?? ''))
+  const [model, setModel] = useState<Model | ''>(() => (isEdit ? '' : (preferredModel ?? '')))
   const [startingCharge, setStartingCharge] = useState('')
   const [endingCharge, setEndingCharge] = useState('')
   const [averageSpeed, setAverageSpeed] = useState('')
@@ -336,9 +357,7 @@ export default function NewTripLogPage() {
   // payload). Deselecting clears it for the user to type their own.
   function setStopStation(index: number, stationId: string) {
     const station = stations.find((s) => s.id === stationId)
-    setStops((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s))
-    )
+    setStops((prev) => prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s)))
     setDirty(true)
   }
 
@@ -358,7 +377,9 @@ export default function NewTripLogPage() {
           setDistanceKm(data.distance_km != null ? String(data.distance_km) : '')
           setTripDate(data.trip_date)
           setModel((data.model as Model | null) ?? '')
-          setStartingCharge(data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : '')
+          setStartingCharge(
+            data.starting_charge_percentage != null ? String(data.starting_charge_percentage) : ''
+          )
           setEndingCharge(data.ending_charge_percentage != null ? String(data.ending_charge_percentage) : '')
           setAverageSpeed(data.average_speed_kmh != null ? String(data.average_speed_kmh) : '')
           const loadedStops = ((data.charging_stops ?? []) as TripChargingStop[]).map(stopToDraft)
@@ -523,7 +544,9 @@ export default function NewTripLogPage() {
             <button type="button" className={formStyles.backBtn} onClick={handleBack} disabled={submitting}>
               ← Atrás
             </button>
-            <span className={styles.stepCounter}>Paso {step} de {LAST_STEP}</span>
+            <span className={styles.stepCounter}>
+              Paso {step} de {LAST_STEP}
+            </span>
           </>
         ) : (
           <button type="button" className={formStyles.backBtn} onClick={handleCancel} disabled={submitting}>
@@ -546,187 +569,214 @@ export default function NewTripLogPage() {
       <Card>
         {error && <FormError>{error}</FormError>}
 
-        <form className={`${formStyles.form} ${styles.formWide}`} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
+        <form
+          className={`${formStyles.form} ${styles.formWide}`}
+          onSubmit={handleSubmit}
+          onChange={() => setDirty(true)}
+        >
           {(!isWizard || step === 1) && (
-          <>
-          <CityDatalist />
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="trip-origin">📍 Origen</label>
-              <input
-                id="trip-origin"
-                required
-                type="text"
-                list={UY_CITIES_LIST_ID}
-                className={formStyles.input}
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                placeholder="Montevideo"
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="trip-destination">🏁 Destino</label>
-              <input
-                id="trip-destination"
-                required
-                type="text"
-                list={UY_CITIES_LIST_ID}
-                className={formStyles.input}
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="Punta del Este"
-              />
-            </div>
-          </div>
+            <>
+              <CityDatalist />
+              <div className={formStyles.row}>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-origin">
+                    📍 Origen
+                  </label>
+                  <input
+                    id="trip-origin"
+                    required
+                    type="text"
+                    list={UY_CITIES_LIST_ID}
+                    className={formStyles.input}
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    placeholder="Montevideo"
+                  />
+                </div>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-destination">
+                    🏁 Destino
+                  </label>
+                  <input
+                    id="trip-destination"
+                    required
+                    type="text"
+                    list={UY_CITIES_LIST_ID}
+                    className={formStyles.input}
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    placeholder="Punta del Este"
+                  />
+                </div>
+              </div>
 
-          <div className={formStyles.row}>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="trip-date">📅 Fecha</label>
-              <input
-                id="trip-date"
-                required
-                type="date"
-                className={formStyles.input}
-                value={tripDate}
-                onChange={(e) => setTripDate(e.target.value)}
-              />
-            </div>
-            <div className={formStyles.field}>
-              <label className={formStyles.label} htmlFor="trip-distance">📏 Distancia (km)</label>
-              <input
-                id="trip-distance"
-                required
-                type="text"
-                inputMode="numeric"
-                className={formStyles.input}
-                value={distanceKm}
-                onChange={(e) => setDistanceKm(e.target.value)}
-                placeholder="140"
-              />
-            </div>
-          </div>
-          </>
+              <div className={formStyles.row}>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-date">
+                    📅 Fecha
+                  </label>
+                  <input
+                    id="trip-date"
+                    required
+                    type="date"
+                    className={formStyles.input}
+                    value={tripDate}
+                    onChange={(e) => setTripDate(e.target.value)}
+                  />
+                </div>
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor="trip-distance">
+                    📏 Distancia (km)
+                  </label>
+                  <input
+                    id="trip-distance"
+                    required
+                    type="text"
+                    inputMode="numeric"
+                    className={formStyles.input}
+                    value={distanceKm}
+                    onChange={(e) => setDistanceKm(e.target.value)}
+                    placeholder="140"
+                  />
+                </div>
+              </div>
+            </>
           )}
 
           {(!isWizard || step === 3) && (
-          <>
-          <div className={styles.shareBlock}>
-            <div className={formStyles.field}>
-              <span className={formStyles.label}>
-                🚙 Modelo
-              </span>
-              <div className={styles.modelRow}>
-                {MODELS.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
-                    onClick={() => { setModel(m); setDirty(true) }}
-                    aria-pressed={model === m}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-              {isPublic && !model && (
-                <span className={styles.modelHint}>
-                  Elegí E2 o E2+ para poder compartir el viaje con la comunidad.
-                </span>
-              )}
-            </div>
-
-            <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
-          </div>
-
-          <button
-            type="button"
-            className={styles.disclosureBtn}
-            onClick={() => setShowDetails((o) => !o)}
-            aria-expanded={showDetails}
-          >
-            {showDetails
-              ? 'Ocultar detalles de batería y carga ▴'
-              : 'Agregar detalles de batería y carga ▾'}
-          </button>
-
-          {showDetails && (
-            <div className={styles.detailsSection}>
-              <div className={formStyles.row}>
+            <>
+              <div className={styles.shareBlock}>
                 <div className={formStyles.field}>
-                  <label className={formStyles.label} htmlFor="trip-starting-charge">🔋 Batería al salir (%)</label>
-                  <input
-                    id="trip-starting-charge"
-                    type="text"
-                    inputMode="numeric"
-                    className={formStyles.input}
-                    value={startingCharge}
-                    onChange={(e) => setStartingCharge(e.target.value)}
-                    placeholder="90"
-                  />
+                  <span className={formStyles.label}>🚙 Modelo</span>
+                  <div className={styles.modelRow}>
+                    {MODELS.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
+                        onClick={() => {
+                          setModel(m)
+                          setDirty(true)
+                        }}
+                        aria-pressed={model === m}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                  {isPublic && !model && (
+                    <span className={styles.modelHint}>
+                      Elegí E2 o E2+ para poder compartir el viaje con la comunidad.
+                    </span>
+                  )}
                 </div>
-                <div className={formStyles.field}>
-                  <label className={formStyles.label} htmlFor="trip-ending-charge">🪫 Batería al llegar (%)</label>
-                  <input
-                    id="trip-ending-charge"
-                    type="text"
-                    inputMode="numeric"
-                    className={formStyles.input}
-                    value={endingCharge}
-                    onChange={(e) => setEndingCharge(e.target.value)}
-                    placeholder="15"
-                  />
-                </div>
+
+                <ShareCheckbox checked={isPublic} onChange={setIsPublic} />
               </div>
 
-              <div className={formStyles.field}>
-                <label className={formStyles.label} htmlFor="trip-avg-speed">⏱️ Velocidad media del viaje (km/h)</label>
-                <input
-                  id="trip-avg-speed"
-                  type="text"
-                  inputMode="decimal"
-                  className={formStyles.input}
-                  value={averageSpeed}
-                  onChange={(e) => setAverageSpeed(e.target.value)}
-                  placeholder="95"
-                />
-              </div>
+              <button
+                type="button"
+                className={styles.disclosureBtn}
+                onClick={() => setShowDetails((o) => !o)}
+                aria-expanded={showDetails}
+              >
+                {showDetails
+                  ? 'Ocultar detalles de batería y carga ▴'
+                  : 'Agregar detalles de batería y carga ▾'}
+              </button>
 
-              <div className={formStyles.field}>
-                <span className={formStyles.label}>⚡ Paradas de carga</span>
-                {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
-                <div className={styles.stopsList}>
-                  {stops.map((stop, index) => (
-                    <StopCard
-                      key={index}
-                      index={index}
-                      stop={stop}
-                      stations={stations}
-                      networks={networks}
-                      onUpdate={(field, value) => updateStop(index, field, value)}
-                      onSetStation={(stationId) => setStopStation(index, stationId)}
-                      onRemove={() => removeStop(index)}
+              {showDetails && (
+                <div className={styles.detailsSection}>
+                  <div className={formStyles.row}>
+                    <div className={formStyles.field}>
+                      <label className={formStyles.label} htmlFor="trip-starting-charge">
+                        🔋 Batería al salir (%)
+                      </label>
+                      <input
+                        id="trip-starting-charge"
+                        type="text"
+                        inputMode="numeric"
+                        className={formStyles.input}
+                        value={startingCharge}
+                        onChange={(e) => setStartingCharge(e.target.value)}
+                        placeholder="90"
+                      />
+                    </div>
+                    <div className={formStyles.field}>
+                      <label className={formStyles.label} htmlFor="trip-ending-charge">
+                        🪫 Batería al llegar (%)
+                      </label>
+                      <input
+                        id="trip-ending-charge"
+                        type="text"
+                        inputMode="numeric"
+                        className={formStyles.input}
+                        value={endingCharge}
+                        onChange={(e) => setEndingCharge(e.target.value)}
+                        placeholder="15"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={formStyles.field}>
+                    <label className={formStyles.label} htmlFor="trip-avg-speed">
+                      ⏱️ Velocidad media del viaje (km/h)
+                    </label>
+                    <input
+                      id="trip-avg-speed"
+                      type="text"
+                      inputMode="decimal"
+                      className={formStyles.input}
+                      value={averageSpeed}
+                      onChange={(e) => setAverageSpeed(e.target.value)}
+                      placeholder="95"
                     />
-                  ))}
+                  </div>
+
+                  <div className={formStyles.field}>
+                    <span className={formStyles.label}>⚡ Paradas de carga</span>
+                    {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
+                    <div className={styles.stopsList}>
+                      {stops.map((stop, index) => (
+                        <StopCard
+                          key={index}
+                          index={index}
+                          stop={stop}
+                          stations={stations}
+                          networks={networks}
+                          onUpdate={(field, value) => updateStop(index, field, value)}
+                          onSetStation={(stationId) => setStopStation(index, stationId)}
+                          onRemove={() => removeStop(index)}
+                        />
+                      ))}
+                    </div>
+                    <button type="button" className={styles.addStopBtn} onClick={addStop}>
+                      + Agregar parada
+                    </button>
+                  </div>
                 </div>
-                <button type="button" className={styles.addStopBtn} onClick={addStop}>
-                  + Agregar parada
-                </button>
-              </div>
-            </div>
-          )}
-          </>
+              )}
+            </>
           )}
 
           {(!isWizard || step === 2) && (
-          <>
-          <RatingField
-            label="⭐ ¿Cómo estuvo el viaje?"
-            value={rating}
-            onChange={(v) => { setRating(v); setDirty(true) }}
-          />
+            <>
+              <RatingField
+                label="⭐ ¿Cómo estuvo el viaje?"
+                value={rating}
+                onChange={(v) => {
+                  setRating(v)
+                  setDirty(true)
+                }}
+              />
 
-          <NotesField id="trip-notes" value={notes} onChange={setNotes} placeholder="Contanos cómo te fue..." />
-          </>
+              <NotesField
+                id="trip-notes"
+                value={notes}
+                onChange={setNotes}
+                placeholder="Contanos cómo te fue..."
+              />
+            </>
           )}
 
           <button type="submit" className={formStyles.submitBtn} disabled={submitting}>

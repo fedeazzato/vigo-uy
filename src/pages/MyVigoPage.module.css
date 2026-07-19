@@ -27,7 +27,9 @@
   cursor: pointer;
   padding: 0;
 }
-.clearBtn:hover { color: var(--red-400); }
+.clearBtn:hover {
+  color: var(--red-400);
+}
 
 .dismissBtn {
   font-size: 12px;
@@ -36,7 +38,9 @@
   cursor: pointer;
   padding: 0;
 }
-.dismissBtn:hover { color: var(--text-secondary); }
+.dismissBtn:hover {
+  color: var(--text-secondary);
+}
 
 /* ── Model selection ── */
 
@@ -54,7 +58,9 @@
   text-align: left;
   background: var(--surface-secondary);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 .modelCard:hover {
   border-color: var(--green-400);
@@ -105,9 +111,13 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   padding: 8px 10px;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
-.swatchBtn:hover { background: var(--surface-secondary); }
+.swatchBtn:hover {
+  background: var(--surface-secondary);
+}
 .swatchBtn.selected {
   background: var(--green-50);
   border-color: var(--green-400);
@@ -154,7 +164,9 @@
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
-.topTripRow:last-child { border-bottom: none; }
+.topTripRow:last-child {
+  border-bottom: none;
+}
 
 .topTripMedal {
   font-size: 20px;

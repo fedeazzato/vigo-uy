@@ -7,7 +7,13 @@ import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { formatCurrency, formatDate } from '../lib/format'
-import { cityCostStatItems, fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
+import {
+  cityCostStatItems,
+  fetchCommunityStats,
+  fetchLeaderboard,
+  useCommunityContent,
+  verifiedFirst,
+} from '../lib/communityData'
 import { useToggleSet } from '../lib/useToggleSet'
 import { partCategoryTitle } from '../lib/partsCatalog'
 import type { PartPurchase, ServiceEntry, StatItem, TripLog, VehicleLeaderboardEntry } from '../types'
@@ -34,8 +40,8 @@ type FeedItem =
   | { kind: 'repuesto'; date: string; rating: number | null; verified: boolean; purchase: PartPurchase }
 
 const KIND_META: Record<FeedItem['kind'], { icon: string; label: string }> = {
-  viaje:    { icon: '🗺️', label: 'Viaje' },
-  service:  { icon: '🛠️', label: 'Service' },
+  viaje: { icon: '🗺️', label: 'Viaje' },
+  service: { icon: '🛠️', label: 'Service' },
   repuesto: { icon: '🔩', label: 'Repuesto' },
 }
 
@@ -89,7 +95,8 @@ export default function CommunityFeedPage() {
     const q = query.trim().toLowerCase()
     const result = trips.filter((trip) => {
       if (modelFilter !== 'todos' && trip.model !== modelFilter) return false
-      if (q && ![trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q))) return false
+      if (q && ![trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q)))
+        return false
       return true
     })
     return rankRows(result, sort)
@@ -125,36 +132,49 @@ export default function CommunityFeedPage() {
     const items: FeedItem[] = []
     if (showTrips) {
       for (const trip of filteredTrips) {
-        items.push({ kind: 'viaje', date: trip.trip_date, rating: trip.rating, verified: trip.verified, trip })
+        items.push({
+          kind: 'viaje',
+          date: trip.trip_date,
+          rating: trip.rating,
+          verified: trip.verified,
+          trip,
+        })
       }
     }
     if (showEntries) {
       for (const entry of filteredEntries) {
-        items.push({ kind: 'service', date: entry.service_date, rating: null, verified: entry.verified, entry })
+        items.push({
+          kind: 'service',
+          date: entry.service_date,
+          rating: null,
+          verified: entry.verified,
+          entry,
+        })
       }
     }
     if (showPurchases) {
       for (const purchase of filteredPurchases) {
-        items.push({ kind: 'repuesto', date: purchase.purchase_date, rating: purchase.rating, verified: purchase.verified, purchase })
+        items.push({
+          kind: 'repuesto',
+          date: purchase.purchase_date,
+          rating: purchase.rating,
+          verified: purchase.verified,
+          purchase,
+        })
       }
     }
     const byDate = (a: FeedItem, b: FeedItem) => b.date.localeCompare(a.date)
-    items.sort(
-      sort === 'puntuacion'
-        ? (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || byDate(a, b)
-        : byDate
-    )
+    items.sort(sort === 'puntuacion' ? (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || byDate(a, b) : byDate)
     return verifiedFirst(items)
   }, [filteredTrips, filteredEntries, filteredPurchases, showTrips, showEntries, showPurchases, sort])
 
   return (
     <div>
-      <PageHeader
-        title="🌐 Comunidad"
-        subtitle="Costos y viajes compartidos por otros dueños de Vigo."
-      />
+      <PageHeader title="🌐 Comunidad" subtitle="Costos y viajes compartidos por otros dueños de Vigo." />
 
-      {!supabase && <Alert type="info">La sección de comunidad no está disponible en esta instalación.</Alert>}
+      {!supabase && (
+        <Alert type="info">La sección de comunidad no está disponible en esta instalación.</Alert>
+      )}
       {error && <Alert type="danger">{error}</Alert>}
 
       {supabase && (
@@ -172,7 +192,9 @@ export default function CommunityFeedPage() {
             <>
               <span>Iniciá sesión para compartir tus viajes y costos con la comunidad.</span>
               <div className={styles.ctaActions}>
-                <Link to="/login" className={listStyles.ctaBtn}>Iniciar sesión</Link>
+                <Link to="/login" className={listStyles.ctaBtn}>
+                  Iniciar sesión
+                </Link>
               </div>
             </>
           )}
@@ -230,7 +252,9 @@ export default function CommunityFeedPage() {
 
       <div className={styles.toolbar}>
         <div className={styles.toolbarField}>
-          <label className={styles.toolbarLabel} htmlFor="feed-model">Modelo</label>
+          <label className={styles.toolbarLabel} htmlFor="feed-model">
+            Modelo
+          </label>
           <select
             id="feed-model"
             className={formStyles.input}
@@ -245,7 +269,9 @@ export default function CommunityFeedPage() {
         {/* Services have no rating, so sorting makes no sense there. */}
         {typeFilter !== 'services' && (
           <div className={styles.toolbarField}>
-            <label className={styles.toolbarLabel} htmlFor="feed-sort">Ordenar por</label>
+            <label className={styles.toolbarLabel} htmlFor="feed-sort">
+              Ordenar por
+            </label>
             <select
               id="feed-sort"
               className={formStyles.input}
@@ -300,7 +326,10 @@ export default function CommunityFeedPage() {
             if (item.kind === 'repuesto') {
               const { purchase } = item
               return (
-                <Card key={`repuesto-${purchase.id}`} className={`${styles.feedCard} ${styles.feedCard_repuesto}`}>
+                <Card
+                  key={`repuesto-${purchase.id}`}
+                  className={`${styles.feedCard} ${styles.feedCard_repuesto}`}
+                >
                   <div className={styles.feedCardHead}>
                     <span className={`${styles.typeChip} ${styles.typeChip_repuesto}`}>
                       <span aria-hidden="true">{meta.icon}</span> {meta.label}
@@ -309,14 +338,13 @@ export default function CommunityFeedPage() {
                   </div>
                   <div className={listStyles.itemTitle}>{purchase.item}</div>
                   <div className={listStyles.itemMeta}>
-                    {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                    {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} ·{' '}
+                    {purchase.store}
                     {purchase.city && ` · ${purchase.city}`}
                     {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
                   </div>
                   <div className={styles.feedCardFoot}>
-                    <span className={listStyles.itemCost}>
-                      {formatCurrency(purchase.price_uyu)}
-                    </span>
+                    <span className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu)}</span>
                     <span className={listStyles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
                   </div>
                 </Card>
@@ -333,13 +361,12 @@ export default function CommunityFeedPage() {
                 </div>
                 <div className={listStyles.itemTitle}>{entry.service_type}</div>
                 <div className={listStyles.itemMeta}>
-                  {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
+                  {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km ·{' '}
+                  {entry.dealer}
                   {entry.city && ` · ${entry.city}`}
                 </div>
                 <div className={styles.feedCardFoot}>
-                  <span className={listStyles.itemCost}>
-                    {formatCurrency(entry.cost_uyu, 2)}
-                  </span>
+                  <span className={listStyles.itemCost}>{formatCurrency(entry.cost_uyu, 2)}</span>
                   <span className={listStyles.author}>por {names[entry.user_id] ?? 'un usuario'}</span>
                 </div>
               </Card>

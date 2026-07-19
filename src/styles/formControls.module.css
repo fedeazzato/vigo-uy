@@ -11,7 +11,9 @@
   font-size: 14px;
   font-family: inherit;
   color: var(--text-primary);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .input::placeholder {
   color: var(--text-tertiary);
@@ -95,8 +97,13 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
-.backBtn:hover:not(:disabled) { color: var(--text-primary); }
-.backBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.backBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+.backBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* One primary button per screen: full width. */
 .submitBtn {
@@ -112,8 +119,13 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.submitBtn:hover:not(:disabled) { background: var(--green-600); }
-.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submitBtn:hover:not(:disabled) {
+  background: var(--green-600);
+}
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* Compact primary button (account cards, login): sized to content, not
    full-width like .submitBtn. */
@@ -128,8 +140,13 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.submitBtnCompact:hover:not(:disabled) { background: var(--green-600); }
-.submitBtnCompact:disabled { opacity: 0.6; cursor: not-allowed; }
+.submitBtnCompact:hover:not(:disabled) {
+  background: var(--green-600);
+}
+.submitBtnCompact:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 @media (max-width: 400px) {
   .row {

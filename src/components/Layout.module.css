@@ -87,7 +87,9 @@
   border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--text-secondary);
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   text-decoration: none;
 }
 
@@ -147,7 +149,9 @@
   background: var(--surface-secondary);
   border: 1px solid var(--border);
   width: 100%;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .themeToggle:hover {
@@ -285,8 +289,13 @@
   text-decoration: none;
   border-bottom: 1px solid var(--border);
 }
-.sheetLink:last-child { border-bottom: none; }
-.sheetLink:hover { background: var(--surface-secondary); text-decoration: none; }
+.sheetLink:last-child {
+  border-bottom: none;
+}
+.sheetLink:hover {
+  background: var(--surface-secondary);
+  text-decoration: none;
+}
 
 .sheetIcon {
   font-size: 22px;
@@ -311,8 +320,14 @@
 }
 
 @keyframes sheetUp {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 700px) {
@@ -374,7 +389,9 @@
     line-height: 1;
     flex-shrink: 0;
     text-decoration: none;
-    transition: background 0.12s, border-color 0.12s;
+    transition:
+      background 0.12s,
+      border-color 0.12s;
   }
 
   /* Subtle highlight on hover, no link underline; tokens cover both themes. */

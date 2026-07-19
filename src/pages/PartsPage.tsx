@@ -1,6 +1,15 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, CardTitle, TipList, Badge, Alert, StatGrid, SectionDivider } from '../components/UI'
+import {
+  PageHeader,
+  Card,
+  CardTitle,
+  TipList,
+  Badge,
+  Alert,
+  StatGrid,
+  SectionDivider,
+} from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { useCommunityContent, verifiedFirst } from '../lib/communityData'
@@ -67,12 +76,16 @@ export default function PartsPage() {
           {status === 'signedIn' ? (
             <>
               <span>¿Compraste un repuesto? Registralo para seguir tus gastos y orientar al resto.</span>
-              <Link to="/repuestos/nuevo" className={listStyles.ctaBtn}>+ Registrar compra</Link>
+              <Link to="/repuestos/nuevo" className={listStyles.ctaBtn}>
+                + Registrar compra
+              </Link>
             </>
           ) : (
             <>
               <span>Iniciá sesión para registrar tus compras de repuestos y compartirlas.</span>
-              <Link to="/login" className={listStyles.ctaBtn}>Iniciar sesión</Link>
+              <Link to="/login" className={listStyles.ctaBtn}>
+                Iniciar sesión
+              </Link>
             </>
           )}
         </Card>

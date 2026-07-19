@@ -275,18 +275,14 @@ describe('parseStopDrafts (charging_stops payload)', () => {
   })
 
   it('carries cost, energy and station link when provided (D4)', () => {
-    const result = parseStopDrafts([
-      draft({ cost: '450', energyKwh: '28.5', stationId: 'st-1' }),
-    ])
+    const result = parseStopDrafts([draft({ cost: '450', energyKwh: '28.5', stationId: 'st-1' })])
     expect(result).toEqual({
       stops: [{ name: 'UTE Rocha', cost_uyu: 450, energy_kwh: 28.5, station_id: 'st-1' }],
     })
   })
 
   it('accepts comma decimals and dot thousands, the way people type here', () => {
-    const result = parseStopDrafts([
-      draft({ energyKwh: '28,5', cost: '1.450' }),
-    ])
+    const result = parseStopDrafts([draft({ energyKwh: '28,5', cost: '1.450' })])
     expect(result).toEqual({
       stops: [{ name: 'UTE Rocha', cost_uyu: 1450, energy_kwh: 28.5 }],
     })

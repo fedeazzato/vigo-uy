@@ -37,8 +37,16 @@
       "difficulty": "Media",
       "stops": [
         { "name": "Montevideo", "type": "origin" },
-        { "name": "Trinidad", "type": "charge", "note": "Obligatorio. 2 cargadores rápidos en Ancap ruta 3 + cargadores en Plaza Hotel Flores (adentro de la ciudad). En feriados hay cola — alternativa: cargar en Durazno primero." },
-        { "name": "Young / Paysandú", "type": "charge", "note": "Opcional según autonomía restante. Young: 2 cargadores cerca de Ancap. Paysandú: varios cargadores, frente al Shopping." },
+        {
+          "name": "Trinidad",
+          "type": "charge",
+          "note": "Obligatorio. 2 cargadores rápidos en Ancap ruta 3 + cargadores en Plaza Hotel Flores (adentro de la ciudad). En feriados hay cola — alternativa: cargar en Durazno primero."
+        },
+        {
+          "name": "Young / Paysandú",
+          "type": "charge",
+          "note": "Opcional según autonomía restante. Young: 2 cargadores cerca de Ancap. Paysandú: varios cargadores, frente al Shopping."
+        },
         { "name": "Salto", "type": "destination", "note": "Cargar en Salto para planificar la vuelta." }
       ],
       "tips": [
@@ -54,8 +62,16 @@
       "difficulty": "Fácil",
       "stops": [
         { "name": "Montevideo", "type": "origin" },
-        { "name": "Rocha", "type": "charge", "note": "Parada recomendada. Cargadores compatibles con la Vigo, aunque la zona tiene reportes frecuentes de equipos UTE fuera de servicio — verificar estado en PlugShare antes de salir." },
-        { "name": "Punta del Diablo", "type": "warning", "note": "Cargadores con conector incompatible con la Vigo — no cargar aquí." },
+        {
+          "name": "Rocha",
+          "type": "charge",
+          "note": "Parada recomendada. Cargadores compatibles con la Vigo, aunque la zona tiene reportes frecuentes de equipos UTE fuera de servicio — verificar estado en PlugShare antes de salir."
+        },
+        {
+          "name": "Punta del Diablo",
+          "type": "warning",
+          "note": "Cargadores con conector incompatible con la Vigo — no cargar aquí."
+        },
         { "name": "Chuy", "type": "destination" }
       ],
       "tips": [
@@ -70,7 +86,11 @@
       "difficulty": "Muy fácil",
       "stops": [
         { "name": "Mvd Shopping", "type": "origin" },
-        { "name": "Colonia del Sacramento", "type": "destination", "note": "A 110 km/h con aire: llegan con ~190 km de autonomía restante. No requiere carga intermedia." }
+        {
+          "name": "Colonia del Sacramento",
+          "type": "destination",
+          "note": "A 110 km/h con aire: llegan con ~190 km de autonomía restante. No requiere carga intermedia."
+        }
       ],
       "tips": [
         "Ida y vuelta sin cargar es viable con la E2+.",
@@ -85,9 +105,21 @@
       "stops": [
         { "name": "Montevideo", "type": "origin" },
         { "name": "Rocha", "type": "charge" },
-        { "name": "Chuy / Río Branco", "type": "charge", "note": "Cruce de frontera. Verificar horarios de Policía y Panda — suelen ser 24hs." },
-        { "name": "Yaguarão (Brasil)", "type": "charge", "note": "Cargador gratuito compatible con la app Tupi, apenas cruzando la frontera." },
-        { "name": "Pelotas / Porto Alegre (Brasil)", "type": "warning", "note": "El tramo Pelotas–Porto Alegre (BR-116) tiene ~260 km sin alternativas — salir con 100% de batería, es riesgoso llegar con menos de 90%. El cargador rápido gratuito antes de Porto Alegre suele estar ocupado; conviene tener un plan B en la app Tupi." },
+        {
+          "name": "Chuy / Río Branco",
+          "type": "charge",
+          "note": "Cruce de frontera. Verificar horarios de Policía y Panda — suelen ser 24hs."
+        },
+        {
+          "name": "Yaguarão (Brasil)",
+          "type": "charge",
+          "note": "Cargador gratuito compatible con la app Tupi, apenas cruzando la frontera."
+        },
+        {
+          "name": "Pelotas / Porto Alegre (Brasil)",
+          "type": "warning",
+          "note": "El tramo Pelotas–Porto Alegre (BR-116) tiene ~260 km sin alternativas — salir con 100% de batería, es riesgoso llegar con menos de 90%. El cargador rápido gratuito antes de Porto Alegre suele estar ocupado; conviene tener un plan B en la app Tupi."
+        },
         { "name": "Florianópolis", "type": "destination" }
       ],
       "tips": [
@@ -104,9 +136,21 @@
       "difficulty": "Avanzada",
       "stops": [
         { "name": "Montevideo", "type": "origin" },
-        { "name": "Colón / Concordia (cruce)", "type": "charge", "note": "Cruce de frontera. Verificar trámites migratorios y de aduana para el vehículo con anticipación." },
-        { "name": "Rosario / Córdoba", "type": "charge", "note": "Redes de carga adecuadas en estas ciudades." },
-        { "name": "Ruta 7 (Rufino, Villa Mercedes)", "type": "warning", "note": "Tramo con muy pocos cargadores — solo 2 puntos Shell Recharge en toda la ruta 7 reportados." },
+        {
+          "name": "Colón / Concordia (cruce)",
+          "type": "charge",
+          "note": "Cruce de frontera. Verificar trámites migratorios y de aduana para el vehículo con anticipación."
+        },
+        {
+          "name": "Rosario / Córdoba",
+          "type": "charge",
+          "note": "Redes de carga adecuadas en estas ciudades."
+        },
+        {
+          "name": "Ruta 7 (Rufino, Villa Mercedes)",
+          "type": "warning",
+          "note": "Tramo con muy pocos cargadores — solo 2 puntos Shell Recharge en toda la ruta 7 reportados."
+        },
         { "name": "Mendoza", "type": "destination" }
       ],
       "tips": [

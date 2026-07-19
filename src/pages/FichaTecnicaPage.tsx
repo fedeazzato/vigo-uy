@@ -33,9 +33,7 @@ export default function FichaTecnicaPage() {
       />
 
       {data.specGroups.map((group) => {
-        const visibleRows = model
-          ? group.rows.filter((r) => !r.model || r.model === model)
-          : group.rows
+        const visibleRows = model ? group.rows.filter((r) => !r.model || r.model === model) : group.rows
 
         return (
           <Card key={group.id}>
@@ -66,7 +64,9 @@ export default function FichaTecnicaPage() {
           {lights.map((light, i) => (
             <div key={i} className={styles.lightRow}>
               <div className={styles.lightHeader}>
-                <span className={styles.lightName}>{light.icon} {light.name}</span>
+                <span className={styles.lightName}>
+                  {light.icon} {light.name}
+                </span>
                 <Badge color={SEVERITY_BADGE[severity]}>{SEVERITY_LABEL[severity]}</Badge>
               </div>
               <p className={styles.lightMeaning}>{light.meaning}</p>

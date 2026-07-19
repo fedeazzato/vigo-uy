@@ -45,7 +45,9 @@
   font-size: 14px;
   color: var(--text-primary);
 }
-.memberRow:last-child { border-bottom: none; }
+.memberRow:last-child {
+  border-bottom: none;
+}
 
 .memberTag {
   font-size: 12px;
@@ -62,7 +64,9 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.removeLink:hover { color: var(--red-600); }
+.removeLink:hover {
+  color: var(--red-600);
+}
 
 .joinCode {
   font-family: monospace;
@@ -87,13 +91,18 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .secondaryBtn:hover:not(:disabled) {
   background: var(--surface-secondary);
   border-color: var(--text-tertiary);
 }
-.secondaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.secondaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .dangerBtn {
   background: var(--surface);
@@ -109,4 +118,7 @@
 .dangerBtn:hover:not(:disabled) {
   background: var(--red-50);
 }
-.dangerBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.dangerBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
