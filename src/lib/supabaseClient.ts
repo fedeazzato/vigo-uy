@@ -16,6 +16,9 @@ if (url && anonKey) {
       detectSessionInUrl: false,
       persistSession: true,
       autoRefreshToken: true,
+      // Passkey support (registerPasskey/signInWithPasskey) is gated behind
+      // this opt-in; without it auth-js throws on every passkey call.
+      experimental: { passkey: true },
     },
   })
 } else {
