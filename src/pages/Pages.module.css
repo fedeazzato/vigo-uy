@@ -222,6 +222,16 @@
   flex-wrap: wrap;
 }
 
+/* Trip-level sum of the recorded charge costs. */
+.routeChargeTotal {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-600);
+}
+
 .routeTips {
   margin-top: 14px;
   padding-top: 12px;

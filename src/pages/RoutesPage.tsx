@@ -101,6 +101,15 @@ function tripToStops(trip: TripLog): Stop[] {
   return stops
 }
 
+// Sum of the recorded charge costs, or null when no stop has one.
+function tripChargeTotal(trip: TripLog): number | null {
+  const costs = trip.charging_stops
+    .map((cs) => cs.cost_uyu)
+    .filter((c): c is number => c != null)
+  if (costs.length === 0) return null
+  return costs.reduce((sum, c) => sum + c, 0)
+}
+
 export default function RoutesPage() {
   const { status } = useAuth()
   // Curated JSON renders immediately; the community section below fills in
@@ -167,7 +176,9 @@ export default function RoutesPage() {
       {/* Trip cards are short (few stops, often no notes) — on wide desktop
           they pack two-up instead of stacking as half-empty full-width cards. */}
       <div className={styles.tripCardsGrid}>
-      {orderedTrips.map((trip) => (
+      {orderedTrips.map((trip) => {
+        const chargeTotal = tripChargeTotal(trip)
+        return (
         <Card key={trip.id} className={styles.routeCard}>
           <div className={styles.routeCardHeader}>
             <div>
@@ -191,6 +202,13 @@ export default function RoutesPage() {
 
           <RouteMap stops={tripToStops(trip)} />
 
+          {chargeTotal != null && (
+            <p className={styles.routeChargeTotal}>
+              ⚡ Total en cargas: $
+              {chargeTotal.toLocaleString('es-UY', { maximumFractionDigits: 2 })}
+            </p>
+          )}
+
           {trip.notes && (
             <div className={styles.routeTips}>
               <p className={styles.routeTip}>💡 {trip.notes}</p>
@@ -201,7 +219,8 @@ export default function RoutesPage() {
             {trip.trip_date} · por {names[trip.user_id] ?? 'un usuario'}
           </p>
         </Card>
-      ))}
+        )
+      })}
       </div>
     </>
   )
