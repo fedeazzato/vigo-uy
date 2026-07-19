@@ -98,6 +98,35 @@ function tripChargeTotal(trip: TripLog): number | null {
   return costs.reduce((sum, c) => sum + c, 0)
 }
 
+interface TripDetailProps {
+  trip: TripLog
+}
+
+// The expandable detail body — stop timeline, charge total and notes —
+// without the Card wrapper or header, for embedding inside another card
+// (Comunidad feed grid).
+export function TripDetail({ trip }: TripDetailProps) {
+  const chargeTotal = tripChargeTotal(trip)
+  return (
+    <>
+      <RouteMap stops={tripToStops(trip)} />
+
+      {chargeTotal != null && (
+        <p className={styles.routeChargeTotal}>
+          <span aria-hidden="true">⚡</span> Total en cargas: $
+          {chargeTotal.toLocaleString('es-UY', { maximumFractionDigits: 2 })}
+        </p>
+      )}
+
+      {trip.notes && (
+        <div className={styles.routeTips}>
+          <p className={styles.routeTip}><span aria-hidden="true">💡</span> {trip.notes}</p>
+        </div>
+      )}
+    </>
+  )
+}
+
 interface TripCardProps {
   trip: TripLog
   authorName?: string
@@ -107,7 +136,6 @@ interface TripCardProps {
 // total charge cost, notes and author. The one place a shared trip is shown
 // with everything the author logged.
 export default function TripCard({ trip, authorName }: TripCardProps) {
-  const chargeTotal = tripChargeTotal(trip)
   return (
     <Card className={styles.routeCard}>
       <div className={styles.routeCardHeader}>
@@ -134,20 +162,7 @@ export default function TripCard({ trip, authorName }: TripCardProps) {
         </div>
       </div>
 
-      <RouteMap stops={tripToStops(trip)} />
-
-      {chargeTotal != null && (
-        <p className={styles.routeChargeTotal}>
-          <span aria-hidden="true">⚡</span> Total en cargas: $
-          {chargeTotal.toLocaleString('es-UY', { maximumFractionDigits: 2 })}
-        </p>
-      )}
-
-      {trip.notes && (
-        <div className={styles.routeTips}>
-          <p className={styles.routeTip}><span aria-hidden="true">💡</span> {trip.notes}</p>
-        </div>
-      )}
+      <TripDetail trip={trip} />
 
       <p className={styles.routeStopNote}>
         {formatDate(trip.trip_date)}

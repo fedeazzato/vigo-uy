@@ -12,22 +12,6 @@
   padding: 8px 0;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.item:last-child { border-bottom: none; }
-
 .itemTitle {
   font-size: 14px;
   font-weight: 600;
@@ -53,8 +37,8 @@
   white-space: nowrap;
 }
 
-/* Expandable trip rows: the whole summary is one button that reveals the
-   full TripCard beneath. */
+/* Expandable trip cards: the whole summary is one button that reveals the
+   stop timeline beneath. */
 .itemToggle {
   display: block;
   width: 100%;
@@ -79,12 +63,70 @@
   text-decoration: underline;
 }
 
-.itemDetail {
-  grid-column: 1 / -1;
+.tripDetail {
+  margin-top: 10px;
 }
-/* The embedded Card brings its own bottom margin; the row doesn't need it. */
-.itemDetail > * {
+
+/* ── Unified feed grid ──
+   One mixed stream of typed cards instead of per-type columns (those grew
+   unevenly with few services/repuestos). Two columns on desktop. */
+
+.feedGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+.feedGrid > * {
   margin-bottom: 0;
+}
+
+@media (min-width: 900px) {
+  .feedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Colored edge + type chip identify the card's kind at a glance. */
+.feedCard { border-left: 3px solid transparent; }
+.feedCard_viaje    { border-left-color: var(--green-400); }
+.feedCard_service  { border-left-color: var(--amber-400); }
+.feedCard_repuesto { border-left-color: var(--blue-600); }
+
+.feedCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.typeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.typeChip_viaje    { background: var(--green-50); color: var(--green-600); }
+.typeChip_service  { background: var(--amber-50); color: var(--amber-600); }
+.typeChip_repuesto { background: var(--blue-50);  color: var(--blue-600); }
+
+.feedCardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+/* Author sits right even when there's no cost (trips). */
+.feedCardFoot .author {
+  margin-left: auto;
 }
 
 .ctaCard {
@@ -156,8 +198,7 @@
   margin-bottom: 10px;
 }
 
-/* Desktop: chips stop scrolling and share one row with the search box;
-   the three feed groups sit side by side. */
+/* Desktop: chips stop scrolling and share one row with the search box. */
 @media (min-width: 900px) {
   .feedControls {
     display: flex;
@@ -175,28 +216,6 @@
     flex: 1;
     margin-bottom: 0;
   }
-}
-
-@media (min-width: 1100px) {
-  .feedGroups {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 12px;
-    align-items: start;
-  }
-  .feedGroups > * {
-    margin-bottom: 0;
-  }
-}
-
-/* Uppercase small-caps labels for the feed groups, matching the chips. */
-.groupTitle {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
 }
 
 .toolbar {
@@ -218,9 +237,3 @@
   color: var(--text-secondary);
 }
 
-@media (max-width: 500px) {
-  .item {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-}

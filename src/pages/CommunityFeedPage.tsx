@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } from '../components/UI'
-import TripCard from '../components/TripCard'
+import { TripDetail } from '../components/TripCard'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
@@ -9,7 +9,7 @@ import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { formatDate } from '../lib/format'
 import { fetchCommunityStats, fetchLeaderboard, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { partCategoryTitle } from '../lib/partsCatalog'
-import type { StatItem, VehicleLeaderboardEntry } from '../types'
+import type { PartPurchase, ServiceEntry, StatItem, TripLog, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -23,6 +23,19 @@ const TYPE_CHIPS: { key: TypeFilter; label: string }[] = [
   { key: 'services', label: 'Services' },
   { key: 'repuestos', label: 'Repuestos' },
 ]
+
+// One mixed feed instead of per-type columns: with few entries of some
+// types, separate columns grow unevenly. Each card carries its type.
+type FeedItem =
+  | { kind: 'viaje'; date: string; rating: number | null; verified: boolean; trip: TripLog }
+  | { kind: 'service'; date: string; rating: number | null; verified: boolean; entry: ServiceEntry }
+  | { kind: 'repuesto'; date: string; rating: number | null; verified: boolean; purchase: PartPurchase }
+
+const KIND_META: Record<FeedItem['kind'], { icon: string; label: string }> = {
+  viaje:    { icon: '🗺️', label: 'Viaje' },
+  service:  { icon: '🛠️', label: 'Service' },
+  repuesto: { icon: '🔩', label: 'Repuesto' },
+}
 
 export default function CommunityFeedPage() {
   const { status } = useAuth()
@@ -115,6 +128,32 @@ export default function CommunityFeedPage() {
   const showTrips = typeFilter === 'todos' || typeFilter === 'viajes'
   const showEntries = typeFilter === 'todos' || typeFilter === 'services'
   const showPurchases = typeFilter === 'todos' || typeFilter === 'repuestos'
+
+  const feedItems = useMemo(() => {
+    const items: FeedItem[] = []
+    if (showTrips) {
+      for (const trip of filteredTrips) {
+        items.push({ kind: 'viaje', date: trip.trip_date, rating: trip.rating, verified: trip.verified, trip })
+      }
+    }
+    if (showEntries) {
+      for (const entry of filteredEntries) {
+        items.push({ kind: 'service', date: entry.service_date, rating: null, verified: entry.verified, entry })
+      }
+    }
+    if (showPurchases) {
+      for (const purchase of filteredPurchases) {
+        items.push({ kind: 'repuesto', date: purchase.purchase_date, rating: purchase.rating, verified: purchase.verified, purchase })
+      }
+    }
+    const byDate = (a: FeedItem, b: FeedItem) => b.date.localeCompare(a.date)
+    items.sort(
+      sort === 'puntuacion'
+        ? (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || byDate(a, b)
+        : byDate
+    )
+    return verifiedFirst(items)
+  }, [filteredTrips, filteredEntries, filteredPurchases, showTrips, showEntries, showPurchases, sort])
 
   return (
     <div>
@@ -228,134 +267,111 @@ export default function CommunityFeedPage() {
         )}
       </div>
 
-      <div className={styles.feedGroups}>
-      {showTrips && (loading ? (
-        <Skeleton lines={4} />
-      ) : (
+      {loading ? (
+        <Skeleton lines={6} />
+      ) : feedItems.length === 0 ? (
         <Card>
-          <h2 className={styles.groupTitle}>Viajes</h2>
-          {filteredTrips.length === 0 ? (
-            <p className={styles.empty}>
-              {trips.length === 0
-                ? 'Todavía no hay viajes compartidos por la comunidad.'
-                : 'No hay viajes que coincidan con los filtros.'}
-            </p>
-          ) : (
-            <ul className={styles.list}>
-              {filteredTrips.map((trip) => {
-                const expanded = expandedTrips.has(trip.id)
-                return (
-                  <li key={trip.id} className={styles.item}>
-                    <button
-                      type="button"
-                      className={styles.itemToggle}
-                      onClick={() => toggleTrip(trip.id)}
-                      aria-expanded={expanded}
-                    >
-                      <div className={styles.itemTitle}>
-                        {trip.title}{trip.model && ` (${trip.model})`}
-                        {trip.verified && <Badge color="blue">Oficial</Badge>}
-                      </div>
-                      <div className={styles.itemMeta}>
-                        {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
-                        {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                        {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
-                      </div>
-                      <span className={styles.itemToggleHint} aria-hidden="true">
-                        {expanded ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
-                      </span>
-                    </button>
-                    <div className={styles.author}>por {names[trip.user_id] ?? 'un usuario'}</div>
-                    {expanded && (
-                      <div className={styles.itemDetail}>
-                        <TripCard trip={trip} authorName={names[trip.user_id] ?? 'un usuario'} />
-                      </div>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+          <p className={styles.empty}>
+            {trips.length + entries.length + purchases.length === 0
+              ? 'Todavía no hay aportes compartidos por la comunidad.'
+              : 'No hay aportes que coincidan con los filtros.'}
+          </p>
         </Card>
-      ))}
-
-      {showPurchases && (loading ? (
-        <Skeleton lines={4} />
       ) : (
-        <Card>
-          <h2 className={styles.groupTitle}>Repuestos</h2>
-          {filteredPurchases.length === 0 ? (
-            <p className={styles.empty}>
-              {purchases.length === 0
-                ? 'Todavía no hay compras compartidas por la comunidad.'
-                : 'No hay compras que coincidan con los filtros.'}
-            </p>
-          ) : (
-            <ul className={styles.list}>
-              {filteredPurchases.map((purchase) => (
-                <li key={purchase.id} className={styles.item}>
-                  <div>
+        <div className={styles.feedGrid}>
+          {feedItems.map((item) => {
+            const meta = KIND_META[item.kind]
+            if (item.kind === 'viaje') {
+              const { trip } = item
+              const expanded = expandedTrips.has(trip.id)
+              const author = names[trip.user_id] ?? 'un usuario'
+              return (
+                <Card key={`viaje-${trip.id}`} className={`${styles.feedCard} ${styles.feedCard_viaje}`}>
+                  <div className={styles.feedCardHead}>
+                    <span className={`${styles.typeChip} ${styles.typeChip_viaje}`}>
+                      <span aria-hidden="true">{meta.icon}</span> {meta.label}
+                    </span>
+                    {trip.verified && <Badge color="blue">Oficial</Badge>}
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.itemToggle}
+                    onClick={() => toggleTrip(trip.id)}
+                    aria-expanded={expanded}
+                  >
                     <div className={styles.itemTitle}>
-                      {purchase.item}
-                      {purchase.verified && <Badge color="blue">Oficial</Badge>}
+                      {trip.title}{trip.model && ` (${trip.model})`}
                     </div>
                     <div className={styles.itemMeta}>
-                      {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
-                      {purchase.city && ` · ${purchase.city}`}
-                      {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                      {formatDate(trip.trip_date)} · {trip.origin} → {trip.destination}
+                      {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
+                      {trip.rating != null && ` · ${'★'.repeat(trip.rating)}`}
                     </div>
+                    <span className={styles.itemToggleHint} aria-hidden="true">
+                      {expanded ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}
+                    </span>
+                  </button>
+                  {expanded && (
+                    <div className={styles.tripDetail}>
+                      <TripDetail trip={trip} />
+                    </div>
+                  )}
+                  <div className={styles.feedCardFoot}>
+                    <span className={styles.author}>por {author}</span>
                   </div>
-                  <div>
-                    <div className={styles.itemCost}>
+                </Card>
+              )
+            }
+            if (item.kind === 'repuesto') {
+              const { purchase } = item
+              return (
+                <Card key={`repuesto-${purchase.id}`} className={`${styles.feedCard} ${styles.feedCard_repuesto}`}>
+                  <div className={styles.feedCardHead}>
+                    <span className={`${styles.typeChip} ${styles.typeChip_repuesto}`}>
+                      <span aria-hidden="true">{meta.icon}</span> {meta.label}
+                    </span>
+                    {purchase.verified && <Badge color="blue">Oficial</Badge>}
+                  </div>
+                  <div className={styles.itemTitle}>{purchase.item}</div>
+                  <div className={styles.itemMeta}>
+                    {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} · {purchase.store}
+                    {purchase.city && ` · ${purchase.city}`}
+                    {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                  </div>
+                  <div className={styles.feedCardFoot}>
+                    <span className={styles.itemCost}>
                       ${purchase.price_uyu.toLocaleString('es-UY', { maximumFractionDigits: 0 })}
-                    </div>
-                    <div className={styles.author}>por {names[purchase.user_id] ?? 'un usuario'}</div>
+                    </span>
+                    <span className={styles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      ))}
-
-      {showEntries && (loading ? (
-        <Skeleton lines={4} />
-      ) : (
-        <Card>
-          <h2 className={styles.groupTitle}>Services</h2>
-          {filteredEntries.length === 0 ? (
-            <p className={styles.empty}>
-              {entries.length === 0
-                ? 'Todavía no hay costos compartidos por la comunidad.'
-                : 'No hay services que coincidan con los filtros.'}
-            </p>
-          ) : (
-            <ul className={styles.list}>
-              {filteredEntries.map((entry) => (
-                <li key={entry.id} className={styles.item}>
-                  <div>
-                    <div className={styles.itemTitle}>
-                      {entry.service_type}
-                      {entry.verified && <Badge color="blue">Oficial</Badge>}
-                    </div>
-                    <div className={styles.itemMeta}>
-                      {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
-                      {entry.city && ` · ${entry.city}`}
-                    </div>
-                  </div>
-                  <div>
-                    <div className={styles.itemCost}>
-                      ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                    <div className={styles.author}>por {names[entry.user_id] ?? 'un usuario'}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      ))}
-      </div>
+                </Card>
+              )
+            }
+            const { entry } = item
+            return (
+              <Card key={`service-${entry.id}`} className={`${styles.feedCard} ${styles.feedCard_service}`}>
+                <div className={styles.feedCardHead}>
+                  <span className={`${styles.typeChip} ${styles.typeChip_service}`}>
+                    <span aria-hidden="true">{meta.icon}</span> {meta.label}
+                  </span>
+                  {entry.verified && <Badge color="blue">Oficial</Badge>}
+                </div>
+                <div className={styles.itemTitle}>{entry.service_type}</div>
+                <div className={styles.itemMeta}>
+                  {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km · {entry.dealer}
+                  {entry.city && ` · ${entry.city}`}
+                </div>
+                <div className={styles.feedCardFoot}>
+                  <span className={styles.itemCost}>
+                    ${entry.cost_uyu.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                  <span className={styles.author}>por {names[entry.user_id] ?? 'un usuario'}</span>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
