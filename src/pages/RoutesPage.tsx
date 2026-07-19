@@ -136,6 +136,9 @@ export default function RoutesPage() {
         </Card>
       )}
 
+      {/* Trip cards are short (few stops, often no notes) — on wide desktop
+          they pack two-up instead of stacking as half-empty full-width cards. */}
+      <div className={styles.tripCardsGrid}>
       {orderedTrips.map((trip) => (
         <Card key={trip.id} className={styles.routeCard}>
           <div className={styles.routeCardHeader}>
@@ -171,6 +174,7 @@ export default function RoutesPage() {
           </p>
         </Card>
       ))}
+      </div>
     </>
   )
 

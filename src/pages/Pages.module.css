@@ -263,6 +263,31 @@
     grid-column: 1 / -1;
     margin-top: 10px;
   }
+
+  /* Community trip cards pack two-up (auto-fit: a lone card still spans
+     the full row). */
+  .tripCardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 12px; /* replaces the cards' own margins removed below */
+  }
+  .tripCardsGrid > * {
+    margin-bottom: 0;
+  }
+  /* Inside a half-width cell there's no room for the internal two-column
+     split — stack any tips under the timeline again. */
+  .tripCardsGrid .routeCard:has(.routeTips) {
+    display: block;
+  }
+  .tripCardsGrid .routeCard:has(.routeTips) .routeTips {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 14px;
+  }
 }
 
 /* ── Costs page ── */
