@@ -4,6 +4,19 @@
   gap: 10px;
 }
 
+/* Desktop: reclaim horizontal space instead of stretching 2 columns. */
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .item {
   display: flex;
   align-items: flex-start;

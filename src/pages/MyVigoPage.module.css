@@ -188,3 +188,17 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* Desktop: model and color pickers side by side. */
+@media (min-width: 900px) {
+  .pickersRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 12px; /* replaces the cards' own margins removed below */
+  }
+  .pickersRow > * {
+    margin-bottom: 0;
+  }
+}

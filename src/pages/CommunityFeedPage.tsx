@@ -153,31 +153,34 @@ export default function CommunityFeedPage() {
 
       <SectionDivider label="Aportes de la comunidad" />
 
-      {/* Type filter as chips (mobile redesign): one tap, no dropdown. */}
-      <div className={styles.chipsRow} role="group" aria-label="Mostrar">
-        {TYPE_CHIPS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            className={`${styles.chip} ${typeFilter === key ? styles.chipActive : ''}`}
-            onClick={() => setTypeFilter(key)}
-            aria-pressed={typeFilter === key}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* Type filter as chips (mobile redesign): one tap, no dropdown.
+          On desktop the chips and search share one row. */}
+      <div className={styles.feedControls}>
+        <div className={styles.chipsRow} role="group" aria-label="Mostrar">
+          {TYPE_CHIPS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              className={`${styles.chip} ${typeFilter === key ? styles.chipActive : ''}`}
+              onClick={() => setTypeFilter(key)}
+              aria-pressed={typeFilter === key}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-      <div className={styles.searchRow}>
-        <input
-          id="feed-search"
-          type="search"
-          aria-label="Buscar en los aportes"
-          className={formStyles.input}
-          placeholder="Buscar título, lugar, taller…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className={styles.searchRow}>
+          <input
+            id="feed-search"
+            type="search"
+            aria-label="Buscar en los aportes"
+            className={formStyles.input}
+            placeholder="Buscar título, lugar, taller…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className={styles.toolbar}>
@@ -211,6 +214,7 @@ export default function CommunityFeedPage() {
         )}
       </div>
 
+      <div className={styles.feedGroups}>
       {showTrips && (loading ? (
         <Skeleton lines={4} />
       ) : (
@@ -321,6 +325,7 @@ export default function CommunityFeedPage() {
           )}
         </Card>
       ))}
+      </div>
     </div>
   )
 }

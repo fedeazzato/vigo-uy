@@ -222,6 +222,14 @@
   padding: 2rem 1.5rem 4rem;
 }
 
+/* Wide desktop: give grid-heavy pages more room (body copy is capped at
+   ~65ch separately in index.css so text doesn't stretch with it). */
+@media (min-width: 1100px) {
+  .content {
+    max-width: 980px;
+  }
+}
+
 /* ── Mobile ── */
 .mobileHeader {
   display: none;

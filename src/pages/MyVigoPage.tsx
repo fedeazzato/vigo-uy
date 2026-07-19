@@ -93,6 +93,8 @@ export default function MyVigoPage() {
         </div>
       )}
 
+      {/* Desktop: the two pickers sit side by side (plan phase 2, item 5). */}
+      <div className={styles.pickersRow}>
       <Card>
         <CardTitle icon="⚙️">Modelo</CardTitle>
         <div className={styles.modelGrid}>
@@ -136,6 +138,7 @@ export default function MyVigoPage() {
           ))}
         </div>
       </Card>
+      </div>
 
       {status === 'signedIn' && (
         <>

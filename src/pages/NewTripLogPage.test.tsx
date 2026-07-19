@@ -65,6 +65,22 @@ function renderNewTrip() {
   )
 }
 
+// The form is a wizard only on phone widths (useMediaQuery). jsdom has no
+// real viewport, so stub matchMedia per describe block.
+function mockViewport(mobile: boolean) {
+  window.matchMedia = (query: string): MediaQueryList =>
+    ({
+      matches: mobile && query.includes('max-width: 700px'),
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList
+}
+
 // Wizard helpers: fill the required basics and advance with the single
 // primary button ("Siguiente" until the last step).
 function fillBasics() {
@@ -83,9 +99,10 @@ function goToShareStep() {
   clickNext() // -> paso 3 (Compartir)
 }
 
-describe('NewTripLogPage wizard', () => {
+describe('NewTripLogPage wizard (mobile)', () => {
   beforeEach(() => {
     localStorage.clear()
+    mockViewport(true)
   })
 
   it('starts on "Lo básico" with only the basics on screen', () => {
@@ -200,6 +217,38 @@ describe('NewTripLogPage wizard', () => {
     goToShareStep()
     fireEvent.click(screen.getByRole('checkbox'))
     expect(screen.queryByText(/Elegí E2 o E2\+ para poder compartir/)).toBeNull()
+  })
+})
+
+describe('NewTripLogPage single page (desktop)', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    mockViewport(false)
+  })
+
+  it('renders all sections at once with no wizard chrome', () => {
+    renderNewTrip()
+    // No step counter, one save button, back is "Volver".
+    expect(screen.queryByText(/Paso 1 de 3/)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Guardar viaje' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Volver/ })).toBeTruthy()
+    // Fields from every wizard step are on screen together.
+    expect(screen.getByLabelText('📍 Origen')).toBeTruthy()
+    expect(screen.getByText('⭐ ¿Cómo estuvo el viaje?')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'E2' })).toBeTruthy()
+    // Battery details stay behind the inline disclosure.
+    expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+    expect(screen.getByLabelText('🔋 Batería al salir (%)')).toBeTruthy()
+  })
+
+  it('validates the basics on direct submit', () => {
+    renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: '  ' } })
+    fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar viaje' }))
+    expect(screen.getByText('Completá origen, destino y distancia.')).toBeTruthy()
   })
 })
 

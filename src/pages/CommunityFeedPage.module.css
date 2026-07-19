@@ -122,6 +122,39 @@
   margin-bottom: 10px;
 }
 
+/* Desktop: chips stop scrolling and share one row with the search box;
+   the three feed groups sit side by side. */
+@media (min-width: 900px) {
+  .feedControls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .chipsRow {
+    overflow-x: visible;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .searchRow {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .feedGroups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  .feedGroups > * {
+    margin-bottom: 0;
+  }
+}
+
 /* Uppercase small-caps labels for the feed groups, matching the chips. */
 .groupTitle {
   font-size: 12px;

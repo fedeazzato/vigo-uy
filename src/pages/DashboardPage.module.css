@@ -150,7 +150,8 @@
   font-size: 13px;
   color: var(--text-tertiary);
   line-height: 1.5;
-  margin-bottom: 14px;
+  max-width: 42ch;
+  margin: 0 auto 14px;
 }
 
 .emptyStateBtn {

@@ -70,6 +70,14 @@
   font-weight: 500;
 }
 
+/* Wide desktop: cap tip line length for readability (the divider follows
+   the reading column). */
+@media (min-width: 1100px) {
+  .tip {
+    max-width: 72ch;
+  }
+}
+
 /* Badge */
 .badge {
   display: inline-block;

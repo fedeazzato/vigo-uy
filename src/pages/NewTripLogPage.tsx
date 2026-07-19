@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { parseLocaleNumber } from '../lib/format'
 import { fetchChargingNetworks, fetchChargingStations, invalidateCommunityCache } from '../lib/communityData'
+import { useMediaQuery, MOBILE_QUERY } from '../lib/useMediaQuery'
 import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 import styles from './NewTripLogPage.module.css'
@@ -134,6 +135,9 @@ export default function NewTripLogPage() {
   const { model: preferredModel } = useUserPrefs()
   const navigate = useNavigate()
 
+  // The 3-step wizard exists to shorten phone screens; on desktop the same
+  // form renders as a single page (plan: phase 2, item 2).
+  const isWizard = useMediaQuery(MOBILE_QUERY)
   const [step, setStep] = useState(1)
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
@@ -258,8 +262,9 @@ export default function NewTripLogPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
 
-    // Steps 1 and 2 only advance; the trip is saved from the last step.
-    if (step < LAST_STEP) {
+    // Wizard mode: steps 1 and 2 only advance; the trip is saved from the
+    // last step. Desktop renders everything at once and submits directly.
+    if (isWizard && step < LAST_STEP) {
       if (step === 1) {
         const basicsError = validateBasics()
         if (basicsError) {
@@ -272,18 +277,18 @@ export default function NewTripLogPage() {
       return
     }
 
-    if (!supabase || !user) return
-
     const basicsError = validateBasics()
     if (basicsError) {
       setError(basicsError)
-      setStep(1)
+      if (isWizard) setStep(1)
       return
     }
     if (isPublic && !model) {
       setError('Seleccioná el modelo (E2 o E2+) para compartir con la comunidad.')
       return
     }
+
+    if (!supabase || !user) return
     const distance = parseLocaleNumber(distanceKm) ?? null
     const startCharge = parseLocaleNumber(startingCharge)
     if (!isValidPercentage(startCharge)) {
@@ -360,21 +365,36 @@ export default function NewTripLogPage() {
   return (
     <div>
       <div className={styles.wizardTop}>
-        <button type="button" className={styles.backBtn} onClick={handleBack} disabled={submitting}>
-          ← Atrás
-        </button>
-        <span className={styles.stepCounter}>Paso {step} de {LAST_STEP}</span>
+        {isWizard ? (
+          <>
+            <button type="button" className={styles.backBtn} onClick={handleBack} disabled={submitting}>
+              ← Atrás
+            </button>
+            <span className={styles.stepCounter}>Paso {step} de {LAST_STEP}</span>
+          </>
+        ) : (
+          <button type="button" className={styles.backBtn} onClick={handleCancel} disabled={submitting}>
+            ← Volver
+          </button>
+        )}
       </div>
-      <PageHeader
-        title={`🗺️ ${STEP_TITLES[step]}`}
-        subtitle={isEdit ? 'Estás editando un viaje guardado.' : undefined}
-      />
+      {isWizard ? (
+        <PageHeader
+          title={`🗺️ ${STEP_TITLES[step]}`}
+          subtitle={isEdit ? 'Estás editando un viaje guardado.' : undefined}
+        />
+      ) : (
+        <PageHeader
+          title={isEdit ? '🗺️ Editar viaje' : '🗺️ Nuevo viaje'}
+          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+        />
+      )}
 
       <Card>
         {error && <FormError>{error}</FormError>}
 
         <form className={styles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
-          {step === 1 && (
+          {(!isWizard || step === 1) && (
           <>
           <CityDatalist />
           <div className={styles.row}>
@@ -435,7 +455,7 @@ export default function NewTripLogPage() {
           </>
           )}
 
-          {step === 3 && (
+          {(!isWizard || step === 3) && (
           <>
           <div className={styles.shareBlock}>
             <div className={styles.field}>
@@ -702,7 +722,7 @@ export default function NewTripLogPage() {
           </>
           )}
 
-          {step === 2 && (
+          {(!isWizard || step === 2) && (
           <>
           <div className={styles.field}>
             <span className={styles.label}>⭐ ¿Cómo estuvo el viaje?</span>
@@ -746,7 +766,7 @@ export default function NewTripLogPage() {
           )}
 
           <button type="submit" className={styles.submitBtn} disabled={submitting}>
-            {step < LAST_STEP
+            {isWizard && step < LAST_STEP
               ? 'Siguiente'
               : submitting
                 ? 'Guardando…'
