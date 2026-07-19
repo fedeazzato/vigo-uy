@@ -347,7 +347,8 @@ export default function NewTripLogPage() {
   const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
-    if (!supabase) return
+    // No supabase guard: the fetchers null-guard the client themselves and
+    // resolve empty, which also keeps this testable without env vars.
     void fetchChargingStations().then(({ stations: s }) => setStations(s))
     void fetchChargingNetworks().then(({ networks: n }) => setNetworks(n))
   }, [])

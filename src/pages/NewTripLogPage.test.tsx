@@ -4,8 +4,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
 import NewTripLogPage, { parseStopDrafts, StopDraft } from './NewTripLogPage'
 
-// supabase is null in tests (no VITE_SUPABASE_* env), so the page never
-// fetches; we only exercise the form's client-side behavior.
+// All data access goes through the mocked communityData layer below, so the
+// tests run identically with or without VITE_SUPABASE_* env (CI has none).
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'user-1' }, profile: null, status: 'signedIn' }),
 }))
