@@ -4,7 +4,7 @@ import { FormError } from '../components/UI'
 import EntryFormShell, { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { ISO_DATE_PATTERN, parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
 import { suggestTitleFromMercadoLibreUrl } from '../lib/mercadolibre'
@@ -65,8 +65,9 @@ export default function NewPartPurchasePage() {
     e.preventDefault()
     if (!supabase || !user) return
 
-    if (!ISO_DATE_PATTERN.test(purchaseDate)) {
-      setError('La fecha debe tener el formato AAAA-MM-DD.')
+    const dateError = validateIsoDate(purchaseDate)
+    if (dateError) {
+      setError(dateError)
       return
     }
     const price = parseLocaleNumber(priceUyu)

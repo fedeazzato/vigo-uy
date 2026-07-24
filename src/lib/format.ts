@@ -2,11 +2,16 @@
 // All user-visible output follows es-UY conventions.
 
 // The shape the entry forms accept and store (`YYYY-MM-DD`).
-export const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 /** Today as an ISO `YYYY-MM-DD` string, the entry forms' default date. */
 export function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10)
+}
+
+/** Spanish error message when `value` isn't `YYYY-MM-DD`, else `null`. */
+export function validateIsoDate(value: string): string | null {
+  return ISO_DATE_PATTERN.test(value) ? null : 'La fecha debe tener el formato AAAA-MM-DD.'
 }
 
 // Uruguayan Spanish month abbreviations (note "set" for setiembre).

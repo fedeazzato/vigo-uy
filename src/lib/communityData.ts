@@ -3,10 +3,11 @@
 // don't each reimplement fetching, author-name resolution, and error state.
 // Every function null-guards `supabase` and resolves to empty results, so the
 // pages render curated JSON only when the backend isn't configured.
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabaseClient'
 import { toFriendlyError } from './errors'
 import { formatCurrency } from './format'
+import { purchaseCategoryTitle } from './purchaseCatalog'
 import type {
   ChargingCostStat,
   ChargingNetwork,
@@ -207,6 +208,44 @@ export function useCityCostStats(): CityCostStat[] {
     void fetchCommunityStats().then(({ cityStats: cs }) => setCityStats(cs))
   }, [])
   return cityStats
+}
+
+// Minimum community purchases per category before showing an average price.
+const MIN_PURCHASE_PRICE_SAMPLES = 2
+
+export interface PurchaseSection {
+  priceStats: StatItem[]
+  recentPurchases: PartPurchase[]
+}
+
+// Shared by PartsPage/AccessoriesPage: both filter the same part_purchases
+// table down to their own category slice (via isPartCategory/
+// isAccessoryCategory), then derive the same price-stat and
+// recent-purchases lists from it.
+export function usePurchaseSection(
+  allPurchases: PartPurchase[],
+  isInScope: (category: string) => boolean
+): PurchaseSection {
+  const purchases = useMemo(() => allPurchases.filter((p) => isInScope(p.category)), [allPurchases, isInScope])
+
+  const priceStats = useMemo(() => {
+    const byCategory = new Map<string, number[]>()
+    for (const p of purchases) {
+      const list = byCategory.get(p.category) ?? []
+      list.push(p.price_uyu)
+      byCategory.set(p.category, list)
+    }
+    return [...byCategory.entries()]
+      .filter(([, prices]) => prices.length >= MIN_PURCHASE_PRICE_SAMPLES)
+      .map(([category, prices]) => ({
+        value: formatCurrency(prices.reduce((a, b) => a + b, 0) / prices.length),
+        label: `Precio medio · ${purchaseCategoryTitle(category)} (${prices.length})`,
+      }))
+  }, [purchases])
+
+  const recentPurchases = useMemo(() => verifiedFirst(purchases).slice(0, 15), [purchases])
+
+  return { priceStats, recentPurchases }
 }
 
 export function fetchLeaderboard(): Promise<{ rows: VehicleLeaderboardEntry[]; error: string | null }> {

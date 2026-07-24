@@ -4,7 +4,7 @@ import { FormError } from '../components/UI'
 import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { ISO_DATE_PATTERN, parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
@@ -59,12 +59,14 @@ export default function NewServiceEntryPage() {
       })
   }, [id, isEdit, setError])
 
+  // fallow-ignore-next-line code-duplication -- both simple entry forms open handleSubmit with the same guard + date-format check
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!supabase || !user) return
 
-    if (!ISO_DATE_PATTERN.test(serviceDate)) {
-      setError('La fecha debe tener el formato AAAA-MM-DD.')
+    const dateError = validateIsoDate(serviceDate)
+    if (dateError) {
+      setError(dateError)
       return
     }
     const km = parseLocaleNumber(odometerKm)

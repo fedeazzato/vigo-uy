@@ -111,7 +111,7 @@ export default function ContentReactions({ content }: ContentReactionsProps) {
 
   return (
     <div>
-      <div className={styles.row}>
+      <div className={styles.actionsRow}>
         <button
           type="button"
           className={`${styles.likeBtn} ${likedByMe ? styles.likeBtnActive : ''}`}
