@@ -299,6 +299,21 @@ export type ServiceEntry = Tables['service_entries']['Row']
 
 export type PartPurchase = Tables['part_purchases']['Row']
 
+// ── Reactions & comments (thumbs-up + short comments) ───────────────────────
+// Community content only (service_entries, trip_logs, part_purchases) --
+// curated JSON (FAQ, routes) is deliberately excluded, see migration 0027.
+
+export type ContentReaction = Tables['content_reactions']['Row']
+export type ContentComment = Tables['content_comments']['Row']
+
+// Which content row a reaction/comment targets, expressed without leaking
+// the three-nullable-FK-column DB shape into callers. `id` is always the
+// target row's own uuid.
+export type ReactableContent =
+  | { kind: 'service_entry'; id: string }
+  | { kind: 'trip_log'; id: string }
+  | { kind: 'part_purchase'; id: string }
+
 // Shape of one element of trip_logs.charging_stops (jsonb — no generated
 // shape; this is the one hand-maintained DB shape left).
 export type TripChargingStop = {

@@ -14,7 +14,9 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { useCommunityContent, verifiedFirst } from '../lib/communityData'
 import { formatCurrency } from '../lib/format'
-import { partsCatalog, partCategoryTitle } from '../lib/partsCatalog'
+import { partsCatalog } from '../lib/partsCatalog'
+import { isPartCategory, purchaseCategoryTitle } from '../lib/purchaseCatalog'
+import ContentReactions from '../components/ContentReactions'
 import type { StatItem } from '../types'
 import styles from './PartsPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -25,12 +27,15 @@ const MIN_PRICE_SAMPLES = 2
 export default function PartsPage() {
   const { status } = useAuth()
   // Curated catalog renders immediately; community purchases fill in async.
-  const { purchases, names, error } = useCommunityContent({
+  const { purchases: allPurchases, names, error } = useCommunityContent({
     trips: false,
     entries: false,
     purchases: true,
     limit: 50,
   })
+  // part_purchases now also covers accessory purchases (AccessoriesPage) --
+  // this page only shows the repuestos slice.
+  const purchases = useMemo(() => allPurchases.filter((p) => isPartCategory(p.category)), [allPurchases])
 
   const priceStats: StatItem[] = useMemo(() => {
     const byCategory = new Map<string, number[]>()
@@ -43,7 +48,7 @@ export default function PartsPage() {
       .filter(([, prices]) => prices.length >= MIN_PRICE_SAMPLES)
       .map(([category, prices]) => ({
         value: formatCurrency(prices.reduce((a, b) => a + b, 0) / prices.length),
-        label: `Precio medio · ${partCategoryTitle(category)} (${prices.length})`,
+        label: `Precio medio · ${purchaseCategoryTitle(category)} (${prices.length})`,
       }))
   }, [purchases])
 
@@ -106,15 +111,24 @@ export default function PartsPage() {
               <li key={p.id} className={listStyles.item}>
                 <div>
                   <div className={listStyles.itemTitle}>
-                    {p.item} <Badge color="gray">{partCategoryTitle(p.category)}</Badge>
+                    {p.item} <Badge color="gray">{purchaseCategoryTitle(p.category)}</Badge>
                     {p.verified && <Badge color="blue">Oficial</Badge>}
                   </div>
                   <div className={listStyles.itemMeta}>
                     {p.purchase_date} · {p.store}
                     {p.city && ` · ${p.city}`}
                     {p.rating != null && ` · ${'★'.repeat(p.rating)}`}
+                    {p.link && (
+                      <>
+                        {' · '}
+                        <a href={p.link} target="_blank" rel="noopener noreferrer nofollow ugc">
+                          Ver publicación ↗
+                        </a>
+                      </>
+                    )}
                   </div>
                   {p.notes && <div className={styles.itemNotes}>💬 {p.notes}</div>}
+                  <ContentReactions content={{ kind: 'part_purchase', id: p.id }} />
                 </div>
                 <div>
                   <div className={`${listStyles.itemCost} ${styles.itemCostRight}`}>

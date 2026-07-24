@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { PageHeader, Card, Alert, Badge, Skeleton } from '../components/UI'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
-import { invalidateCommunityCache } from '../lib/communityData'
+import { deleteComment, invalidateCommunityCache } from '../lib/communityData'
 import { useAuth } from '../context/AuthContext'
-import { partCategoryTitle } from '../lib/partsCatalog'
-import type { AdminUserRow, PartPurchase, ServiceEntry, TripLog } from '../types'
+import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
+import type { AdminUserRow, ContentComment, PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './ModerationPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -18,6 +18,7 @@ export default function ModerationPage() {
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
+  const [comments, setComments] = useState<ContentComment[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
   const [users, setUsers] = useState<AdminUserRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,7 +32,7 @@ export default function ModerationPage() {
     if (!supabase) return
     setLoading(true)
 
-    const [entriesRes, tripsRes, purchasesRes, usersRes] = await Promise.all([
+    const [entriesRes, tripsRes, purchasesRes, commentsRes, usersRes] = await Promise.all([
       supabase
         .from('service_entries')
         .select('*')
@@ -43,11 +44,18 @@ export default function ModerationPage() {
         .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false }),
+      // RLS already restricts this to comments on public content (plus the
+      // moderator's own) -- no extra filter needed.
+      supabase.from('content_comments').select('*').order('created_at', { ascending: false }),
       supabase.rpc('admin_list_users'),
     ])
 
-    if (entriesRes.error || tripsRes.error || purchasesRes.error || usersRes.error) {
-      setError(toFriendlyError(entriesRes.error ?? tripsRes.error ?? purchasesRes.error ?? usersRes.error))
+    if (entriesRes.error || tripsRes.error || purchasesRes.error || commentsRes.error || usersRes.error) {
+      setError(
+        toFriendlyError(
+          entriesRes.error ?? tripsRes.error ?? purchasesRes.error ?? commentsRes.error ?? usersRes.error
+        )
+      )
       setLoading(false)
       return
     }
@@ -55,6 +63,7 @@ export default function ModerationPage() {
     setEntries(entriesRes.data ?? [])
     setTrips((tripsRes.data ?? []) as TripLog[])
     setPurchases(purchasesRes.data ?? [])
+    setComments(commentsRes.data ?? [])
 
     const usersData = (usersRes.data ?? []) as AdminUserRow[]
     setUsers(usersData)
@@ -67,6 +76,28 @@ export default function ModerationPage() {
     setNames(map)
 
     setLoading(false)
+  }
+
+  // Human-readable label for whichever content row a comment targets, from
+  // the lists already loaded above.
+  function commentTargetLabel(comment: ContentComment): string {
+    if (comment.service_entry_id) {
+      return entries.find((e) => e.id === comment.service_entry_id)?.service_type ?? 'un service'
+    }
+    if (comment.trip_log_id) {
+      return trips.find((t) => t.id === comment.trip_log_id)?.title ?? 'un viaje'
+    }
+    return purchases.find((p) => p.id === comment.part_purchase_id)?.item ?? 'una compra'
+  }
+
+  async function handleDeleteComment(id: string) {
+    if (!confirm('¿Eliminar este comentario?')) return
+    const { error } = await deleteComment(id)
+    if (error) {
+      setError(error)
+      return
+    }
+    setComments((prev) => prev.filter((c) => c.id !== id))
   }
 
   function patchRows(table: ContentTable, id: string, patch: { hidden?: boolean; verified?: boolean }) {
@@ -237,8 +268,16 @@ export default function ModerationPage() {
                           {purchase.hidden && <Badge color="gray">Oculto</Badge>}
                         </div>
                         <div className={listStyles.itemMeta}>
-                          {purchase.purchase_date} · {partCategoryTitle(purchase.category)} · {purchase.store}{' '}
-                          · por {names[purchase.user_id] ?? 'un usuario'}
+                          {purchase.purchase_date} · {purchaseCategoryTitle(purchase.category)} ·{' '}
+                          {purchase.store} · por {names[purchase.user_id] ?? 'un usuario'}
+                          {purchase.link && (
+                            <>
+                              {' · '}
+                              <a href={purchase.link} target="_blank" rel="noopener noreferrer nofollow ugc">
+                                Ver publicación ↗
+                              </a>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className={listStyles.itemActions}>
@@ -304,6 +343,34 @@ export default function ModerationPage() {
                         <button
                           className={listStyles.actionLink}
                           onClick={() => deleteItem('trip_logs', trip.id)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card>
+              <h2 className={listStyles.sectionTitle}>Comentarios</h2>
+              {comments.length === 0 ? (
+                <p className={listStyles.empty}>No hay comentarios públicos.</p>
+              ) : (
+                <ul className={listStyles.list}>
+                  {comments.map((comment) => (
+                    <li key={comment.id} className={listStyles.item}>
+                      <div>
+                        <div className={listStyles.itemTitle}>{comment.body}</div>
+                        <div className={listStyles.itemMeta}>
+                          en {commentTargetLabel(comment)} · por {names[comment.user_id] ?? 'un usuario'}
+                        </div>
+                      </div>
+                      <div className={listStyles.itemActions}>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => handleDeleteComment(comment.id)}
                         >
                           Eliminar
                         </button>

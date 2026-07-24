@@ -1,0 +1,131 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.likeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+.likeBtn:hover:not(:disabled) {
+  border-color: var(--green-400);
+  color: var(--green-600);
+}
+.likeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.likeBtnActive {
+  border-color: var(--green-400);
+  color: var(--green-600);
+  background: var(--green-50);
+}
+
+.commentsToggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.commentsToggle:hover {
+  color: var(--green-600);
+}
+
+.comments {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment {
+  font-size: 13px;
+  color: var(--text-primary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.comment:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.commentAuthor {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.commentDelete {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.commentDelete:hover {
+  color: var(--red-400);
+}
+
+.commentForm {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.commentInput {
+  flex: 1;
+}
+
+.commentSubmit {
+  background: var(--green-400);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.commentSubmit:hover:not(:disabled) {
+  background: var(--green-600);
+}
+.commentSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.signInHint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.signInHint a {
+  color: var(--green-600);
+  font-weight: 600;
+}

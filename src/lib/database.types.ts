@@ -131,6 +131,107 @@ export type Database = {
           },
         ]
       }
+      content_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          part_purchase_id: string | null
+          service_entry_id: string | null
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          trip_log_id?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_comments_part_purchase_id_fkey"
+            columns: ["part_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "part_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_comments_service_entry_id_fkey"
+            columns: ["service_entry_id"]
+            isOneToOne: false
+            referencedRelation: "service_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_comments_trip_log_id_fkey"
+            columns: ["trip_log_id"]
+            isOneToOne: false
+            referencedRelation: "trip_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          part_purchase_id: string | null
+          service_entry_id: string | null
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          trip_log_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reactions_part_purchase_id_fkey"
+            columns: ["part_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "part_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reactions_service_entry_id_fkey"
+            columns: ["service_entry_id"]
+            isOneToOne: false
+            referencedRelation: "service_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reactions_trip_log_id_fkey"
+            columns: ["trip_log_id"]
+            isOneToOne: false
+            referencedRelation: "trip_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_code_attempts: {
         Row: {
           attempted_at: string
@@ -155,6 +256,7 @@ export type Database = {
           id: string
           is_public: boolean
           item: string
+          link: string | null
           notes: string | null
           odometer_km: number | null
           price_uyu: number
@@ -173,6 +275,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           item: string
+          link?: string | null
           notes?: string | null
           odometer_km?: number | null
           price_uyu: number
@@ -191,6 +294,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           item?: string
+          link?: string | null
           notes?: string | null
           odometer_km?: number | null
           price_uyu?: number
@@ -525,6 +629,37 @@ export type Database = {
           total_trips: number | null
         }
         Relationships: []
+      }
+      content_reaction_counts: {
+        Row: {
+          like_count: number | null
+          part_purchase_id: string | null
+          service_entry_id: string | null
+          trip_log_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reactions_part_purchase_id_fkey"
+            columns: ["part_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "part_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reactions_service_entry_id_fkey"
+            columns: ["service_entry_id"]
+            isOneToOne: false
+            referencedRelation: "service_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reactions_trip_log_id_fkey"
+            columns: ["trip_log_id"]
+            isOneToOne: false
+            referencedRelation: "trip_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_profiles: {
         Row: {

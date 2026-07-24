@@ -1,4 +1,5 @@
 import { Card, Badge } from './UI'
+import ContentReactions from './ContentReactions'
 import { formatDate } from '../lib/format'
 import type { Stop, StopType, TripLog } from '../types'
 import styles from './TripCard.module.css'
@@ -184,6 +185,7 @@ export default function TripCard({ trip, authorName }: TripCardProps) {
         {formatDate(trip.trip_date)}
         {authorName && ` · por ${authorName}`}
       </p>
+      <ContentReactions content={{ kind: 'trip_log', id: trip.id }} />
     </Card>
   )
 }

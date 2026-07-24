@@ -13,9 +13,12 @@ import type {
   ChargingStation,
   CityCostStat,
   CommunityTotals,
+  ContentComment,
+  ContentReaction,
   ModelTripStat,
   PartPurchase,
   PublicProfile,
+  ReactableContent,
   ServiceEntry,
   StatItem,
   StationReliability,
@@ -320,6 +323,118 @@ export type ReliabilityLevel = 'ok' | 'flaky' | 'unknown'
 export function reliabilityLevel(rel: StationReliability | undefined): ReliabilityLevel {
   if (!rel || rel.report_count < 3) return 'unknown'
   return rel.failure_ratio > 0.3 ? 'flaky' : 'ok'
+}
+
+// ── Reactions & comments (D5, community content only) ────────────────────
+// content_reactions/content_comments (migration 0027) each target exactly
+// one of three nullable FK columns; this maps the app-facing `ReactableContent`
+// kind to that column name everywhere a raw Supabase call needs it.
+
+type ReactableKind = ReactableContent['kind']
+
+const REACTION_COLUMN: Record<ReactableKind, 'service_entry_id' | 'trip_log_id' | 'part_purchase_id'> = {
+  service_entry: 'service_entry_id',
+  trip_log: 'trip_log_id',
+  part_purchase: 'part_purchase_id',
+}
+
+// All three FK columns always present (two undefined) so the return type is
+// one exact shape instead of a union of differently-keyed objects -- Supabase's
+// insert() typing rejects a union whose members don't all carry the same keys.
+function reactionRow(kind: ReactableKind, contentId: string, userId: string) {
+  return {
+    service_entry_id: kind === 'service_entry' ? contentId : undefined,
+    trip_log_id: kind === 'trip_log' ? contentId : undefined,
+    part_purchase_id: kind === 'part_purchase' ? contentId : undefined,
+    user_id: userId,
+  }
+}
+
+function commentRow(kind: ReactableKind, contentId: string, userId: string, body: string) {
+  return { ...reactionRow(kind, contentId, userId), body }
+}
+
+export interface ReactionState {
+  counts: Record<string, number>
+  likedByMe: Set<string>
+}
+
+// One round trip for a whole page's worth of content ids: fetches the raw
+// rows (not the content_reaction_counts view) so the count and "did I like
+// this" set come from the same query instead of two.
+export function fetchReactions(
+  kind: ReactableKind,
+  ids: string[],
+  userId: string | null
+): Promise<ReactionState> {
+  const client = supabase
+  if (!client || ids.length === 0) return Promise.resolve({ counts: {}, likedByMe: new Set() })
+  const column = REACTION_COLUMN[kind]
+  return cached(`reactions:${kind}:${[...ids].sort().join(',')}`, async () => {
+    const { data } = await client.from('content_reactions').select('*').in(column, ids)
+    const counts: Record<string, number> = {}
+    const likedByMe = new Set<string>()
+    for (const row of (data ?? []) as ContentReaction[]) {
+      const id = row[column]
+      if (!id) continue
+      counts[id] = (counts[id] ?? 0) + 1
+      if (userId && row.user_id === userId) likedByMe.add(id)
+    }
+    return { counts, likedByMe }
+  })
+}
+
+export function fetchComments(kind: ReactableKind, ids: string[]): Promise<ContentComment[]> {
+  const client = supabase
+  if (!client || ids.length === 0) return Promise.resolve([])
+  const column = REACTION_COLUMN[kind]
+  return cached(`comments:${kind}:${[...ids].sort().join(',')}`, async () => {
+    const { data } = await client
+      .from('content_comments')
+      .select('*')
+      .in(column, ids)
+      .order('created_at', { ascending: true })
+    return data ?? []
+  })
+}
+
+// Toggle: insert to like, delete the (unique) row to unlike.
+export async function toggleReaction(
+  kind: ReactableKind,
+  contentId: string,
+  userId: string,
+  currentlyLiked: boolean
+): Promise<{ error: string | null }> {
+  const client = supabase
+  if (!client) return { error: null }
+  const column = REACTION_COLUMN[kind]
+  const { error } = currentlyLiked
+    ? await client.from('content_reactions').delete().eq(column, contentId).eq('user_id', userId)
+    : await client.from('content_reactions').insert(reactionRow(kind, contentId, userId))
+  invalidateCommunityCache()
+  return { error: error ? toFriendlyError(error) : null }
+}
+
+export async function postComment(
+  kind: ReactableKind,
+  contentId: string,
+  userId: string,
+  body: string
+): Promise<{ error: string | null }> {
+  const client = supabase
+  if (!client) return { error: null }
+  const { error } = await client.from('content_comments').insert(commentRow(kind, contentId, userId, body))
+  invalidateCommunityCache()
+  return { error: error ? toFriendlyError(error) : null }
+}
+
+// Own comment or moderator (enforced by RLS); id is the comment's own uuid.
+export async function deleteComment(id: string): Promise<{ error: string | null }> {
+  const client = supabase
+  if (!client) return { error: null }
+  const { error } = await client.from('content_comments').delete().eq('id', id)
+  invalidateCommunityCache()
+  return { error: error ? toFriendlyError(error) : null }
 }
 
 export interface CommunityContent {

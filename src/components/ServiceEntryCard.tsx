@@ -1,4 +1,5 @@
 import { Card, Badge } from './UI'
+import ContentReactions from './ContentReactions'
 import { formatCurrency } from '../lib/format'
 import type { ServiceEntry } from '../types'
 // The realCase* classes live in Pages.module.css because CostsPage's curated
@@ -27,6 +28,7 @@ export default function ServiceEntryCard({ entry, authorName }: ServiceEntryCard
         {entry.city && ` · ${entry.city}`} · por {authorName ?? 'un usuario'}
       </p>
       {entry.notes && <p className={styles.realCaseConditions}>💬 {entry.notes}</p>}
+      <ContentReactions content={{ kind: 'service_entry', id: entry.id }} />
     </Card>
   )
 }

@@ -10,7 +10,8 @@ import { formatCurrency, formatDate } from '../lib/format'
 import { invalidateCommunityCache } from '../lib/communityData'
 import { useToggleSet } from '../lib/useToggleSet'
 import { toCsv, downloadCsv } from '../lib/csvExport'
-import { partCategoryTitle } from '../lib/partsCatalog'
+import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
+import ContentReactions from '../components/ContentReactions'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -231,11 +232,12 @@ export default function DashboardPage() {
       'Ciudad',
       'Calificación',
       'Notas',
+      'Link',
       'Público',
     ]
     const rows = purchases.map((p) => [
       p.purchase_date,
-      partCategoryTitle(p.category),
+      purchaseCategoryTitle(p.category),
       p.item,
       p.store,
       p.price_uyu,
@@ -243,6 +245,7 @@ export default function DashboardPage() {
       p.city,
       p.rating,
       p.notes,
+      p.link,
       p.is_public ? 'Sí' : 'No',
     ])
     downloadCsv('repuestos.csv', toCsv(headers, rows))
@@ -343,6 +346,7 @@ export default function DashboardPage() {
                         {formatDate(entry.service_date)} · {entry.odometer_km.toLocaleString('es-UY')} km ·{' '}
                         {entry.dealer}
                       </div>
+                      <ContentReactions content={{ kind: 'service_entry', id: entry.id }} />
                     </div>
                     <div className={listStyles.itemCost}>{formatCurrency(entry.cost_uyu, 2)}</div>
                     <div className={listStyles.itemActions}>
@@ -369,7 +373,7 @@ export default function DashboardPage() {
 
           <Card>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionHeaderTitle}>Repuestos y consumibles</h2>
+              <h2 className={styles.sectionHeaderTitle}>Repuestos y accesorios</h2>
               <div className={styles.sectionActions}>
                 {purchases.length > 0 && (
                   <button className={styles.addLink} onClick={exportPurchasesCsv}>
@@ -385,7 +389,7 @@ export default function DashboardPage() {
             {loadingPurchases ? (
               <p className={listStyles.empty}>Cargando…</p>
             ) : purchases.length === 0 ? (
-              <p className={listStyles.empty}>Todavía no registraste ninguna compra de repuestos.</p>
+              <p className={listStyles.empty}>Todavía no registraste ninguna compra.</p>
             ) : (
               <ul className={listStyles.list}>
                 {purchases.map((purchase) => (
@@ -393,10 +397,19 @@ export default function DashboardPage() {
                     <div>
                       <div className={listStyles.itemTitle}>{purchase.item}</div>
                       <div className={listStyles.itemMeta}>
-                        {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} ·{' '}
+                        {formatDate(purchase.purchase_date)} · {purchaseCategoryTitle(purchase.category)} ·{' '}
                         {purchase.store}
                         {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                        {purchase.link && (
+                          <>
+                            {' · '}
+                            <a href={purchase.link} target="_blank" rel="noopener noreferrer nofollow ugc">
+                              Ver publicación ↗
+                            </a>
+                          </>
+                        )}
                       </div>
+                      <ContentReactions content={{ kind: 'part_purchase', id: purchase.id }} />
                     </div>
                     <div className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu, 2)}</div>
                     <div className={listStyles.itemActions}>

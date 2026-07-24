@@ -15,7 +15,8 @@ import {
   verifiedFirst,
 } from '../lib/communityData'
 import { useToggleSet } from '../lib/useToggleSet'
-import { partCategoryTitle } from '../lib/partsCatalog'
+import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
+import ContentReactions from '../components/ContentReactions'
 import type { PartPurchase, ServiceEntry, StatItem, TripLog, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -29,7 +30,7 @@ const TYPE_CHIPS: { key: TypeFilter; label: string }[] = [
   { key: 'todos', label: 'Todo' },
   { key: 'viajes', label: 'Viajes' },
   { key: 'services', label: 'Services' },
-  { key: 'repuestos', label: 'Repuestos' },
+  { key: 'repuestos', label: 'Compras' },
 ]
 
 // One mixed feed instead of per-type columns: with few entries of some
@@ -42,7 +43,7 @@ type FeedItem =
 const KIND_META: Record<FeedItem['kind'], { icon: string; label: string }> = {
   viaje: { icon: '🗺️', label: 'Viaje' },
   service: { icon: '🛠️', label: 'Service' },
-  repuesto: { icon: '🔩', label: 'Repuesto' },
+  repuesto: { icon: '🛒', label: 'Compra' },
 }
 
 // Shared ordering for the filter memos: "puntuación" sorts by rating first,
@@ -116,7 +117,7 @@ export default function CommunityFeedPage() {
     const q = query.trim().toLowerCase()
     const result = q
       ? purchases.filter((p) =>
-          [p.item, p.store, partCategoryTitle(p.category), p.city ?? ''].some((f) =>
+          [p.item, p.store, purchaseCategoryTitle(p.category), p.city ?? ''].some((f) =>
             f.toLowerCase().includes(q)
           )
         )
@@ -320,6 +321,7 @@ export default function CommunityFeedPage() {
                   <div className={styles.feedCardFoot}>
                     <span className={listStyles.author}>por {author}</span>
                   </div>
+                  <ContentReactions content={{ kind: 'trip_log', id: trip.id }} />
                 </Card>
               )
             }
@@ -338,15 +340,24 @@ export default function CommunityFeedPage() {
                   </div>
                   <div className={listStyles.itemTitle}>{purchase.item}</div>
                   <div className={listStyles.itemMeta}>
-                    {formatDate(purchase.purchase_date)} · {partCategoryTitle(purchase.category)} ·{' '}
+                    {formatDate(purchase.purchase_date)} · {purchaseCategoryTitle(purchase.category)} ·{' '}
                     {purchase.store}
                     {purchase.city && ` · ${purchase.city}`}
                     {purchase.rating != null && ` · ${'★'.repeat(purchase.rating)}`}
+                    {purchase.link && (
+                      <>
+                        {' · '}
+                        <a href={purchase.link} target="_blank" rel="noopener noreferrer nofollow ugc">
+                          Ver publicación ↗
+                        </a>
+                      </>
+                    )}
                   </div>
                   <div className={styles.feedCardFoot}>
                     <span className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu)}</span>
                     <span className={listStyles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
                   </div>
+                  <ContentReactions content={{ kind: 'part_purchase', id: purchase.id }} />
                 </Card>
               )
             }
@@ -369,6 +380,7 @@ export default function CommunityFeedPage() {
                   <span className={listStyles.itemCost}>{formatCurrency(entry.cost_uyu, 2)}</span>
                   <span className={listStyles.author}>por {names[entry.user_id] ?? 'un usuario'}</span>
                 </div>
+                <ContentReactions content={{ kind: 'service_entry', id: entry.id }} />
               </Card>
             )
           })}

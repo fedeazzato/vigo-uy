@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { ISO_DATE_PATTERN, parseLocaleNumber, todayIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
-import { partsCatalog } from '../lib/partsCatalog'
+import { PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
+import { suggestTitleFromMercadoLibreUrl } from '../lib/mercadolibre'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
@@ -17,7 +18,7 @@ export default function NewPartPurchasePage() {
   const navigate = useNavigate()
 
   const [purchaseDate, setPurchaseDate] = useState(todayIsoDate())
-  const [category, setCategory] = useState(partsCatalog.categories[0]?.id ?? 'otros')
+  const [category, setCategory] = useState(PURCHASE_CATEGORY_GROUPS[0]?.categories[0]?.id ?? 'otros')
   const [item, setItem] = useState('')
   const [store, setStore] = useState('')
   const [priceUyu, setPriceUyu] = useState('')
@@ -25,6 +26,7 @@ export default function NewPartPurchasePage() {
   const [city, setCity] = useState('')
   const [rating, setRating] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
+  const [link, setLink] = useState('')
   const [isPublic, setIsPublic] = useState(true)
 
   const [loading, setLoading] = useState(isEdit)
@@ -52,6 +54,7 @@ export default function NewPartPurchasePage() {
           setCity(data.city ?? '')
           setRating(data.rating)
           setNotes(data.notes ?? '')
+          setLink(data.link ?? '')
           setIsPublic(data.is_public)
         }
         setLoading(false)
@@ -80,6 +83,11 @@ export default function NewPartPurchasePage() {
       setError('Completá qué compraste y dónde.')
       return
     }
+    const trimmedLink = link.trim()
+    if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
+      setError('El link debe empezar con http:// o https://.')
+      return
+    }
 
     const payload = {
       purchase_date: purchaseDate,
@@ -91,6 +99,7 @@ export default function NewPartPurchasePage() {
       city: city.trim() || null,
       rating,
       notes: notes.trim() || null,
+      link: trimmedLink || null,
       is_public: isPublic,
     }
 
@@ -109,8 +118,8 @@ export default function NewPartPurchasePage() {
 
   return (
     <EntryFormShell
-      title={isEdit ? '🔩 Editar compra de repuesto' : '🔩 Nueva compra de repuesto'}
-      subtitle="Registrá lo que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
+      title={isEdit ? '🛒 Editar compra' : '🛒 Nueva compra'}
+      subtitle="Registrá un repuesto o accesorio que compraste para llevar tus gastos y recomendar (o no) dónde comprar."
       loading={loading}
       submitting={submitting}
       onCancel={handleCancel}
@@ -143,10 +152,14 @@ export default function NewPartPurchasePage() {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              {partsCatalog.categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.icon} {c.title}
-                </option>
+              {PURCHASE_CATEGORY_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.icon} {c.title}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
@@ -166,6 +179,27 @@ export default function NewPartPurchasePage() {
             placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
           />
           <span className={formStyles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
+        </div>
+
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="purchase-link">
+            🔗 Link a la publicación (opcional)
+          </label>
+          <input
+            id="purchase-link"
+            type="url"
+            className={formStyles.input}
+            value={link}
+            onChange={(e) => {
+              const value = e.target.value
+              setLink(value)
+              if (!item.trim()) {
+                const suggested = suggestTitleFromMercadoLibreUrl(value)
+                if (suggested) setItem(suggested)
+              }
+            }}
+            placeholder="https://articulo.mercadolibre.com.uy/..."
+          />
         </div>
 
         <div className={formStyles.row}>
