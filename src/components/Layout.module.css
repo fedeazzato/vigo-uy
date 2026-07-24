@@ -52,6 +52,24 @@
   margin-top: 1px;
 }
 
+.searchTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0.5rem 1rem 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-secondary);
+  color: var(--text-tertiary);
+  font-size: 13px;
+  text-align: left;
+}
+.searchTrigger:hover {
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
 .vigoTag {
   display: flex;
   align-items: center;
@@ -373,6 +391,7 @@
   }
 
   /* ≥ 44px touch targets (B3). */
+  .searchButtonMobile,
   .themeToggleMobile,
   .suggestLinkMobile,
   .miVigoLinkMobile {
@@ -395,6 +414,7 @@
   }
 
   /* Subtle highlight on hover, no link underline; tokens cover both themes. */
+  .searchButtonMobile:hover,
   .themeToggleMobile:hover,
   .suggestLinkMobile:hover,
   .miVigoLinkMobile:hover {

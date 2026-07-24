@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary'
 import OfflineBanner from './OfflineBanner'
+import SiteSearch from './SiteSearch'
 import { GUIDE_LINKS } from './GuideLinks'
+import { PRIMARY_NAV } from '../lib/primaryNav'
+import type { NavItem } from '../lib/primaryNav'
 import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
@@ -18,22 +21,6 @@ const THEME_LABEL: Record<EffectiveTheme, string> = {
   light: 'Claro',
   dark: 'Oscuro',
 }
-
-interface NavItem {
-  to: string
-  label: string
-  icon: string
-  end?: boolean
-}
-
-// App-like destinations. The static reference pages live under the Guía
-// group (sidebar) / the /guia page (mobile), not here.
-const PRIMARY_NAV: NavItem[] = [
-  { to: '/', label: 'Inicio', icon: '🏠', end: true },
-  { to: '/comunidad', label: 'Comunidad', icon: '🌐' },
-  { to: '/mi-actividad', label: 'Mi actividad', icon: '🗒️' },
-  { to: '/mi-vigo', label: 'Mi Vigo', icon: '🚗' },
-]
 
 const MODERATION_ITEM: NavItem = { to: '/moderacion', label: 'Moderación', icon: '🛡️' }
 
@@ -71,6 +58,7 @@ export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
   const { user, profile, status, signOut } = useAuth()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   function toggleTheme() {
     setTheme(effectiveTheme === 'dark' ? 'light' : 'dark')
@@ -121,6 +109,16 @@ export default function Layout() {
               <div className={styles.brandSub}>Uruguay 🇺🇾</div>
             </div>
           </div>
+
+          <button
+            type="button"
+            className={styles.searchTrigger}
+            onClick={() => setSearchOpen(true)}
+            aria-label="Buscar en el sitio"
+          >
+            <span aria-hidden="true">🔍</span>
+            <span>Buscar...</span>
+          </button>
 
           {(model || color) && (
             <div className={styles.vigoTag}>
@@ -209,6 +207,14 @@ export default function Layout() {
               </div>
             </div>
             <div className={styles.mobileHeaderActions}>
+              <button
+                type="button"
+                className={styles.searchButtonMobile}
+                onClick={() => setSearchOpen(true)}
+                aria-label="Buscar en el sitio"
+              >
+                🔍
+              </button>
               <a
                 href="https://forms.gle/SiNjQ77d71bUHvJ96"
                 target="_blank"
@@ -323,6 +329,8 @@ export default function Layout() {
           <TabLink to="/mi-actividad" icon="🗒️" label="Mi actividad" onClick={closeSheet} />
           <TabLink to="/guia" icon="📖" label="Guía" onClick={closeSheet} />
         </nav>
+
+        <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
 
         <OfflineBanner />
       </div>

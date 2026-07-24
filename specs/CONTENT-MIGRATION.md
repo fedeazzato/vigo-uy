@@ -22,6 +22,12 @@ file is finally deleted.
 
 Notes:
 
+- Site search (`src/lib/siteSearch.ts`, specs/site-search.md) indexes curated
+  JSON text directly, independent of `preferCommunity()`. When a row above
+  flips a page's stats/lists to `comunidad`, that page's curated prose (tips,
+  troubleshooting, disclaimers) stays in the search index regardless —
+  search coverage of a page shouldn't quietly shrink just because its data
+  view went community-first.
 - `CostsPage.estimateConsumption` keeps its own ≥3-samples gate (the original
   instance of this pattern) — deliberately not routed through
   `preferCommunity`, which returns one source or the other, while the

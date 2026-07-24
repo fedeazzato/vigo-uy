@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { fromMock, selectMock } = vi.hoisted(() => {
+const { fromMock, selectMock, rpcMock } = vi.hoisted(() => {
   const selectMock = vi.fn()
   const fromMock = vi.fn(() => ({ select: selectMock }))
-  return { fromMock, selectMock }
+  const rpcMock = vi.fn()
+  return { fromMock, selectMock, rpcMock }
 })
 
 vi.mock('./supabaseClient', () => ({
-  supabase: { from: fromMock },
+  supabase: { from: fromMock, rpc: rpcMock },
 }))
 
 import {
@@ -17,9 +18,10 @@ import {
   pickCostStat,
   preferCommunity,
   reliabilityLevel,
+  searchCommunityContent,
   verifiedFirst,
 } from './communityData'
-import type { ChargingCostStat, CityCostStat, StationReliability } from '../types'
+import type { ChargingCostStat, CityCostStat, CommunitySearchResult, StationReliability } from '../types'
 
 describe('preferCommunity', () => {
   const curated = { anything: true }
@@ -129,6 +131,48 @@ describe('reliabilityLevel', () => {
 
   it('is ok at or below 30% failures', () => {
     expect(reliabilityLevel(rel({ failure_ratio: 0.3, failure_count: 1 }))).toBe('ok')
+  })
+})
+
+describe('searchCommunityContent', () => {
+  beforeEach(() => {
+    rpcMock.mockReset()
+  })
+
+  it('returns no results without calling the RPC for an empty or whitespace query', async () => {
+    expect(await searchCommunityContent('')).toEqual({ results: [], error: null })
+    expect(await searchCommunityContent('   ')).toEqual({ results: [], error: null })
+    expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it('calls the RPC with the query and limit, and returns the mapped rows', async () => {
+    const rows: CommunitySearchResult[] = [
+      {
+        kind: 'trip_log',
+        id: 't-1',
+        title: 'Montevideo — Punta del Este',
+        subtitle: 'Montevideo → Punta del Este',
+        category: null,
+        created_at: '2026-07-01T00:00:00Z',
+        rank: 0.5,
+      },
+    ]
+    rpcMock.mockResolvedValue({ data: rows, error: null })
+
+    const result = await searchCommunityContent('punta', 10)
+
+    expect(rpcMock).toHaveBeenCalledWith('search_community_content', {
+      search_query: 'punta',
+      result_limit: 10,
+    })
+    expect(result).toEqual({ results: rows, error: null })
+  })
+
+  it('propagates a friendly error and empty results on RPC failure', async () => {
+    rpcMock.mockResolvedValue({ data: null, error: { message: 'boom' } })
+    const result = await searchCommunityContent('punta')
+    expect(result.results).toEqual([])
+    expect(result.error).not.toBeNull()
   })
 })
 

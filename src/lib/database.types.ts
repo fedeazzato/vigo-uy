@@ -758,6 +758,18 @@ export type Database = {
         Returns: undefined
       }
       reset_my_vehicle: { Args: never; Returns: string }
+      search_community_content: {
+        Args: { result_limit?: number; search_query: string }
+        Returns: {
+          category: string
+          created_at: string
+          id: string
+          kind: string
+          rank: number
+          subtitle: string
+          title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

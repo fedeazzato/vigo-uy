@@ -408,3 +408,29 @@ export type AdminUserRow = Omit<
   city: string | null
   model: Model | null
 }
+
+// ── Site search (v1: plain keyword search, no LLM/embeddings) ──────────────
+
+export type CommunitySearchKind = 'service_entry' | 'trip_log' | 'part_purchase'
+
+// search_community_content RPC (0028): full-text search over public,
+// non-hidden community rows. `category` is only set on part_purchase rows
+// (null for the other two kinds via the RPC's UNION ALL) -- it picks
+// /repuestos vs /accesorios via purchaseCatalog.ts. Codegen marks it non-null
+// like the other Function-return columns (same limitation noted on
+// AdminUserRow above), so re-widen it here to what it actually is.
+export type CommunitySearchResult = Omit<
+  Database['public']['Functions']['search_community_content']['Returns'][number],
+  'kind' | 'category'
+> & {
+  kind: CommunitySearchKind
+  category: string | null
+}
+
+// One "Guía" search hit: a curated page (nav label) or a snippet of curated
+// JSON text, both pointing at a page path -- see src/lib/siteSearch.ts.
+export interface CuratedSearchResult {
+  path: string
+  title: string
+  subtitle?: string
+}

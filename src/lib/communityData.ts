@@ -12,6 +12,7 @@ import type {
   ChargingNetwork,
   ChargingStation,
   CityCostStat,
+  CommunitySearchResult,
   CommunityTotals,
   ContentComment,
   ContentReaction,
@@ -435,6 +436,27 @@ export async function deleteComment(id: string): Promise<{ error: string | null 
   const { error } = await client.from('content_comments').delete().eq('id', id)
   invalidateCommunityCache()
   return { error: error ? toFriendlyError(error) : null }
+}
+
+// ── Site search (0028) ───────────────────────────────────────────────────
+// Deliberately not run through `cached()`: each call is keyed by a
+// free-typed query string with low reuse, so memoizing it would just grow
+// the TTL cache with one-off entries instead of saving round trips.
+
+export async function searchCommunityContent(
+  query: string,
+  limit = 20
+): Promise<{ results: CommunitySearchResult[]; error: string | null }> {
+  const client = supabase
+  if (!client || query.trim() === '') return { results: [], error: null }
+  const { data, error } = await client.rpc('search_community_content', {
+    search_query: query,
+    result_limit: limit,
+  })
+  return {
+    results: (data ?? []) as CommunitySearchResult[],
+    error: error ? toFriendlyError(error) : null,
+  }
 }
 
 export interface CommunityContent {
