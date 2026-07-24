@@ -47,6 +47,9 @@ export default function AccessoriesPage() {
       }))
   }, [purchases])
 
+  // TODO(D1): accessories.json carries no curated prices today (only tips),
+  // so there is nothing to gate yet. If curated price references are ever
+  // added, gate them per category against part_purchases counts (≥3).
   const recentPurchases = verifiedFirst(purchases).slice(0, 15)
 
   return (

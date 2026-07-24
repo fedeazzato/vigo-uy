@@ -12,11 +12,13 @@ file is finally deleted.
 |---|---|---|---|
 | costs.json (realCases) | service_entries | ≥5 public entries | gated (D1) |
 | routes.json (route cards) | trip_logs | ≥5 public trips | gated (D1) |
-| parts.json prices | part_purchases | per-category ≥3 | pending — parts.json carries no prices yet (`TODO(D1)` in PartsPage) |
+| parts.json prices | part_purchases (repuestos categories) | per-category ≥3 | pending — parts.json carries no prices yet (`TODO(D1)` in PartsPage) |
+| accessories.json prices | part_purchases (accessory categories, added when the purchase form was broadened to cover both) | per-category ≥3 | pending — same situation as parts.json prices, no curated prices to gate yet (`TODO(D1)` in AccessoriesPage) |
 | charging.json (chargers + alerts) | `charging_stations` + `station_reports` + computed `charging_cost_stats` | per-network ≥3 charges with cost+kWh | gated (D4) |
 | charging.json (home/V2L/troubleshooting/autonomy) | permanently curated | n/a | keep |
 | mantenimiento.json (dealerPrices) | service_entries by type | — | future work |
-| ficha-tecnica.json, tech-faq.json, accessories.json | permanently curated | n/a | keep |
+| ficha-tecnica.json, tech-faq.json | permanently curated | n/a | keep |
+| accessories.json (category descriptions/tips) | permanently curated | n/a | keep — only the descriptive text; purchase prices/recommendations now come from part_purchases, see row above |
 
 Notes:
 

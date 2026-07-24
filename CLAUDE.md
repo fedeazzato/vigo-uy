@@ -13,6 +13,17 @@ npm run gen:types    # Regenerate src/lib/database.types.ts from the linked Supa
 npm run deploy       # Build + push to gh-pages branch (GitHub Pages)
 ```
 
+## Development methodology
+
+Before implementing a non-trivial change (new feature, bug fix, schema/migration change, or anything touching a subject an existing spec already tracks), write or update a spec file under `specs/` **first, as part of the same change** — not as a follow-up after the fact. Trivial changes (typo fixes, formatting, dependency bumps, pure refactors with no behavior change) are exempt.
+
+- **Format**: follow the existing self-contained style already in `specs/` — context, requirements, files to touch, acceptance criteria, and a **test plan**. Use the `spec` skill to scaffold one.
+- **Naming**: the `A1`/`B2`/`C3`/`D4` lettering in `specs/README.md`'s status board belongs to the closed "July 2026 whole-app audit" — don't extend it for new work. Give new specs a plain descriptive filename (e.g. `specs/purchase-links-and-reactions.md`), the same pattern `specs/CONTENT-MIGRATION.md` already uses as a living tracker outside that scheme.
+- **Keep existing trackers current**: if a change touches something an existing spec tracks — most commonly `specs/CONTENT-MIGRATION.md`'s curated-vs-community gates — update that spec's table in the same change. (This is the exact mistake this rule exists to prevent: accessories.json purchases were added without updating CONTENT-MIGRATION.md's row for it.)
+- **Tests are part of the spec, not an afterthought**: every feature or bug fix ships with the unit tests its test plan calls for (colocated `*.test.ts(x)`, per the Vitest convention above).
+- For non-trivial work, present a plan and get sign-off before writing code (as usual) — the difference now is the agreed plan gets persisted as the spec file instead of staying only in conversation.
+- **Every change is complete only once `npm run type-check`, `npm run lint`, and `npm test` all pass, followed by a commit and a push to `origin/main`.** This is a standing authorization — don't stop to ask before pushing on a change that reaches this point clean. If any of the three fail, stop and fix the underlying issue; never commit or push on a red run.
+
 ## Architecture
 
 The frontend is still a **static SPA deployed to GitHub Pages** (no server, `HashRouter`), but the site is no longer purely static content: it has a Supabase (Postgres + Auth) backend for real user accounts and user-submitted data. Two kinds of content coexist, and the distinction matters everywhere in the UI:
