@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
-import { suggestTitleFromMercadoLibreUrl } from '../lib/mercadolibre'
+import { suggestTitleFromStoreUrl } from '../lib/storeLinks'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
@@ -195,11 +195,11 @@ export default function NewPartPurchasePage() {
               const value = e.target.value
               setLink(value)
               if (!item.trim()) {
-                const suggested = suggestTitleFromMercadoLibreUrl(value)
+                const suggested = suggestTitleFromStoreUrl(value)
                 if (suggested) setItem(suggested)
               }
             }}
-            placeholder="https://articulo.mercadolibre.com.uy/..."
+            placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress)"
           />
         </div>
 
