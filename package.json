@@ -2,6 +2,7 @@
   "name": "vigo-wiki",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "homepage": "https://fedeazzato.github.io/vigo-uy",
   "scripts": {
     "dev": "vite",
