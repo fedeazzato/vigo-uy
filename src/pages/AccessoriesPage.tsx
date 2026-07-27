@@ -45,6 +45,8 @@ export default function AccessoriesPage() {
         priceStats={priceStats}
         recentPurchases={recentPurchases}
         names={names}
+        ctaLabel="Registrar accesorio"
+        ctaTo="/repuestos/nuevo"
       />
     </div>
   )

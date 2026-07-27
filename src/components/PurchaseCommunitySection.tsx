@@ -22,6 +22,8 @@ interface PurchaseCommunitySectionProps {
   priceStats: StatItem[]
   recentPurchases: PartPurchase[]
   names: Record<string, string>
+  ctaLabel?: string
+  ctaTo?: string
 }
 
 export default function PurchaseCommunitySection({
@@ -30,6 +32,8 @@ export default function PurchaseCommunitySection({
   priceStats,
   recentPurchases,
   names,
+  ctaLabel = '+ Registrar compra',
+  ctaTo = '/repuestos/nuevo',
 }: PurchaseCommunitySectionProps) {
   return (
     <>
@@ -40,8 +44,8 @@ export default function PurchaseCommunitySection({
           {signedIn ? (
             <>
               <span>¿Compraste un {itemWord}? Registralo para seguir tus gastos y orientar al resto.</span>
-              <Link to="/repuestos/nuevo" className={listStyles.ctaBtn}>
-                + Registrar compra
+              <Link to={ctaTo} className={listStyles.ctaBtn}>
+                {ctaLabel}
               </Link>
             </>
           ) : (
