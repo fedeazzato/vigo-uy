@@ -8,6 +8,7 @@ import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
 import { suggestTitleFromStoreUrl } from '../lib/storeLinks'
+import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 
@@ -27,6 +28,7 @@ export default function NewPartPurchasePage() {
   const [rating, setRating] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
   const [link, setLink] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
 
   const [loading, setLoading] = useState(isEdit)
@@ -55,6 +57,7 @@ export default function NewPartPurchasePage() {
           setRating(data.rating)
           setNotes(data.notes ?? '')
           setLink(data.link ?? '')
+          setImageUrl(data.image_url ?? '')
           setIsPublic(data.is_public)
         }
         setLoading(false)
@@ -89,6 +92,11 @@ export default function NewPartPurchasePage() {
       setError('El link debe empezar con http:// o https://.')
       return
     }
+    const trimmedImageUrl = imageUrl.trim()
+    if (trimmedImageUrl && !/^https?:\/\//i.test(trimmedImageUrl)) {
+      setError('El link de la foto debe empezar con http:// o https://.')
+      return
+    }
 
     const payload = {
       purchase_date: purchaseDate,
@@ -101,6 +109,7 @@ export default function NewPartPurchasePage() {
       rating,
       notes: notes.trim() || null,
       link: trimmedLink || null,
+      image_url: trimmedImageUrl || null,
       is_public: isPublic,
     }
 
@@ -201,6 +210,21 @@ export default function NewPartPurchasePage() {
             }}
             placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress)"
           />
+        </div>
+
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="purchase-image">
+            🖼️ Foto del producto (opcional)
+          </label>
+          <input
+            id="purchase-image"
+            type="url"
+            className={formStyles.input}
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://... (clic derecho sobre la foto en la publicación → Copiar dirección de la imagen)"
+          />
+          <PurchaseThumbnail src={imageUrl.trim() || null} alt={item || 'Vista previa'} />
         </div>
 
         <div className={formStyles.row}>

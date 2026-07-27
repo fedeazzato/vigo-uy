@@ -7,6 +7,7 @@
 import { Link } from 'react-router-dom'
 import { Card, Badge, StatGrid, SectionDivider } from './UI'
 import ContentReactions from './ContentReactions'
+import PurchaseThumbnail from './PurchaseThumbnail'
 import { formatCurrency } from '../lib/format'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import { supabase } from '../lib/supabaseClient'
@@ -86,6 +87,7 @@ export default function PurchaseCommunitySection({
                     )}
                   </div>
                   {p.notes && <div className={styles.itemNotes}>💬 {p.notes}</div>}
+                  <PurchaseThumbnail src={p.image_url} alt={p.item} />
                   <ContentReactions content={{ kind: 'part_purchase', id: p.id }} />
                 </div>
                 <div>

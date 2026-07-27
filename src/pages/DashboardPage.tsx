@@ -12,6 +12,7 @@ import { useToggleSet } from '../lib/useToggleSet'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import ContentReactions from '../components/ContentReactions'
+import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import type { PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -233,6 +234,7 @@ export default function DashboardPage() {
       'Calificación',
       'Notas',
       'Link',
+      'Imagen',
       'Público',
     ]
     const rows = purchases.map((p) => [
@@ -246,6 +248,7 @@ export default function DashboardPage() {
       p.rating,
       p.notes,
       p.link,
+      p.image_url,
       p.is_public ? 'Sí' : 'No',
     ])
     downloadCsv('repuestos.csv', toCsv(headers, rows))
@@ -409,6 +412,7 @@ export default function DashboardPage() {
                           </>
                         )}
                       </div>
+                      <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
                       <ContentReactions content={{ kind: 'part_purchase', id: purchase.id }} />
                     </div>
                     <div className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu, 2)}</div>

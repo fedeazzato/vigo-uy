@@ -17,6 +17,7 @@ import {
 import { useToggleSet } from '../lib/useToggleSet'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import ContentReactions from '../components/ContentReactions'
+import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import type { PartPurchase, ServiceEntry, StatItem, TripLog, VehicleLeaderboardEntry } from '../types'
 import styles from './CommunityFeedPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -353,6 +354,7 @@ export default function CommunityFeedPage() {
                       </>
                     )}
                   </div>
+                  <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
                   <div className={styles.feedCardFoot}>
                     <span className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu)}</span>
                     <span className={listStyles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>

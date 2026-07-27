@@ -1,0 +1,10 @@
+.thumbnail {
+  display: block;
+  width: 100%;
+  max-width: 160px;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+  border: 1px solid var(--border);
+}

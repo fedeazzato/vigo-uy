@@ -5,6 +5,7 @@ import { toFriendlyError } from '../lib/errors'
 import { deleteComment, invalidateCommunityCache } from '../lib/communityData'
 import { useAuth } from '../context/AuthContext'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
+import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import type { AdminUserRow, ContentComment, PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './ModerationPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
@@ -279,6 +280,7 @@ export default function ModerationPage() {
                             </>
                           )}
                         </div>
+                        <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
                       </div>
                       <div className={listStyles.itemActions}>
                         <button

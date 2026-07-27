@@ -254,6 +254,7 @@ export type Database = {
           created_at: string
           hidden: boolean
           id: string
+          image_url: string | null
           is_public: boolean
           item: string
           link: string | null
@@ -273,6 +274,7 @@ export type Database = {
           created_at?: string
           hidden?: boolean
           id?: string
+          image_url?: string | null
           is_public?: boolean
           item: string
           link?: string | null
@@ -292,6 +294,7 @@ export type Database = {
           created_at?: string
           hidden?: boolean
           id?: string
+          image_url?: string | null
           is_public?: boolean
           item?: string
           link?: string | null
