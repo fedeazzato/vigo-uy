@@ -101,6 +101,14 @@ future phase if keyword matching proves too literal.
   that curated JSON text remains part of the Guía search index even after a
   section's data view flips to `comunidad`, so search doesn't quietly drop
   coverage of a page's static prose when its stats/lists go community-first.
+- `supabase/migrations/0031_site_search_servicio_keyword.sql` —
+  follow-up: `to_tsvector('spanish', ...)` doesn't stem the English
+  loanword "service" to the same root as "servicio", so the two never
+  matched each other; added "servicio" explicitly alongside "service" and
+  "taller". `src/pages/CommunityFeedPage.tsx`'s own local (client-side,
+  non-RPC) search box had the identical gap for the identical reason,
+  fixed the same way — see that file's `SERVICE_KEYWORDS`/`TRIP_KEYWORDS`/
+  `PURCHASE_KEYWORDS` arrays.
 - `supabase/migrations/0030_site_search_entry_type_keywords.sql` —
   `create or replace function` on `search_community_content` (same
   signature) adding the fixed per-kind keywords described above to each

@@ -47,6 +47,18 @@ const KIND_META: Record<FeedItem['kind'], { icon: string; label: string }> = {
   repuesto: { icon: '🛒', label: 'Compra' },
 }
 
+// Fixed per-kind keywords, checked alongside each row's own fields, so
+// searching by *type* ("servicio") finds rows even when nothing in the
+// row's own text happens to contain that word (e.g. someone put their
+// odometer reading as the service_type instead of a description). Same
+// fix, same reason, as the DB-side search RPC -- see specs/site-search.md.
+// Kept as extra array entries (not string concatenation) so a query can't
+// accidentally match across a boundary between two different fields.
+// Module-level (not per-render) so useMemo below doesn't need them as deps.
+const TRIP_KEYWORDS = ['viaje', 'ruta']
+const SERVICE_KEYWORDS = ['service', 'servicio', 'taller']
+const PURCHASE_KEYWORDS = ['compra', 'repuesto', 'accesorio']
+
 // Shared ordering for the filter memos: "puntuación" sorts by rating first,
 // then both orders float verified rows to the top.
 function rankRows<T extends { rating: number | null; verified: boolean }>(rows: T[], sort: SortOrder): T[] {
@@ -97,7 +109,7 @@ export default function CommunityFeedPage() {
     const q = query.trim().toLowerCase()
     const result = trips.filter((trip) => {
       if (modelFilter !== 'todos' && trip.model !== modelFilter) return false
-      if (q && ![trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q)))
+      if (q && ![...TRIP_KEYWORDS, trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q)))
         return false
       return true
     })
@@ -109,7 +121,9 @@ export default function CommunityFeedPage() {
     if (!q) return verifiedFirst(entries)
     return verifiedFirst(
       entries.filter((entry) =>
-        [entry.service_type, entry.dealer, entry.city ?? ''].some((f) => f.toLowerCase().includes(q))
+        [...SERVICE_KEYWORDS, entry.service_type, entry.dealer, entry.city ?? ''].some((f) =>
+          f.toLowerCase().includes(q)
+        )
       )
     )
   }, [entries, query])
@@ -118,7 +132,7 @@ export default function CommunityFeedPage() {
     const q = query.trim().toLowerCase()
     const result = q
       ? purchases.filter((p) =>
-          [p.item, p.store, purchaseCategoryTitle(p.category), p.city ?? ''].some((f) =>
+          [...PURCHASE_KEYWORDS, p.item, p.store, purchaseCategoryTitle(p.category), p.city ?? ''].some((f) =>
             f.toLowerCase().includes(q)
           )
         )
@@ -354,7 +368,7 @@ export default function CommunityFeedPage() {
                       </>
                     )}
                   </div>
-                  <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
+                  <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} link={purchase.link} />
                   <div className={styles.feedCardFoot}>
                     <span className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu)}</span>
                     <span className={listStyles.author}>por {names[purchase.user_id] ?? 'un usuario'}</span>
