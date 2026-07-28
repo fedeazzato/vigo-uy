@@ -412,7 +412,7 @@ export default function DashboardPage() {
                           </>
                         )}
                       </div>
-                      <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
+                      <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} link={purchase.link} />
                       <ContentReactions content={{ kind: 'part_purchase', id: purchase.id }} />
                     </div>
                     <div className={listStyles.itemCost}>{formatCurrency(purchase.price_uyu, 2)}</div>

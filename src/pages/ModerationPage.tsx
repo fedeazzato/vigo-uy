@@ -280,7 +280,7 @@ export default function ModerationPage() {
                             </>
                           )}
                         </div>
-                        <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} />
+                        <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} link={purchase.link} />
                       </div>
                       <div className={listStyles.itemActions}>
                         <button
