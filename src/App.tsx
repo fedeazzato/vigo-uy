@@ -1,27 +1,32 @@
+import { lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProfilePrefsSync from './components/ProfilePrefsSync'
 import RequireAuth from './components/RequireAuth'
 import RequireModerator from './components/RequireModerator'
+// Eager: the index route, so `/` never shows a loading flash on first paint.
 import HomePage from './pages/HomePage'
-import GuidePage from './pages/GuidePage'
-import ChargingPage from './pages/ChargingPage'
-import RoutesPage from './pages/RoutesPage'
-import CostsPage from './pages/CostsPage'
-import AccessoriesPage from './pages/AccessoriesPage'
-import TechPage from './pages/TechPage'
-import FaqPage from './pages/FaqPage'
-import MyVigoPage from './pages/MyVigoPage'
-import FichaTecnicaPage from './pages/FichaTecnicaPage'
-import MantenimientoPage from './pages/MantenimientoPage'
-import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
-import NewServiceEntryPage from './pages/NewServiceEntryPage'
-import NewTripLogPage from './pages/NewTripLogPage'
-import PartsPage from './pages/PartsPage'
-import NewPartPurchasePage from './pages/NewPartPurchasePage'
-import CommunityFeedPage from './pages/CommunityFeedPage'
-import ModerationPage from './pages/ModerationPage'
+// Lazy: every other page becomes its own chunk, fetched on navigation
+// instead of shipped upfront. Loading state is a single Suspense boundary
+// around Layout's Outlet (see Layout.tsx) — see specs/route-code-splitting.md.
+const GuidePage = lazy(() => import('./pages/GuidePage'))
+const ChargingPage = lazy(() => import('./pages/ChargingPage'))
+const RoutesPage = lazy(() => import('./pages/RoutesPage'))
+const CostsPage = lazy(() => import('./pages/CostsPage'))
+const AccessoriesPage = lazy(() => import('./pages/AccessoriesPage'))
+const TechPage = lazy(() => import('./pages/TechPage'))
+const FaqPage = lazy(() => import('./pages/FaqPage'))
+const MyVigoPage = lazy(() => import('./pages/MyVigoPage'))
+const FichaTecnicaPage = lazy(() => import('./pages/FichaTecnicaPage'))
+const MantenimientoPage = lazy(() => import('./pages/MantenimientoPage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const NewServiceEntryPage = lazy(() => import('./pages/NewServiceEntryPage'))
+const NewTripLogPage = lazy(() => import('./pages/NewTripLogPage'))
+const PartsPage = lazy(() => import('./pages/PartsPage'))
+const NewPartPurchasePage = lazy(() => import('./pages/NewPartPurchasePage'))
+const CommunityFeedPage = lazy(() => import('./pages/CommunityFeedPage'))
+const ModerationPage = lazy(() => import('./pages/ModerationPage'))
 
 export default function App() {
   return (

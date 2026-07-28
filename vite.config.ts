@@ -38,4 +38,24 @@ export default defineConfig({
     }),
   ],
   base: '/vigo-uy/',
+  build: {
+    rollupOptions: {
+      output: {
+        // React/react-dom/react-router-dom and @supabase/supabase-js
+        // together make up most of what's left in the main chunk after
+        // route-level code splitting (specs/route-code-splitting.md) --
+        // they're needed on every page (auth/profile sync runs on mount
+        // regardless of route), so splitting them out doesn't shrink the
+        // initial payload, but it separates code that changes on nearly
+        // every deploy (our app) from code that doesn't (vendor deps), so
+        // a typical deploy no longer forces a re-download of either.
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (/[\\/](react|react-dom|react-router-dom|scheduler)[\\/]/.test(id)) return 'vendor-react'
+            if (id.includes('@supabase')) return 'vendor-supabase'
+          }
+        },
+      },
+    },
+  },
 })

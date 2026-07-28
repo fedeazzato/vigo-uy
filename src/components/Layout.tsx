@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary'
 import OfflineBanner from './OfflineBanner'
 import SiteSearch from './SiteSearch'
+import { Skeleton } from './UI'
 import { GUIDE_LINKS } from './GuideLinks'
 import { PRIMARY_NAV } from '../lib/primaryNav'
 import type { NavItem } from '../lib/primaryNav'
@@ -257,9 +258,14 @@ export default function Layout() {
 
         <main className={styles.main}>
           <div className={styles.content}>
-            {/* Inside the content area so the sidebar/header survive a page crash. */}
+            {/* Inside the content area so the sidebar/header survive a page crash.
+                Suspense covers every lazy-loaded page route (App.tsx); a chunk that
+                fails to fetch throws during render, which ErrorBoundary already
+                catches with its "Recargar la página" UI. */}
             <ErrorBoundary>
-              <Outlet />
+              <Suspense fallback={<Skeleton lines={4} />}>
+                <Outlet />
+              </Suspense>
             </ErrorBoundary>
           </div>
         </main>
