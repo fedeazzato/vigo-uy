@@ -91,7 +91,7 @@ export default function PurchaseCommunitySection({
                     )}
                   </div>
                   {p.notes && <div className={styles.itemNotes}>💬 {p.notes}</div>}
-                  <PurchaseThumbnail src={p.image_url} alt={p.item} />
+                  <PurchaseThumbnail src={p.image_url} alt={p.item} link={p.link} />
                   <ContentReactions content={{ kind: 'part_purchase', id: p.id }} />
                 </div>
                 <div>

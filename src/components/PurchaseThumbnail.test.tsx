@@ -13,6 +13,13 @@ describe('PurchaseThumbnail', () => {
     expect(screen.getByRole('img', { name: 'Producto' })).toBeTruthy()
   })
 
+  it('wraps the image in a link to the publication when a link is provided', () => {
+    render(<PurchaseThumbnail src="https://example.com/img.jpg" alt="Producto" link="https://example.com/post" />)
+    const link = screen.getByRole('link')
+    expect(link.getAttribute('href')).toBe('https://example.com/post')
+    expect(screen.getByRole('img', { name: 'Producto' })).toBeTruthy()
+  })
+
   it('hides the image after it fails to load, instead of a broken-image icon', () => {
     render(<PurchaseThumbnail src="https://example.com/broken.jpg" alt="Producto" />)
     const img = screen.getByRole('img', { name: 'Producto' })
