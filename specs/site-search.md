@@ -52,6 +52,19 @@ future phase if keyword matching proves too literal.
   only whitespace, or contains Postgres `tsquery` special characters
   (handled via `websearch_to_tsquery`, which is permissive of raw user
   input, unlike `to_tsquery`).
+- Comunidad rows must also match on their **entry type**, independent of
+  whatever the author actually typed into the free-text fields. Reported
+  gap: users often put their odometer reading as the service_entries
+  `service_type` (e.g. "45.000 km") instead of a descriptive word, so
+  searching "service" found the Mantenimiento guide page but none of the
+  actual submitted service records. Fix: each RPC arm's indexed tsvector
+  gets a couple of fixed Spanish keywords appended for its kind, on top of
+  the row's own fields — `service`/`taller` for service_entries,
+  `viaje`/`ruta` for trip_logs, `compra`/`repuesto`/`accesorio` for
+  part_purchases (that table covers both catalogs, and its `category`
+  column holds a catalog id like `cubiertas`, not the word "repuesto" or
+  "accesorio"). These keywords feed only the match expression, not the
+  `title`/`subtitle` shown to the user.
 
 ## Files to touch
 
@@ -88,6 +101,11 @@ future phase if keyword matching proves too literal.
   that curated JSON text remains part of the Guía search index even after a
   section's data view flips to `comunidad`, so search doesn't quietly drop
   coverage of a page's static prose when its stats/lists go community-first.
+- `supabase/migrations/0030_site_search_entry_type_keywords.sql` —
+  `create or replace function` on `search_community_content` (same
+  signature) adding the fixed per-kind keywords described above to each
+  arm's `to_tsvector(...)` expression, both in the `where ... @@` clause and
+  the matching `ts_rank(...)` call so they stay in sync.
 
 ## Test plan
 
