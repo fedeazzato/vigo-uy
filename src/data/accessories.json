@@ -51,6 +51,21 @@
       ]
     },
     {
+      "id": "ev-chargers",
+      "title": "Cargadores EV",
+      "icon": "🔌",
+      "items": [
+        {
+          "bold": "Qué mirar:",
+          "text": "Tipo de conector, potencia y si el cargador incluye instalación o solo el equipo. Verificá también compatibilidad con la red eléctrica de tu casa o edificio."
+        },
+        {
+          "bold": "Precio en Uruguay:",
+          "text": "Depende del modelo y si incluye instalación. Compará también si el vendedor ofrece instalación o soporte local."
+        }
+      ]
+    },
+    {
       "id": "floor-mats",
       "title": "Alfombras y organizadores",
       "icon": "🧩",

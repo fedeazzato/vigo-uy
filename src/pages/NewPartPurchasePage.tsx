@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
-import { PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
-import { suggestTitleFromStoreUrl } from '../lib/storeLinks'
+import { isAccessoryCategory, PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
+import { suggestStoreFromUrl, suggestTitleFromStoreUrl } from '../lib/storeLinks'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
@@ -30,6 +30,40 @@ export default function NewPartPurchasePage() {
   const [link, setLink] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
+
+  const shouldShowOdometer = !isAccessoryCategory(category)
+  const productPlaceholder =
+    category === 'ev-chargers'
+      ? 'Ej: Cargador portátil de 7,4 kW'
+      : category === 'carlinkit'
+        ? 'Ej: Adaptador inalámbrico para Android Auto'
+        : category === 'floor-mats'
+          ? 'Ej: Alfombra tipo bandeja para Vigo'
+          : category === 'keychains'
+            ? 'Ej: Llavero personalizado de la Vigo'
+            : category === 'electrical'
+              ? 'Ej: Cable de carga para Wallbox'
+              : category === 'cubiertas'
+                ? 'Ej: 4 cubiertas Kumho 215/60 R17'
+                : category === 'filtro-cabina'
+                  ? 'Ej: Filtro de cabina original'
+                  : category === 'escobillas'
+                    ? 'Ej: Escobillas limpiaparabrisas 24"'
+                    : category === 'bateria-12v'
+                      ? 'Ej: Batería 12V 60Ah'
+                      : category === 'pastillas-freno'
+                        ? 'Ej: Pastillas de freno delanteras'
+                        : category === 'parabrisas'
+                          ? 'Ej: Parabrisas delantero'
+                          : category === 'vidrios-laterales'
+                            ? 'Ej: Vidrio lateral delantero izquierdo'
+                            : category === 'espejos'
+                              ? 'Ej: Espejo retrovisor izquierdo'
+                              : category === 'carroceria'
+                                ? 'Ej: Guardabarros delantero'
+                                : category === 'luces'
+                                  ? 'Ej: Óptica LED delantera'
+                                  : 'Ej: Repuesto o pieza adicional'
 
   const [loading, setLoading] = useState(isEdit)
   const { submitting, error, setError, submit } = useEntrySubmit('compra')
@@ -186,7 +220,7 @@ export default function NewPartPurchasePage() {
             className={formStyles.input}
             value={item}
             onChange={(e) => setItem(e.target.value)}
-            placeholder="Ej: 4 cubiertas Kumho 215/60 R17"
+            placeholder={productPlaceholder}
           />
           <span className={formStyles.hint}>Marca, modelo y medida ayudan mucho al resto.</span>
         </div>
@@ -206,6 +240,10 @@ export default function NewPartPurchasePage() {
               if (!item.trim()) {
                 const suggested = suggestTitleFromStoreUrl(value)
                 if (suggested) setItem(suggested)
+              }
+              if (!store.trim()) {
+                const suggestedStore = suggestStoreFromUrl(value)
+                if (suggestedStore) setStore(suggestedStore)
               }
             }}
             placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress)"
@@ -260,20 +298,22 @@ export default function NewPartPurchasePage() {
         </div>
 
         <div className={formStyles.row}>
-          <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="purchase-km">
-              📏 Kilometraje
-            </label>
-            <input
-              id="purchase-km"
-              type="text"
-              inputMode="numeric"
-              className={formStyles.input}
-              value={odometerKm}
-              onChange={(e) => setOdometerKm(e.target.value)}
-              placeholder="45000"
-            />
-          </div>
+          {shouldShowOdometer && (
+            <div className={formStyles.field}>
+              <label className={formStyles.label} htmlFor="purchase-km">
+                📏 Kilometraje
+              </label>
+              <input
+                id="purchase-km"
+                type="text"
+                inputMode="numeric"
+                className={formStyles.input}
+                value={odometerKm}
+                onChange={(e) => setOdometerKm(e.target.value)}
+                placeholder="45000"
+              />
+            </div>
+          )}
           <div className={formStyles.field}>
             <label className={formStyles.label} htmlFor="purchase-city">
               📍 Ciudad

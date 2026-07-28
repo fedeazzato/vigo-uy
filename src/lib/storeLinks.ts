@@ -46,6 +46,11 @@ const STORE_RULES: StoreSlugRule[] = [
  * `null` if the URL doesn't match any known store or has no extractable
  * slug. Never throws.
  */
+export interface StoreSuggestion {
+  title: string | null
+  storeName: string | null
+}
+
 export function suggestTitleFromStoreUrl(url: string): string | null {
   let parsed: URL
   try {
@@ -65,4 +70,20 @@ export function suggestTitleFromStoreUrl(url: string): string | null {
 
   const title = words.join(' ')
   return title.charAt(0).toUpperCase() + title.slice(1)
+}
+
+export function suggestStoreFromUrl(url: string): string | null {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return null
+  }
+
+  const hostname = parsed.hostname.toLowerCase()
+  if (hostname.includes('amazon.')) return 'Amazon'
+  if (hostname.includes('mercadolibre.')) return 'MercadoLibre'
+  if (hostname.includes('temu.')) return 'Temu'
+  if (hostname.includes('aliexpress.')) return 'AliExpress'
+  return null
 }
