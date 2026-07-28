@@ -7,6 +7,15 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ status: 'signedIn' }),
 }))
 
+// PurchaseCommunitySection's CTA card only renders when `supabase` is
+// truthy. Locally `.env.local` (gitignored) makes the real client truthy,
+// but CI has no such file, so `supabase` is null there -- mock it
+// explicitly so this test doesn't depend on ambient env vars that differ
+// between machines (this is what made it pass locally and fail in CI).
+vi.mock('../lib/supabaseClient', () => ({
+  supabase: {},
+}))
+
 vi.mock('../lib/communityData', () => ({
   useCommunityContent: () => ({
     purchases: [],
