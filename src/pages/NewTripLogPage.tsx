@@ -5,10 +5,18 @@ import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
 import { parseLocaleNumber, todayIsoDate } from '../lib/format'
-import { fetchChargingNetworks, fetchChargingStations } from '../lib/communityData'
+import { createChargingStation, fetchChargingNetworks, fetchChargingStations } from '../lib/communityData'
+import { CONNECTORS_BY_CURRENT, DEFAULT_CONNECTOR } from '../lib/stations'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { useMediaQuery, MOBILE_QUERY } from '../lib/useMediaQuery'
-import type { ChargingNetwork, ChargingStation, TripChargingStop, Model } from '../types'
+import type {
+  ChargingNetwork,
+  ChargingStation,
+  StationConnector,
+  StationCurrentType,
+  TripChargingStop,
+  Model,
+} from '../types'
 import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
 import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
@@ -159,6 +167,147 @@ function StopField({
   )
 }
 
+// Inline "link this stop to a real station" form: shown for a free-text
+// charging stop so its cost data can count toward charging_cost_stats (a
+// bare name never does, by design — see D4). Creates the station via the
+// shared createChargingStation helper and hands the new row back to the
+// parent, which links the stop to it exactly as picking it from the
+// dropdown would.
+function AddStationInline({
+  index,
+  name,
+  userId,
+  networks,
+  onCreated,
+}: {
+  index: number
+  name: string
+  userId: string
+  networks: ChargingNetwork[]
+  onCreated: (station: ChargingStation) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [network, setNetwork] = useState(networks[0]?.slug ?? 'otro')
+  const [currentType, setCurrentType] = useState<StationCurrentType>('DC')
+  const [connector, setConnector] = useState<StationConnector>(DEFAULT_CONNECTOR.DC)
+  const [city, setCity] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  function changeCurrentType(next: StationCurrentType) {
+    setCurrentType(next)
+    if (!CONNECTORS_BY_CURRENT[next].includes(connector)) {
+      setConnector(DEFAULT_CONNECTOR[next])
+    }
+  }
+
+  async function submit() {
+    setBusy(true)
+    setError(null)
+    const { station, error: createError } = await createChargingStation({
+      userId,
+      name,
+      network,
+      city: city.trim() || null,
+      connector,
+      currentType,
+    })
+    setBusy(false)
+    if (createError || !station) {
+      setError(createError ?? 'No se pudo agregar la estación.')
+      return
+    }
+    onCreated(station)
+    setOpen(false)
+  }
+
+  if (!open) {
+    return (
+      <button type="button" className={styles.addStationBtn} onClick={() => setOpen(true)}>
+        + Agregar esta parada como estación de la comunidad
+      </button>
+    )
+  }
+
+  return (
+    <div className={styles.addStationInline}>
+      {error && <FormError>{error}</FormError>}
+      <div className={styles.stopMainRow}>
+        <div className={formStyles.field}>
+          <label className={styles.smallLabel} htmlFor={`new-station-network-${index}`}>
+            🌐 Red
+          </label>
+          <select
+            id={`new-station-network-${index}`}
+            className={formStyles.input}
+            value={network}
+            onChange={(e) => setNetwork(e.target.value)}
+          >
+            {networks.map((n) => (
+              <option key={n.slug} value={n.slug}>
+                {n.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={formStyles.field}>
+          <label className={styles.smallLabel} htmlFor={`new-station-city-${index}`}>
+            📍 Ciudad
+          </label>
+          <input
+            id={`new-station-city-${index}`}
+            type="text"
+            className={formStyles.input}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className={styles.stopMainRow}>
+        <div className={formStyles.field}>
+          <label className={styles.smallLabel} htmlFor={`new-station-current-${index}`}>
+            ⚡ Corriente
+          </label>
+          <select
+            id={`new-station-current-${index}`}
+            className={formStyles.input}
+            value={currentType}
+            onChange={(e) => changeCurrentType(e.target.value as StationCurrentType)}
+          >
+            <option value="AC">AC (lenta)</option>
+            <option value="DC">DC (rápida)</option>
+          </select>
+        </div>
+        <div className={formStyles.field}>
+          <label className={styles.smallLabel} htmlFor={`new-station-connector-${index}`}>
+            🔌 Conector
+          </label>
+          <select
+            id={`new-station-connector-${index}`}
+            className={formStyles.input}
+            value={connector}
+            onChange={(e) => setConnector(e.target.value as StationConnector)}
+          >
+            {CONNECTORS_BY_CURRENT[currentType].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className={styles.stopMainRow}>
+        <button type="button" className={styles.addStopBtn} onClick={() => void submit()} disabled={busy}>
+          {busy ? 'Guardando…' : 'Guardar estación'}
+        </button>
+        <button type="button" className={styles.removeStopBtn} onClick={() => setOpen(false)} disabled={busy}>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // One charging stop's whole card: header with remove, the station picker
 // (when community stations are loaded), the numeric StopFields and the note.
 function StopCard({
@@ -166,16 +315,20 @@ function StopCard({
   stop,
   stations,
   networks,
+  userId,
   onUpdate,
   onSetStation,
+  onStationCreated,
   onRemove,
 }: {
   index: number
   stop: StopDraft
   stations: ChargingStation[]
   networks: ChargingNetwork[]
+  userId: string | null
   onUpdate: (field: keyof StopDraft, value: string) => void
   onSetStation: (stationId: string) => void
+  onStationCreated: (station: ChargingStation) => void
   onRemove: () => void
 }) {
   return (
@@ -236,6 +389,18 @@ function StopCard({
           onChange={(v) => onUpdate('durationMinutes', v)}
           placeholder="35"
         />
+      </div>
+
+      <div className={styles.stopMainRow}>
+        {!stop.stationId && stop.name.trim() && userId && (
+          <AddStationInline
+            index={index}
+            name={stop.name.trim()}
+            userId={userId}
+            networks={networks}
+            onCreated={onStationCreated}
+          />
+        )}
       </div>
 
       <div className={styles.stopMainRow}>
@@ -359,6 +524,15 @@ export default function NewTripLogPage() {
   function setStopStation(index: number, stationId: string) {
     const station = stations.find((s) => s.id === stationId)
     setStops((prev) => prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s)))
+    setDirty(true)
+  }
+
+  // A stop's free-text name was just formalized into a real station (D4:
+  // a bare name never counts toward charging_cost_stats). Link the stop to
+  // it exactly as picking it from the dropdown would.
+  function handleStationCreated(index: number, station: ChargingStation) {
+    setStations((prev) => [...prev, station])
+    setStops((prev) => prev.map((s, i) => (i === index ? { ...s, stationId: station.id, name: station.name } : s)))
     setDirty(true)
   }
 
@@ -745,8 +919,10 @@ export default function NewTripLogPage() {
                           stop={stop}
                           stations={stations}
                           networks={networks}
+                          userId={user?.id ?? null}
                           onUpdate={(field, value) => updateStop(index, field, value)}
                           onSetStation={(stationId) => setStopStation(index, stationId)}
+                          onStationCreated={(station) => handleStationCreated(index, station)}
                           onRemove={() => removeStop(index)}
                         />
                       ))}

@@ -28,6 +28,54 @@
   border-top: 1px solid var(--border);
 }
 
+.providerList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.providerItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.providerItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.providerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.providerPrice {
+  text-align: right;
+}
+
+.providerPriceValue {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green-600);
+  white-space: nowrap;
+}
+
+.providerPriceNote {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
 /* ── Autonomy ── */
 .autonomyHeader {
   display: flex;

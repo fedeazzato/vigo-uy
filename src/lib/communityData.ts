@@ -23,6 +23,8 @@ import type {
   ReactableContent,
   ServiceEntry,
   StatItem,
+  StationConnector,
+  StationCurrentType,
   StationReliability,
   TripLog,
   VehicleLeaderboardEntry,
@@ -363,6 +365,61 @@ export type ReliabilityLevel = 'ok' | 'flaky' | 'unknown'
 export function reliabilityLevel(rel: StationReliability | undefined): ReliabilityLevel {
   if (!rel || rel.report_count < 3) return 'unknown'
   return rel.failure_ratio > 0.3 ? 'flaky' : 'ok'
+}
+
+export interface NetworkCostStat {
+  network: ChargingNetwork
+  stat: ChargingCostStat
+}
+
+// All network-level rollups (station_id null) that clear the sample floor,
+// joined to their network's display info, cheapest first — the "which
+// provider is cheapest" view that per-network lookups (pickCostStat,
+// ChargingPage's networkAverage) don't answer on their own.
+export function networkCostStats(stats: ChargingCostStat[], networks: ChargingNetwork[]): NetworkCostStat[] {
+  const bySlug = new Map(networks.map((n) => [n.slug, n]))
+  return stats
+    .filter((s) => s.station_id === null && s.sample_count >= MIN_COST_SAMPLES && bySlug.has(s.network))
+    .map((stat) => ({ network: bySlug.get(stat.network)!, stat }))
+    .sort((a, b) => a.stat.avg_cost_per_kwh - b.stat.avg_cost_per_kwh)
+}
+
+export interface NewChargingStationInput {
+  userId: string
+  name: string
+  network: string
+  city?: string | null
+  connector: StationConnector
+  currentType: StationCurrentType
+  maxPowerKw?: number | null
+  accessNotes?: string | null
+}
+
+// Shared by CommunityStations' own "+ Agregar estación" form and the trip
+// form's inline "link this stop to a real station" affordance — one insert
+// shape instead of two.
+export async function createChargingStation(
+  input: NewChargingStationInput
+): Promise<{ station: ChargingStation | null; error: string | null }> {
+  const client = supabase
+  if (!client) return { station: null, error: null }
+  const { data, error } = await client
+    .from('charging_stations')
+    .insert({
+      user_id: input.userId,
+      name: input.name,
+      network: input.network,
+      city: input.city ?? null,
+      connector: input.connector,
+      current_type: input.currentType,
+      max_power_kw: input.maxPowerKw ?? null,
+      access_notes: input.accessNotes ?? null,
+    })
+    .select()
+    .single()
+  if (error) return { station: null, error: toFriendlyError(error) }
+  invalidateCommunityCache()
+  return { station: data as ChargingStation, error: null }
 }
 
 // ── Reactions & comments (D5, community content only) ────────────────────

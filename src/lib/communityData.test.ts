@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const { fromMock, selectMock, rpcMock } = vi.hoisted(() => {
   const selectMock = vi.fn()
-  const fromMock = vi.fn(() => ({ select: selectMock }))
+  // `unknown` return type: some tests (createChargingStation) need this mock
+  // to also return an `insert(...)` chain, which the default `{ select }`
+  // shape doesn't have.
+  const fromMock = vi.fn((): unknown => ({ select: selectMock }))
   const rpcMock = vi.fn()
   return { fromMock, selectMock, rpcMock }
 })
@@ -13,15 +16,23 @@ vi.mock('./supabaseClient', () => ({
 
 import {
   cityCostStatItems,
+  createChargingStation,
   fetchLeaderboard,
   invalidateCommunityCache,
+  networkCostStats,
   pickCostStat,
   preferCommunity,
   reliabilityLevel,
   searchCommunityContent,
   verifiedFirst,
 } from './communityData'
-import type { ChargingCostStat, CityCostStat, CommunitySearchResult, StationReliability } from '../types'
+import type {
+  ChargingCostStat,
+  ChargingNetwork,
+  CityCostStat,
+  CommunitySearchResult,
+  StationReliability,
+} from '../types'
 
 describe('preferCommunity', () => {
   const curated = { anything: true }
@@ -105,6 +116,130 @@ describe('pickCostStat', () => {
 
   it('never borrows another network’s rollup', () => {
     expect(pickCostStat([networkStat], 'eone', 'st-9')).toBeNull()
+  })
+})
+
+describe('networkCostStats', () => {
+  const ute: ChargingNetwork = {
+    slug: 'ute',
+    name: 'UTE',
+    country: 'UY',
+    instructions: null,
+    sort_order: 1,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+  const eone: ChargingNetwork = {
+    slug: 'eone',
+    name: 'EONE',
+    country: 'UY',
+    instructions: null,
+    sort_order: 2,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+
+  it('keeps only network-level rollups at or above the sample floor, joined to their network', () => {
+    const uteStat: ChargingCostStat = { network: 'ute', station_id: null, avg_cost_per_kwh: 12, sample_count: 3 }
+    const thinEone: ChargingCostStat = { network: 'eone', station_id: null, avg_cost_per_kwh: 15, sample_count: 2 }
+    const uteStationStat: ChargingCostStat = {
+      network: 'ute',
+      station_id: 'st-1',
+      avg_cost_per_kwh: 10,
+      sample_count: 9,
+    }
+    expect(networkCostStats([uteStat, thinEone, uteStationStat], [ute, eone])).toEqual([
+      { network: ute, stat: uteStat },
+    ])
+  })
+
+  it('sorts cheapest network first', () => {
+    const pricey: ChargingCostStat = { network: 'ute', station_id: null, avg_cost_per_kwh: 14, sample_count: 5 }
+    const cheap: ChargingCostStat = { network: 'eone', station_id: null, avg_cost_per_kwh: 9, sample_count: 5 }
+    expect(networkCostStats([pricey, cheap], [ute, eone]).map((r) => r.network.slug)).toEqual(['eone', 'ute'])
+  })
+
+  it('skips a stat whose network is not in the given list', () => {
+    const orphan: ChargingCostStat = { network: 'dmc', station_id: null, avg_cost_per_kwh: 11, sample_count: 4 }
+    expect(networkCostStats([orphan], [ute])).toEqual([])
+  })
+})
+
+describe('createChargingStation', () => {
+  beforeEach(() => {
+    invalidateCommunityCache()
+    fromMock.mockReset()
+    selectMock.mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('builds the insert payload and returns the row on success', async () => {
+    const singleMock = vi.fn().mockResolvedValue({ data: { id: 'st-1', name: 'Terminal Punta del Diablo' }, error: null })
+    const selectMock2 = vi.fn(() => ({ single: singleMock }))
+    const insertMock = vi.fn(() => ({ select: selectMock2 }))
+    fromMock.mockReturnValueOnce({ insert: insertMock })
+
+    const result = await createChargingStation({
+      userId: 'user-1',
+      name: 'Terminal Punta del Diablo',
+      network: 'ute',
+      connector: 'CCS2',
+      currentType: 'DC',
+    })
+
+    expect(insertMock).toHaveBeenCalledWith({
+      user_id: 'user-1',
+      name: 'Terminal Punta del Diablo',
+      network: 'ute',
+      city: null,
+      connector: 'CCS2',
+      current_type: 'DC',
+      max_power_kw: null,
+      access_notes: null,
+    })
+    expect(result).toEqual({ station: { id: 'st-1', name: 'Terminal Punta del Diablo' }, error: null })
+  })
+
+  it('invalidates the cache on success, so the next fetch refetches instead of serving stale data', async () => {
+    // Prime the leaderboard cache.
+    selectMock.mockResolvedValue({ data: [], error: null })
+    await fetchLeaderboard()
+    fromMock.mockClear()
+
+    const singleMock = vi.fn().mockResolvedValue({ data: { id: 'st-1' }, error: null })
+    fromMock.mockReturnValueOnce({ insert: () => ({ select: () => ({ single: singleMock }) }) })
+    await createChargingStation({
+      userId: 'user-1',
+      name: 'Terminal Punta del Diablo',
+      network: 'ute',
+      connector: 'CCS2',
+      currentType: 'DC',
+    })
+    fromMock.mockClear()
+
+    selectMock.mockResolvedValue({ data: [], error: null })
+    await fetchLeaderboard()
+    expect(fromMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns a friendly error and no station on failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const singleMock = vi.fn().mockResolvedValue({ data: null, error: { message: 'boom' } })
+    fromMock.mockReturnValueOnce({
+      insert: () => ({ select: () => ({ single: singleMock }) }),
+    })
+
+    const result = await createChargingStation({
+      userId: 'user-1',
+      name: 'Terminal Punta del Diablo',
+      network: 'ute',
+      connector: 'CCS2',
+      currentType: 'DC',
+    })
+
+    expect(result.station).toBeNull()
+    expect(result.error).not.toBeNull()
   })
 })
 

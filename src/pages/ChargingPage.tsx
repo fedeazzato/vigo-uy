@@ -13,9 +13,15 @@ import {
 import CommunityStations from '../components/CommunityStations'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import { fetchChargingCostStats, MIN_COST_SAMPLES } from '../lib/communityData'
+import {
+  fetchChargingCostStats,
+  fetchChargingNetworks,
+  MIN_COST_SAMPLES,
+  networkCostStats,
+} from '../lib/communityData'
+import { COUNTRY_LABELS } from '../lib/stations'
 import styles from './Pages.module.css'
-import type { ChargingCostStat, ChargingData, AutonomyStandard } from '../types'
+import type { ChargingCostStat, ChargingData, ChargingNetwork, AutonomyStandard } from '../types'
 
 const data = rawData as ChargingData
 
@@ -30,11 +36,15 @@ export default function ChargingPage() {
   const { stats, autonomy, homeCharging, publicCharging } = data
   const [standard, setStandard] = useState<AutonomyStandard>('WLTP')
   const [costStats, setCostStats] = useState<ChargingCostStat[]>([])
+  const [networks, setNetworks] = useState<ChargingNetwork[]>([])
 
   useEffect(() => {
     if (!supabase) return
     void fetchChargingCostStats().then(({ stats: cs }) => setCostStats(cs))
+    void fetchChargingNetworks().then(({ networks: n }) => setNetworks(n))
   }, [])
+
+  const providerAverages = networkCostStats(costStats, networks)
 
   // Rolling-year network average from real charges (D4). When present, it
   // takes visual precedence over the hardcoded price text in the card.
@@ -109,6 +119,36 @@ export default function ChargingPage() {
       <SectionDivider label="Cargadores públicos" />
 
       <Alert type="warning">{publicCharging.alert}</Alert>
+
+      {providerAverages.length > 0 && (
+        <Card>
+          <CardTitle icon="📊">Promedio por proveedor</CardTitle>
+          <p className={styles.chargerTip}>
+            Lo que realmente pagó la comunidad por kWh en cada red, del más barato al más caro.
+          </p>
+          <ul className={styles.providerList}>
+            {providerAverages.map(({ network: net, stat }) => (
+              <li key={net.slug} className={styles.providerItem}>
+                <span className={styles.providerName}>
+                  {net.name}
+                  {net.country !== 'UY' && net.country !== 'otro' && (
+                    <Badge color="gray">{COUNTRY_LABELS[net.country]}</Badge>
+                  )}
+                </span>
+                <span className={styles.providerPrice}>
+                  <span className={styles.providerPriceValue}>
+                    ${stat.avg_cost_per_kwh.toLocaleString('es-UY', { maximumFractionDigits: 1 })}/kWh
+                  </span>
+                  <br />
+                  <span className={styles.providerPriceNote}>
+                    {stat.sample_count} {stat.sample_count === 1 ? 'carga' : 'cargas'}, último año
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {publicCharging.chargers.map((c, i) => {
         const avg = networkAverage(c.network)

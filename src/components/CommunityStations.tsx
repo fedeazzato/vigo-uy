@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
 import { parseLocaleNumber } from '../lib/format'
 import {
+  createChargingStation,
   fetchChargingNetworks,
   fetchChargingStations,
   fetchChargingCostStats,
@@ -100,22 +101,21 @@ export default function CommunityStations() {
     setBusy(true)
     setError(null)
     setMessage(null)
-    const { error: insertError } = await supabase.from('charging_stations').insert({
-      user_id: user.id,
+    const { error: insertError } = await createChargingStation({
+      userId: user.id,
       name: name.trim(),
       network,
       city: city.trim() || null,
       connector,
-      current_type: currentType,
-      max_power_kw: power,
-      access_notes: accessNotes.trim() || null,
+      currentType,
+      maxPowerKw: power,
+      accessNotes: accessNotes.trim() || null,
     })
     setBusy(false)
     if (insertError) {
-      setError(toFriendlyError(insertError))
+      setError(insertError)
       return
     }
-    invalidateCommunityCache()
     setMessage('Estación agregada. ¡Gracias por aportar!')
     setName('')
     setCity('')

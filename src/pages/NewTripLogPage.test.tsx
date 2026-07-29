@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
 import NewTripLogPage, { parseStopDrafts, StopDraft } from './NewTripLogPage'
+import { createChargingStation } from '../lib/communityData'
 
 // All data access goes through the mocked communityData layer below, so the
 // tests run identically with or without VITE_SUPABASE_* env (CI has none).
@@ -13,6 +14,7 @@ vi.mock('../context/AuthContext', () => ({
 // One known network + station so the stop's charger selector renders.
 vi.mock('../lib/communityData', () => ({
   invalidateCommunityCache: vi.fn(),
+  createChargingStation: vi.fn(),
   fetchChargingNetworks: () =>
     Promise.resolve({
       networks: [
@@ -200,6 +202,102 @@ describe('NewTripLogPage wizard (mobile)', () => {
     fireEvent.change(selector, { target: { value: '' } })
     const nameInput = screen.getByPlaceholderText<HTMLInputElement>('Nombre del cargador')
     expect(nameInput.value).toBe('')
+  })
+
+  describe('linking a free-text charger to a real station', () => {
+    beforeEach(() => {
+      vi.mocked(createChargingStation).mockReset()
+    })
+
+    it('only offers to add a station once a free-text name is typed, and hides once one is picked', async () => {
+      renderNewTrip()
+      goToShareStep()
+      fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+      fireEvent.click(screen.getByText('+ Agregar parada'))
+      await screen.findByRole('combobox', { name: 'Cargador' })
+
+      // No name yet: no invitation to formalize a station.
+      expect(screen.queryByText(/Agregar esta parada como estación/)).toBeNull()
+
+      fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
+        target: { value: 'Terminal Punta del Diablo' },
+      })
+      expect(screen.getByText(/Agregar esta parada como estación/)).toBeTruthy()
+
+      // Picking a listed station instead removes the free-text name and the offer.
+      fireEvent.change(screen.getByRole('combobox', { name: 'Cargador' }), { target: { value: 'st-1' } })
+      expect(screen.queryByText(/Agregar esta parada como estación/)).toBeNull()
+    })
+
+    it('creates and links the station from the inline form', async () => {
+      vi.mocked(createChargingStation).mockResolvedValue({
+        station: {
+          id: 'st-new',
+          user_id: 'user-1',
+          name: 'Terminal Punta del Diablo',
+          network: 'eone',
+          city: 'Rocha',
+          address: null,
+          lat: null,
+          lng: null,
+          connector: 'CCS2',
+          current_type: 'DC',
+          max_power_kw: null,
+          access_notes: null,
+          hidden: false,
+          verified: false,
+          created_at: '2026-07-01T00:00:00Z',
+          updated_at: '2026-07-01T00:00:00Z',
+        },
+        error: null,
+      })
+
+      renderNewTrip()
+      goToShareStep()
+      fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+      fireEvent.click(screen.getByText('+ Agregar parada'))
+      await screen.findByRole('combobox', { name: 'Cargador' })
+
+      fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
+        target: { value: 'Terminal Punta del Diablo' },
+      })
+      fireEvent.click(screen.getByText(/Agregar esta parada como estación/))
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar estación' }))
+
+      await waitFor(() =>
+        expect(createChargingStation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: 'user-1',
+            name: 'Terminal Punta del Diablo',
+            network: 'eone',
+            connector: 'CCS2',
+            currentType: 'DC',
+          })
+        )
+      )
+
+      // Linked: the free-text name input is gone, same as picking from the dropdown.
+      await waitFor(() => expect(screen.queryByPlaceholderText('Nombre del cargador')).toBeNull())
+    })
+
+    it('shows an error and keeps the stop unlinked when creation fails', async () => {
+      vi.mocked(createChargingStation).mockResolvedValue({ station: null, error: 'No se pudo agregar.' })
+
+      renderNewTrip()
+      goToShareStep()
+      fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+      fireEvent.click(screen.getByText('+ Agregar parada'))
+      await screen.findByRole('combobox', { name: 'Cargador' })
+
+      fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
+        target: { value: 'Terminal Punta del Diablo' },
+      })
+      fireEvent.click(screen.getByText(/Agregar esta parada como estación/))
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar estación' }))
+
+      expect(await screen.findByText('No se pudo agregar.')).toBeTruthy()
+      expect(screen.getByPlaceholderText('Nombre del cargador')).toBeTruthy()
+    })
   })
 
   it('shows the model hint on the share step while public and no model is picked', () => {
