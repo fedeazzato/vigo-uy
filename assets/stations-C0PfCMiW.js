@@ -1,0 +1,1 @@
+var e=[`AC`,`DC`],t={AC:[`Tipo 2`,`Tipo 1`,`GB/T`,`Sin cable`],DC:[`CCS2`,`CCS1`,`GB/T`,`Sin cable`]},n={AC:`Tipo 2`,DC:`CCS2`},r={UY:`Uruguay`,AR:`Argentina`,BR:`Brasil`,otro:`Otros`},i=[`UY`,`AR`,`BR`,`otro`];export{n as a,e as i,i as n,r,t};
