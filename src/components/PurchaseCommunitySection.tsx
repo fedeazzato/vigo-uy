@@ -69,7 +69,7 @@ export default function PurchaseCommunitySection({
       {recentPurchases.length > 0 && (
         <Card>
           <h2 className={listStyles.sectionTitle}>Últimas compras</h2>
-          <ul className={listStyles.list}>
+          <ul className={styles.purchaseGrid}>
             {recentPurchases.map((p) => (
               <li key={p.id} className={listStyles.item}>
                 <div>

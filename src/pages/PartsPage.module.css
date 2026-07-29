@@ -24,3 +24,20 @@
 .itemCostRight {
   text-align: right;
 }
+
+/* "Últimas compras" packs two-up on wide desktop instead of stacking as
+   full-width rows -- each purchase is short (title, meta, maybe a
+   thumbnail), so one column per row wastes horizontal space. Self-contained
+   (not layered on listStyles.list's flex/gap) to avoid depending on CSS
+   module bundle order between the two stylesheets. */
+.purchaseGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 24px;
+}
+
+@media (max-width: 700px) {
+  .purchaseGrid {
+    grid-template-columns: 1fr;
+  }
+}
