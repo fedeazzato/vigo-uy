@@ -85,6 +85,12 @@ function isValidPercentage(n: number | undefined): boolean {
   return n === undefined || (n >= 0 && n <= 100)
 }
 
+// The title is derived, not asked for: nobody knows what to "title" a trip,
+// and origin/destination already say it all. Exported for tests.
+export function tripTitle(origin: string, destination: string): string {
+  return `${origin.trim()} → ${destination.trim()}`
+}
+
 // Converts the string drafts into the charging_stops jsonb payload,
 // validating as it goes. Stops without a name are skipped. Exported for
 // tests: this is the exact shape sent to the database.
@@ -672,9 +678,7 @@ export default function NewTripLogPage() {
     const cleanStops = parsed.stops
 
     const payload = {
-      // The title is derived, not asked for: nobody knows what to "title" a
-      // trip, and origin/destination already say it all.
-      title: `${origin.trim()} - ${destination.trim()}`,
+      title: tripTitle(origin, destination),
       origin: origin.trim(),
       destination: destination.trim(),
       distance_km: distance,

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
-import NewTripLogPage, { parseStopDrafts, StopDraft } from './NewTripLogPage'
+import NewTripLogPage, { parseStopDrafts, tripTitle, StopDraft } from './NewTripLogPage'
 import { createChargingStation } from '../lib/communityData'
 
 // All data access goes through the mocked communityData layer below, so the
@@ -347,6 +347,16 @@ describe('NewTripLogPage single page (desktop)', () => {
     fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar viaje' }))
     expect(screen.getByText('Completá origen, destino y distancia.')).toBeTruthy()
+  })
+})
+
+describe('tripTitle', () => {
+  it('joins origin and destination with an arrow', () => {
+    expect(tripTitle('Montevideo', 'Punta del Este')).toBe('Montevideo → Punta del Este')
+  })
+
+  it('trims whitespace from both ends', () => {
+    expect(tripTitle('  Montevideo  ', '  Rocha ')).toBe('Montevideo → Rocha')
   })
 })
 
