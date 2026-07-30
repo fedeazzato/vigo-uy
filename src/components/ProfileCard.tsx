@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import formStyles from '../styles/formControls.module.css'
-import CityDatalist, { UY_CITIES_LIST_ID } from './CityDatalist'
+import CityCombobox from './CityCombobox'
 
 // Account identity shown on community content. Model and color are NOT
 // edited here: the Mi Vigo selectors above are the single place to pick
@@ -56,7 +56,6 @@ export default function ProfileCard() {
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="info">{message}</Alert>}
       <form className={formStyles.form} onSubmit={saveProfile}>
-        <CityDatalist />
         <div className={formStyles.field}>
           <label className={formStyles.label} htmlFor="profile-name">
             ✏️ Nombre visible
@@ -77,15 +76,7 @@ export default function ProfileCard() {
           <label className={formStyles.label} htmlFor="profile-city">
             📍 Ciudad
           </label>
-          <input
-            id="profile-city"
-            type="text"
-            list={UY_CITIES_LIST_ID}
-            className={formStyles.input}
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Montevideo"
-          />
+          <CityCombobox id="profile-city" value={city} onChange={setCity} placeholder="Montevideo" />
         </div>
 
         <div>

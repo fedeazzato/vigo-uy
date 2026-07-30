@@ -17,7 +17,7 @@ import type {
   TripChargingStop,
   Model,
 } from '../types'
-import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
+import CityCombobox from '../components/CityCombobox'
 import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -751,35 +751,22 @@ export default function NewTripLogPage() {
         >
           {(!isWizard || step === 1) && (
             <>
-              <CityDatalist />
               <div className={formStyles.row}>
                 <div className={formStyles.field}>
                   <label className={formStyles.label} htmlFor="trip-origin">
                     📍 Origen
                   </label>
-                  <input
-                    id="trip-origin"
-                    required
-                    type="text"
-                    list={UY_CITIES_LIST_ID}
-                    className={formStyles.input}
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    placeholder="Montevideo"
-                  />
+                  <CityCombobox id="trip-origin" required value={origin} onChange={setOrigin} placeholder="Montevideo" />
                 </div>
                 <div className={formStyles.field}>
                   <label className={formStyles.label} htmlFor="trip-destination">
                     🏁 Destino
                   </label>
-                  <input
+                  <CityCombobox
                     id="trip-destination"
                     required
-                    type="text"
-                    list={UY_CITIES_LIST_ID}
-                    className={formStyles.input}
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
+                    onChange={setDestination}
                     placeholder="Punta del Este"
                   />
                 </div>

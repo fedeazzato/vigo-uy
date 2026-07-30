@@ -10,7 +10,7 @@ import { isAccessoryCategory, PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCa
 import { suggestStoreFromUrl, suggestTitleFromStoreUrl } from '../lib/storeLinks'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
-import CityDatalist, { UY_CITIES_LIST_ID } from '../components/CityDatalist'
+import CityCombobox from '../components/CityCombobox'
 
 export default function NewPartPurchasePage() {
   const { id } = useParams()
@@ -171,7 +171,6 @@ export default function NewPartPurchasePage() {
       {error && <FormError>{error}</FormError>}
 
       <form className={formStyles.form} onSubmit={handleSubmit} onChange={() => setDirty(true)}>
-        <CityDatalist />
         <div className={formStyles.row}>
           <div className={formStyles.field}>
             <label className={formStyles.label} htmlFor="purchase-date">
@@ -318,15 +317,7 @@ export default function NewPartPurchasePage() {
             <label className={formStyles.label} htmlFor="purchase-city">
               📍 Ciudad
             </label>
-            <input
-              id="purchase-city"
-              type="text"
-              list={UY_CITIES_LIST_ID}
-              className={formStyles.input}
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Montevideo"
-            />
+            <CityCombobox id="purchase-city" value={city} onChange={setCity} placeholder="Montevideo" />
           </div>
         </div>
 

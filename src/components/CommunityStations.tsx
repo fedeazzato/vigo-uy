@@ -26,7 +26,7 @@ import type {
 } from '../types'
 import styles from './CommunityStations.module.css'
 import formStyles from '../styles/formControls.module.css'
-import CityDatalist, { UY_CITIES_LIST_ID } from './CityDatalist'
+import CityCombobox from './CityCombobox'
 import {
   CONNECTORS_BY_CURRENT,
   COUNTRIES,
@@ -178,7 +178,6 @@ export default function CommunityStations() {
 
         {showForm && (
           <form className={styles.stationForm} onSubmit={addStation}>
-            <CityDatalist />
             <div className={styles.formRow}>
               <div className={styles.stationField}>
                 <label className={styles.stationLabel} htmlFor="station-network">
@@ -209,15 +208,7 @@ export default function CommunityStations() {
                 <label className={styles.stationLabel} htmlFor="station-city">
                   📍 Ciudad
                 </label>
-                <input
-                  id="station-city"
-                  type="text"
-                  list={UY_CITIES_LIST_ID}
-                  className={formStyles.input}
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Rocha"
-                />
+                <CityCombobox id="station-city" value={city} onChange={setCity} placeholder="Rocha" />
               </div>
             </div>
 
