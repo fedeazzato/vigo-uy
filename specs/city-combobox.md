@@ -163,10 +163,8 @@ forms) should continue to pass unchanged — none currently assert on
 - [x] `CityDatalist.tsx` and `UY_CITIES_LIST_ID` removed with no remaining
       references.
 - [x] `npm run type-check`, `npm run lint`, and `npm test` all pass.
-- [ ] `0032_normalize_city_casing.sql` pushed to the linked project
-      (`npx supabase db push`) and spot-checked against a few known-messy
-      rows (e.g. anything previously saved all-lowercase). **Not yet run —
-      needs explicit go-ahead since it writes to the live project.**
+- [x] `0032_normalize_city_casing.sql` pushed to the linked project
+      (`npx supabase db push`, confirmed via `npx supabase migration list`).
 - [x] Manual check on a mobile viewport (per the `verify` skill, via a
       temporary unauthenticated route since every real city field sits
       behind `RequireAuth`): typing shows a tappable dropdown of matches in
