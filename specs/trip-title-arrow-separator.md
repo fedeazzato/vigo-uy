@@ -37,8 +37,6 @@ standardizes on the arrow everywhere: `"{origin} → {destination}"`.
 
 - [x] New trips get `"{origin} → {destination}"` titles (via new exported
       `tripTitle` helper, unit-tested).
-- [ ] Existing `trip_logs.title` rows backfilled to match (migration
-      written, not yet pushed).
+- [x] Existing `trip_logs.title` rows backfilled to match.
 - [x] `npm run type-check`, `npm run lint`, and `npm test` all pass.
-- [ ] Migration pushed to the linked project (`npx supabase db push`), with
-      explicit go-ahead first since it writes to the live project.
+- [x] Migration pushed to the linked project (`npx supabase db push`).
