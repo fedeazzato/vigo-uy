@@ -121,3 +121,27 @@ is migration-level and manual instead:
       grouped correctly by the three new networks, and the existing
       "Ancap Rocha" entry now shows its backfilled address without a
       duplicate appearing alongside it.
+
+## Follow-up data-quality fixes (2026-08-01)
+
+Three small migrations, same explicit-per-row-update approach as
+`0035_clean_station_names.sql`:
+
+- `0036_verify_existing_stations.sql`: the two rows that predate this seed
+  ("Ancap Rocha", "Terminal Punta del Diablo") were left `verified = false`
+  by the 0034 backfill, even though every row — seeded and these two — is
+  attributed to the same account. Set both to `verified = true` so they
+  don't stand out as un-badged among 209 "Oficial" stations.
+- `0037_normalize_tata_names.sql`: "Ta-Ta" (the supermarket chain hosting
+  several stations) appeared as `Ta-Ta`/`TaTa`/`Tata` depending on which
+  OCM contributor typed it. Normalized to `Ta-Ta`, the brand's actual
+  spelling — also fixed a missing accent (`Paysandu` → `Paysandú`) on the
+  one row it happened to share a name with.
+- `0038_normalize_ancap_names.sql`: same casing problem for `ANCAP`
+  (Uruguay's state fuel-station brand, an acronym — 27 rows said "Ancap",
+  7 said "ANCAP"). Normalized to the all-caps acronym form.
+
+Not touched: other embedded typos spotted in passing (`Guichon` for
+`Guichón`, `Jose Enrique Rodo` for `José Enrique Rodó`, `SanLuis` for
+`San Luis`) — those are a broader, unrequested cleanup pass, not a
+brand-name casing inconsistency like Ta-Ta/ANCAP.
