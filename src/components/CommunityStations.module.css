@@ -20,22 +20,31 @@
   background: var(--green-600);
 }
 
-/* Provider/city filter row above the network cards. */
+/* Provider/city/connector/power filter controls above the network cards.
+   The clear button lives in its own row below .filterFields, not as a
+   sibling flex item alongside the fields — otherwise its appearing/
+   disappearing (hasActiveFilter) changes how much width the flex:1 fields
+   get and visibly shifts them mid-typing. */
 .filterToolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-direction: column;
   gap: 10px;
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
-.filterToolbar .stationField {
+.filterFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.filterFields .stationField {
   flex: 1;
   min-width: 140px;
 }
 
 .clearFiltersBtn {
+  align-self: flex-start;
   background: none;
   border: none;
   padding: 0;

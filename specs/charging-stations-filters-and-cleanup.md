@@ -42,7 +42,7 @@ That raw data carries two rough edges the community list shouldn't keep:
 
 ### Provider + city filters (UI)
 
-4. `CommunityStations.tsx` gains two filter controls above the per-network
+4. `CommunityStations.tsx` gains four filter controls above the per-network
    station cards, visible regardless of sign-in state (the list itself
    already renders signed-out):
    - **Red (provider)**: a `<select>` mirroring the add-station form's own
@@ -54,15 +54,29 @@ That raw data carries two rough edges the community list shouldn't keep:
      filtering stations whose `city` contains the typed text — case- and
      accent-insensitive (reuse the `foldAccents` approach from
      `src/lib/cities.ts` rather than a second implementation).
-5. Both filters combine (AND) and apply before the existing per-network
+   - **Conector**: a `<select>` over `ALL_CONNECTORS` narrowed to whichever
+     connector values are actually present in the loaded `stations` (never
+     offers a choice that always returns zero results), default "Cualquiera".
+   - **Potencia mínima**: a `<select>` over a fixed tier list (`POWER_TIERS
+     = [30, 60, 80]`, not derived from the data — round numbers members
+     actually think in, rather than every exact value like 43 kW), default
+     "Cualquiera". A station with `max_power_kw = null` never matches an
+     active minimum-power filter (unknown isn't "at least X").
+5. All four filters combine (AND) and apply before the existing per-network
    grouping/empty-group filtering — a network card disappears entirely if
    the current filters leave it with zero stations, same as today's
    behavior when a network genuinely has no stations.
-6. When both filters are active and yield zero results, show a short
-   `Alert type="info"` ("No hay estaciones que coincidan con el filtro.")
-   instead of silently rendering nothing.
-7. A "Limpiar filtros" text button appears next to the controls only when
-   at least one filter is non-empty, resetting both in one click.
+6. When the filters yield zero results, show a short `Alert type="info"`
+   ("No hay estaciones que coincidan con el filtro.") instead of silently
+   rendering nothing.
+7. A "Limpiar filtros" text button appears below the filter fields only
+   when at least one is non-empty, resetting all four in one click. It sits
+   in its own row (`.filterToolbar` is a column; `.filterFields` is the
+   wrapped row of the four `flex: 1` fields) specifically so its
+   appearing/disappearing never resizes the fields above it — an earlier
+   version had the button as a fifth flex sibling in the same row, which
+   visibly shifted the city input while typing every time the button
+   mounted.
 8. Filters are local UI state only (`useState`, not persisted, not synced
    to the URL) — reset on navigating away and back, consistent with every
    other filter/search control already in the app (`CommunityFeedPage`'s
@@ -102,13 +116,16 @@ in `NewTripLogPage.test.tsx` for the same module):
   other network.
 - Typing in the city input narrows results to matching stations only,
   case- and accent-insensitively (e.g. "rocha" matches "Rocha").
-- Combining both filters narrows to the intersection.
+- Selecting a connector narrows to stations with that exact connector.
+- Selecting a minimum power tier excludes stations below it, and excludes
+  stations with unknown (`null`) power entirely.
+- Combining filters narrows to the intersection.
 - A network whose stations are all filtered out doesn't render an empty
   `<Card>`.
 - When filters exclude everything, the "No hay estaciones..." alert shows
   instead of an empty list.
-- "Limpiar filtros" only renders when a filter is active, and resets both
-  fields + the full list when clicked.
+- "Limpiar filtros" only renders when a filter is active, and resets all
+  four fields + the full list when clicked.
 
 ## Acceptance criteria
 

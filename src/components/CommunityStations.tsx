@@ -36,6 +36,16 @@ import {
   DEFAULT_CONNECTOR,
 } from '../lib/stations'
 
+// Every connector value the schema allows, in a fixed sensible display
+// order (AC pair, DC pair, then the two current-agnostic ones) — the
+// filter narrows this down to whichever are actually present in the data.
+const ALL_CONNECTORS: StationConnector[] = ['Tipo 2', 'Tipo 1', 'CCS2', 'CCS1', 'GB/T', 'Sin cable']
+
+// Fixed round tiers rather than every distinct max_power_kw in the data —
+// exact values like 43 kW aren't a threshold anyone filters by; these three
+// cover the AC/DC power classes members actually care about.
+const POWER_TIERS = [30, 60, 80]
+
 // Shared <option> list for both the add-station network picker and the
 // filter toolbar's network picker — grouped by country (UY first, 'otro'
 // last, per COUNTRIES' order).
@@ -93,15 +103,30 @@ export default function CommunityStations() {
 
   const [providerFilter, setProviderFilter] = useState('')
   const [cityQuery, setCityQuery] = useState('')
-  const hasActiveFilter = providerFilter !== '' || cityQuery.trim() !== ''
+  const [connectorFilter, setConnectorFilter] = useState('')
+  const [minPowerFilter, setMinPowerFilter] = useState('')
+  const hasActiveFilter =
+    providerFilter !== '' || cityQuery.trim() !== '' || connectorFilter !== '' || minPowerFilter !== ''
+
+  // Connector options are derived from what's actually in the data (not
+  // the full schema enum) so the filter never offers a choice that would
+  // always return zero results. Power tiers stay fixed (POWER_TIERS).
+  const availableConnectors = useMemo(() => {
+    const present = new Set(stations.map((s) => s.connector))
+    return ALL_CONNECTORS.filter((c) => present.has(c))
+  }, [stations])
+
   const filteredStations = useMemo(() => {
     const q = foldAccents(cityQuery.trim())
+    const minPower = minPowerFilter ? Number(minPowerFilter) : null
     return stations.filter((s) => {
       if (providerFilter && s.network !== providerFilter) return false
       if (q && !foldAccents(s.city ?? '').includes(q)) return false
+      if (connectorFilter && s.connector !== connectorFilter) return false
+      if (minPower != null && (s.max_power_kw == null || s.max_power_kw < minPower)) return false
       return true
     })
-  }, [stations, providerFilter, cityQuery])
+  }, [stations, providerFilter, cityQuery, connectorFilter, minPowerFilter])
 
   const load = useCallback(async () => {
     const [networksRes, stationsRes, statsRes, reliabilityRes] = await Promise.all([
@@ -214,32 +239,70 @@ export default function CommunityStations() {
         )}
 
         <div className={styles.filterToolbar}>
-          <div className={styles.stationField}>
-            <label className={styles.stationLabel} htmlFor="station-filter-network">
-              🌐 Red
-            </label>
-            <select
-              id="station-filter-network"
-              className={formStyles.input}
-              value={providerFilter}
-              onChange={(e) => setProviderFilter(e.target.value)}
-            >
-              <option value="">Todas las redes</option>
-              <NetworkOptions networks={networks} />
-            </select>
-          </div>
-          <div className={styles.stationField}>
-            <label className={styles.stationLabel} htmlFor="station-filter-city">
-              📍 Ciudad
-            </label>
-            <input
-              id="station-filter-city"
-              type="search"
-              className={formStyles.input}
-              value={cityQuery}
-              onChange={(e) => setCityQuery(e.target.value)}
-              placeholder="Rocha"
-            />
+          <div className={styles.filterFields}>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-filter-network">
+                🌐 Red
+              </label>
+              <select
+                id="station-filter-network"
+                className={formStyles.input}
+                value={providerFilter}
+                onChange={(e) => setProviderFilter(e.target.value)}
+              >
+                <option value="">Todas las redes</option>
+                <NetworkOptions networks={networks} />
+              </select>
+            </div>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-filter-city">
+                📍 Ciudad
+              </label>
+              <input
+                id="station-filter-city"
+                type="search"
+                className={formStyles.input}
+                value={cityQuery}
+                onChange={(e) => setCityQuery(e.target.value)}
+                placeholder="Rocha"
+              />
+            </div>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-filter-connector">
+                🔌 Conector
+              </label>
+              <select
+                id="station-filter-connector"
+                className={formStyles.input}
+                value={connectorFilter}
+                onChange={(e) => setConnectorFilter(e.target.value)}
+              >
+                <option value="">Cualquiera</option>
+                {availableConnectors.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.stationField}>
+              <label className={styles.stationLabel} htmlFor="station-filter-power">
+                ⚡ Potencia mínima
+              </label>
+              <select
+                id="station-filter-power"
+                className={formStyles.input}
+                value={minPowerFilter}
+                onChange={(e) => setMinPowerFilter(e.target.value)}
+              >
+                <option value="">Cualquiera</option>
+                {POWER_TIERS.map((kw) => (
+                  <option key={kw} value={kw}>
+                    {kw} kW o más
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           {hasActiveFilter && (
             <button
@@ -248,6 +311,8 @@ export default function CommunityStations() {
               onClick={() => {
                 setProviderFilter('')
                 setCityQuery('')
+                setConnectorFilter('')
+                setMinPowerFilter('')
               }}
             >
               Limpiar filtros

@@ -37,9 +37,17 @@ function station(overrides: Partial<ChargingStation>): ChargingStation {
 }
 
 const STATIONS = [
-  station({ id: 'st-1', name: 'Axion Carrasco', network: 'eone', city: 'Rocha' }),
-  station({ id: 'st-2', name: 'Axion Prado', network: 'eone', city: 'Montevideo' }),
-  station({ id: 'st-3', name: 'Estación Mercedes', network: 'dmc', city: 'Rocha' }),
+  station({ id: 'st-1', name: 'Axion Carrasco', network: 'eone', city: 'Rocha', connector: 'CCS2', max_power_kw: 180 }),
+  station({
+    id: 'st-2',
+    name: 'Axion Prado',
+    network: 'eone',
+    city: 'Montevideo',
+    connector: 'Tipo 2',
+    current_type: 'AC',
+    max_power_kw: 22,
+  }),
+  station({ id: 'st-3', name: 'Estación Mercedes', network: 'dmc', city: 'Rocha', connector: 'CCS2', max_power_kw: 60 }),
 ]
 
 vi.mock('../lib/communityData', () => ({
@@ -122,13 +130,38 @@ describe('CommunityStations filters', () => {
     expect(screen.queryByText('Estación Mercedes')).toBeNull()
   })
 
-  it('shows an empty-state alert when filters match nothing, and "Limpiar filtros" resets them', async () => {
+  it('filtering by connector narrows to matching stations only', async () => {
     renderStations()
     await screen.findByText('Axion Carrasco')
 
-    fireEvent.change(screen.getByPlaceholderText('Rocha'), {
-      target: { value: 'Salto' },
+    fireEvent.change(screen.getByLabelText('🔌 Conector'), {
+      target: { value: 'Tipo 2' },
     })
+
+    expect(screen.getByText('Axion Prado')).toBeTruthy()
+    expect(screen.queryByText('Axion Carrasco')).toBeNull()
+    expect(screen.queryByText('Estación Mercedes')).toBeNull()
+  })
+
+  it('filtering by minimum power excludes stations below the threshold', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.change(screen.getByLabelText('⚡ Potencia mínima'), {
+      target: { value: '60' },
+    })
+
+    expect(screen.getByText('Axion Carrasco')).toBeTruthy() // 180 kW
+    expect(screen.getByText('Estación Mercedes')).toBeTruthy() // 60 kW
+    expect(screen.queryByText('Axion Prado')).toBeNull() // 22 kW, below threshold
+  })
+
+  it('shows an empty-state alert when filters match nothing, and "Limpiar filtros" resets all four filters', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.change(screen.getByLabelText('🌐 Red'), { target: { value: 'eone' } })
+    fireEvent.change(screen.getByPlaceholderText('Rocha'), { target: { value: 'Salto' } })
 
     await screen.findByText('No hay estaciones que coincidan con el filtro.')
     expect(screen.queryByText('Axion Carrasco')).toBeNull()
@@ -138,5 +171,8 @@ describe('CommunityStations filters', () => {
 
     await waitFor(() => expect(screen.getByText('Axion Carrasco')).toBeTruthy())
     expect(screen.queryByText('Limpiar filtros')).toBeNull()
+    // The provider filter ('eone') was active too — clearing it should bring
+    // the dmc station back, confirming all filters reset, not just the city.
+    expect(screen.getByText('Estación Mercedes')).toBeTruthy()
   })
 })
