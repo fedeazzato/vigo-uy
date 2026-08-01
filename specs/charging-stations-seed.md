@@ -145,3 +145,7 @@ Not touched: other embedded typos spotted in passing (`Guichon` for
 `Guichón`, `Jose Enrique Rodo` for `José Enrique Rodó`, `SanLuis` for
 `San Luis`) — those are a broader, unrequested cleanup pass, not a
 brand-name casing inconsistency like Ta-Ta/ANCAP.
+
+- `0039_name_tata_rivera.sql`: one Ta-Ta row (Rivera, Avenida Sarandí 950)
+  had no city qualifier at all — just `"Ta-Ta"`, unlike every sibling row
+  (`Ta-Ta Durazno`, `Ta-Ta Florida`, ...). Renamed to `Ta-Ta Rivera`.
