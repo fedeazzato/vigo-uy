@@ -81,6 +81,8 @@ export type Database = {
           max_power_kw: number | null
           name: string
           network: string
+          ocm_id: number | null
+          ocm_last_synced_at: string | null
           updated_at: string
           user_id: string
           verified: boolean
@@ -99,6 +101,8 @@ export type Database = {
           max_power_kw?: number | null
           name: string
           network: string
+          ocm_id?: number | null
+          ocm_last_synced_at?: string | null
           updated_at?: string
           user_id: string
           verified?: boolean
@@ -117,6 +121,8 @@ export type Database = {
           max_power_kw?: number | null
           name?: string
           network?: string
+          ocm_id?: number | null
+          ocm_last_synced_at?: string | null
           updated_at?: string
           user_id?: string
           verified?: boolean
@@ -773,6 +779,7 @@ export type Database = {
           title: string
         }[]
       }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

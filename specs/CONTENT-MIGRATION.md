@@ -34,3 +34,8 @@ Notes:
   consumption stat is additive.
 - Verified rows (D2, "Oficial" badge) may later become the only rows that
   count toward thresholds — hook noted on `preferCommunity`.
+- `charging_stations` baseline: `specs/charging-stations-seed.md` seeded
+  209 real Uruguayan stations from OpenChargeMap (verified, "Oficial"
+  badge) so the list isn't empty for new users. This doesn't change the
+  gate above — it only raises the starting row count community
+  submissions are compared against.
