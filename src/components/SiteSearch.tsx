@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { searchCommunityContent } from '../lib/communityData'
 import { searchCuratedContent } from '../lib/siteSearch'
 import { isAccessoryCategory } from '../lib/purchaseCatalog'
+import { useEscapeToClose } from '../lib/useEscapeToClose'
 import { Badge } from './UI'
 import styles from './SiteSearch.module.css'
 import type { CommunitySearchResult, CuratedSearchResult } from '../types'
@@ -53,14 +54,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
     }
   }, [open])
 
-  useEffect(() => {
-    if (!open) return
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+  useEscapeToClose(open, onClose)
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS)

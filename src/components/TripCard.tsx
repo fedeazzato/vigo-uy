@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Card, Badge } from './UI'
 import ContentReactions from './ContentReactions'
+import TripMap from './TripMap'
 import { formatDate } from '../lib/format'
 import type { Stop, StopType, TripLog } from '../types'
 import styles from './TripCard.module.css'
@@ -94,10 +96,16 @@ interface TripDetailProps {
 // without the Card wrapper or header, for embedding inside another card
 // (Comunidad feed grid).
 export function TripDetail({ trip }: TripDetailProps) {
+  const [mapOpen, setMapOpen] = useState(false)
   const chargeTotal = tripChargeTotal(trip)
   return (
     <>
       <RouteMap stops={tripToStops(trip)} />
+
+      <button type="button" className={styles.mapTrigger} onClick={() => setMapOpen(true)}>
+        <span aria-hidden="true">🗺️</span> Ver en mapa
+      </button>
+      <TripMap trip={trip} open={mapOpen} onClose={() => setMapOpen(false)} />
 
       {chargeTotal != null && (
         <p className={styles.routeChargeTotal}>

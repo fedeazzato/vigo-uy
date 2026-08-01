@@ -102,6 +102,22 @@
   flex-wrap: wrap;
 }
 
+.mapTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--green-600);
+}
+.mapTrigger:hover {
+  text-decoration: underline;
+}
+
 /* Trip-level sum of the recorded charge costs. */
 .routeChargeTotal {
   margin-top: 10px;
