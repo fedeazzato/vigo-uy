@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, StatGrid, SectionDivider } from '../components/UI'
 import { GuideLinks, GUIDE_LINKS } from '../components/GuideLinks'
+import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
-import { fetchCommunityTotals, useCommunityContent } from '../lib/communityData'
-import type { CommunityTotals } from '../types'
+import { fetchCommunityTotals, fetchLeaderboard } from '../lib/communityData'
+import type { CommunityTotals, VehicleLeaderboardEntry } from '../types'
 import styles from './HomePage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -15,15 +16,20 @@ import listStyles from '../styles/listPatterns.module.css'
 const QUICK_GUIDE_ROUTES = ['/carga', '/rutas', '/costos', '/faq']
 const QUICK_GUIDE = GUIDE_LINKS.filter(({ to }) => QUICK_GUIDE_ROUTES.includes(to))
 
+// Homepage teaser: just the top vehicles, same length as the "last 3 trips"
+// list it replaced. The full ranking (with trip counts) lives on /comunidad.
+const TOP_VEHICLES = 3
+
 export default function HomePage() {
   const { status } = useAuth()
   const { openRegisterSheet } = useRegisterSheet()
-  const { trips, names } = useCommunityContent({ entries: false, limit: 3 })
   const [totals, setTotals] = useState<CommunityTotals | null>(null)
+  const [leaderboard, setLeaderboard] = useState<VehicleLeaderboardEntry[]>([])
 
   useEffect(() => {
     if (!supabase) return
     void fetchCommunityTotals().then(({ totals: t }) => setTotals(t))
+    void fetchLeaderboard().then(({ rows }) => setLeaderboard(rows.slice(0, TOP_VEHICLES)))
   }, [])
 
   return (
@@ -48,24 +54,8 @@ export default function HomePage() {
 
       {supabase && (
         <Card>
-          <CardTitle icon="🗺️">Últimos viajes</CardTitle>
-          {trips.length > 0 ? (
-            <ul className={styles.communityList}>
-              {trips.map((trip) => (
-                <li key={trip.id} className={styles.communityItem}>
-                  <span className={styles.communityTitle}>{trip.title}</span>
-                  <span className={styles.communityMeta}>
-                    {trip.origin} → {trip.destination}
-                    {trip.distance_km != null && ` · ${trip.distance_km.toLocaleString('es-UY')} km`}
-                    {' · por '}
-                    {names[trip.user_id] ?? 'un usuario'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.emptyNote}>Todavía no hay viajes compartidos por la comunidad.</p>
-          )}
+          <CardTitle icon="🏁">Ranking de kilómetros</CardTitle>
+          <VehicleLeaderboard rows={leaderboard} compact />
           <div className={styles.communityCta}>
             {status === 'signedIn' ? (
               <button
