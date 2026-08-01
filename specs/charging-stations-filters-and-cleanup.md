@@ -67,6 +67,13 @@ That raw data carries two rough edges the community list shouldn't keep:
    to the URL) — reset on navigating away and back, consistent with every
    other filter/search control already in the app (`CommunityFeedPage`'s
    type chips and search box behave the same way).
+9. On desktop (`min-width: 700px`, matching `Layout.module.css`'s own
+   sidebar-vs-bottom-tab-bar breakpoint), each network's station list
+   renders as a 2-column grid instead of a single stacked column, so two
+   stations show per row. Mobile stays single-column. Each item keeps its
+   own bottom divider; the last *row* (not just the last DOM item) drops
+   its divider, handled via a per-item `lastRow` class computed from the
+   station's index within its network group.
 
 ## Files to touch
 

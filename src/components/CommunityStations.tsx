@@ -388,12 +388,19 @@ export default function CommunityStations() {
               per-station — every post of the network works the same way. */}
           {net.instructions && <p className={styles.intro}>📱 {net.instructions}</p>}
           <ul className={styles.stationList}>
-            {netStations.map((station) => {
+            {netStations.map((station, index) => {
               const price = pickCostStat(costStats, station.network, station.id)
               const rel = reliability.find((r) => r.station_id === station.id)
               const level = reliabilityLevel(rel)
+              // Two-column desktop grid: the last row (last 1-2 items) drops
+              // its divider instead of just the last DOM item (see the
+              // ".lastRow" min-width:700px rule in the CSS module).
+              const inLastRow = index >= netStations.length - (netStations.length % 2 === 0 ? 2 : 1)
               return (
-                <li key={station.id} className={styles.stationItem}>
+                <li
+                  key={station.id}
+                  className={`${styles.stationItem} ${inLastRow ? styles.lastRow : ''}`}
+                >
                   <div className={styles.stationHeader}>
                     <span className={styles.stationName}>
                       {station.name}
