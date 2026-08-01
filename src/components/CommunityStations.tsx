@@ -1,10 +1,11 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardTitle, Alert, Badge } from './UI'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
 import { parseLocaleNumber } from '../lib/format'
+import { foldAccents } from '../lib/cities'
 import {
   createChargingStation,
   fetchChargingNetworks,
@@ -34,6 +35,29 @@ import {
   CURRENT_TYPES,
   DEFAULT_CONNECTOR,
 } from '../lib/stations'
+
+// Shared <option> list for both the add-station network picker and the
+// filter toolbar's network picker — grouped by country (UY first, 'otro'
+// last, per COUNTRIES' order).
+function NetworkOptions({ networks }: { networks: ChargingNetwork[] }) {
+  return (
+    <>
+      {COUNTRIES.map((country) => {
+        const options = networks.filter((n) => n.country === country)
+        if (options.length === 0) return null
+        return (
+          <optgroup key={country} label={COUNTRY_LABELS[country]}>
+            {options.map((n) => (
+              <option key={n.slug} value={n.slug}>
+                {n.name}
+              </option>
+            ))}
+          </optgroup>
+        )
+      })}
+    </>
+  )
+}
 
 // Community-maintained charging stations (D4): locations submitted by
 // members, reliability from one-tap reports, and cost per kWh COMPUTED from
@@ -66,6 +90,18 @@ export default function CommunityStations() {
   const [maxPowerKw, setMaxPowerKw] = useState('')
   const [accessNotes, setAccessNotes] = useState('')
   const [busy, setBusy] = useState(false)
+
+  const [providerFilter, setProviderFilter] = useState('')
+  const [cityQuery, setCityQuery] = useState('')
+  const hasActiveFilter = providerFilter !== '' || cityQuery.trim() !== ''
+  const filteredStations = useMemo(() => {
+    const q = foldAccents(cityQuery.trim())
+    return stations.filter((s) => {
+      if (providerFilter && s.network !== providerFilter) return false
+      if (q && !foldAccents(s.city ?? '').includes(q)) return false
+      return true
+    })
+  }, [stations, providerFilter, cityQuery])
 
   const load = useCallback(async () => {
     const [networksRes, stationsRes, statsRes, reliabilityRes] = await Promise.all([
@@ -150,9 +186,10 @@ export default function CommunityStations() {
   const byNetwork = networks
     .map((net) => ({
       network: net,
-      stations: stations.filter((s) => s.network === net.slug),
+      stations: filteredStations.filter((s) => s.network === net.slug),
     }))
     .filter((group) => group.stations.length > 0)
+  const noResultsFromFilter = hasActiveFilter && byNetwork.length === 0
 
   return (
     <>
@@ -176,6 +213,50 @@ export default function CommunityStations() {
           </p>
         )}
 
+        <div className={styles.filterToolbar}>
+          <div className={styles.stationField}>
+            <label className={styles.stationLabel} htmlFor="station-filter-network">
+              🌐 Red
+            </label>
+            <select
+              id="station-filter-network"
+              className={formStyles.input}
+              value={providerFilter}
+              onChange={(e) => setProviderFilter(e.target.value)}
+            >
+              <option value="">Todas las redes</option>
+              <NetworkOptions networks={networks} />
+            </select>
+          </div>
+          <div className={styles.stationField}>
+            <label className={styles.stationLabel} htmlFor="station-filter-city">
+              📍 Ciudad
+            </label>
+            <input
+              id="station-filter-city"
+              type="search"
+              className={formStyles.input}
+              value={cityQuery}
+              onChange={(e) => setCityQuery(e.target.value)}
+              placeholder="Rocha"
+            />
+          </div>
+          {hasActiveFilter && (
+            <button
+              type="button"
+              className={styles.clearFiltersBtn}
+              onClick={() => {
+                setProviderFilter('')
+                setCityQuery('')
+              }}
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
+        {noResultsFromFilter && <Alert type="info">No hay estaciones que coincidan con el filtro.</Alert>}
+
         {showForm && (
           <form className={styles.stationForm} onSubmit={addStation}>
             <div className={styles.formRow}>
@@ -189,19 +270,7 @@ export default function CommunityStations() {
                   value={network}
                   onChange={(e) => setNetwork(e.target.value)}
                 >
-                  {COUNTRIES.map((country) => {
-                    const options = networks.filter((n) => n.country === country)
-                    if (options.length === 0) return null
-                    return (
-                      <optgroup key={country} label={COUNTRY_LABELS[country]}>
-                        {options.map((n) => (
-                          <option key={n.slug} value={n.slug}>
-                            {n.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )
-                  })}
+                  <NetworkOptions networks={networks} />
                 </select>
               </div>
               <div className={styles.stationField}>

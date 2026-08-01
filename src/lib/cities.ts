@@ -87,7 +87,7 @@ export const UY_CITIES: string[] = [
 
 // Strips accents and lowercases, for accent/case-insensitive comparisons.
 const COMBINING_DIACRITICS = /[̀-ͯ]/g
-function foldAccents(s: string): string {
+export function foldAccents(s: string): string {
   return s.normalize('NFD').replace(COMBINING_DIACRITICS, '').toLowerCase()
 }
 
