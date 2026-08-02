@@ -24,13 +24,15 @@ export default function StationsMap({ stations, open, onClose }: StationsMapProp
 
   const positions: [number, number][] = stations.map((s) => [s.lat, s.lng])
 
+  // A single station (its own "Ver en mapa" link) gets its name as the
+  // title instead of a redundant "(1)" count.
+  const title =
+    stations.length === 1
+      ? stations[0].name
+      : `Estaciones de carga${stations.length > 0 ? ` (${stations.length})` : ''}`
+
   return (
-    <MapModal
-      open={open}
-      onClose={onClose}
-      title={`Estaciones de carga${stations.length > 0 ? ` (${stations.length})` : ''}`}
-      ariaLabel="Mapa de estaciones de carga"
-    >
+    <MapModal open={open} onClose={onClose} title={title} ariaLabel="Mapa de estaciones de carga">
       <FittedMapContainer
         positions={positions}
         effectiveTheme={effectiveTheme}

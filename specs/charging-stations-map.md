@@ -36,6 +36,18 @@ gap can't quietly reopen.
 - Bounds fit all markers (reuse `TripMap`'s bounds/single-point-fallback
   logic). Empty state text when the filtered list is empty: "No hay
   estaciones para mostrar con los filtros actuales."
+- Each individual station in the network-grouped list also gets its own
+  small "🗺️ Ver en mapa" link (below its city/connector/power meta line),
+  opening the same `StationsMap` modal scoped to just that one station —
+  `CommunityStations` holds a single `mapStations: ChargingStation[] | null`
+  state (null = closed) that either the toolbar button (`filteredStations`)
+  or a station's own link (`[station]`) can populate. When `StationsMap`
+  receives exactly one station, its modal title is that station's name
+  instead of the generic "Estaciones de carga (N)" count. The toolbar
+  button and each per-station link share the same visible text, so they
+  need distinct `aria-label`s ("Ver todas las estaciones en el mapa" vs.
+  "Ver {name} en el mapa") to stay distinguishable to assistive tech and
+  to tests.
 - Tiles follow `effectiveTheme` exactly like `TripMap` — the CARTO
   light/dark URL + attribution constants move to a new shared
   `src/lib/mapTiles.ts` so `TripMap`, `StationsMap`, and `LocationPicker`
@@ -135,6 +147,8 @@ gap can't quietly reopen.
   - Renders one marker per station passed in.
   - Empty state renders when given an empty station list.
   - Popup content includes the station's name and network.
+  - A single station renders its own name as the modal title, not the
+    generic "Estaciones de carga (1)" count.
 - `src/components/LocationPicker.test.tsx`:
   - Clicking the map calls `onChange` with the clicked coordinates (mock
     `useMapEvents`'s `click` handler invocation).
@@ -152,6 +166,8 @@ gap can't quietly reopen.
   - "Ver en mapa" opens `StationsMap` with exactly the currently filtered
     stations (assert against an active-filter scenario, not just the
     unfiltered list).
+  - A station's own "Ver en mapa" link opens `StationsMap` with just that
+    one station.
 - `src/pages/NewTripLogPage.test.tsx` (extend): `AddStationInline`'s
   "Guardar estación" blocks with the same validation message when no
   location is set, and passes `lat`/`lng` through when one is.
@@ -170,6 +186,9 @@ gap can't quietly reopen.
       pins, with a working popup (name, "Oficial" badge, city/connector/
       power); confirmed again in dark mode (tiles switch to
       `dark_all`, all 211 stations render unfiltered)
+- [x] Verified live via Playwright: clicking a single station's own
+      "Ver en mapa" link ("19 de Abril") opens the modal with exactly 1
+      marker and the station's name as the title, not a count
 - [ ] Not yet done: a real signed-in click-through of `LocationPicker`
       itself (click/drag/"Usar mi ubicación") on `/carga`'s add-station
       form and `/viajes/nuevo`'s inline one. Turnstile blocks driving the

@@ -75,6 +75,14 @@ describe('StationsMap', () => {
     expect(screen.queryByTestId('map-container')).toBeNull()
   })
 
+  it('uses the station name as the modal title when showing a single station', () => {
+    render(<StationsMap stations={[makeStation({ name: 'UTE Rocha centro' })]} open onClose={vi.fn()} />)
+    // Header title and popup content both show the name -- confirms the
+    // title is the station's own name, not the generic "(1)" count.
+    expect(screen.getAllByText('UTE Rocha centro')).toHaveLength(2)
+    expect(screen.queryByText(/Estaciones de carga/)).toBeNull()
+  })
+
   it('shows a verified badge in the popup for verified stations only', () => {
     const stations = [
       makeStation({ id: 's-1', name: 'UTE Rocha', verified: true }),

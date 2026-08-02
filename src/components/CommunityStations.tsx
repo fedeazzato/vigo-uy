@@ -104,7 +104,10 @@ export default function CommunityStations() {
   const [accessNotes, setAccessNotes] = useState('')
   const [location, setLocation] = useState<LatLng | null>(null)
   const [busy, setBusy] = useState(false)
-  const [mapOpen, setMapOpen] = useState(false)
+  // Also doubles as the modal's open flag: null means closed. Holds either
+  // the full filtered list ("Ver en mapa" in the toolbar) or a single
+  // station (a station's own "Ver en mapa" link).
+  const [mapStations, setMapStations] = useState<ChargingStation[] | null>(null)
 
   const [providerFilter, setProviderFilter] = useState('')
   const [cityQuery, setCityQuery] = useState('')
@@ -246,11 +249,20 @@ export default function CommunityStations() {
               {showForm ? 'Cancelar' : '+ Agregar estación'}
             </button>
           )}
-          <button type="button" className={styles.mapBtn} onClick={() => setMapOpen(true)}>
+          <button
+            type="button"
+            className={styles.mapBtn}
+            aria-label="Ver todas las estaciones en el mapa"
+            onClick={() => setMapStations(filteredStations)}
+          >
             🗺️ Ver en mapa
           </button>
         </div>
-        <StationsMap stations={filteredStations} open={mapOpen} onClose={() => setMapOpen(false)} />
+        <StationsMap
+          stations={mapStations ?? []}
+          open={mapStations !== null}
+          onClose={() => setMapStations(null)}
+        />
 
         {status !== 'signedIn' && (
           <p className={styles.intro}>
@@ -513,6 +525,14 @@ export default function CommunityStations() {
                       .filter(Boolean)
                       .join(' · ')}
                   </div>
+                  <button
+                    type="button"
+                    className={styles.stationMapBtn}
+                    aria-label={`Ver ${station.name} en el mapa`}
+                    onClick={() => setMapStations([station])}
+                  >
+                    🗺️ Ver en mapa
+                  </button>
                   {price && (
                     <div className={styles.stationPriceNote}>
                       Promedio último año ({price.sample_count}{' '}

@@ -216,9 +216,18 @@ describe('CommunityStations map + add-station form', () => {
     await screen.findByText('Axion Carrasco')
 
     fireEvent.change(screen.getByLabelText('🌐 Red'), { target: { value: 'dmc' } })
-    fireEvent.click(screen.getByText('🗺️ Ver en mapa'))
+    fireEvent.click(screen.getByRole('button', { name: 'Ver todas las estaciones en el mapa' }))
 
     expect(screen.getByTestId('stations-map').textContent).toBe('Estación Mercedes')
+  })
+
+  it('a station\'s own "Ver en mapa" link opens the map with just that station', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver Axion Prado en el mapa' }))
+
+    expect(screen.getByTestId('stations-map').textContent).toBe('Axion Prado')
   })
 
   it('blocks submitting the add-station form until a location is set', async () => {
