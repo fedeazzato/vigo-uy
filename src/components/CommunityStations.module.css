@@ -5,6 +5,12 @@
   line-height: 1.5;
 }
 
+.introActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .addBtn {
   background: var(--green-400);
   color: #fff;
@@ -18,6 +24,21 @@
 }
 .addBtn:hover {
   background: var(--green-600);
+}
+
+.mapBtn {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mapBtn:hover {
+  background: var(--surface);
 }
 
 /* Provider/city/connector/power filter controls above the network cards.

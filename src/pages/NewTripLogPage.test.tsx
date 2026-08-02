@@ -39,8 +39,8 @@ vi.mock('../lib/communityData', () => ({
           network: 'eone',
           city: 'Maldonado',
           address: null,
-          lat: null,
-          lng: null,
+          lat: -34.8895,
+          lng: -54.9337,
           connector: 'Tipo 2',
           current_type: 'DC',
           max_power_kw: 120,
@@ -53,6 +53,17 @@ vi.mock('../lib/communityData', () => ({
       ],
       error: null,
     }),
+}))
+
+// LocationPicker's own click/drag/geolocation behavior is covered by its
+// own test file; here it's stubbed to a single button so tests can set a
+// location without mounting a real Leaflet map.
+vi.mock('../components/LocationPicker', () => ({
+  default: ({ onChange }: { value: unknown; onChange: (next: { lat: number; lng: number }) => void }) => (
+    <button type="button" onClick={() => onChange({ lat: -34.0489, lng: -53.5406 })}>
+      Marcar ubicación (test)
+    </button>
+  ),
 }))
 
 function renderNewTrip() {
@@ -238,8 +249,8 @@ describe('NewTripLogPage wizard (mobile)', () => {
           network: 'eone',
           city: 'Rocha',
           address: null,
-          lat: null,
-          lng: null,
+          lat: -34.0489,
+          lng: -53.5406,
           connector: 'CCS2',
           current_type: 'DC',
           max_power_kw: null,
@@ -264,6 +275,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
         target: { value: 'Terminal Punta del Diablo' },
       })
       fireEvent.click(screen.getByText(/Agregar esta parada como estación/))
+      fireEvent.click(screen.getByText('Marcar ubicación (test)'))
       fireEvent.click(screen.getByRole('button', { name: 'Guardar estación' }))
 
       await waitFor(() =>
@@ -274,12 +286,31 @@ describe('NewTripLogPage wizard (mobile)', () => {
             network: 'eone',
             connector: 'CCS2',
             currentType: 'DC',
+            lat: -34.0489,
+            lng: -53.5406,
           })
         )
       )
 
       // Linked: the free-text name input is gone, same as picking from the dropdown.
       await waitFor(() => expect(screen.queryByPlaceholderText('Nombre del cargador')).toBeNull())
+    })
+
+    it('blocks submission until a location is set on the map', async () => {
+      renderNewTrip()
+      goToShareStep()
+      fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+      fireEvent.click(screen.getByText('+ Agregar parada'))
+      await screen.findByRole('combobox', { name: 'Cargador' })
+
+      fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
+        target: { value: 'Terminal Punta del Diablo' },
+      })
+      fireEvent.click(screen.getByText(/Agregar esta parada como estación/))
+      fireEvent.click(screen.getByRole('button', { name: 'Guardar estación' }))
+
+      expect(await screen.findByText('Marcá la ubicación de la estación en el mapa.')).toBeTruthy()
+      expect(createChargingStation).not.toHaveBeenCalled()
     })
 
     it('shows an error and keeps the stop unlinked when creation fails', async () => {
@@ -295,6 +326,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
         target: { value: 'Terminal Punta del Diablo' },
       })
       fireEvent.click(screen.getByText(/Agregar esta parada como estación/))
+      fireEvent.click(screen.getByText('Marcar ubicación (test)'))
       fireEvent.click(screen.getByRole('button', { name: 'Guardar estación' }))
 
       expect(await screen.findByText('No se pudo agregar.')).toBeTruthy()

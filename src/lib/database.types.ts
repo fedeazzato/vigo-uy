@@ -76,8 +76,8 @@ export type Database = {
           current_type: string
           hidden: boolean
           id: string
-          lat: number | null
-          lng: number | null
+          lat: number
+          lng: number
           max_power_kw: number | null
           name: string
           network: string
@@ -96,8 +96,8 @@ export type Database = {
           current_type: string
           hidden?: boolean
           id?: string
-          lat?: number | null
-          lng?: number | null
+          lat: number
+          lng: number
           max_power_kw?: number | null
           name: string
           network: string
@@ -116,8 +116,8 @@ export type Database = {
           current_type?: string
           hidden?: boolean
           id?: string
-          lat?: number | null
-          lng?: number | null
+          lat?: number
+          lng?: number
           max_power_kw?: number | null
           name?: string
           network?: string

@@ -1,15 +1,29 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import CommunityStations from './CommunityStations'
+import { UserPrefsProvider } from '../context/UserPrefsContext'
+import { createChargingStation } from '../lib/communityData'
 import type { ChargingStation } from '../types'
 
 vi.mock('../lib/supabaseClient', () => ({
   supabase: {},
 }))
 
+const { useAuthMock } = vi.hoisted(() => ({ useAuthMock: vi.fn() }))
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: null, profile: null, status: 'signedOut' }),
+  useAuth: useAuthMock,
+}))
+
+// LocationPicker's own click/drag/geolocation behavior is covered by its own
+// test file; here it's stubbed to a button so tests can set a location
+// without mounting a real Leaflet map.
+vi.mock('./LocationPicker', () => ({
+  default: ({ onChange }: { value: unknown; onChange: (next: { lat: number; lng: number }) => void }) => (
+    <button type="button" onClick={() => onChange({ lat: -34.0489, lng: -53.5406 })}>
+      Marcar ubicación (test)
+    </button>
+  ),
 }))
 
 function station(overrides: Partial<ChargingStation>): ChargingStation {
@@ -20,8 +34,8 @@ function station(overrides: Partial<ChargingStation>): ChargingStation {
     network: 'eone',
     city: null,
     address: null,
-    lat: null,
-    lng: null,
+    lat: -34.9011,
+    lng: -56.1645,
     connector: 'CCS2',
     current_type: 'DC',
     max_power_kw: null,
@@ -70,13 +84,19 @@ vi.mock('../lib/communityData', () => ({
 
 function renderStations() {
   return render(
-    <MemoryRouter>
-      <CommunityStations />
-    </MemoryRouter>
+    <UserPrefsProvider>
+      <MemoryRouter>
+        <CommunityStations />
+      </MemoryRouter>
+    </UserPrefsProvider>
   )
 }
 
 describe('CommunityStations filters', () => {
+  beforeEach(() => {
+    useAuthMock.mockReset().mockReturnValue({ user: null, profile: null, status: 'signedOut' })
+  })
+
   it('renders all stations grouped under their network by default', async () => {
     renderStations()
     await screen.findByText('Axion Carrasco')
@@ -174,5 +194,66 @@ describe('CommunityStations filters', () => {
     // The provider filter ('eone') was active too — clearing it should bring
     // the dmc station back, confirming all filters reset, not just the city.
     expect(screen.getByText('Estación Mercedes')).toBeTruthy()
+  })
+})
+
+// StationsMap itself (which stations get a pin, popups, tiles) is covered
+// by its own test file; here it's stubbed so these tests only assert which
+// stations CommunityStations hands it.
+vi.mock('./StationsMap', () => ({
+  default: ({ stations, open }: { stations: ChargingStation[]; open: boolean }) =>
+    open ? <div data-testid="stations-map">{stations.map((s) => s.name).join(', ')}</div> : null,
+}))
+
+describe('CommunityStations map + add-station form', () => {
+  beforeEach(() => {
+    useAuthMock.mockReset().mockReturnValue({ user: { id: 'user-1' }, profile: null, status: 'signedIn' })
+    vi.mocked(createChargingStation).mockReset()
+  })
+
+  it('"Ver en mapa" opens the stations map with only the currently filtered stations', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.change(screen.getByLabelText('🌐 Red'), { target: { value: 'dmc' } })
+    fireEvent.click(screen.getByText('🗺️ Ver en mapa'))
+
+    expect(screen.getByTestId('stations-map').textContent).toBe('Estación Mercedes')
+  })
+
+  it('blocks submitting the add-station form until a location is set', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.click(screen.getByText('+ Agregar estación'))
+    fireEvent.change(screen.getByLabelText('📝 Nombre / ubicación'), {
+      target: { value: 'Nueva estación' },
+    })
+    fireEvent.click(screen.getByText('Guardar estación'))
+
+    expect(await screen.findByText('Marcá la ubicación de la estación en el mapa.')).toBeTruthy()
+    expect(createChargingStation).not.toHaveBeenCalled()
+  })
+
+  it('submits the chosen lat/lng when adding a station', async () => {
+    vi.mocked(createChargingStation).mockResolvedValue({
+      station: station({ id: 'st-new', name: 'Nueva estación' }),
+      error: null,
+    })
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.click(screen.getByText('+ Agregar estación'))
+    fireEvent.change(screen.getByLabelText('📝 Nombre / ubicación'), {
+      target: { value: 'Nueva estación' },
+    })
+    fireEvent.click(screen.getByText('Marcar ubicación (test)'))
+    fireEvent.click(screen.getByText('Guardar estación'))
+
+    await waitFor(() =>
+      expect(createChargingStation).toHaveBeenCalledWith(
+        expect.objectContaining({ lat: -34.0489, lng: -53.5406 })
+      )
+    )
   })
 })

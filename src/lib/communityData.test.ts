@@ -186,6 +186,8 @@ describe('createChargingStation', () => {
       network: 'ute',
       connector: 'CCS2',
       currentType: 'DC',
+      lat: -34.0489,
+      lng: -53.5406,
     })
 
     expect(insertMock).toHaveBeenCalledWith({
@@ -197,6 +199,8 @@ describe('createChargingStation', () => {
       current_type: 'DC',
       max_power_kw: null,
       access_notes: null,
+      lat: -34.0489,
+      lng: -53.5406,
     })
     expect(result).toEqual({ station: { id: 'st-1', name: 'Terminal Punta del Diablo' }, error: null })
   })
@@ -215,6 +219,8 @@ describe('createChargingStation', () => {
       network: 'ute',
       connector: 'CCS2',
       currentType: 'DC',
+      lat: -34.0489,
+      lng: -53.5406,
     })
     fromMock.mockClear()
 
@@ -236,6 +242,8 @@ describe('createChargingStation', () => {
       network: 'ute',
       connector: 'CCS2',
       currentType: 'DC',
+      lat: -34.0489,
+      lng: -53.5406,
     })
 
     expect(result.station).toBeNull()

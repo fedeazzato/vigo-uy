@@ -18,6 +18,8 @@ import type {
   Model,
 } from '../types'
 import CityCombobox from '../components/CityCombobox'
+import LocationPicker from '../components/LocationPicker'
+import type { LatLng } from '../components/LocationPicker'
 import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -197,6 +199,7 @@ function AddStationInline({
   const [currentType, setCurrentType] = useState<StationCurrentType>('DC')
   const [connector, setConnector] = useState<StationConnector>(DEFAULT_CONNECTOR.DC)
   const [city, setCity] = useState('')
+  const [location, setLocation] = useState<LatLng | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -208,6 +211,10 @@ function AddStationInline({
   }
 
   async function submit() {
+    if (!location) {
+      setError('Marcá la ubicación de la estación en el mapa.')
+      return
+    }
     setBusy(true)
     setError(null)
     const { station, error: createError } = await createChargingStation({
@@ -217,6 +224,8 @@ function AddStationInline({
       city: city.trim() || null,
       connector,
       currentType,
+      lat: location.lat,
+      lng: location.lng,
     })
     setBusy(false)
     if (createError || !station) {
@@ -301,6 +310,10 @@ function AddStationInline({
             ))}
           </select>
         </div>
+      </div>
+      <div className={formStyles.field}>
+        <label className={styles.smallLabel}>🗺️ Ubicación en el mapa</label>
+        <LocationPicker value={location} onChange={setLocation} />
       </div>
       <div className={styles.stopMainRow}>
         <button type="button" className={styles.addStopBtn} onClick={() => void submit()} disabled={busy}>

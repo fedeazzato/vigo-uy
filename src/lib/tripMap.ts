@@ -24,8 +24,10 @@ export interface TripMapPoint {
 
 export interface TripMapPoints {
   points: TripMapPoint[]
-  // Charging stops that couldn't be placed on the map: no station_id, or a
-  // linked station with no recorded lat/lng.
+  // Charging stops that couldn't be placed on the map: no station_id, or
+  // the linked station isn't in the fetched list (hidden, or since
+  // removed). Every station row has coordinates (DB NOT NULL, migration
+  // 0041), so a resolved station is always placeable.
   unresolvedStopCount: number
 }
 
@@ -47,7 +49,7 @@ export function resolveTripMapPoints(trip: TripLog, stations: ChargingStation[])
 
   for (const stop of trip.charging_stops) {
     const station = stop.station_id ? stationsById.get(stop.station_id) : undefined
-    if (station?.lat != null && station.lng != null) {
+    if (station) {
       points.push({ type: 'charge', lat: station.lat, lng: station.lng, label: stop.name })
     } else {
       unresolvedStopCount++

@@ -28,6 +28,9 @@ import type {
 import styles from './CommunityStations.module.css'
 import formStyles from '../styles/formControls.module.css'
 import CityCombobox from './CityCombobox'
+import LocationPicker from './LocationPicker'
+import type { LatLng } from './LocationPicker'
+import StationsMap from './StationsMap'
 import {
   CONNECTORS_BY_CURRENT,
   COUNTRIES,
@@ -99,7 +102,9 @@ export default function CommunityStations() {
   }
   const [maxPowerKw, setMaxPowerKw] = useState('')
   const [accessNotes, setAccessNotes] = useState('')
+  const [location, setLocation] = useState<LatLng | null>(null)
   const [busy, setBusy] = useState(false)
+  const [mapOpen, setMapOpen] = useState(false)
 
   const [providerFilter, setProviderFilter] = useState('')
   const [cityQuery, setCityQuery] = useState('')
@@ -159,6 +164,10 @@ export default function CommunityStations() {
       setError('La potencia debe ser un número válido.')
       return
     }
+    if (!location) {
+      setError('Marcá la ubicación de la estación en el mapa.')
+      return
+    }
     setBusy(true)
     setError(null)
     setMessage(null)
@@ -171,6 +180,8 @@ export default function CommunityStations() {
       currentType,
       maxPowerKw: power,
       accessNotes: accessNotes.trim() || null,
+      lat: location.lat,
+      lng: location.lng,
     })
     setBusy(false)
     if (insertError) {
@@ -182,6 +193,7 @@ export default function CommunityStations() {
     setCity('')
     setMaxPowerKw('')
     setAccessNotes('')
+    setLocation(null)
     setShowForm(false)
     void load()
   }
@@ -228,11 +240,19 @@ export default function CommunityStations() {
           no son tarifas oficiales. La confiabilidad sale de los reportes de uso.
         </p>
 
-        {status === 'signedIn' ? (
-          <button type="button" className={styles.addBtn} onClick={() => setShowForm((o) => !o)}>
-            {showForm ? 'Cancelar' : '+ Agregar estación'}
+        <div className={styles.introActions}>
+          {status === 'signedIn' && (
+            <button type="button" className={styles.addBtn} onClick={() => setShowForm((o) => !o)}>
+              {showForm ? 'Cancelar' : '+ Agregar estación'}
+            </button>
+          )}
+          <button type="button" className={styles.mapBtn} onClick={() => setMapOpen(true)}>
+            🗺️ Ver en mapa
           </button>
-        ) : (
+        </div>
+        <StationsMap stations={filteredStations} open={mapOpen} onClose={() => setMapOpen(false)} />
+
+        {status !== 'signedIn' && (
           <p className={styles.intro}>
             <Link to="/login">Iniciá sesión</Link> para agregar estaciones o reportar su estado.
           </p>
@@ -359,6 +379,11 @@ export default function CommunityStations() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ej: UTE Rocha centro"
               />
+            </div>
+
+            <div className={styles.stationField}>
+              <span className={styles.stationLabel}>🗺️ Ubicación en el mapa</span>
+              <LocationPicker value={location} onChange={setLocation} />
             </div>
 
             <div className={styles.formRow}>

@@ -393,6 +393,8 @@ export interface NewChargingStationInput {
   currentType: StationCurrentType
   maxPowerKw?: number | null
   accessNotes?: string | null
+  lat: number
+  lng: number
 }
 
 // Shared by CommunityStations' own "+ Agregar estación" form and the trip
@@ -414,6 +416,8 @@ export async function createChargingStation(
       current_type: input.currentType,
       max_power_kw: input.maxPowerKw ?? null,
       access_notes: input.accessNotes ?? null,
+      lat: input.lat,
+      lng: input.lng,
     })
     .select()
     .single()

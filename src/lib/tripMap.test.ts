@@ -39,8 +39,8 @@ function makeStation(overrides: Partial<ChargingStation> = {}): ChargingStation 
     current_type: 'DC',
     max_power_kw: null,
     access_notes: null,
-    lat: null,
-    lng: null,
+    lat: -34.5,
+    lng: -55.5,
     ocm_id: null,
     ocm_last_synced_at: null,
     verified: false,
@@ -87,10 +87,11 @@ describe('resolveTripMapPoints', () => {
     expect(unresolvedStopCount).toBe(0)
   })
 
-  it('counts a stop whose linked station has no coordinates as unresolved', () => {
-    const station = makeStation({ id: 's-1', lat: null, lng: null })
-    const trip = makeTrip({ charging_stops: [makeStop({ station_id: 's-1' })] })
-    const { points, unresolvedStopCount } = resolveTripMapPoints(trip, [station])
+  it('counts a stop whose linked station is not in the fetched list as unresolved', () => {
+    // e.g. the station is hidden (RLS excludes it from fetchChargingStations)
+    // or has since been removed -- the stop's station_id no longer resolves.
+    const trip = makeTrip({ charging_stops: [makeStop({ station_id: 'missing-station' })] })
+    const { points, unresolvedStopCount } = resolveTripMapPoints(trip, [])
     expect(points.some((p) => p.type === 'charge')).toBe(false)
     expect(unresolvedStopCount).toBe(1)
   })
