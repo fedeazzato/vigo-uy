@@ -72,6 +72,13 @@ mysteriously incomplete. No DB migration, no backfill.
   (`useUserPrefs().effectiveTheme`) — light tiles in light mode, dark tiles
   in dark mode — using CARTO's free, key-less basemap tiles (Positron/Dark
   Matter), attributed to OpenStreetMap + CARTO per their usage terms.
+  CARTO's Dark Matter tiles read as near-black on their own (a user
+  reported it as "extremely dark") — softened with a CSS filter
+  (`brightness(1.3) contrast(0.8)` on `.leaflet-tile-pane`, dark theme
+  only) in `FittedMapContainer.module.css` rather than switching tile
+  sets, so labels/roads keep CARTO's intended styling, just lighter.
+  Verified visually (no automated test — jsdom doesn't render CSS
+  filters), not tunable further without eyeballing a screenshot.
 - Coordinate-resolution logic (matching origin/destination to
   `cityCoordinates.json`, matching stops to stations, counting unresolved
   stops) is a pure, testable function separate from the Leaflet rendering —

@@ -51,7 +51,11 @@ gap can't quietly reopen.
 - Tiles follow `effectiveTheme` exactly like `TripMap` — the CARTO
   light/dark URL + attribution constants move to a new shared
   `src/lib/mapTiles.ts` so `TripMap`, `StationsMap`, and `LocationPicker`
-  don't each hardcode them.
+  don't each hardcode them. Dark mode also gets the same
+  `.leaflet-tile-pane` brightness/contrast filter as `TripMap` (see
+  `specs/trip-map.md`) so CARTO's near-black Dark Matter tiles read
+  softer here too — same `FittedMapContainer.module.css` rule covers
+  `StationsMap`, `LocationPicker.module.css` has its own copy.
 
 **Location picker on the add-station form**
 

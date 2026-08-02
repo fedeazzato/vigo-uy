@@ -7,6 +7,13 @@
   height: 100%;
 }
 
+/* CARTO's dark_all tiles read as near-black, heavier than the rest of the
+   app's dark theme (--surface: #1e1e1c) -- soften them instead of
+   switching tile sets, so labels/roads keep their intended styling. */
+[data-theme='dark'] .map :global(.leaflet-tile-pane) {
+  filter: brightness(1.3) contrast(0.8);
+}
+
 .empty {
   padding: 40px 14px;
   text-align: center;

@@ -11,6 +11,12 @@
   cursor: crosshair;
 }
 
+/* Same softening as FittedMapContainer.module.css -- CARTO's dark_all
+   tiles read as near-black otherwise. */
+[data-theme='dark'] .map :global(.leaflet-tile-pane) {
+  filter: brightness(1.3) contrast(0.8);
+}
+
 .controls {
   display: flex;
   align-items: center;
