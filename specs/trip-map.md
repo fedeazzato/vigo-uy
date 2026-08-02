@@ -29,6 +29,17 @@ resolvable station location are silently excluded from the map's pins, but
 a one-line note discloses how many were skipped so the map doesn't look
 mysteriously incomplete. No DB migration, no backfill.
 
+**Places outside the curated list.** Real trips named places `UY_CITIES`
+doesn't cover — "Solymar"/"Punta Negra" (real Uruguayan towns the curated
+81-city list simply missed) and "Torres" (a real cross-border trip to
+Torres, Brazil, discovered from an actual `trip_logs` row: `Maldonado →
+Torres` with a `pelotas` charging stop). Rather than keep manually patching
+a static list forever, an unresolved place now gets a live geocoding
+fallback (`src/lib/nominatimGeocoding.ts`, OpenStreetMap's free Nominatim
+search, no API key) before the pin is given up on — see the origin/
+destination bullet below and the `unresolvedOrigin`/`unresolvedDestination`
+fields on `TripMapPoints`.
+
 ## Requirements
 
 - A new "Ver en mapa" action is available anywhere a trip's full detail
@@ -48,12 +59,25 @@ mysteriously incomplete. No DB migration, no backfill.
     request has actually failed (network, rate limit, no drivable route
     between the points — OSRM's demo server has no SLA). See
     `src/lib/osrmRouting.ts`.
-  - Origin/destination coordinates come from a new curated
+  - Origin/destination coordinates come first from a curated
     `src/data/cityCoordinates.json` lookup keyed by the exact `UY_CITIES`
     strings (accent/case-insensitive match via the existing
-    `foldAccents` helper, mirroring `normalizeCityCasing`'s approach). A
-    city not in the lookup (e.g. a trip abroad, or free text that doesn't
-    match any curated city) is simply omitted as a pin — no error state.
+    `foldAccents` helper, mirroring `normalizeCityCasing`'s approach) — the
+    fast path, no network needed. A city that misses this lookup falls back
+    to a live Nominatim geocode (`geocodeCity` in
+    `src/lib/nominatimGeocoding.ts`), biased toward the Southern Cone
+    (`viewbox`, soft `bounded=0`) so an ambiguous name like "Torres"
+    prefers the nearby Brazilian town over, say, Spain, without hard-
+    excluding a genuine match elsewhere. Both this and the OSRM route fetch
+    are gated on `open` — `TripMap` stays mounted whenever a trip's detail
+    is expanded (not just while its map modal is visible), so without the
+    gate every expanded trip with an unresolved place would fire a
+    background network request whether or not its map was ever opened.
+    While geocoding is pending and nothing has resolved yet, the modal
+    says "Buscando ubicaciones…" instead of prematurely claiming it
+    couldn't find anything. A place still unresolved after geocoding gets
+    a specific note ("No encontramos "X" para ubicarlo en el mapa.")
+    instead of silently vanishing.
   - Each pin's popup leads with a colored circle emoji matching its marker
     color instead of a formal "Origen:"/"Destino:"/"Carga:" text label —
     🟢 origin, 🟠 charge, 🔵 destination — followed by the place/stop name.
@@ -68,6 +92,16 @@ mysteriously incomplete. No DB migration, no backfill.
   - If **zero** points resolve at all (no origin, no destination, no
     stops), the modal shows an empty state instead of a blank map:
     "No pudimos ubicar este viaje en el mapa todavía."
+  - `FittedMapContainer` (shared with `StationsMap`) re-fits the view via
+    an imperative `useMap()` + `fitBounds`/`setView` effect keyed on the
+    positions list, not just react-leaflet's `bounds`/`center`/`zoom`
+    props on `MapContainer` — those only ever apply once, at creation.
+    Without this, a pin that resolves *after* the initial render (the
+    origin from the fast path, the destination arriving a moment later
+    from geocoding) would never bring the view into frame: found live on
+    "Maldonado → Torres" — the map stayed zoomed into Maldonado alone,
+    with the Brazil-bound route line running off the edge of the visible
+    area, until this fix.
 - Map tiles follow the site's existing dark-mode toggle
   (`useUserPrefs().effectiveTheme`) — light tiles in light mode, dark tiles
   in dark mode — using CARTO's free, key-less basemap tiles (Positron/Dark
@@ -97,10 +131,17 @@ mysteriously incomplete. No DB migration, no backfill.
   function; exported `TripMapPoint` type.
 - `src/lib/osrmRouting.ts` — new: `fetchRoute(points)`, a best-effort OSRM
   call returning a road-following `[lat, lng][]` route or `null` on failure.
+- `src/lib/nominatimGeocoding.ts` — new: `geocodeCity(name)`, a best-effort
+  Nominatim call returning `{ lat, lng }` or `null` on failure.
+- `src/components/FittedMapContainer.tsx` — added the `FitBounds` child
+  component (imperative `useMap()` re-fit on every `positions` change, not
+  just the initial mount) — shared with `StationsMap`, so this fix isn't
+  TripMap-specific.
 - `src/components/TripMap.tsx` — new: the modal + Leaflet map component
   (`MapContainer`/`TileLayer`/`Marker`/`Polyline` from `react-leaflet`),
   theme-aware tile selection, empty state, unresolved-stop disclosure line,
-  road-route fetch with straight-line placeholder/fallback.
+  road-route fetch with straight-line placeholder/fallback, live-geocoding
+  fallback for a place outside the curated lookup.
 - `src/components/TripMap.module.css` — new: modal chrome (reuse
   `SiteSearch.module.css`'s backdrop/panel pattern), map container sizing.
 - `src/components/TripCard.tsx` — add the "Ver en mapa" trigger button to
@@ -128,6 +169,15 @@ mysteriously incomplete. No DB migration, no backfill.
     then destination.
   - A trip where nothing resolves returns an empty points array (caller
     renders the empty state).
+  - The raw origin/destination is reported via `unresolvedOrigin`/
+    `unresolvedDestination` when it misses the curated lookup, and both
+    are `null` when both resolve.
+- `src/lib/nominatimGeocoding.test.ts`:
+  - Blank name returns `null` without calling `fetch`.
+  - Builds the Nominatim URL with the trimmed query and the Southern Cone
+    `viewbox`/`bounded=0` bias, returning the first result as `{lat, lng}`.
+  - Returns `null` (not a throw) on an empty result array, a non-ok HTTP
+    response, or a network error.
 - `src/components/TripMap.test.tsx`:
   - Smoke-render with a trip that has resolvable points (mock
     `react-leaflet`'s exports so the test doesn't depend on real tile
@@ -141,6 +191,14 @@ mysteriously incomplete. No DB migration, no backfill.
   - Popups show the emoji labels, not "Origen"/"Destino" text.
   - A charge stop's popup shows "⏱️ N min de carga" when recorded, and
     omits the line entirely when it wasn't.
+  - Neither `geocodeCity` nor `fetchRoute` is called while `open` is
+    `false`, even for a trip with an unresolved place.
+  - "Buscando ubicaciones…" (not the final empty message) shows while
+    geocoding is pending and nothing has resolved yet.
+  - A pin from live geocoding appears once `geocodeCity` resolves it.
+  - The final empty state shows once geocoding settles with nothing found.
+  - "No encontramos "X" para ubicarlo en el mapa." names the place that
+    stayed unresolved after geocoding, alongside a pin that did resolve.
 - `src/lib/osrmRouting.test.ts`:
   - Fewer than 2 points returns `null` without calling `fetch`.
   - Builds the OSRM URL with `lng,lat` order and converts the response
@@ -153,10 +211,18 @@ mysteriously incomplete. No DB migration, no backfill.
 - [x] `npm run type-check` passes
 - [x] `npm run lint` passes
 - [x] `npm test` passes, including `tripMap.test.ts`, `TripMap.test.tsx`,
-      and `osrmRouting.test.ts`
+      `osrmRouting.test.ts`, and `nominatimGeocoding.test.ts`
 - [x] Verified live via Playwright on the "Chuy → Ciudad de la Costa" trip:
       popups read "🟢 Chuy", "🟠 Rocha" + "⏱️ 28 min de carga", and
       "🔵 Ciudad de la Costa" — matching the trip's actual recorded stop
+- [x] Verified live via Playwright on the two trips a user reported as
+      broken: "Solymar → Punta Negra" (previously the empty state; now a
+      full road route along the coast from Ciudad de la Costa to
+      Piriápolis) and "Maldonado → Torres" (previously only the origin
+      pin; now the full route from Maldonado into Rio Grande do Sul,
+      Brazil, correctly zoomed out to show both ends — this second trip is
+      what surfaced the `FitBounds` bug, since the first attempt still
+      showed only Maldonado despite both pins existing in the DOM)
 - [x] Manual check via the `verify` skill: open a community trip with at
       least one linked charging stop in the Comunidad feed, click "Ver en
       mapa", confirm pins + route line render, toggle dark mode and confirm

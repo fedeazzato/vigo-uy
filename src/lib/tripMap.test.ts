@@ -76,6 +76,24 @@ describe('resolveTripMapPoints', () => {
     expect(points.map((p) => p.type)).toEqual(['destination'])
   })
 
+  it('reports the raw origin/destination as unresolved when they miss the curated lookup', () => {
+    const { unresolvedOrigin, unresolvedDestination } = resolveTripMapPoints(
+      makeTrip({ origin: 'Solymar', destination: 'Torres' }),
+      []
+    )
+    expect(unresolvedOrigin).toBe('Solymar')
+    expect(unresolvedDestination).toBe('Torres')
+  })
+
+  it('leaves unresolvedOrigin/unresolvedDestination null when both resolve from the curated lookup', () => {
+    const { unresolvedOrigin, unresolvedDestination } = resolveTripMapPoints(
+      makeTrip({ origin: 'Montevideo', destination: 'Rocha' }),
+      []
+    )
+    expect(unresolvedOrigin).toBeNull()
+    expect(unresolvedDestination).toBeNull()
+  })
+
   it('resolves a charging stop linked to a station with coordinates', () => {
     const station = makeStation({ id: 's-1', lat: -34.5, lng: -55.5 })
     const trip = makeTrip({

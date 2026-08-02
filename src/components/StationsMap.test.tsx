@@ -22,6 +22,7 @@ vi.mock('react-leaflet', () => ({
   TileLayer: ({ url }: { url: string }) => <div data-testid="tile-layer" data-url={url} />,
   Marker: ({ children }: { children: React.ReactNode }) => <div data-testid="marker">{children}</div>,
   Popup: ({ children }: { children: React.ReactNode }) => <div data-testid="popup">{children}</div>,
+  useMap: () => ({ fitBounds: vi.fn(), setView: vi.fn() }),
 }))
 
 function makeStation(overrides: Partial<ChargingStation> = {}): ChargingStation {

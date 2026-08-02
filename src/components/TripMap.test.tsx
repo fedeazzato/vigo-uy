@@ -3,10 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react'
 import TripMap from './TripMap'
 import type { ChargingStation, TripLog } from '../types'
 
-const { fetchChargingStationsMock, useUserPrefsMock, fetchRouteMock } = vi.hoisted(() => ({
+const { fetchChargingStationsMock, useUserPrefsMock, fetchRouteMock, geocodeCityMock } = vi.hoisted(() => ({
   fetchChargingStationsMock: vi.fn(),
   useUserPrefsMock: vi.fn(),
   fetchRouteMock: vi.fn(),
+  geocodeCityMock: vi.fn(),
 }))
 
 vi.mock('../lib/communityData', () => ({
@@ -17,6 +18,9 @@ vi.mock('../context/UserPrefsContext', () => ({
 }))
 vi.mock('../lib/osrmRouting', () => ({
   fetchRoute: fetchRouteMock,
+}))
+vi.mock('../lib/nominatimGeocoding', () => ({
+  geocodeCity: geocodeCityMock,
 }))
 
 // react-leaflet needs a real DOM layout (container size, tile loading) that
@@ -33,6 +37,7 @@ vi.mock('react-leaflet', () => ({
   Polyline: ({ positions }: { positions: [number, number][] }) => (
     <div data-testid="polyline" data-positions={JSON.stringify(positions)} />
   ),
+  useMap: () => ({ fitBounds: vi.fn(), setView: vi.fn() }),
 }))
 
 function makeTrip(overrides: Partial<TripLog> = {}): TripLog {
@@ -95,6 +100,7 @@ describe('TripMap', () => {
     // Defaults to "no road route available" so existing assertions see the
     // straight-line fallback unless a test opts into a resolved route.
     fetchRouteMock.mockReset().mockResolvedValue(null)
+    geocodeCityMock.mockReset().mockResolvedValue(null)
   })
 
   it('renders nothing when closed', () => {
@@ -206,5 +212,62 @@ describe('TripMap', () => {
     resolveRoute(null)
 
     await waitFor(() => expect(polylinePositions()).toHaveLength(2)) // straight-line fallback: origin + destination
+  })
+
+  it('does not geocode or fetch a route while closed, even with an unresolved place', () => {
+    const trip = makeTrip({ origin: 'Solymar', destination: 'Rocha' })
+    render(<TripMap trip={trip} open={false} onClose={vi.fn()} />)
+    expect(geocodeCityMock).not.toHaveBeenCalled()
+    expect(fetchRouteMock).not.toHaveBeenCalled()
+  })
+
+  it('shows a searching message (not the final empty state) while geocoding resolves nothing yet', async () => {
+    let resolveGeocode!: (result: { lat: number; lng: number } | null) => void
+    geocodeCityMock.mockReset().mockReturnValue(
+      new Promise((resolve) => {
+        resolveGeocode = resolve
+      })
+    )
+    const trip = makeTrip({ origin: 'Solymar', destination: 'Punta Negra' })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+
+    await waitFor(() => expect(geocodeCityMock).toHaveBeenCalledTimes(2))
+    expect(screen.getByText('Buscando ubicaciones…')).toBeTruthy()
+    expect(screen.queryByText('No pudimos ubicar este viaje en el mapa todavía.')).toBeNull()
+
+    resolveGeocode({ lat: -34.82, lng: -55.97 })
+    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+  })
+
+  it('places a pin from live geocoding when a city misses the curated lookup', async () => {
+    geocodeCityMock.mockImplementation((name: string) =>
+      Promise.resolve(name === 'Solymar' ? { lat: -34.82, lng: -55.97 } : null)
+    )
+    const trip = makeTrip({ origin: 'Solymar', destination: 'Rocha' })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+
+    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+    expect(screen.getByText(/🔵 Rocha/)).toBeTruthy()
+  })
+
+  it('shows the final empty state once geocoding settles with nothing found', async () => {
+    geocodeCityMock.mockResolvedValue(null)
+    const trip = makeTrip({ origin: 'Solymar', destination: 'Punta Negra' })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+
+    await waitFor(() =>
+      expect(screen.getByText('No pudimos ubicar este viaje en el mapa todavía.')).toBeTruthy()
+    )
+  })
+
+  it('names the place that stayed unresolved after geocoding, next to a pin that did resolve', async () => {
+    geocodeCityMock.mockImplementation((name: string) =>
+      Promise.resolve(name === 'Solymar' ? { lat: -34.82, lng: -55.97 } : null)
+    )
+    const trip = makeTrip({ origin: 'Solymar', destination: 'Nowhereville' })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+
+    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+    expect(screen.getByText('No encontramos "Nowhereville" para ubicarlo en el mapa.')).toBeTruthy()
   })
 })

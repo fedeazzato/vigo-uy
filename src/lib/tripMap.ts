@@ -31,6 +31,12 @@ export interface TripMapPoints {
   // removed). Every station row has coordinates (DB NOT NULL, migration
   // 0041), so a resolved station is always placeable.
   unresolvedStopCount: number
+  // The raw origin/destination string, when it didn't match the curated
+  // cityCoordinates.json lookup -- TripMap falls back to live geocoding
+  // (nominatimGeocoding.ts) for these instead of just omitting the pin.
+  // null when it resolved from the curated list (the common, fast path).
+  unresolvedOrigin: string | null
+  unresolvedDestination: string | null
 }
 
 function cityPoint(type: 'origin' | 'destination', cityName: string): TripMapPoint | null {
@@ -67,5 +73,10 @@ export function resolveTripMapPoints(trip: TripLog, stations: ChargingStation[])
   const destination = cityPoint('destination', trip.destination)
   if (destination) points.push(destination)
 
-  return { points, unresolvedStopCount }
+  return {
+    points,
+    unresolvedStopCount,
+    unresolvedOrigin: origin ? null : trip.origin,
+    unresolvedDestination: destination ? null : trip.destination,
+  }
 }
