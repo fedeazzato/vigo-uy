@@ -3,9 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react'
 import TripMap from './TripMap'
 import type { ChargingStation, TripLog } from '../types'
 
-const { fetchChargingStationsMock, useUserPrefsMock } = vi.hoisted(() => ({
+const { fetchChargingStationsMock, useUserPrefsMock, fetchRouteMock } = vi.hoisted(() => ({
   fetchChargingStationsMock: vi.fn(),
   useUserPrefsMock: vi.fn(),
+  fetchRouteMock: vi.fn(),
 }))
 
 vi.mock('../lib/communityData', () => ({
@@ -13,6 +14,9 @@ vi.mock('../lib/communityData', () => ({
 }))
 vi.mock('../context/UserPrefsContext', () => ({
   useUserPrefs: useUserPrefsMock,
+}))
+vi.mock('../lib/osrmRouting', () => ({
+  fetchRoute: fetchRouteMock,
 }))
 
 // react-leaflet needs a real DOM layout (container size, tile loading) that
@@ -26,7 +30,9 @@ vi.mock('react-leaflet', () => ({
   TileLayer: ({ url }: { url: string }) => <div data-testid="tile-layer" data-url={url} />,
   Marker: ({ children }: { children: React.ReactNode }) => <div data-testid="marker">{children}</div>,
   Popup: ({ children }: { children: React.ReactNode }) => <div data-testid="popup">{children}</div>,
-  Polyline: () => <div data-testid="polyline" />,
+  Polyline: ({ positions }: { positions: [number, number][] }) => (
+    <div data-testid="polyline" data-positions={JSON.stringify(positions)} />
+  ),
 }))
 
 function makeTrip(overrides: Partial<TripLog> = {}): TripLog {
@@ -52,6 +58,10 @@ function makeTrip(overrides: Partial<TripLog> = {}): TripLog {
     created_at: '2026-07-01T00:00:00Z',
     ...overrides,
   }
+}
+
+function polylinePositions(): [number, number][] {
+  return JSON.parse(screen.getByTestId('polyline').getAttribute('data-positions')!) as [number, number][]
 }
 
 function makeStation(overrides: Partial<ChargingStation> = {}): ChargingStation {
@@ -82,6 +92,9 @@ describe('TripMap', () => {
   beforeEach(() => {
     useUserPrefsMock.mockReset().mockReturnValue({ effectiveTheme: 'light' })
     fetchChargingStationsMock.mockReset().mockResolvedValue({ stations: [], error: null })
+    // Defaults to "no road route available" so existing assertions see the
+    // straight-line fallback unless a test opts into a resolved route.
+    fetchRouteMock.mockReset().mockResolvedValue(null)
   })
 
   it('renders nothing when closed', () => {
@@ -121,5 +134,36 @@ describe('TripMap', () => {
       expect(screen.getByText('No pudimos ubicar este viaje en el mapa todavía.')).toBeTruthy()
     )
     expect(screen.queryByTestId('map-container')).toBeNull()
+  })
+
+  it('draws the straight line as an immediate placeholder, then swaps in the road route once it resolves', async () => {
+    let resolveRoute!: (route: [number, number][] | null) => void
+    fetchRouteMock.mockReset().mockReturnValue(
+      new Promise((resolve) => {
+        resolveRoute = resolve
+      })
+    )
+
+    render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
+    await waitFor(() => expect(screen.getByTestId('polyline')).toBeTruthy())
+
+    expect(polylinePositions()).toHaveLength(2) // origin + destination, no intermediate points yet
+
+    const roadRoute: [number, number][] = [
+      [-34.9011, -56.1645],
+      [-34.7, -55.9],
+      [-34.4833, -54.3333],
+    ]
+    resolveRoute(roadRoute)
+
+    await waitFor(() => expect(polylinePositions()).toEqual(roadRoute))
+  })
+
+  it('keeps the straight line when the road route request fails', async () => {
+    fetchRouteMock.mockResolvedValue(null)
+    render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
+
+    await waitFor(() => expect(fetchRouteMock).toHaveBeenCalled())
+    expect(polylinePositions()).toHaveLength(2)
   })
 })

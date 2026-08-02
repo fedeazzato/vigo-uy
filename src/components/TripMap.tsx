@@ -9,6 +9,7 @@ import { useUserPrefs } from '../context/UserPrefsContext'
 import { fetchChargingStations } from '../lib/communityData'
 import { resolveTripMapPoints } from '../lib/tripMap'
 import type { TripMapPointType } from '../lib/tripMap'
+import { fetchRoute } from '../lib/osrmRouting'
 import { dotIcon } from '../lib/mapMarkerIcon'
 import MapModal from './MapModal'
 import FittedMapContainer from './FittedMapContainer'
@@ -49,7 +50,27 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
     [trip, stations]
   )
 
-  const positions: [number, number][] = points.map((p) => [p.lat, p.lng])
+  const positions = useMemo<[number, number][]>(() => points.map((p) => [p.lat, p.lng]), [points])
+
+  // Straight lines between stops cut across the map regardless of roads;
+  // OSRM gives the actual driving route. `positions` renders immediately
+  // as a placeholder so the line doesn't pop in from nothing, then gets
+  // replaced once the real route arrives (or stays as-is if the request
+  // fails -- best-effort, see osrmRouting.ts).
+  const [roadRoute, setRoadRoute] = useState<[number, number][] | null>(null)
+  useEffect(() => {
+    setRoadRoute(null)
+    if (positions.length < 2) return
+    let cancelled = false
+    void fetchRoute(positions).then((route) => {
+      if (!cancelled) setRoadRoute(route)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [positions])
+
+  const routeLine = roadRoute ?? positions
 
   return (
     <MapModal open={open} onClose={onClose} title={trip.title} ariaLabel={`Mapa de ${trip.title}`}>
@@ -59,7 +80,7 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
         emptyMessage="No pudimos ubicar este viaje en el mapa todavía."
       >
         {positions.length > 1 && (
-          <Polyline positions={positions} pathOptions={{ color: ROUTE_LINE_COLOR, weight: 3 }} />
+          <Polyline positions={routeLine} pathOptions={{ color: ROUTE_LINE_COLOR, weight: 3 }} />
         )}
         {points.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={dotIcon(POINT_COLOR[p.type])}>

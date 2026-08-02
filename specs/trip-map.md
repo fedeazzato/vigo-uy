@@ -39,6 +39,15 @@ mysteriously incomplete. No DB migration, no backfill.
 - The map shows, in order: an origin pin, one pin per charging stop that
   resolves to a real location, a destination pin, and a polyline connecting
   them in trip order.
+  - The polyline follows actual roads, not a straight line between points —
+    fetched from OSRM's free public routing server (`router.project-osrm.org`,
+    no API key, CORS-enabled). Best-effort: the straight line between
+    resolved points renders immediately as a placeholder (so the line
+    never pops in from nothing), and gets replaced with the real route once
+    the request resolves. Any failure (network, rate limit, no drivable
+    route between the points — OSRM's demo server has no SLA) just leaves
+    the straight line in place rather than breaking the map. See
+    `src/lib/osrmRouting.ts`.
   - Origin/destination coordinates come from a new curated
     `src/data/cityCoordinates.json` lookup keyed by the exact `UY_CITIES`
     strings (accent/case-insensitive match via the existing
@@ -73,9 +82,12 @@ mysteriously incomplete. No DB migration, no backfill.
   `UY_CITIES` city (lat/lng in decimal degrees).
 - `src/lib/tripMap.ts` — new: `resolveTripMapPoints(trip, stations)` pure
   function; exported `TripMapPoint` type.
+- `src/lib/osrmRouting.ts` — new: `fetchRoute(points)`, a best-effort OSRM
+  call returning a road-following `[lat, lng][]` route or `null` on failure.
 - `src/components/TripMap.tsx` — new: the modal + Leaflet map component
   (`MapContainer`/`TileLayer`/`Marker`/`Polyline` from `react-leaflet`),
-  theme-aware tile selection, empty state, unresolved-stop disclosure line.
+  theme-aware tile selection, empty state, unresolved-stop disclosure line,
+  road-route fetch with straight-line placeholder/fallback.
 - `src/components/TripMap.module.css` — new: modal chrome (reuse
   `SiteSearch.module.css`'s backdrop/panel pattern), map container sizing.
 - `src/components/TripCard.tsx` — add the "Ver en mapa" trigger button to
@@ -107,13 +119,24 @@ mysteriously incomplete. No DB migration, no backfill.
     loading/DOM measurement in jsdom) — asserts the right number of
     markers render and the unresolved-stop note appears when applicable.
   - Empty-state renders when `resolveTripMapPoints` returns no points.
+  - The polyline renders the straight line immediately, then swaps to the
+    resolved road route once `fetchRoute` resolves (mocked, not a real
+    OSRM call).
+  - The straight line stays in place when `fetchRoute` resolves `null`
+    (failure).
+- `src/lib/osrmRouting.test.ts`:
+  - Fewer than 2 points returns `null` without calling `fetch`.
+  - Builds the OSRM URL with `lng,lat` order and converts the response
+    geometry back to `lat,lng` pairs.
+  - Returns `null` (not a throw) on a non-ok HTTP response, an OSRM
+    `code !== 'Ok'` response, or a network error.
 
 ## Acceptance criteria
 
 - [x] `npm run type-check` passes
 - [x] `npm run lint` passes
-- [x] `npm test` passes, including the new `tripMap.test.ts` and
-      `TripMap.test.tsx`
+- [x] `npm test` passes, including `tripMap.test.ts`, `TripMap.test.tsx`,
+      and `osrmRouting.test.ts`
 - [x] Manual check via the `verify` skill: open a community trip with at
       least one linked charging stop in the Comunidad feed, click "Ver en
       mapa", confirm pins + route line render, toggle dark mode and confirm
@@ -122,3 +145,8 @@ mysteriously incomplete. No DB migration, no backfill.
       unresolvable origin/destination to click through live, so this is
       verified by `TripMap.test.tsx`'s "shows the empty state when nothing
       on the trip resolves" case instead of a manual click-through
+- [x] Manual check: opened the "Chuy → Ciudad de la Costa" trip's map live
+      (Playwright) — the polyline's SVG path grew from 24 chars (the
+      2-point straight-line placeholder) to 408 chars within ~2.5s,
+      visibly following the coastal highway through Rocha/Maldonado
+      instead of cutting a diagonal across the country
