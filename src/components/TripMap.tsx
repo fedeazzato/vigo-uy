@@ -53,24 +53,29 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
   const positions = useMemo<[number, number][]>(() => points.map((p) => [p.lat, p.lng]), [points])
 
   // Straight lines between stops cut across the map regardless of roads;
-  // OSRM gives the actual driving route. `positions` renders immediately
-  // as a placeholder so the line doesn't pop in from nothing, then gets
-  // replaced once the real route arrives (or stays as-is if the request
-  // fails -- best-effort, see osrmRouting.ts).
+  // OSRM gives the actual driving route. No line renders until either one
+  // arrives -- drawing the straight line first and swapping it a moment
+  // later reads as a glitch, not a placeholder. The straight line only
+  // ever appears as a genuine fallback, once the request has actually
+  // failed (see osrmRouting.ts).
   const [roadRoute, setRoadRoute] = useState<[number, number][] | null>(null)
+  const [routeFailed, setRouteFailed] = useState(false)
   useEffect(() => {
     setRoadRoute(null)
+    setRouteFailed(false)
     if (positions.length < 2) return
     let cancelled = false
     void fetchRoute(positions).then((route) => {
-      if (!cancelled) setRoadRoute(route)
+      if (cancelled) return
+      if (route) setRoadRoute(route)
+      else setRouteFailed(true)
     })
     return () => {
       cancelled = true
     }
   }, [positions])
 
-  const routeLine = roadRoute ?? positions
+  const routeLine = roadRoute ?? (routeFailed ? positions : null)
 
   return (
     <MapModal open={open} onClose={onClose} title={trip.title} ariaLabel={`Mapa de ${trip.title}`}>
@@ -79,9 +84,7 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
         effectiveTheme={effectiveTheme}
         emptyMessage="No pudimos ubicar este viaje en el mapa todavía."
       >
-        {positions.length > 1 && (
-          <Polyline positions={routeLine} pathOptions={{ color: ROUTE_LINE_COLOR, weight: 3 }} />
-        )}
+        {routeLine && <Polyline positions={routeLine} pathOptions={{ color: ROUTE_LINE_COLOR, weight: 3 }} />}
         {points.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={dotIcon(POINT_COLOR[p.type])}>
             <Popup>

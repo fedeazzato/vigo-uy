@@ -41,12 +41,12 @@ mysteriously incomplete. No DB migration, no backfill.
   them in trip order.
   - The polyline follows actual roads, not a straight line between points —
     fetched from OSRM's free public routing server (`router.project-osrm.org`,
-    no API key, CORS-enabled). Best-effort: the straight line between
-    resolved points renders immediately as a placeholder (so the line
-    never pops in from nothing), and gets replaced with the real route once
-    the request resolves. Any failure (network, rate limit, no drivable
-    route between the points — OSRM's demo server has no SLA) just leaves
-    the straight line in place rather than breaking the map. See
+    no API key, CORS-enabled). No line renders until the request settles
+    (drawing a straight line first and swapping it a moment later reads as
+    a glitch, not a placeholder): the road route draws once it arrives, and
+    the straight line only ever appears as a genuine fallback, once the
+    request has actually failed (network, rate limit, no drivable route
+    between the points — OSRM's demo server has no SLA). See
     `src/lib/osrmRouting.ts`.
   - Origin/destination coordinates come from a new curated
     `src/data/cityCoordinates.json` lookup keyed by the exact `UY_CITIES`
@@ -119,11 +119,10 @@ mysteriously incomplete. No DB migration, no backfill.
     loading/DOM measurement in jsdom) — asserts the right number of
     markers render and the unresolved-stop note appears when applicable.
   - Empty-state renders when `resolveTripMapPoints` returns no points.
-  - The polyline renders the straight line immediately, then swaps to the
-    resolved road route once `fetchRoute` resolves (mocked, not a real
-    OSRM call).
-  - The straight line stays in place when `fetchRoute` resolves `null`
-    (failure).
+  - No polyline renders while `fetchRoute` is still pending; it appears
+    once the mocked promise resolves with a road route.
+  - No polyline renders until `fetchRoute` resolves; only then does the
+    straight-line fallback appear, when it resolves `null` (failure).
 - `src/lib/osrmRouting.test.ts`:
   - Fewer than 2 points returns `null` without calling `fetch`.
   - Builds the OSRM URL with `lng,lat` order and converts the response
@@ -146,7 +145,7 @@ mysteriously incomplete. No DB migration, no backfill.
       verified by `TripMap.test.tsx`'s "shows the empty state when nothing
       on the trip resolves" case instead of a manual click-through
 - [x] Manual check: opened the "Chuy → Ciudad de la Costa" trip's map live
-      (Playwright) — the polyline's SVG path grew from 24 chars (the
-      2-point straight-line placeholder) to 408 chars within ~2.5s,
-      visibly following the coastal highway through Rocha/Maldonado
-      instead of cutting a diagonal across the country
+      (Playwright) — zero polylines exist immediately after opening (no
+      straight-line flash), then one appears within ~2.5s with a 408-char
+      SVG path, visibly following the coastal highway through Rocha/
+      Maldonado instead of cutting a diagonal across the country

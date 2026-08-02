@@ -136,7 +136,7 @@ describe('TripMap', () => {
     expect(screen.queryByTestId('map-container')).toBeNull()
   })
 
-  it('draws the straight line as an immediate placeholder, then swaps in the road route once it resolves', async () => {
+  it('draws no line while the road route is loading, then the road route once it resolves', async () => {
     let resolveRoute!: (route: [number, number][] | null) => void
     fetchRouteMock.mockReset().mockReturnValue(
       new Promise((resolve) => {
@@ -145,9 +145,8 @@ describe('TripMap', () => {
     )
 
     render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
-    await waitFor(() => expect(screen.getByTestId('polyline')).toBeTruthy())
-
-    expect(polylinePositions()).toHaveLength(2) // origin + destination, no intermediate points yet
+    await waitFor(() => expect(fetchRouteMock).toHaveBeenCalled())
+    expect(screen.queryByTestId('polyline')).toBeNull()
 
     const roadRoute: [number, number][] = [
       [-34.9011, -56.1645],
@@ -159,11 +158,20 @@ describe('TripMap', () => {
     await waitFor(() => expect(polylinePositions()).toEqual(roadRoute))
   })
 
-  it('keeps the straight line when the road route request fails', async () => {
-    fetchRouteMock.mockResolvedValue(null)
-    render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
+  it('draws no line until the road route request fails, then falls back to the straight line', async () => {
+    let resolveRoute!: (route: [number, number][] | null) => void
+    fetchRouteMock.mockReset().mockReturnValue(
+      new Promise((resolve) => {
+        resolveRoute = resolve
+      })
+    )
 
+    render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
     await waitFor(() => expect(fetchRouteMock).toHaveBeenCalled())
-    expect(polylinePositions()).toHaveLength(2)
+    expect(screen.queryByTestId('polyline')).toBeNull()
+
+    resolveRoute(null)
+
+    await waitFor(() => expect(polylinePositions()).toHaveLength(2)) // straight-line fallback: origin + destination
   })
 })
