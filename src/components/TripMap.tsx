@@ -22,10 +22,12 @@ const POINT_COLOR: Record<TripMapPointType, string> = {
   destination: '#185FA5',
 }
 
-const POINT_LABEL: Record<TripMapPointType, string> = {
-  origin: 'Origen',
-  charge: 'Carga',
-  destination: 'Destino',
+// Match the marker dot colors (green/amber/blue) instead of a formal
+// "Origen:"/"Destino:" text label.
+const POINT_EMOJI: Record<TripMapPointType, string> = {
+  origin: '🟢',
+  charge: '🟠',
+  destination: '🔵',
 }
 
 const ROUTE_LINE_COLOR = '#64748B'
@@ -88,7 +90,10 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
         {points.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={dotIcon(POINT_COLOR[p.type])}>
             <Popup>
-              <strong>{POINT_LABEL[p.type]}</strong>: {p.label}
+              {POINT_EMOJI[p.type]} {p.label}
+              {p.type === 'charge' && p.durationMinutes != null && (
+                <div>⏱️ {p.durationMinutes} min de carga</div>
+              )}
             </Popup>
           </Marker>
         ))}

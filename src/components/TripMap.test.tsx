@@ -118,6 +118,39 @@ describe('TripMap', () => {
     expect(screen.queryByText(/sin ubicación registrada/)).toBeNull()
   })
 
+  it('labels points with emoji instead of formal "Origen:"/"Destino:" text', async () => {
+    render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
+    await waitFor(() => expect(screen.getAllByTestId('marker')).toHaveLength(2))
+    expect(screen.getByText(/🟢 Montevideo/)).toBeTruthy()
+    expect(screen.getByText(/🔵 Rocha/)).toBeTruthy()
+    expect(screen.queryByText(/Origen/)).toBeNull()
+    expect(screen.queryByText(/Destino/)).toBeNull()
+  })
+
+  it("shows the charging duration in a charge stop's popup when the stop recorded it", async () => {
+    fetchChargingStationsMock.mockResolvedValue({
+      stations: [makeStation({ id: 's-1', lat: -34.6, lng: -55.6 })],
+      error: null,
+    })
+    const trip = makeTrip({
+      charging_stops: [{ name: 'ANCAP Ruta 8', station_id: 's-1', duration_minutes: 28 }],
+    })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+    await waitFor(() => expect(screen.getByText(/🟠 ANCAP Ruta 8/)).toBeTruthy())
+    expect(screen.getByText('⏱️ 28 min de carga')).toBeTruthy()
+  })
+
+  it('omits the duration line when the stop did not record a charging time', async () => {
+    fetchChargingStationsMock.mockResolvedValue({
+      stations: [makeStation({ id: 's-1', lat: -34.6, lng: -55.6 })],
+      error: null,
+    })
+    const trip = makeTrip({ charging_stops: [{ name: 'ANCAP Ruta 8', station_id: 's-1' }] })
+    render(<TripMap trip={trip} open onClose={vi.fn()} />)
+    await waitFor(() => expect(screen.getByText(/🟠 ANCAP Ruta 8/)).toBeTruthy())
+    expect(screen.queryByText(/min de carga/)).toBeNull()
+  })
+
   it('discloses charging stops that could not be placed on the map', async () => {
     const trip = makeTrip({
       charging_stops: [{ name: 'Sin estación vinculada' }, { name: 'Otra sin ubicación' }],

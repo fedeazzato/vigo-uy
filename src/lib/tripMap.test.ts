@@ -87,6 +87,24 @@ describe('resolveTripMapPoints', () => {
     expect(unresolvedStopCount).toBe(0)
   })
 
+  it('carries the charge duration through when the stop recorded it', () => {
+    const station = makeStation({ id: 's-1', lat: -34.5, lng: -55.5 })
+    const trip = makeTrip({
+      charging_stops: [makeStop({ name: 'ANCAP Ruta 8', station_id: 's-1', duration_minutes: 28 })],
+    })
+    const { points } = resolveTripMapPoints(trip, [station])
+    expect(points.find((p) => p.type === 'charge')?.durationMinutes).toBe(28)
+  })
+
+  it('leaves the charge duration undefined when the stop did not record it', () => {
+    const station = makeStation({ id: 's-1', lat: -34.5, lng: -55.5 })
+    const trip = makeTrip({
+      charging_stops: [makeStop({ name: 'ANCAP Ruta 8', station_id: 's-1' })],
+    })
+    const { points } = resolveTripMapPoints(trip, [station])
+    expect(points.find((p) => p.type === 'charge')?.durationMinutes).toBeUndefined()
+  })
+
   it('counts a stop whose linked station is not in the fetched list as unresolved', () => {
     // e.g. the station is hidden (RLS excludes it from fetchChargingStations)
     // or has since been removed -- the stop's station_id no longer resolves.

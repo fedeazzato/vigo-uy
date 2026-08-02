@@ -54,6 +54,12 @@ mysteriously incomplete. No DB migration, no backfill.
     `foldAccents` helper, mirroring `normalizeCityCasing`'s approach). A
     city not in the lookup (e.g. a trip abroad, or free text that doesn't
     match any curated city) is simply omitted as a pin — no error state.
+  - Each pin's popup leads with a colored circle emoji matching its marker
+    color instead of a formal "Origen:"/"Destino:"/"Carga:" text label —
+    🟢 origin, 🟠 charge, 🔵 destination — followed by the place/stop name.
+    A charge stop's popup also shows "⏱️ N min de carga" when the stop
+    recorded `duration_minutes`; omitted when it didn't (`TripMapPoint`
+    carries `durationMinutes` for exactly this).
   - A charging stop resolves to a pin only when it carries `station_id` AND
     that station (fetched via the existing `fetchChargingStations()`) has
     non-null `lat`/`lng`. Stops that don't resolve are counted, not shown as
@@ -109,6 +115,8 @@ mysteriously incomplete. No DB migration, no backfill.
   - A charging stop with `station_id` matching a station whose `lat`/`lng`
     are null is counted as unresolved, not returned as a point.
   - A charging stop with no `station_id` is counted as unresolved.
+  - A resolved charge stop carries `durationMinutes` through when the stop
+    recorded `duration_minutes`, and leaves it `undefined` when it didn't.
   - Point order matches trip order: origin, then stops in array order,
     then destination.
   - A trip where nothing resolves returns an empty points array (caller
@@ -123,6 +131,9 @@ mysteriously incomplete. No DB migration, no backfill.
     once the mocked promise resolves with a road route.
   - No polyline renders until `fetchRoute` resolves; only then does the
     straight-line fallback appear, when it resolves `null` (failure).
+  - Popups show the emoji labels, not "Origen"/"Destino" text.
+  - A charge stop's popup shows "⏱️ N min de carga" when recorded, and
+    omits the line entirely when it wasn't.
 - `src/lib/osrmRouting.test.ts`:
   - Fewer than 2 points returns `null` without calling `fetch`.
   - Builds the OSRM URL with `lng,lat` order and converts the response
@@ -136,6 +147,9 @@ mysteriously incomplete. No DB migration, no backfill.
 - [x] `npm run lint` passes
 - [x] `npm test` passes, including `tripMap.test.ts`, `TripMap.test.tsx`,
       and `osrmRouting.test.ts`
+- [x] Verified live via Playwright on the "Chuy → Ciudad de la Costa" trip:
+      popups read "🟢 Chuy", "🟠 Rocha" + "⏱️ 28 min de carga", and
+      "🔵 Ciudad de la Costa" — matching the trip's actual recorded stop
 - [x] Manual check via the `verify` skill: open a community trip with at
       least one linked charging stop in the Comunidad feed, click "Ver en
       mapa", confirm pins + route line render, toggle dark mode and confirm

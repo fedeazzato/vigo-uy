@@ -20,6 +20,8 @@ export interface TripMapPoint {
   lat: number
   lng: number
   label: string
+  // Charge points only, when the stop recorded it.
+  durationMinutes?: number
 }
 
 export interface TripMapPoints {
@@ -50,7 +52,13 @@ export function resolveTripMapPoints(trip: TripLog, stations: ChargingStation[])
   for (const stop of trip.charging_stops) {
     const station = stop.station_id ? stationsById.get(stop.station_id) : undefined
     if (station) {
-      points.push({ type: 'charge', lat: station.lat, lng: station.lng, label: stop.name })
+      points.push({
+        type: 'charge',
+        lat: station.lat,
+        lng: station.lng,
+        label: stop.name,
+        durationMinutes: stop.duration_minutes,
+      })
     } else {
       unresolvedStopCount++
     }
