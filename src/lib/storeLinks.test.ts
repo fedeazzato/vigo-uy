@@ -7,7 +7,7 @@ import {
 } from './storeLinks'
 
 // A real Alibaba mobile "share" link (reported directly) -- a different URL
-// shape from the plain /product-detail/<slug>-<id>.html page: no slug in
+// shape from the plain /product-detail/<slug>_<id>.html page: no slug in
 // the path, but the product name and a direct CDN image URL are already
 // there as query params.
 const ALIBABA_SHARE_URL =
@@ -102,16 +102,19 @@ describe('suggestTitleFromStoreUrl', () => {
   })
 
   describe('Alibaba', () => {
-    it('extracts the slug from /product-detail/<slug>-<id>.html (hyphen-separated)', () => {
+    it('extracts the slug from /product-detail/<slug>_<id>.html (underscore-separated, real listing URL)', () => {
       expect(
         suggestTitleFromStoreUrl(
-          'https://www.alibaba.com/product-detail/2023-New-Arrival-Fashion-Car-Charger-1600123456789.html'
+          'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html'
         )
-      ).toBe('2023 New Arrival Fashion Car Charger')
+      ).toBe('Front Trunk Storage Solution ABS Plastic')
     })
 
     it('returns null for a real listing URL with an empty slug', () => {
-      // Real URL, reported not matching before the underscore->hyphen fix.
+      // Real URL. A single empty-slug example like this can't actually
+      // distinguish hyphen from underscore separators (neither character
+      // appears when there's no slug) -- don't repeat the mistake of
+      // generalizing the separator from this case alone.
       expect(
         suggestTitleFromStoreUrl('https://spanish.alibaba.com/product-detail/-1601902641033.html')
       ).toBeNull()
@@ -142,7 +145,7 @@ describe('suggestTitleFromStoreUrl', () => {
   it('rejects lookalike domains that merely contain a store name', () => {
     expect(suggestTitleFromStoreUrl('https://amazon.evil.com/some-item/dp/B08N5WRWNW')).toBeNull()
     expect(suggestTitleFromStoreUrl('https://mercadolibre.evil.com/MLU-123456-cubiertas')).toBeNull()
-    expect(suggestTitleFromStoreUrl('https://alibaba.evil.com/product-detail/thing-12345.html')).toBeNull()
+    expect(suggestTitleFromStoreUrl('https://alibaba.evil.com/product-detail/thing_12345.html')).toBeNull()
   })
 })
 
@@ -152,7 +155,7 @@ describe('suggestStoreFromUrl', () => {
     ['https://www.amazon.com/dp/B08N5WRWNW', 'Amazon'],
     ['https://www.temu.com/usb-c-fast-charger-30w-g-601234567890.html', 'Temu'],
     ['https://www.aliexpress.com/item/1005006104729202.html', 'AliExpress'],
-    ['https://www.alibaba.com/product-detail/thing-1600123456789.html', 'Alibaba'],
+    ['https://www.alibaba.com/product-detail/thing_1600123456789.html', 'Alibaba'],
   ])('recognizes %s as %s', (url, expected) => {
     expect(suggestStoreFromUrl(url)).toBe(expected)
   })
@@ -165,7 +168,7 @@ describe('suggestStoreFromUrl', () => {
 
   it('rejects lookalike domains that merely contain a store name', () => {
     expect(suggestStoreFromUrl('https://amazon.evil.com/dp/B08N5WRWNW')).toBeNull()
-    expect(suggestStoreFromUrl('https://alibaba.evil.com/product-detail/thing-12345.html')).toBeNull()
+    expect(suggestStoreFromUrl('https://alibaba.evil.com/product-detail/thing_12345.html')).toBeNull()
   })
 
   it('recognizes the Alibaba share-link shape too (host-only match, no slug needed)', () => {
@@ -182,7 +185,7 @@ describe('suggestImageFromStoreUrl', () => {
 
   it('returns null for the plain Alibaba product-detail page (no image in the URL)', () => {
     expect(
-      suggestImageFromStoreUrl('https://www.alibaba.com/product-detail/thing-1600123456789.html')
+      suggestImageFromStoreUrl('https://www.alibaba.com/product-detail/thing_1600123456789.html')
     ).toBeNull()
   })
 
@@ -264,6 +267,21 @@ describe('real-world URLs', () => {
     expect(suggestTitleFromStoreUrl(url)).toBe('Roof Rack Cross Dongfeng 2025 2026')
     expect(suggestStoreFromUrl(url)).toBe('Amazon')
     expect(canonicalizeStoreUrl(url)).toBe('https://www.amazon.com/dp/B0H8DJ6JBV')
+  })
+
+  it('Alibaba, plain product-detail page with search-result tracking query string', () => {
+    // Reported directly, alongside the exact clean URL expected -- the
+    // search-tracking params (spm, priceId) aren't in Alibaba's keepParams
+    // allowlist, so unlike the share-link shape this reduces to just the
+    // path, no verbosity left over.
+    const url =
+      'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html' +
+      '?spm=a2700.prosearch.normal_offer.d_image.50d467afmy2A69&priceId=782c764aca5e4975abe5124517b5f07e'
+    expect(suggestTitleFromStoreUrl(url)).toBe('Front Trunk Storage Solution ABS Plastic')
+    expect(suggestStoreFromUrl(url)).toBe('Alibaba')
+    expect(canonicalizeStoreUrl(url)).toBe(
+      'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html'
+    )
   })
 })
 

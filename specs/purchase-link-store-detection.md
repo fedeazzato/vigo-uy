@@ -196,3 +196,37 @@ unchanged.
       matters for each.
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Correction #2: the hyphen fix above was itself wrong
+
+A seventh real URL (reported directly,
+`.../product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html`)
+proved the "Correction: Alibaba's slug separator is a hyphen, not an
+underscore" section above was wrong. The regex went back to `_\d+\.html$`
+(underscore).
+
+What actually went wrong: the *only* evidence for switching to hyphen was
+a single **empty-slug** example
+(`/product-detail/-1601902641033.html`). But an empty slug can't
+distinguish the two hypotheses at all — whether the separator is `-` or
+`_`, an empty slug produces the same string either way (no separator
+character actually appears when there's nothing on one side of it). That
+example was consistent with underscore all along; switching to hyphen was
+an unjustified generalization from a data point that didn't support it,
+and it silently broke the common case (a real, non-empty slug) that the
+original underscore guess had gotten right.
+
+Restated lesson, more precisely this time: a real example proves a
+pattern only if the pattern's distinguishing feature actually appears in
+that example. An edge case that happens to elide the very thing being
+verified isn't evidence for either hypothesis — it takes a second real
+example, with a non-empty slug, to actually settle this one.
+
+- [x] Alibaba's `/product-detail/<slug>_<id>.html` reverted to underscore;
+      both the empty-slug case and the new non-empty-slug real URL pass.
+- [x] Also verified `canonicalizeStoreUrl` on this URL shape end-to-end:
+      its `spm`/`priceId` tracking params aren't in the `keepParams`
+      allowlist, so (unlike the share-link shape) it cleans down to just
+      the path, matching the clean URL reported alongside it.
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

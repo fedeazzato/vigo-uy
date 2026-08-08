@@ -50,7 +50,7 @@ function fromSlug(pattern: RegExp): (pathname: string) => string | null {
   }
 }
 
-const ALIBABA_PRODUCT_DETAIL = fromSlug(/^\/product-detail\/([a-z0-9-]+)-\d+\.html$/i)
+const ALIBABA_PRODUCT_DETAIL = fromSlug(/^\/product-detail\/([a-z0-9-]+)_\d+\.html$/i)
 
 // MercadoLibre has two URL shapes: the legacy item page
 // (articulo.mercadolibre.../MLU-<id>-<slug>[-_XX]) and the modern
@@ -100,12 +100,17 @@ const STORE_RULES: StoreSlugRule[] = [
     // Alibaba.com (B2B wholesale) is a different site from AliExpress
     // (B2C retail) despite the shared parent company -- separate domain,
     // two different URL shapes:
-    //  1. /product-detail/<slug>-<numeric id>.html -- hyphen-separated,
-    //     not underscore (verified against a real listing URL). An empty
-    //     slug still leaves the leading hyphen, e.g.
-    //     /product-detail/-1601902641033.html -- fromSlug's `+` (at least
-    //     one slug char) makes that fail to match, same net "no title"
-    //     result as the other stores' slugless cases.
+    //  1. /product-detail/<slug>_<numeric id>.html -- underscore-separated
+    //     (verified against a real listing URL,
+    //     ".../Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html").
+    //     A previous fix wrongly changed this to a hyphen based on a
+    //     slugless example (/product-detail/-1601902641033.html) where the
+    //     separator character doesn't actually appear either way, so it
+    //     couldn't distinguish the two -- don't repeat that: a single
+    //     empty-slug example proves nothing about the separator, only a
+    //     real non-empty slug does. That empty-slug case still correctly
+    //     returns null with the underscore regex (no underscore present
+    //     at all, so no match -- same net "no title" result).
     //  2. /share/product-detail.html?...&name=...&imageUrl=...&productId=...
     //     -- the mobile "share" link. No slug to parse: the product name
     //     and a direct CDN image URL are already there as query params
