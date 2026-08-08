@@ -111,3 +111,36 @@ URL pattern (as established for all five stores here), a real example URL
 is worth more than a plausible-looking guess — ask for one, or add it as a
 test the moment it's reported not matching, rather than assuming the first
 guess was right.
+
+## Update: Alibaba's mobile "share" link carries a real image URL
+
+A second real Alibaba URL (also reported directly) turned out to be a
+completely different shape from the plain product page:
+`/share/product-detail.html?...&name=...&imageUrl=...&productId=...`. No
+slug to parse — the product name and a direct CDN image URL are already
+sitting in the query string as structured data (`URLSearchParams` decodes
+both correctly, `+` as space included). This is not a fetch: the data is
+already inside the URL the user pastes, same "zero network calls" premise
+as everything else here — it just turns out one store's URL shape hands us
+more than a title.
+
+This is the first store link able to suggest a **product image**, which is
+the original ask this whole thread traces back to (`specs/purchase-image-url.md`
+ruled out fetching it — this doesn't contradict that, it's not a fetch).
+Added `suggestImageFromStoreUrl`, wired into `NewPartPurchasePage.tsx`'s
+image field the same way title/store already are (fills only when empty).
+
+`StoreSlugRule.slug: RegExp` generalized to `extractTitle: (pathname,
+params) => string | null` (+ optional `extractImage`) to accommodate a rule
+needing two different extraction strategies for the same host (path-slug
+regex vs. query-param lookup) — the four simpler stores share a `fromSlug()`
+regex-to-extractTitle adapter so their rules are unchanged in shape.
+
+- [x] Alibaba share-link shape recognized for title (query `name`) and
+      image (query `imageUrl`); the plain product-detail path still works
+      via the existing slug regex.
+- [x] `suggestImageFromStoreUrl` added, returns `null` for every URL shape
+      that doesn't carry a direct image (all four other stores, Alibaba's
+      plain product page, non-matching/malformed input).
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

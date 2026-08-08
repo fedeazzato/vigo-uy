@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { isAccessoryCategory, PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
-import { suggestStoreFromUrl, suggestTitleFromStoreUrl } from '../lib/storeLinks'
+import { suggestImageFromStoreUrl, suggestStoreFromUrl, suggestTitleFromStoreUrl } from '../lib/storeLinks'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
 import CityCombobox from '../components/CityCombobox'
@@ -243,6 +243,10 @@ export default function NewPartPurchasePage() {
               if (!store.trim()) {
                 const suggestedStore = suggestStoreFromUrl(value)
                 if (suggestedStore) setStore(suggestedStore)
+              }
+              if (!imageUrl.trim()) {
+                const suggestedImage = suggestImageFromStoreUrl(value)
+                if (suggestedImage) setImageUrl(suggestedImage)
               }
             }}
             placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress, Alibaba)"
