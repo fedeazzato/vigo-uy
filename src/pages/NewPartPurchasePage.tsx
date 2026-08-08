@@ -245,7 +245,7 @@ export default function NewPartPurchasePage() {
                 if (suggestedStore) setStore(suggestedStore)
               }
             }}
-            placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress)"
+            placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress, Alibaba)"
           />
         </div>
 

@@ -54,9 +54,43 @@ In `storeLinks.test.ts`:
 
 ## Acceptance criteria
 
-- [ ] `suggestTitleFromStoreUrl` exported from `src/lib/storeLinks.ts`,
+- [x] `suggestTitleFromStoreUrl` exported from `src/lib/storeLinks.ts`,
       handling all four stores plus the null-fallback cases above.
-- [ ] `NewPartPurchasePage.tsx` uses the new function; prefill behavior on
+- [x] `NewPartPurchasePage.tsx` uses the new function; prefill behavior on
       the link field is otherwise unchanged (only fills `item` when empty).
-- [ ] `npm run type-check`, `npm run lint`, `npm test` all pass.
-- [ ] Commit + push to `origin/main` per the standing methodology.
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.
+
+## Update: Alibaba + a `suggestStoreFromUrl` helper
+
+Two additions landed after the initial four-store version, both extending
+this same spec rather than getting their own file:
+
+1. A `suggestStoreFromUrl(url)` helper (prefills the "store" field on the
+   purchase form, e.g. pasting a MercadoLibre link fills store="MercadoLibre")
+   was added for the original four stores.
+2. Alibaba.com (B2B wholesale — a different domain and URL shape from
+   AliExpress's B2C retail site, despite the shared parent company) was
+   added as a fifth store: `/product-detail/<slug>_<numeric id>.html`.
+
+While adding Alibaba to `suggestStoreFromUrl`, found it used unanchored
+`hostname.includes('amazon.')`-style substring checks — the same
+lookalike-domain gap `STORE_RULES`' anchored host regexes exist to prevent
+(`amazon.evil.com` would have matched). Fixed by unifying both functions
+around the single `STORE_RULES` table (`name` field added to
+`StoreSlugRule`) instead of maintaining two separate per-store lists that
+can drift out of sync — adding a store is now one place, not two.
+
+**Test plan**: `storeLinks.test.ts` — Alibaba slug extraction, Alibaba not
+matched by the AliExpress rule, `alibaba.evil.com` lookalike rejection;
+`suggestStoreFromUrl` gets its own `describe` block (previously untested)
+covering all five stores, the non-matching/malformed cases, and the
+lookalike-domain regression for both `amazon.evil.com` and
+`alibaba.evil.com`.
+
+- [x] `alibaba.com` recognized by both `suggestTitleFromStoreUrl` and
+      `suggestStoreFromUrl`, not conflated with `aliexpress.com`.
+- [x] `suggestStoreFromUrl` host matching anchored the same way as
+      `STORE_RULES`, closing the lookalike-domain gap.
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.
