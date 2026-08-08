@@ -50,7 +50,18 @@ function fromSlug(pattern: RegExp): (pathname: string) => string | null {
   }
 }
 
-const ALIBABA_PRODUCT_DETAIL = fromSlug(/^\/product-detail\/([a-z0-9-]+)_\d+\.html$/i)
+// Alibaba doesn't care whether the slug/id separator is a hyphen or an
+// underscore -- both resolve to the same listing (verified: a real
+// listing works at both .../Front-Trunk-Storage-Solution-ABS-Plastic_<id>.html
+// and .../Front-Trunk-Storage-Solution-ABS-Plastic-<id>.html). So there's
+// no single "right" separator to guess -- match either, and treat
+// underscores within the slug as word breaks too, same as hyphens.
+function alibabaProductDetail(pathname: string): string | null {
+  const match = /^\/product-detail\/([a-z0-9_-]+)[-_]\d+\.html$/i.exec(pathname)
+  if (!match) return null
+  const words = match[1].split(/[-_]/).filter(Boolean)
+  return words.length > 0 ? words.join(' ') : null
+}
 
 // MercadoLibre has two URL shapes: the legacy item page
 // (articulo.mercadolibre.../MLU-<id>-<slug>[-_XX]) and the modern
@@ -100,17 +111,17 @@ const STORE_RULES: StoreSlugRule[] = [
     // Alibaba.com (B2B wholesale) is a different site from AliExpress
     // (B2C retail) despite the shared parent company -- separate domain,
     // two different URL shapes:
-    //  1. /product-detail/<slug>_<numeric id>.html -- underscore-separated
-    //     (verified against a real listing URL,
-    //     ".../Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html").
-    //     A previous fix wrongly changed this to a hyphen based on a
-    //     slugless example (/product-detail/-1601902641033.html) where the
-    //     separator character doesn't actually appear either way, so it
-    //     couldn't distinguish the two -- don't repeat that: a single
-    //     empty-slug example proves nothing about the separator, only a
-    //     real non-empty slug does. That empty-slug case still correctly
-    //     returns null with the underscore regex (no underscore present
-    //     at all, so no match -- same net "no title" result).
+    //  1. /product-detail/<slug><sep><numeric id>.html, where <sep> is
+    //     EITHER a hyphen or an underscore -- Alibaba resolves both to the
+    //     same listing (verified: a real listing works at both
+    //     .../Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html
+    //     and the hyphen equivalent). Two earlier fixes each guessed a
+    //     single separator from one real URL and got it wrong both times
+    //     -- not because the guesses were unreasonable, but because there
+    //     was never one right answer to guess. Match either, and split the
+    //     slug on either when turning it into words. A fully empty slug
+    //     (/product-detail/-1601902641033.html) still correctly returns
+    //     null either way -- no separator character to match against.
     //  2. /share/product-detail.html?...&name=...&imageUrl=...&productId=...
     //     -- the mobile "share" link. No slug to parse: the product name
     //     and a direct CDN image URL are already there as query params
@@ -124,7 +135,7 @@ const STORE_RULES: StoreSlugRule[] = [
         const name = params.get('name')?.trim()
         return name || null
       }
-      return ALIBABA_PRODUCT_DETAIL(pathname)
+      return alibabaProductDetail(pathname)
     },
     extractImage: (pathname, params) => {
       if (pathname !== '/share/product-detail.html') return null

@@ -230,3 +230,35 @@ example, with a non-empty slug, to actually settle this one.
       the path, matching the clean URL reported alongside it.
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Correction #3: there was never one right separator — Alibaba accepts both
+
+Reported directly: `.../Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html`
+and `.../Front-Trunk-Storage-Solution-ABS-Plastic-1601722567961.html` are
+**both valid URLs for the same listing**. Corrections #1 and #2 each
+guessed a single separator (hyphen, then underscore) from one real URL and
+got it "wrong" both times — not because either guess was unreasonable
+given the evidence at the time, but because the premise was wrong: there
+was never one correct separator to find. Alibaba's routing evidently just
+looks for the trailing numeric id and treats everything before it as a
+cosmetic SEO slug, indifferent to which non-alphanumeric character joins
+them.
+
+Fixed properly this time: `alibabaProductDetail()` matches either `-` or
+`_` before the numeric id, and splits the captured slug on either when
+turning it into words. No longer a "pick the right one" problem.
+
+Broader lesson, layered on top of corrections #1 and #2: once a *second*
+real example contradicts a hard-coded assumption, stop trying to find the
+"real" answer as a single fixed value — check whether the site just
+doesn't care, and if so, accept the class of valid inputs rather than one
+member of it. Two contradicting real examples are a stronger signal that
+the pattern is looser than assumed than that the second example is simply
+the more authoritative one.
+
+- [x] `alibabaProductDetail()` accepts either separator; both real URLs
+      (hyphen and underscore forms of the same listing) extract the same
+      title. The empty-slug case still correctly returns null (no
+      separator character present to match against either way).
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

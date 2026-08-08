@@ -102,10 +102,22 @@ describe('suggestTitleFromStoreUrl', () => {
   })
 
   describe('Alibaba', () => {
-    it('extracts the slug from /product-detail/<slug>_<id>.html (underscore-separated, real listing URL)', () => {
+    it('extracts the slug from /product-detail/<slug>_<id>.html (underscore, real listing URL)', () => {
       expect(
         suggestTitleFromStoreUrl(
           'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html'
+        )
+      ).toBe('Front Trunk Storage Solution ABS Plastic')
+    })
+
+    it('extracts the same slug from the hyphen-separated equivalent of the same listing', () => {
+      // Reported directly: both this and the underscore version above are
+      // valid URLs for the exact same product. Alibaba doesn't care which
+      // separator is used, so neither did two earlier (wrong) attempts to
+      // pick just one.
+      expect(
+        suggestTitleFromStoreUrl(
+          'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic-1601722567961.html'
         )
       ).toBe('Front Trunk Storage Solution ABS Plastic')
     })
