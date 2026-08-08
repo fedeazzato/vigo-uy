@@ -65,12 +65,19 @@ describe('suggestTitleFromStoreUrl', () => {
   })
 
   describe('Alibaba', () => {
-    it('extracts the slug from /product-detail/<slug>_<id>.html', () => {
+    it('extracts the slug from /product-detail/<slug>-<id>.html (hyphen-separated)', () => {
       expect(
         suggestTitleFromStoreUrl(
-          'https://www.alibaba.com/product-detail/2023-New-Arrival-Fashion-Car-Charger_1600123456789.html'
+          'https://www.alibaba.com/product-detail/2023-New-Arrival-Fashion-Car-Charger-1600123456789.html'
         )
       ).toBe('2023 New Arrival Fashion Car Charger')
+    })
+
+    it('returns null for a real listing URL with an empty slug', () => {
+      // Real URL, reported not matching before the underscore->hyphen fix.
+      expect(
+        suggestTitleFromStoreUrl('https://spanish.alibaba.com/product-detail/-1601902641033.html')
+      ).toBeNull()
     })
 
     it('is not confused with aliexpress.com (different domain, different rule)', () => {
@@ -92,7 +99,7 @@ describe('suggestTitleFromStoreUrl', () => {
   it('rejects lookalike domains that merely contain a store name', () => {
     expect(suggestTitleFromStoreUrl('https://amazon.evil.com/some-item/dp/B08N5WRWNW')).toBeNull()
     expect(suggestTitleFromStoreUrl('https://mercadolibre.evil.com/MLU-123456-cubiertas')).toBeNull()
-    expect(suggestTitleFromStoreUrl('https://alibaba.evil.com/product-detail/thing_12345.html')).toBeNull()
+    expect(suggestTitleFromStoreUrl('https://alibaba.evil.com/product-detail/thing-12345.html')).toBeNull()
   })
 })
 
@@ -102,7 +109,7 @@ describe('suggestStoreFromUrl', () => {
     ['https://www.amazon.com/dp/B08N5WRWNW', 'Amazon'],
     ['https://www.temu.com/usb-c-fast-charger-30w-g-601234567890.html', 'Temu'],
     ['https://www.aliexpress.com/item/1005006104729202.html', 'AliExpress'],
-    ['https://www.alibaba.com/product-detail/thing_1600123456789.html', 'Alibaba'],
+    ['https://www.alibaba.com/product-detail/thing-1600123456789.html', 'Alibaba'],
   ])('recognizes %s as %s', (url, expected) => {
     expect(suggestStoreFromUrl(url)).toBe(expected)
   })
@@ -115,6 +122,6 @@ describe('suggestStoreFromUrl', () => {
 
   it('rejects lookalike domains that merely contain a store name', () => {
     expect(suggestStoreFromUrl('https://amazon.evil.com/dp/B08N5WRWNW')).toBeNull()
-    expect(suggestStoreFromUrl('https://alibaba.evil.com/product-detail/thing_12345.html')).toBeNull()
+    expect(suggestStoreFromUrl('https://alibaba.evil.com/product-detail/thing-12345.html')).toBeNull()
   })
 })

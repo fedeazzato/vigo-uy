@@ -52,9 +52,14 @@ const STORE_RULES: StoreSlugRule[] = [
     // Alibaba.com (B2B wholesale) is a different site from AliExpress
     // (B2C retail) despite the shared parent company -- separate domain,
     // separate URL shape. Product pages are
-    // /product-detail/<slug>_<numeric id>.html.
+    // /product-detail/<slug>-<numeric id>.html -- hyphen-separated, not
+    // underscore (verified against a real listing URL). When there's no
+    // slug the hyphen is still there with nothing before it, e.g.
+    // /product-detail/-1601902641033.html -- the `+` (at least one slug
+    // char) makes that case fail to match at all, same net "no title
+    // suggestion" result as the other stores' slugless cases.
     host: /(^|\.)alibaba\.com$/i,
-    slug: /^\/product-detail\/([a-z0-9-]+)_\d+\.html$/i,
+    slug: /^\/product-detail\/([a-z0-9-]+)-\d+\.html$/i,
   },
 ]
 

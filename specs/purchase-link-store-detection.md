@@ -94,3 +94,20 @@ lookalike-domain regression for both `amazon.evil.com` and
       `STORE_RULES`, closing the lookalike-domain gap.
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Correction: Alibaba's slug separator is a hyphen, not an underscore
+
+The initial Alibaba rule guessed `/product-detail/<slug>_<numeric id>.html`
+(underscore separator) without a real URL to check against. A real listing
+URL (`https://spanish.alibaba.com/product-detail/-1601902641033.html`,
+reported directly) doesn't match that pattern — Alibaba actually separates
+the slug from the numeric ID with a **hyphen**, and when there's no slug
+the hyphen is still there with nothing before it. Fixed the regex
+(`_\d+\.html$` → `-\d+\.html$`) and added the real URL as a regression
+test (expects `null`, same as any other slugless listing).
+
+Lesson for future store rules: where a live fetch isn't viable to verify a
+URL pattern (as established for all five stores here), a real example URL
+is worth more than a plausible-looking guess — ask for one, or add it as a
+test the moment it's reported not matching, rather than assuming the first
+guess was right.
