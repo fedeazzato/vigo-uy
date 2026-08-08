@@ -144,3 +144,55 @@ regex-to-extractTitle adapter so their rules are unchanged in shape.
       plain product page, non-matching/malformed input).
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Update: a second MercadoLibre URL shape, and cleaning the link on blur
+
+Six real listing URLs (reported directly) surfaced two things:
+
+1. **A MercadoLibre URL shape the original rule didn't handle at all**:
+   the modern canonical form `mercadolibre.../<slug>/up/MLU<code><id>`
+   (e.g. `.../mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279`),
+   distinct from the legacy `articulo.mercadolibre.../MLU-<id>-<slug>` form
+   the original implementation was built against. `extractTitle` now tries
+   both.
+2. **Most of these URLs carry a lot of tracking noise** — search-result
+   position/session ids, share-copy tokens, referral tags — in the query
+   string and/or hash fragment, on top of the actual listing path. Pasting
+   one as-is would save and publicly display that noise via "Ver
+   publicación ↗".
+
+Added `canonicalizeStoreUrl(url)`, wired to the link field's `onBlur` (plus
+re-applied at submit time, idempotently, in case blur never fired) to clean
+a recognized store's URL to its simplest working form before it's saved:
+
+- Always strips the hash fragment and any query param that isn't
+  load-bearing — the default and correct behavior for every store *except*
+  Alibaba's share link, where the query string is the actual payload
+  (`productId`/`name`/`imageUrl` are kept, everything else dropped).
+- **Never rewrites the path** by default — guessing whether a shorter path
+  still resolves risks producing a dead link, the exact mistake the
+  Alibaba separator fix above exists to warn against. The one deliberate
+  exception is Amazon's `/dp/<ASIN>`, which is Amazon's own well-documented
+  minimal product URL (literally what its own share button generates) —
+  confident enough to drop the slug and any `/ref=...` suffix entirely.
+
+`StoreSlugRule` gained `simplifyPath` (path rewrite, Amazon only) and
+`keepParams` (query allowlist, Alibaba share-link only) — both optional,
+defaulting to "don't touch the path" / "keep no query params", so the
+other three stores are unaffected in shape.
+
+**Test plan**: `storeLinks.test.ts` — a `real-world URLs` block running all
+six reported URLs through title/store extraction and cleanup together, plus
+a `canonicalizeStoreUrl` block covering: already-clean URL unchanged,
+generic query+hash stripping, Amazon's `/dp/<ASIN>` reduction, the Alibaba
+share-link allowlist, and non-recognized/malformed input returned
+unchanged.
+
+- [x] MercadoLibre's modern `/<slug>/up/MLU<id>` form recognized, alongside
+      the legacy form (not a replacement).
+- [x] `canonicalizeStoreUrl` added and wired to the link field's `onBlur` +
+      submit-time payload construction.
+- [x] All six reported URLs covered by a test exercising the behavior that
+      matters for each.
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

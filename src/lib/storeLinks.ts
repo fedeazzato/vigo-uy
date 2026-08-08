@@ -3,7 +3,9 @@
 // network calls, since none of these stores are reliably scrapable
 // anonymously (MercadoLibre's public API 403s anonymous requests; the
 // others either 403/redirect to a bot-check page or, for AliExpress
-// especially, usually carry no slug at all).
+// especially, usually carry no slug at all). Also cleans a pasted URL down
+// to its simplest working form, stripping search-result/share tracking
+// noise before it gets saved and shown to the rest of the community.
 //
 // Host patterns anchor on `(^|\.)store\.tld$` rather than a bare substring
 // match, so a lookalike domain (`amazon.evil.com`) can't be mistaken for
@@ -21,6 +23,19 @@ interface StoreSlugRule {
   // Only Alibaba's share links do today (structured data in the URL
   // itself, not a fetch) -- optional because most stores don't.
   extractImage?: (pathname: string, params: URLSearchParams) => string | null
+  // Rewrites the path to its shortest known-working form for "clean on
+  // blur", e.g. Amazon's /dp/<ASIN> resolves with no slug at all (this is
+  // literally what Amazon's own share button generates). Absent means
+  // "don't touch the path" -- the safe default: guessing whether a
+  // shorter path still resolves risks producing a dead link for a store
+  // without an equally well-established minimal form (see the Alibaba
+  // slug-separator lesson in specs/purchase-link-store-detection.md).
+  simplifyPath?: (pathname: string) => string
+  // Query params that are load-bearing and must survive cleanup -- every
+  // other param and the hash fragment are always stripped. Absent means
+  // "no query params are load-bearing", true for every store except
+  // Alibaba's share-link shape, where the query IS the payload.
+  keepParams?: string[]
 }
 
 // Shared by the plain path-slug stores: hyphen-joined slug -> space-joined
@@ -37,14 +52,20 @@ function fromSlug(pattern: RegExp): (pathname: string) => string | null {
 
 const ALIBABA_PRODUCT_DETAIL = fromSlug(/^\/product-detail\/([a-z0-9-]+)-\d+\.html$/i)
 
+// MercadoLibre has two URL shapes: the legacy item page
+// (articulo.mercadolibre.../MLU-<id>-<slug>[-_XX]) and the modern
+// canonical one (mercadolibre.../<slug>/up/MLU<code><id>, e.g.
+// ".../mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279").
+const MERCADOLIBRE_LEGACY = fromSlug(/^\/ML[A-Z]-?\d+-([a-z0-9-]+?)(?:-_[A-Z]{2})?$/i)
+const MERCADOLIBRE_UP = fromSlug(/^\/([a-z0-9-]+)\/up\/ML[A-Z0-9]+$/i)
+
+const AMAZON_ASIN = /\/(?:dp|gp\/product)\/([A-Z0-9]{10})(?:\/|$)/i
+
 const STORE_RULES: StoreSlugRule[] = [
   {
     name: 'MercadoLibre',
-    // MercadoLibre embeds the title in the slug, e.g.
-    // ".../MLU-637941467-carlinkit-carplayadaptador-inalambrico-30-apple-carplay-_JM"
-    // MLU (Uruguay), MLA (Argentina), MLB (Brasil), etc. -- any site code.
     host: /(^|\.)mercadolibre\.[a-z]{2,3}(\.[a-z]{2,3})?$/i,
-    extractTitle: fromSlug(/^\/ML[A-Z]-?\d+-([a-z0-9-]+?)(?:-_[A-Z]{2})?$/i),
+    extractTitle: (pathname) => MERCADOLIBRE_LEGACY(pathname) ?? MERCADOLIBRE_UP(pathname),
   },
   {
     name: 'Amazon',
@@ -53,6 +74,12 @@ const STORE_RULES: StoreSlugRule[] = [
     // Short share links with a bare /dp/<ASIN> have no slug to extract.
     host: /(^|\.)amazon\.[a-z]{2,3}(\.[a-z]{2,3})?$/i,
     extractTitle: fromSlug(/^\/([a-z0-9-]+)\/(?:dp|gp\/product)\/[A-Z0-9]{10}(?:\/|$)/i),
+    // /dp/<ASIN> alone is Amazon's own minimal product URL -- drop the
+    // slug and any /ref=... attribution suffix entirely.
+    simplifyPath: (pathname) => {
+      const match = AMAZON_ASIN.exec(pathname)
+      return match ? `/dp/${match[1]}` : pathname
+    },
   },
   {
     name: 'Temu',
@@ -83,7 +110,9 @@ const STORE_RULES: StoreSlugRule[] = [
     //     -- the mobile "share" link. No slug to parse: the product name
     //     and a direct CDN image URL are already there as query params
     //     (verified against a real share link), so no fetch is needed --
-    //     the only store link that can suggest an image today.
+    //     the only store link that can suggest an image today. Unlike
+    //     every other store, the query string here IS the payload, so
+    //     cleanup keeps these three params instead of stripping all of them.
     host: /(^|\.)alibaba\.com$/i,
     extractTitle: (pathname, params) => {
       if (pathname === '/share/product-detail.html') {
@@ -97,10 +126,11 @@ const STORE_RULES: StoreSlugRule[] = [
       const imageUrl = params.get('imageUrl')?.trim()
       return imageUrl && /^https?:\/\//i.test(imageUrl) ? imageUrl : null
     },
+    keepParams: ['productId', 'name', 'imageUrl'],
   },
 ]
 
-function matchStore(url: string): { rule: StoreSlugRule; pathname: string; params: URLSearchParams } | null {
+function matchStore(url: string): { rule: StoreSlugRule; url: URL } | null {
   let parsed: URL
   try {
     parsed = new URL(url)
@@ -108,7 +138,7 @@ function matchStore(url: string): { rule: StoreSlugRule; pathname: string; param
     return null
   }
   const rule = STORE_RULES.find((r) => r.host.test(parsed.hostname))
-  return rule ? { rule, pathname: parsed.pathname, params: parsed.searchParams } : null
+  return rule ? { rule, url: parsed } : null
 }
 
 /**
@@ -120,7 +150,7 @@ export function suggestTitleFromStoreUrl(url: string): string | null {
   const found = matchStore(url)
   if (!found) return null
 
-  const title = found.rule.extractTitle(found.pathname, found.params)
+  const title = found.rule.extractTitle(found.url.pathname, found.url.searchParams)
   if (!title) return null
 
   return title.charAt(0).toUpperCase() + title.slice(1)
@@ -143,5 +173,31 @@ export function suggestStoreFromUrl(url: string): string | null {
  */
 export function suggestImageFromStoreUrl(url: string): string | null {
   const found = matchStore(url)
-  return found?.rule.extractImage?.(found.pathname, found.params) ?? null
+  return found?.rule.extractImage?.(found.url.pathname, found.url.searchParams) ?? null
+}
+
+/**
+ * Cleans a recognized store's URL down to its simplest working form --
+ * strips the hash fragment and any query params that aren't load-bearing
+ * (search-result position, referral/session ids, share-tracking, ...), and
+ * simplifies the path where a shorter form is well-established to still
+ * resolve (currently just Amazon's /dp/<ASIN>). Never rewrites the path
+ * otherwise -- see `simplifyPath` above for why that's the safe default.
+ * Returns the URL unchanged if it doesn't match a known store, or isn't a
+ * valid URL at all. Never throws.
+ */
+export function canonicalizeStoreUrl(url: string): string {
+  const found = matchStore(url)
+  if (!found) return url
+
+  const pathname = found.rule.simplifyPath?.(found.url.pathname) ?? found.url.pathname
+
+  const kept = new URLSearchParams()
+  for (const key of found.rule.keepParams ?? []) {
+    const value = found.url.searchParams.get(key)
+    if (value != null) kept.set(key, value)
+  }
+  const search = [...kept].length > 0 ? `?${kept.toString()}` : ''
+
+  return `${found.url.origin}${pathname}${search}`
 }

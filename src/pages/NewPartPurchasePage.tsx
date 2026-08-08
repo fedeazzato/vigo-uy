@@ -7,7 +7,12 @@ import { supabase } from '../lib/supabaseClient'
 import { parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { isAccessoryCategory, PURCHASE_CATEGORY_GROUPS } from '../lib/purchaseCatalog'
-import { suggestImageFromStoreUrl, suggestStoreFromUrl, suggestTitleFromStoreUrl } from '../lib/storeLinks'
+import {
+  canonicalizeStoreUrl,
+  suggestImageFromStoreUrl,
+  suggestStoreFromUrl,
+  suggestTitleFromStoreUrl,
+} from '../lib/storeLinks'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
 import CityCombobox from '../components/CityCombobox'
@@ -121,7 +126,10 @@ export default function NewPartPurchasePage() {
       setError('Completá qué compraste y dónde.')
       return
     }
-    const trimmedLink = link.trim()
+    // Cleaned again here (not just on blur) in case the field never blurred
+    // before submit -- idempotent, so re-cleaning an already-clean link is
+    // a no-op.
+    const trimmedLink = canonicalizeStoreUrl(link.trim())
     if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
       setError('El link debe empezar con http:// o https://.')
       return
@@ -249,6 +257,11 @@ export default function NewPartPurchasePage() {
                 if (suggestedImage) setImageUrl(suggestedImage)
               }
             }}
+            // Search-result/share links carry a lot of tracking noise
+            // (position, session ids, referral tags...) that shouldn't end
+            // up saved and shown to the rest of the community -- clean it
+            // down to the simplest form once the user's done pasting.
+            onBlur={() => setLink((current) => canonicalizeStoreUrl(current.trim()))}
             placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress, Alibaba)"
           />
         </div>

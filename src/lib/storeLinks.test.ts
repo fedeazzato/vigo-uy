@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { suggestImageFromStoreUrl, suggestStoreFromUrl, suggestTitleFromStoreUrl } from './storeLinks'
+import {
+  canonicalizeStoreUrl,
+  suggestImageFromStoreUrl,
+  suggestStoreFromUrl,
+  suggestTitleFromStoreUrl,
+} from './storeLinks'
 
 // A real Alibaba mobile "share" link (reported directly) -- a different URL
 // shape from the plain /product-detail/<slug>-<id>.html page: no slug in
@@ -28,6 +33,31 @@ describe('suggestTitleFromStoreUrl', () => {
       expect(
         suggestTitleFromStoreUrl('https://articulo.mercadolibre.com.ar/MLA-987654-alfombras-de-goma')
       ).toBe('Alfombras de goma')
+    })
+
+    it('extracts the slug from the modern /<slug>/up/MLU<id> form (real listing URLs)', () => {
+      expect(
+        suggestTitleFromStoreUrl(
+          'https://www.mercadolibre.com.uy/mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279'
+        )
+      ).toBe('Mini compresor xiaomi electric air compressor 2 pro')
+
+      expect(
+        suggestTitleFromStoreUrl('https://www.mercadolibre.com.uy/cubre-llaves-dongfeng-vigo/up/MLUU4454795392')
+      ).toBe('Cubre llaves dongfeng vigo')
+    })
+
+    it('extracts the slug from the modern form even with search/share tracking noise attached', () => {
+      // Same real URL as above, with a search-result click-tracking query
+      // string and share-tracking hash appended -- both are outside
+      // pathname, so extraction is unaffected either way.
+      expect(
+        suggestTitleFromStoreUrl(
+          'https://www.mercadolibre.com.uy/mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279' +
+            '?pdp_filters=item_id%3AMLU947962110&matt_tool=97158715&ua=7yZSRjHY39v3evZl-yo3BAkN0Bn3EMerTDF_mq-YbUnH3g' +
+            '#origin=share&sid=share&wid=MLU947962110&action=copy'
+        )
+      ).toBe('Mini compresor xiaomi electric air compressor 2 pro')
     })
   })
 
@@ -171,5 +201,109 @@ describe('suggestImageFromStoreUrl', () => {
     expect(suggestImageFromStoreUrl('https://www.somerandomstore.com/dp/12345')).toBeNull()
     expect(suggestImageFromStoreUrl('')).toBeNull()
     expect(suggestImageFromStoreUrl('not a url')).toBeNull()
+  })
+})
+
+// Real listing URLs (reported directly), most carrying a lot of
+// search-result/share tracking noise that shouldn't survive into a saved
+// purchase's link. One assertion per URL for the behavior that actually
+// matters for it, plus the full set exercised through canonicalizeStoreUrl
+// below.
+describe('real-world URLs', () => {
+  it('AliExpress, no slug, no tracking noise', () => {
+    const url = 'https://es.aliexpress.com/item/1005007587878624.html'
+    expect(suggestTitleFromStoreUrl(url)).toBeNull()
+    expect(suggestStoreFromUrl(url)).toBe('AliExpress')
+    expect(canonicalizeStoreUrl(url)).toBe(url)
+  })
+
+  it('AliExpress, no slug, heavy search-result tracking query string', () => {
+    const url =
+      'https://es.aliexpress.com/item/1005012646710776.html?spm=a2g0o.productlist.main.1.2e60vde5vde5Tj' +
+      '&algo_pvid=0312089f-078c-4b93-b0df-1e90a142ae50&algo_exp_id=0312089f-078c-4b93-b0df-1e90a142ae50-0' +
+      '&pdp_ext_f=%7B%22order%22%3A%22-1%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D' +
+      '&pdp_npi=6%40dis%21UYU%214312.82%212889.58%21%21%21718.36%21481.30%21%400b14ce1917861978269216556e10cc' +
+      '%2112000058909241973%21sea%21UY%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3A30156e97%3Bm03_new_user%3A-29895' +
+      '&curPageLogUid=auFa6G99RcwS&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005012646710776%7C_p_origin_prod%3A'
+    expect(suggestTitleFromStoreUrl(url)).toBeNull()
+    expect(suggestStoreFromUrl(url)).toBe('AliExpress')
+    expect(canonicalizeStoreUrl(url)).toBe('https://es.aliexpress.com/item/1005012646710776.html')
+  })
+
+  it('MercadoLibre, modern /up/ form, no tracking noise', () => {
+    const url =
+      'https://www.mercadolibre.com.uy/mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279'
+    expect(suggestTitleFromStoreUrl(url)).toBe('Mini compresor xiaomi electric air compressor 2 pro')
+    expect(canonicalizeStoreUrl(url)).toBe(url)
+  })
+
+  it('MercadoLibre, modern /up/ form, share-copy query string + hash', () => {
+    const url =
+      'https://www.mercadolibre.com.uy/mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279' +
+      '?pdp_filters=item_id%3AMLU947962110&matt_tool=97158715&ua=7yZSRjHY39v3evZl-yo3BAkN0Bn3EMerTDF_mq-YbUnH3g' +
+      '#origin=share&sid=share&wid=MLU947962110&action=copy'
+    expect(canonicalizeStoreUrl(url)).toBe(
+      'https://www.mercadolibre.com.uy/mini-compresor-xiaomi-electric-air-compressor-2-pro/up/MLUU3541562279'
+    )
+  })
+
+  it('MercadoLibre, modern /up/ form, search-result click-tracking hash', () => {
+    const url =
+      'https://www.mercadolibre.com.uy/cubre-llaves-dongfeng-vigo/up/MLUU4454795392' +
+      '#polycard_client=search-desktop&be_origin=backend&overlay_label=not_apply&search_layout=grid' +
+      '&position=9&type=product&tracking_id=d0f951bd-75d3-4781-a7a7-ff3e60d6492e&wid=MLU1469261774&sid=search'
+    expect(suggestTitleFromStoreUrl(url)).toBe('Cubre llaves dongfeng vigo')
+    expect(canonicalizeStoreUrl(url)).toBe('https://www.mercadolibre.com.uy/cubre-llaves-dongfeng-vigo/up/MLUU4454795392')
+  })
+
+  it('Amazon, slug + /ref=.../ + heavy search-result tracking query string', () => {
+    const url =
+      'https://www.amazon.com/Roof-Rack-Cross-Dongfeng-2025-2026/dp/B0H8DJ6JBV/ref=sr_1_5' +
+      '?crid=PUNRUNA8Z0S9&dib=eyJ2IjoiMSJ9.mQeJylogF-vig9glz1gJ2XuIfcKI4HlijbEC8jppUTHgbu043fOAbwrOgFiZl6FjqANN0AlS0VGpATFFbtSKzSfIQ_mMG1sJB9nPlAVJ7zdbutWHZJj61MQxfStQP4WQnwNPtMriORuSFBEmi3COp5p2KVl9YvSbab-ELvgI-lV-Urkp46XXoI1EqYgot-gSiAvW7-8vGksPMANhHuNWaTlgB51d-QIcrNsOcoSOfBANZWZs9vDcYNSE_BNQ33t4ye9aMKu2elfnwDY1fRKk5XZZiSj-ao9y-6Jc9xeepLc.Z_jF31CRD_wjhYq8La6Xvt7fX8E_HiYhPU-WyUi6AIk' +
+      '&dib_tag=se&keywords=dongfeng%2Bvigo&qid=1786197983&sprefix=dongfeng%2Bvigo%2Caps%2C316&sr=8-5&th=1'
+    expect(suggestTitleFromStoreUrl(url)).toBe('Roof Rack Cross Dongfeng 2025 2026')
+    expect(suggestStoreFromUrl(url)).toBe('Amazon')
+    expect(canonicalizeStoreUrl(url)).toBe('https://www.amazon.com/dp/B0H8DJ6JBV')
+  })
+})
+
+describe('canonicalizeStoreUrl', () => {
+  it('leaves an already-clean recognized URL unchanged', () => {
+    const url = 'https://es.aliexpress.com/item/1005007587878624.html'
+    expect(canonicalizeStoreUrl(url)).toBe(url)
+  })
+
+  it('strips query string and hash for stores where no query param is load-bearing', () => {
+    expect(
+      canonicalizeStoreUrl('https://www.temu.com/usb-c-fast-charger-30w-g-601234567890.html?utm_source=share')
+    ).toBe('https://www.temu.com/usb-c-fast-charger-30w-g-601234567890.html')
+  })
+
+  it('reduces Amazon to its own minimal /dp/<ASIN> form, dropping slug and query', () => {
+    expect(
+      canonicalizeStoreUrl('https://www.amazon.co.uk/rubber-floor-mats-set/gp/product/B01N5IB20Q?ref=abc&th=1')
+    ).toBe('https://www.amazon.co.uk/dp/B01N5IB20Q')
+  })
+
+  it('keeps only the load-bearing params for Alibaba share links, dropping the rest', () => {
+    const cleaned = canonicalizeStoreUrl(
+      'https://www.alibaba.com/share/product-detail.html?from=share&ckvia=abc123&productId=1601902641033' +
+        '&name=Test+Product&alibabaGuaranteed=false&imageUrl=https%3A%2F%2Fs.alicdn.com%2Fimg.jpg' +
+        '&moq=Orden+min&companyInfo=Some+Co&verified=false&shortKey=xyz&language=es'
+    )
+    const result = new URL(cleaned)
+    expect(result.pathname).toBe('/share/product-detail.html')
+    expect([...result.searchParams.keys()].sort()).toEqual(['imageUrl', 'name', 'productId'])
+    expect(result.searchParams.get('productId')).toBe('1601902641033')
+    expect(result.searchParams.get('name')).toBe('Test Product')
+    expect(result.searchParams.get('imageUrl')).toBe('https://s.alicdn.com/img.jpg')
+  })
+
+  it('returns non-recognized or malformed URLs unchanged', () => {
+    expect(canonicalizeStoreUrl('https://www.somerandomstore.com/dp/12345?utm_source=x')).toBe(
+      'https://www.somerandomstore.com/dp/12345?utm_source=x'
+    )
+    expect(canonicalizeStoreUrl('')).toBe('')
+    expect(canonicalizeStoreUrl('not a url')).toBe('not a url')
   })
 })
