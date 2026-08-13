@@ -146,13 +146,20 @@ const STORE_RULES: StoreSlugRule[] = [
   },
   {
     name: 'TiendaMia',
-    // TiendaMia is a Uruguayan cross-border proxy for buying from Amazon
-    // and other US stores. Slug comes *after* the id here, unlike every
-    // other store above: /p/<source code>/<id>/<slug>, e.g.
-    // ".../p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-..." (the
-    // id is the source store's own id -- lowercased Amazon ASIN for "amz").
+    // TiendaMia is a Uruguayan cross-border proxy for buying from Amazon,
+    // eBay and other US stores. Slug comes *after* the id here, unlike
+    // every other store above: /p/<source code>/<id>/<slug>. The id is
+    // the source store's own id, and its shape varies by source -- a
+    // lowercased Amazon ASIN for "amz" (.../p/amz/b0h3kwccqr/...), but
+    // eBay's is a composite with percent-encoded pipe separators
+    // (.../p/ebay/v1%7C358793702065%7C626816119992/...). Rather than
+    // guess every source store's id format (the Alibaba separator lesson:
+    // don't hard-code a shape from one example when more sources exist),
+    // the id segment matches anything but a slash -- only the source code
+    // and the trailing slug, which is what's actually extracted, stay
+    // restricted to a known character set.
     host: /(^|\.)tiendamia\.[a-z]{2,3}(\.[a-z]{2,3})?$/i,
-    extractTitle: fromSlug(/^\/p\/[a-z0-9]+\/[a-z0-9]+\/([a-z0-9-]+)$/i),
+    extractTitle: fromSlug(/^\/p\/[a-z0-9]+\/[^/]+\/([a-z0-9-]+)$/i),
   },
 ]
 

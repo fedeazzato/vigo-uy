@@ -290,3 +290,22 @@ stripped by the existing default behavior.
       handling needed).
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Correction: TiendaMia's id segment isn't plain alphanumeric
+
+A second real TiendaMia URL, sourced from eBay rather than Amazon
+(`.../p/ebay/v1%7C358793702065%7C626816119992/60w-usb-c-...`), didn't
+match: the id segment was hard-coded to `[a-z0-9]+` after only seeing one
+example (Amazon's lowercased ASIN, itself plain alphanumeric). eBay's id
+on TiendaMia is a composite with percent-encoded pipe separators --
+different source stores, different id shapes, same lesson as the Alibaba
+separator saga: don't harden a shape from a single example when the
+pattern is likely to vary by a dimension you haven't seen yet (there, the
+listing; here, the source store). Broadened the id segment to "anything
+but a slash" -- the source code and the trailing slug (the only two
+parts actually used) stay restricted to their known character sets, only
+the part that isn't consumed for anything got broadened.
+
+- [x] Both the Amazon-sourced and eBay-sourced real URLs extract correctly.
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

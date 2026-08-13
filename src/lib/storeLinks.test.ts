@@ -154,6 +154,17 @@ describe('suggestTitleFromStoreUrl', () => {
         )
       ).toBe('Adaptador carplay inalambrico 4 en 1 para transmision de netflix youtube tiktok tf')
     })
+
+    it('extracts the slug when the id is a non-alphanumeric composite (real eBay-sourced listing URL)', () => {
+      // The id here (v1%7C358793702065%7C626816119992) has percent-encoded
+      // pipe separators, unlike the plain-alphanumeric Amazon ASIN above --
+      // different source stores, different id shapes.
+      expect(
+        suggestTitleFromStoreUrl(
+          'https://tiendamia.com.uy/p/ebay/v1%7C358793702065%7C626816119992/60w-usb-c-to-usb-c-cable-fast-charger-lot-pd-nylon'
+        )
+      ).toBe('60w usb c to usb c cable fast charger lot pd nylon')
+    })
   })
 
   it('returns null for non-recognized store URLs', () => {
