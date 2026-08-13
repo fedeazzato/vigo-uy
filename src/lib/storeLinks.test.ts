@@ -145,6 +145,17 @@ describe('suggestTitleFromStoreUrl', () => {
     })
   })
 
+  describe('TiendaMia', () => {
+    it('extracts the slug from /p/<source>/<id>/<slug> (real listing URL, slug after the id)', () => {
+      expect(
+        suggestTitleFromStoreUrl(
+          'https://tiendamia.com.uy/p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-para-transmision-de-netflix-youtube-tiktok-tf' +
+            '?utm_medium=referral&utm_source=share-pdp'
+        )
+      ).toBe('Adaptador carplay inalambrico 4 en 1 para transmision de netflix youtube tiktok tf')
+    })
+  })
+
   it('returns null for non-recognized store URLs', () => {
     expect(suggestTitleFromStoreUrl('https://www.somerandomstore.com/dp/12345')).toBeNull()
   })
@@ -168,6 +179,7 @@ describe('suggestStoreFromUrl', () => {
     ['https://www.temu.com/usb-c-fast-charger-30w-g-601234567890.html', 'Temu'],
     ['https://www.aliexpress.com/item/1005006104729202.html', 'AliExpress'],
     ['https://www.alibaba.com/product-detail/thing_1600123456789.html', 'Alibaba'],
+    ['https://tiendamia.com.uy/p/amz/b0h3kwccqr/some-product-slug', 'TiendaMia'],
   ])('recognizes %s as %s', (url, expected) => {
     expect(suggestStoreFromUrl(url)).toBe(expected)
   })
@@ -293,6 +305,19 @@ describe('real-world URLs', () => {
     expect(suggestStoreFromUrl(url)).toBe('Alibaba')
     expect(canonicalizeStoreUrl(url)).toBe(
       'https://www.alibaba.com/product-detail/Front-Trunk-Storage-Solution-ABS-Plastic_1601722567961.html'
+    )
+  })
+
+  it('TiendaMia, slug after the id, referral tracking query string', () => {
+    const url =
+      'https://tiendamia.com.uy/p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-para-transmision-de-netflix-youtube-tiktok-tf' +
+      '?utm_medium=referral&utm_source=share-pdp'
+    expect(suggestTitleFromStoreUrl(url)).toBe(
+      'Adaptador carplay inalambrico 4 en 1 para transmision de netflix youtube tiktok tf'
+    )
+    expect(suggestStoreFromUrl(url)).toBe('TiendaMia')
+    expect(canonicalizeStoreUrl(url)).toBe(
+      'https://tiendamia.com.uy/p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-para-transmision-de-netflix-youtube-tiktok-tf'
     )
   })
 })

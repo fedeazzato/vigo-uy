@@ -262,3 +262,31 @@ the more authoritative one.
       separator character present to match against either way).
 - [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
 - [x] Commit + push to `origin/main` per the standing methodology.
+
+## Update: a sixth store, TiendaMia
+
+TiendaMia (`tiendamia.com.uy`) is a Uruguayan cross-border proxy for
+buying from Amazon and other US stores — plausible enough for this app's
+audience to warrant its own rule, distinct from Amazon itself since the
+purchase actually happens on TiendaMia's own domain.
+
+Its URL shape is the one structural outlier among the six stores: the
+slug comes *after* the id, not before —
+`/p/<source store code>/<id>/<slug>`, e.g.
+`.../p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-...` (`amz`
+here is the source store TiendaMia is proxying; the id is that source
+store's own id -- a lowercased Amazon ASIN in this example, though that's
+incidental to how the rule matches, which doesn't care what the id looks
+like). `fromSlug()` handles it unchanged since it already just captures
+whichever group is marked, regardless of position in the pattern.
+
+No `simplifyPath` or `keepParams` needed -- the query string
+(`utm_medium`/`utm_source`) is pure referral tracking, so it's fully
+stripped by the existing default behavior.
+
+- [x] `tiendamia.com.uy` recognized for title suggestion and store-name
+      prefill; the referral-tracking query string is stripped by
+      `canonicalizeStoreUrl`'s existing default (no store-specific
+      handling needed).
+- [x] `npm run type-check`, `npm run lint`, `npm test` all pass.
+- [x] Commit + push to `origin/main` per the standing methodology.

@@ -262,7 +262,7 @@ export default function NewPartPurchasePage() {
             // up saved and shown to the rest of the community -- clean it
             // down to the simplest form once the user's done pasting.
             onBlur={() => setLink((current) => canonicalizeStoreUrl(current.trim()))}
-            placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress, Alibaba)"
+            placeholder="https://articulo.mercadolibre.com.uy/... (o Amazon, Temu, AliExpress, Alibaba, TiendaMia)"
           />
         </div>
 

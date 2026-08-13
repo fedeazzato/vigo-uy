@@ -144,6 +144,16 @@ const STORE_RULES: StoreSlugRule[] = [
     },
     keepParams: ['productId', 'name', 'imageUrl'],
   },
+  {
+    name: 'TiendaMia',
+    // TiendaMia is a Uruguayan cross-border proxy for buying from Amazon
+    // and other US stores. Slug comes *after* the id here, unlike every
+    // other store above: /p/<source code>/<id>/<slug>, e.g.
+    // ".../p/amz/b0h3kwccqr/adaptador-carplay-inalambrico-4-en-1-..." (the
+    // id is the source store's own id -- lowercased Amazon ASIN for "amz").
+    host: /(^|\.)tiendamia\.[a-z]{2,3}(\.[a-z]{2,3})?$/i,
+    extractTitle: fromSlug(/^\/p\/[a-z0-9]+\/[a-z0-9]+\/([a-z0-9-]+)$/i),
+  },
 ]
 
 function matchStore(url: string): { rule: StoreSlugRule; url: URL } | null {
