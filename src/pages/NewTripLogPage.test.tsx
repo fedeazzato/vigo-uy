@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
 import NewTripLogPage, { parseStopDrafts, tripTitle, StopDraft } from './NewTripLogPage'
 import { createChargingStation } from '../lib/communityData'
+import type { ChargingStation } from '../types'
 
 // All data access goes through the mocked communityData layer below, so the
 // tests run identically with or without VITE_SUPABASE_* env (CI has none).
@@ -64,6 +65,42 @@ vi.mock('../components/LocationPicker', () => ({
       Marcar ubicación (test)
     </button>
   ),
+}))
+
+// StationPickerModal's own filtering/map/"cerca mío" behavior is covered by
+// its own test file; here it's stubbed to a plain list of buttons so these
+// tests only assert which station NewTripLogPage links when one is picked.
+vi.mock('../components/StationPickerModal', () => ({
+  default: ({
+    open,
+    stations,
+    onSelect,
+    onClose,
+  }: {
+    open: boolean
+    stations: ChargingStation[]
+    onSelect: (station: ChargingStation) => void
+    onClose: () => void
+  }) =>
+    open ? (
+      <div data-testid="station-picker">
+        {stations.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => {
+              onSelect(s)
+              onClose()
+            }}
+          >
+            {s.name}
+          </button>
+        ))}
+        <button type="button" onClick={onClose}>
+          Cerrar buscador (test)
+        </button>
+      </div>
+    ) : null,
 }))
 
 function renderNewTrip() {
@@ -194,25 +231,39 @@ describe('NewTripLogPage wizard (mobile)', () => {
     expect(screen.queryByText('Parada 1')).toBeNull()
   })
 
-  it('puts the charger selector first and only shows the free-text name when unlisted', async () => {
+  it('opens the charger picker, links a station, and only shows the free-text name when unlinked', async () => {
     renderNewTrip()
     goToShareStep()
     fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
     fireEvent.click(screen.getByText('+ Agregar parada'))
 
-    // Selector present (stations mocked), name visible while nothing picked.
-    // Note: inputs with list= also have role combobox, hence the name filter.
-    const selector = await screen.findByRole('combobox', { name: 'Cargador' })
+    // Picker trigger present (stations mocked), name visible while nothing picked.
+    const openPicker = await screen.findByText('🔎 Buscar cargador…')
     expect(screen.getByPlaceholderText('Nombre del cargador')).toBeTruthy()
 
-    // Picking a listed charger hides the free-text name.
-    fireEvent.change(selector, { target: { value: 'st-1' } })
+    // Picking a listed charger hides the free-text name and shows a chip.
+    fireEvent.click(openPicker)
+    fireEvent.click(screen.getByText('EONE Punta Shopping'))
     expect(screen.queryByPlaceholderText('Nombre del cargador')).toBeNull()
+    expect(screen.getByText(/EONE Punta Shopping/)).toBeTruthy()
 
-    // Back to "not listed": the name input returns, empty.
-    fireEvent.change(selector, { target: { value: '' } })
+    // "Quitar cargador" unlinks it: the name input returns, empty.
+    fireEvent.click(screen.getByText('Quitar cargador'))
     const nameInput = screen.getByPlaceholderText<HTMLInputElement>('Nombre del cargador')
     expect(nameInput.value).toBe('')
+  })
+
+  it('reopens the picker via "Cambiar" once a station is already linked', async () => {
+    renderNewTrip()
+    goToShareStep()
+    fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
+    fireEvent.click(screen.getByText('+ Agregar parada'))
+
+    fireEvent.click(await screen.findByText('🔎 Buscar cargador…'))
+    fireEvent.click(screen.getByText('EONE Punta Shopping'))
+
+    fireEvent.click(screen.getByText('Cambiar'))
+    expect(screen.getByTestId('station-picker')).toBeTruthy()
   })
 
   describe('linking a free-text charger to a real station', () => {
@@ -225,7 +276,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
       goToShareStep()
       fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
       fireEvent.click(screen.getByText('+ Agregar parada'))
-      await screen.findByRole('combobox', { name: 'Cargador' })
+      await screen.findByText('🔎 Buscar cargador…')
 
       // No name yet: no invitation to formalize a station.
       expect(screen.queryByText(/Agregar esta parada como estación/)).toBeNull()
@@ -236,7 +287,8 @@ describe('NewTripLogPage wizard (mobile)', () => {
       expect(screen.getByText(/Agregar esta parada como estación/)).toBeTruthy()
 
       // Picking a listed station instead removes the free-text name and the offer.
-      fireEvent.change(screen.getByRole('combobox', { name: 'Cargador' }), { target: { value: 'st-1' } })
+      fireEvent.click(screen.getByText('🔎 Buscar cargador…'))
+      fireEvent.click(screen.getByText('EONE Punta Shopping'))
       expect(screen.queryByText(/Agregar esta parada como estación/)).toBeNull()
     })
 
@@ -269,7 +321,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
       goToShareStep()
       fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
       fireEvent.click(screen.getByText('+ Agregar parada'))
-      await screen.findByRole('combobox', { name: 'Cargador' })
+      await screen.findByText('🔎 Buscar cargador…')
 
       fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
         target: { value: 'Terminal Punta del Diablo' },
@@ -301,7 +353,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
       goToShareStep()
       fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
       fireEvent.click(screen.getByText('+ Agregar parada'))
-      await screen.findByRole('combobox', { name: 'Cargador' })
+      await screen.findByText('🔎 Buscar cargador…')
 
       fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
         target: { value: 'Terminal Punta del Diablo' },
@@ -320,7 +372,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
       goToShareStep()
       fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
       fireEvent.click(screen.getByText('+ Agregar parada'))
-      await screen.findByRole('combobox', { name: 'Cargador' })
+      await screen.findByText('🔎 Buscar cargador…')
 
       fireEvent.change(screen.getByPlaceholderText('Nombre del cargador'), {
         target: { value: 'Terminal Punta del Diablo' },
@@ -414,6 +466,29 @@ describe('parseStopDrafts (charging_stops payload)', () => {
   it('skips stops without a name and keeps only entered fields', () => {
     const result = parseStopDrafts([draft({ name: '  ' }), draft({ durationMinutes: '35' })])
     expect(result).toEqual({ stops: [{ name: 'UTE Rocha', duration_minutes: 35 }] })
+  })
+
+  it('silently skips a genuinely blank stop (never touched)', () => {
+    const result = parseStopDrafts([draft({ name: '' })])
+    expect(result).toEqual({ stops: [] })
+  })
+
+  it('errors instead of silently dropping a stop that has data but no name/station', () => {
+    // This is the exact bug report: filling in duration/cost without
+    // naming the stop or picking a charger used to lose the data with no
+    // warning at all.
+    const result = parseStopDrafts([draft({ name: '', durationMinutes: '35', cost: '450' })])
+    expect(result).toEqual({ error: 'Ponele un nombre a la parada 1 o elegí un cargador de la lista.' })
+  })
+
+  it('uses the 1-based stop index in the missing-name error', () => {
+    const result = parseStopDrafts([draft({}), draft({ name: '', note: 'sin nombre' })])
+    expect(result).toEqual({ error: 'Ponele un nombre a la parada 2 o elegí un cargador de la lista.' })
+  })
+
+  it('keeps a stop with only a linked station and no free-text name', () => {
+    const result = parseStopDrafts([draft({ name: '', stationId: 'st-1' })])
+    expect(result).toEqual({ stops: [{ name: '', station_id: 'st-1' }] })
   })
 
   it('carries cost, energy and station link when provided (D4)', () => {

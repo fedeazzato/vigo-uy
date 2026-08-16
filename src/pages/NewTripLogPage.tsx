@@ -20,6 +20,7 @@ import type {
 import CityCombobox from '../components/CityCombobox'
 import LocationPicker from '../components/LocationPicker'
 import type { LatLng } from '../components/LocationPicker'
+import StationPickerModal from '../components/StationPickerModal'
 import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
@@ -93,13 +94,37 @@ export function tripTitle(origin: string, destination: string): string {
   return `${origin.trim()} → ${destination.trim()}`
 }
 
+// A stop with literally nothing filled in (the common case of an "+
+// Agregar parada" card the user opened and never touched) is dropped
+// silently. Anything else needs a name -- see parseStopDrafts below.
+function isBlankStop(s: StopDraft): boolean {
+  return (
+    !s.name.trim() &&
+    !s.stationId &&
+    !s.note.trim() &&
+    !s.distanceFromPrevious.trim() &&
+    !s.arrivalPercentage.trim() &&
+    !s.departurePercentage.trim() &&
+    !s.durationMinutes.trim() &&
+    !s.averageSpeed.trim() &&
+    !s.cost.trim() &&
+    !s.energyKwh.trim()
+  )
+}
+
 // Converts the string drafts into the charging_stops jsonb payload,
-// validating as it goes. Stops without a name are skipped. Exported for
+// validating as it goes. Completely empty stops are skipped; a stop with
+// any data but no name/station is a validation error instead of a silent
+// drop -- previously any unnamed stop vanished with no warning, taking
+// whatever else the user had typed into it along with it. Exported for
 // tests: this is the exact shape sent to the database.
 export function parseStopDrafts(stops: StopDraft[]): { stops: TripChargingStop[] } | { error: string } {
   const cleanStops: TripChargingStop[] = []
-  for (const s of stops) {
-    if (!s.name.trim()) continue
+  for (const [i, s] of stops.entries()) {
+    if (isBlankStop(s)) continue
+    if (!s.name.trim() && !s.stationId) {
+      return { error: `Ponele un nombre a la parada ${i + 1} o elegí un cargador de la lista.` }
+    }
     const arrival = parseLocaleNumber(s.arrivalPercentage)
     const departure = parseLocaleNumber(s.departurePercentage)
     if (!isValidPercentage(arrival) || !isValidPercentage(departure)) {
@@ -336,7 +361,8 @@ function StopCard({
   networks,
   userId,
   onUpdate,
-  onSetStation,
+  onClearStation,
+  onOpenPicker,
   onStationCreated,
   onRemove,
 }: {
@@ -346,10 +372,12 @@ function StopCard({
   networks: ChargingNetwork[]
   userId: string | null
   onUpdate: (field: keyof StopDraft, value: string) => void
-  onSetStation: (stationId: string) => void
+  onClearStation: () => void
+  onOpenPicker: () => void
   onStationCreated: (station: ChargingStation) => void
   onRemove: () => void
 }) {
+  const selectedStation = stations.find((s) => s.id === stop.stationId)
   return (
     <div className={styles.stopCard}>
       <div className={styles.stopHeader}>
@@ -361,32 +389,25 @@ function StopCard({
 
       {stations.length > 0 && (
         <div className={formStyles.field}>
-          <label className={styles.smallLabel} htmlFor={`stop-${index}-station`}>
-            🔌 Cargador
-          </label>
-          <select
-            id={`stop-${index}-station`}
-            aria-label="Cargador"
-            className={formStyles.input}
-            value={stop.stationId}
-            onChange={(e) => onSetStation(e.target.value)}
-          >
-            <option value="">No está en la lista</option>
-            {networks.map((net) => {
-              const options = stations.filter((s) => s.network === net.slug)
-              if (options.length === 0) return null
-              return (
-                <optgroup key={net.slug} label={net.name}>
-                  {options.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                      {s.city ? ` — ${s.city}` : ''}
-                    </option>
-                  ))}
-                </optgroup>
-              )
-            })}
-          </select>
+          <span className={styles.smallLabel}>🔌 Cargador</span>
+          {selectedStation ? (
+            <div className={styles.selectedStation}>
+              <span className={styles.selectedStationName}>
+                {selectedStation.name}
+                {selectedStation.city ? ` — ${selectedStation.city}` : ''}
+              </span>
+              <button type="button" className={styles.removeStopBtn} onClick={onOpenPicker}>
+                Cambiar
+              </button>
+              <button type="button" className={styles.removeStopBtn} onClick={onClearStation}>
+                Quitar cargador
+              </button>
+            </div>
+          ) : (
+            <button type="button" className={styles.addStationBtn} onClick={onOpenPicker}>
+              🔎 Buscar cargador…
+            </button>
+          )}
         </div>
       )}
 
@@ -529,6 +550,10 @@ export default function NewTripLogPage() {
   const [networks, setNetworks] = useState<ChargingNetwork[]>([])
   // Any change flips this on; Cancel then asks before discarding.
   const [dirty, setDirty] = useState(false)
+  // Which stop's charger picker is open; null = closed. A single modal
+  // instance is reused across every stop card (mirrors CommunityStations'
+  // one `mapStations` state for all its per-station "Ver en mapa" links).
+  const [pickerForIndex, setPickerForIndex] = useState<number | null>(null)
 
   useEffect(() => {
     // No supabase guard: the fetchers null-guard the client themselves and
@@ -544,6 +569,12 @@ export default function NewTripLogPage() {
     const station = stations.find((s) => s.id === stationId)
     setStops((prev) => prev.map((s, i) => (i === index ? { ...s, stationId, name: station?.name ?? '' } : s)))
     setDirty(true)
+  }
+
+  // "Quitar" on an already-linked stop: same effect as never having picked
+  // one, leaving the free-text name field for the user to fill in instead.
+  function clearStopStation(index: number) {
+    setStopStation(index, '')
   }
 
   // A stop's free-text name was just formalized into a real station (D4:
@@ -925,7 +956,8 @@ export default function NewTripLogPage() {
                           networks={networks}
                           userId={user?.id ?? null}
                           onUpdate={(field, value) => updateStop(index, field, value)}
-                          onSetStation={(stationId) => setStopStation(index, stationId)}
+                          onClearStation={() => clearStopStation(index)}
+                          onOpenPicker={() => setPickerForIndex(index)}
                           onStationCreated={(station) => handleStationCreated(index, station)}
                           onRemove={() => removeStop(index)}
                         />
@@ -934,6 +966,15 @@ export default function NewTripLogPage() {
                     <button type="button" className={styles.addStopBtn} onClick={addStop}>
                       + Agregar parada
                     </button>
+                    <StationPickerModal
+                      open={pickerForIndex !== null}
+                      onClose={() => setPickerForIndex(null)}
+                      stations={stations}
+                      networks={networks}
+                      onSelect={(station) => {
+                        if (pickerForIndex !== null) setStopStation(pickerForIndex, station.id)
+                      }}
+                    />
                   </div>
                 </div>
               )}
