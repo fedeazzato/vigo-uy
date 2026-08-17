@@ -21,17 +21,22 @@ export function useEntrySubmit(saved: SavedFlag) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function submit(run: () => PromiseLike<{ error: unknown }>): Promise<void> {
+  // Returns whether the write actually went through, so callers that keep
+  // their own local state (e.g. NewTripLogPage's draft autosave) know
+  // whether it's now safe to discard it -- a failed submit (offline, RLS,
+  // validation) must leave that state alone so the user can retry.
+  async function submit(run: () => PromiseLike<{ error: unknown }>): Promise<boolean> {
     setSubmitting(true)
     setError(null)
     const { error } = await run()
     setSubmitting(false)
     if (error) {
       setError(toFriendlyError(error))
-      return
+      return false
     }
     invalidateCommunityCache()
     navigate('/mi-actividad', { state: { saved } })
+    return true
   }
 
   return { submitting, error, setError, submit }

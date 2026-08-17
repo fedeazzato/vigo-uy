@@ -1,12 +1,13 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, FormError, Skeleton } from '../components/UI'
+import { PageHeader, Card, FormError, Alert, Skeleton } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
-import { parseLocaleNumber, todayIsoDate } from '../lib/format'
+import { formatRelativeTime, parseLocaleNumber, todayIsoDate } from '../lib/format'
 import { createChargingStation, fetchChargingNetworks, fetchChargingStations } from '../lib/communityData'
 import { CONNECTORS_BY_CURRENT, DEFAULT_CONNECTOR } from '../lib/stations'
+import { clearDraft, loadDraft, saveDraft, type StoredDraft } from '../lib/tripDraftStore'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
 import { useMediaQuery, MOBILE_QUERY } from '../lib/useMediaQuery'
 import type {
@@ -78,6 +79,45 @@ function stopToDraft(stop: TripChargingStop): StopDraft {
     energyKwh: stop.energy_kwh != null ? String(stop.energy_kwh) : '',
     stationId: stop.station_id ?? '',
   }
+}
+
+// Everything the new-trip form needs to resume exactly where it left off.
+// Only the *new-trip* path is drafted (see specs/trip-draft-autosave.md) --
+// editing an already-saved trip never reads or writes this.
+export interface TripDraftState {
+  step: number
+  origin: string
+  destination: string
+  distanceKm: string
+  tripDate: string
+  model: Model | ''
+  startingCharge: string
+  endingCharge: string
+  averageSpeed: string
+  stops: StopDraft[]
+  rating: number | null
+  notes: string
+  isPublic: boolean
+  showDetails: boolean
+}
+
+// A draft with nothing but defaults (today's date, the preferred model,
+// "compartir" left on) isn't worth persisting -- it would just make an
+// untouched form falsely offer to "resume" itself next time. Once any real
+// content is present, autosaving kicks in and this also becomes the signal
+// to show the "Descartar viaje" action.
+function isDraftWorthSaving(s: TripDraftState): boolean {
+  return (
+    s.origin.trim() !== '' ||
+    s.destination.trim() !== '' ||
+    s.distanceKm.trim() !== '' ||
+    s.stops.length > 0 ||
+    s.notes.trim() !== '' ||
+    s.rating !== null ||
+    s.startingCharge.trim() !== '' ||
+    s.endingCharge.trim() !== '' ||
+    s.averageSpeed.trim() !== ''
+  )
 }
 
 function isValidNonNegative(n: number | undefined): boolean {
@@ -544,6 +584,15 @@ export default function NewTripLogPage() {
   // form isn't a wall of optional numbers on a phone.
   const [showDetails, setShowDetails] = useState(false)
 
+  // A draft saved from an earlier session, still waiting on a
+  // resume-or-discard decision. Only looked up for a genuinely new trip --
+  // editing an existing one never touches the draft store. Non-null blocks
+  // the normal form from rendering (and from autosaving over the stored
+  // draft) until the user picks one of the two options below.
+  const [pendingDraft, setPendingDraft] = useState<StoredDraft<TripDraftState> | null>(() =>
+    isEdit ? null : loadDraft<TripDraftState>()
+  )
+
   const [loading, setLoading] = useState(isEdit)
   const { submitting, error, setError, submit } = useEntrySubmit('viaje')
   const [stations, setStations] = useState<ChargingStation[]>([])
@@ -625,6 +674,107 @@ export default function NewTripLogPage() {
       })
   }, [id, isEdit, setError])
 
+  // Autosave: debounced so a burst of keystrokes writes once, not per
+  // keystroke. Skipped for edits (drafts are new-trip only) and while a
+  // stored draft is still awaiting resume/discard -- saving here would
+  // overwrite it with the still-blank form before the user has chosen.
+  useEffect(() => {
+    if (isEdit || pendingDraft) return
+    const state: TripDraftState = {
+      step,
+      origin,
+      destination,
+      distanceKm,
+      tripDate,
+      model,
+      startingCharge,
+      endingCharge,
+      averageSpeed,
+      stops,
+      rating,
+      notes,
+      isPublic,
+      showDetails,
+    }
+    const timer = setTimeout(() => {
+      if (isDraftWorthSaving(state)) saveDraft(state)
+      else clearDraft()
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [
+    isEdit,
+    pendingDraft,
+    step,
+    origin,
+    destination,
+    distanceKm,
+    tripDate,
+    model,
+    startingCharge,
+    endingCharge,
+    averageSpeed,
+    stops,
+    rating,
+    notes,
+    isPublic,
+    showDetails,
+  ])
+
+  // "Continuar viaje": restores every field from the stored draft.
+  function handleResumeDraft() {
+    if (!pendingDraft) return
+    const s = pendingDraft.state
+    setStep(s.step)
+    setOrigin(s.origin)
+    setDestination(s.destination)
+    setDistanceKm(s.distanceKm)
+    setTripDate(s.tripDate)
+    setModel(s.model)
+    setStartingCharge(s.startingCharge)
+    setEndingCharge(s.endingCharge)
+    setAverageSpeed(s.averageSpeed)
+    setStops(s.stops)
+    setRating(s.rating)
+    setNotes(s.notes)
+    setIsPublic(s.isPublic)
+    setShowDetails(s.showDetails)
+    setPendingDraft(null)
+  }
+
+  // "Empezar de nuevo" on the resume prompt: nothing was touched in this
+  // session yet, so no confirmation needed -- just drop the old draft.
+  function handleDiscardPendingDraft() {
+    clearDraft()
+    setPendingDraft(null)
+  }
+
+  // Resets every field back to a blank new trip.
+  function resetForm() {
+    setStep(1)
+    setOrigin('')
+    setDestination('')
+    setDistanceKm('')
+    setTripDate(todayIsoDate())
+    setModel(preferredModel ?? '')
+    setStartingCharge('')
+    setEndingCharge('')
+    setAverageSpeed('')
+    setStops([])
+    setRating(null)
+    setNotes('')
+    setIsPublic(true)
+    setShowDetails(false)
+    setDirty(false)
+  }
+
+  // Explicit "Descartar viaje" mid-edit: this one does destroy in-progress
+  // work, unlike declining the resume prompt, so it confirms first.
+  function handleDiscardDraft() {
+    if (!confirm('¿Descartar este viaje? Se va a borrar todo lo que registraste.')) return
+    clearDraft()
+    resetForm()
+  }
+
   function addStop() {
     setStops((prev) => [...prev, emptyStop()])
     setDirty(true)
@@ -640,7 +790,9 @@ export default function NewTripLogPage() {
   }
 
   function handleCancel() {
-    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
+    // New trips are autosaved as a draft, so leaving no longer discards
+    // anything -- only edits (never drafted) still need the confirmation.
+    if (isEdit && dirty && !confirm('¿Descartar los cambios sin guardar?')) return
     navigate('/mi-actividad')
   }
 
@@ -738,11 +890,15 @@ export default function NewTripLogPage() {
     }
 
     const client = supabase
-    await submit(() =>
+    const ok = await submit(() =>
       isEdit
         ? client.from('trip_logs').update(payload).eq('id', id!)
         : client.from('trip_logs').insert({ ...payload, user_id: user.id })
     )
+    // Only clear the draft once it has actually reached Supabase -- a
+    // failed submit (offline, most likely, mid-drive) must leave it in
+    // place so the trip isn't lost and the user can just try again later.
+    if (ok && !isEdit) clearDraft()
   }
 
   // Edit mode: show the header + a skeleton instead of a blank screen while
@@ -758,6 +914,53 @@ export default function NewTripLogPage() {
       </div>
     )
   }
+
+  // A stored draft is waiting on resume-or-discard: show that choice
+  // instead of the (still blank) form underneath.
+  if (pendingDraft) {
+    return (
+      <div>
+        <PageHeader
+          title="🗺️ Nuevo viaje"
+          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+        />
+        <Card>
+          <Alert type="info">
+            Tenés un viaje sin terminar, guardado {formatRelativeTime(new Date(pendingDraft.savedAt))}.
+          </Alert>
+          <div className={styles.draftPromptActions}>
+            <button type="button" className={formStyles.submitBtnCompact} onClick={handleResumeDraft}>
+              Continuar viaje
+            </button>
+            <button type="button" className={formStyles.backBtn} onClick={handleDiscardPendingDraft}>
+              Empezar de nuevo
+            </button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Only offer to discard once there's actually a draft worth discarding --
+  // no stray link on a form nobody has touched yet.
+  const showDiscardAction =
+    !isEdit &&
+    isDraftWorthSaving({
+      step,
+      origin,
+      destination,
+      distanceKm,
+      tripDate,
+      model,
+      startingCharge,
+      endingCharge,
+      averageSpeed,
+      stops,
+      rating,
+      notes,
+      isPublic,
+      showDetails,
+    })
 
   return (
     <div>
@@ -777,6 +980,13 @@ export default function NewTripLogPage() {
           </button>
         )}
       </div>
+      {showDiscardAction && (
+        <div className={styles.discardRow}>
+          <button type="button" className={styles.discardBtn} onClick={handleDiscardDraft}>
+            Descartar viaje
+          </button>
+        </div>
+      )}
       {isWizard ? (
         <PageHeader
           title={`🗺️ ${STEP_TITLES[step]}`}

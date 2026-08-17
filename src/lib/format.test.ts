@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatCurrency, formatDate, parseLocaleNumber } from './format'
+import { formatCurrency, formatDate, formatRelativeTime, parseLocaleNumber } from './format'
 
 describe('formatDate', () => {
   const now = new Date(2026, 6, 13) // 13 jul 2026
@@ -32,6 +32,29 @@ describe('formatCurrency', () => {
     expect(formatCurrency(1234.5)).toBe('$1.235')
     expect(formatCurrency(1500.5, 2)).toBe('$1.500,50')
     expect(formatCurrency(89.9, 2)).toBe('$89,90')
+  })
+})
+
+describe('formatRelativeTime', () => {
+  const now = new Date(2026, 6, 13, 12, 0, 0) // 13 jul 2026, 12:00
+
+  it('rounds anything under a minute to "hace un momento"', () => {
+    expect(formatRelativeTime(new Date(now.getTime() - 30_000), now)).toBe('hace un momento')
+  })
+
+  it('shows minutes under an hour', () => {
+    expect(formatRelativeTime(new Date(now.getTime() - 5 * 60_000), now)).toBe('hace 5 min')
+    expect(formatRelativeTime(new Date(now.getTime() - 59 * 60_000), now)).toBe('hace 59 min')
+  })
+
+  it('shows hours under a day', () => {
+    expect(formatRelativeTime(new Date(now.getTime() - 60 * 60_000), now)).toBe('hace 1 h')
+    expect(formatRelativeTime(new Date(now.getTime() - 23 * 60 * 60_000), now)).toBe('hace 23 h')
+  })
+
+  it('shows days, singular and plural', () => {
+    expect(formatRelativeTime(new Date(now.getTime() - 24 * 60 * 60_000), now)).toBe('hace 1 día')
+    expect(formatRelativeTime(new Date(now.getTime() - 3 * 24 * 60 * 60_000), now)).toBe('hace 3 días')
   })
 })
 

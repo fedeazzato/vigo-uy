@@ -47,6 +47,21 @@ export function formatCurrency(value: number, fractionDigits = 0): string {
 }
 
 /**
+ * Formats a past `Date` as "hace un momento" / "hace 5 min" / "hace 2 h" /
+ * "hace 3 días" -- how a save timestamp (e.g. a trip draft's last autosave)
+ * reads to a user glancing at it.
+ */
+export function formatRelativeTime(date: Date, now: Date = new Date()): string {
+  const diffMin = Math.floor((now.getTime() - date.getTime()) / 60000)
+  if (diffMin < 1) return 'hace un momento'
+  if (diffMin < 60) return `hace ${diffMin} min`
+  const diffHours = Math.floor(diffMin / 60)
+  if (diffHours < 24) return `hace ${diffHours} h`
+  const diffDays = Math.floor(diffHours / 24)
+  return `hace ${diffDays} día${diffDays === 1 ? '' : 's'}`
+}
+
+/**
  * Parses a number the way people type it here: accepts "28,5" (comma
  * decimal), "1.500,50" and "12.000" (dot thousands) alongside plain "28.5".
  * Returns `undefined` for blank input and `NaN` for garbage, so callers can

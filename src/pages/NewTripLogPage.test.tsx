@@ -1,10 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { UserPrefsProvider } from '../context/UserPrefsContext'
 import NewTripLogPage, { parseStopDrafts, tripTitle, StopDraft } from './NewTripLogPage'
 import { createChargingStation } from '../lib/communityData'
+import { loadDraft, saveDraft } from '../lib/tripDraftStore'
 import type { ChargingStation } from '../types'
+
+// A minimal always-succeeds stand-in for the real client (which is null in
+// this test env -- no VITE_SUPABASE_* -- and would otherwise no-op every
+// submit). Only the draft-autosave tests below actually reach a submit or
+// an edit-mode fetch; every earlier test in this file stops at a validation
+// error before ever touching `supabase`, so this doesn't change their
+// behavior.
+vi.mock('../lib/supabaseClient', () => ({
+  supabase: {
+    from: () => ({
+      insert: () => Promise.resolve({ error: null }),
+      update: () => ({ eq: () => Promise.resolve({ error: null }) }),
+      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+    }),
+  },
+}))
 
 // All data access goes through the mocked communityData layer below, so the
 // tests run identically with or without VITE_SUPABASE_* env (CI has none).
@@ -433,6 +450,135 @@ describe('NewTripLogPage single page (desktop)', () => {
     fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar viaje' }))
     expect(screen.getByText('Completá origen, destino y distancia.')).toBeTruthy()
+  })
+})
+
+describe('NewTripLogPage draft autosave (specs/trip-draft-autosave.md)', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    mockViewport(false)
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  async function advanceDebounce() {
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+  }
+
+  it('renders the normal blank form when nothing is stored', () => {
+    renderNewTrip()
+    expect(screen.queryByText(/Tenés un viaje sin terminar/)).toBeNull()
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('')
+  })
+
+  it('does not show "Descartar viaje" on an untouched form', () => {
+    renderNewTrip()
+    expect(screen.queryByText('Descartar viaje')).toBeNull()
+  })
+
+  it('autosaves after editing, and offers to resume on the next mount', async () => {
+    const { unmount } = renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    await advanceDebounce()
+
+    expect(loadDraft<{ origin: string }>()?.state.origin).toBe('Montevideo')
+    // Editing shows the explicit discard action too, once there's something to discard.
+    expect(screen.getByText('Descartar viaje')).toBeTruthy()
+
+    unmount()
+    renderNewTrip()
+    expect(screen.getByText(/Tenés un viaje sin terminar/)).toBeTruthy()
+  })
+
+  it('"Continuar viaje" restores the saved fields', async () => {
+    const { unmount } = renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
+    await advanceDebounce()
+    unmount()
+
+    renderNewTrip()
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar viaje' }))
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('Montevideo')
+    expect(screen.getByLabelText<HTMLInputElement>('🏁 Destino').value).toBe('Rocha')
+    expect(screen.getByLabelText<HTMLInputElement>('📏 Distancia (km)').value).toBe('210')
+  })
+
+  it('"Empezar de nuevo" discards the stored draft and starts blank', async () => {
+    const { unmount } = renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    await advanceDebounce()
+    unmount()
+
+    renderNewTrip()
+    fireEvent.click(screen.getByRole('button', { name: 'Empezar de nuevo' }))
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('')
+    expect(loadDraft()).toBeNull()
+  })
+
+  it('the explicit "Descartar viaje" action clears the draft after confirming', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    await advanceDebounce()
+
+    fireEvent.click(screen.getByText('Descartar viaje'))
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('')
+    expect(loadDraft()).toBeNull()
+  })
+
+  it('leaves the draft in place when the discard confirmation is declined', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    await advanceDebounce()
+
+    fireEvent.click(screen.getByText('Descartar viaje'))
+    expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('Montevideo')
+    expect(loadDraft<{ origin: string }>()?.state.origin).toBe('Montevideo')
+  })
+})
+
+describe('NewTripLogPage draft submit/edit interaction (real timers)', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    mockViewport(false)
+  })
+
+  it('clears the draft once the trip is actually saved', async () => {
+    renderNewTrip()
+    fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
+    fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
+    fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
+    fireEvent.click(screen.getByRole('button', { name: 'E2' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar viaje' }))
+    await waitFor(() => expect(loadDraft()).toBeNull())
+  })
+
+  it('never shows or clears a draft on the edit route, even if one is stored', async () => {
+    saveDraft({ origin: 'Montevideo' })
+    render(
+      <MemoryRouter initialEntries={['/viajes/trip-1/editar']}>
+        <UserPrefsProvider>
+          <Routes>
+            <Route path="/viajes/:id/editar" element={<NewTripLogPage />} />
+          </Routes>
+        </UserPrefsProvider>
+      </MemoryRouter>
+    )
+    // Loading renders only the header + skeleton (no back button yet);
+    // wait for the real edit form chrome to confirm the fetch resolved.
+    await waitFor(() => expect(screen.getByRole('button', { name: /Volver/ })).toBeTruthy())
+    expect(screen.queryByText(/Tenés un viaje sin terminar/)).toBeNull()
+    expect(loadDraft<{ origin: string }>()?.state.origin).toBe('Montevideo')
   })
 })
 
