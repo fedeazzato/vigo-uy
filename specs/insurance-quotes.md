@@ -142,21 +142,11 @@ New file `supabase/migrations/0043_insurance_quotes.sql`:
     -- the tiers that do isn't uniform enough to enforce via CHECK against
     -- coverage_level -- left to the submitter to fill in or leave blank.
     deductible_uyu numeric check (deductible_uyu between 0 and 1000000),
-    -- Free hail-storm repair is a covered-peril add-on some insurers bundle
-    -- into a tier (research found it commonly included with Terceros
-    -- Completo) rather than a tier of its own -- a boolean flag orthogonal
-    -- to coverage_level, not a 6th coverage_level value, so it can vary
-    -- independently within the same tier across insurers.
-    hail_coverage boolean not null default false,
-    -- Glass/windshield repair: whether it's covered at all, and if so,
-    -- whether it's free/unlimited (limit null) or capped at a peso amount
-    -- (limit set) -- same boolean-gates-a-nullable-amount shape as
-    -- deductible_uyu, but glass coverage specifically needs the boolean
-    -- because "not covered" and "covered, no cap" would otherwise both be
-    -- represented as a null limit.
-    glass_coverage boolean not null default false,
-    glass_coverage_limit_uyu numeric check (glass_coverage_limit_uyu between 0 and 1000000),
-    constraint glass_limit_requires_coverage check (glass_coverage_limit_uyu is null or glass_coverage),
+    -- hail_coverage / glass_coverage / glass_coverage_limit_uyu lived here
+    -- originally (this table, as first applied) but were dropped by 0044 in
+    -- favor of the extensible insurance_addons/insurance_quote_addons
+    -- tables -- see Requirement 7. This reproduction reflects the table's
+    -- current (post-0044) shape, not its as-first-applied one.
     notes text check (char_length(notes) <= 500),
     is_public boolean not null default true,
     hidden boolean not null default false,
@@ -228,7 +218,9 @@ New file `supabase/migrations/0043_insurance_quotes.sql`:
 - `fetchInsuranceProviders()`, `fetchInsuranceQuotes(limit)`,
   `fetchInsuranceCostStats()` — same TTL-cached, `supabase`-null-guarded
   shape as the existing charging/service fetchers.
-- `MIN_INSURANCE_SAMPLES = 3` (mirrors `MIN_COST_SAMPLES`), exported.
+- `MIN_INSURANCE_SAMPLES = 3` (mirrors `MIN_COST_SAMPLES`), module-private —
+  unlike `MIN_COST_SAMPLES`, nothing outside this module needs the raw
+  threshold; the two helpers below apply it internally.
 - `insuranceCostStatsByProvider(stats, providers)` — pure helper: filters to
   provider-only rollup rows (`coverage_level === null`) at
   `sample_count >= MIN_INSURANCE_SAMPLES`, joins to `InsuranceProvider` by
@@ -236,11 +228,41 @@ New file `supabase/migrations/0043_insurance_quotes.sql`:
   reasoning as `networkCostStats`).
 - `insuranceCostStatsByProviderAndCoverage(stats, providers)` — same shape,
   filtered to `coverage_level !== null` rows instead.
+- `fetchInsuranceAddons()` — the addon catalog, TTL-cached, ordered by
+  `sort_order`.
+- `fetchInsuranceQuoteAddons(quoteIds)` — batch fetch of
+  `insurance_quote_addons` rows for a set of quote ids in one round trip
+  (`.in('quote_id', quoteIds)`), grouped into a `Map<quoteId, rows[]>` —
+  same batching shape as `fetchReactions`/`fetchComments`.
+- `insuranceQuoteAddonDisplays(rows, addons)` — pure helper: joins a quote's
+  addon rows to their catalog entry (skipping any whose addon isn't in the
+  given catalog), sorted by catalog `sort_order`, returning
+  `{icon, badgeLabel, limitKind, limitUyu, limitCount}[]`.
+- `addonBadgeText(addon)` — pure helper: renders one addon's badge text —
+  `"{icon} {badgeLabel} sin cargo"` (kind `none`, or `cost`/`count` with no
+  limit given), `"hasta $X"` (kind `cost` with `limitUyu` set), `"hasta
+  Nx/año"` (kind `count` with `limitCount` set). Shared by
+  `InsuranceQuoteCard` (JSX) and `DashboardPage`'s CSV export (plain text) —
+  lives here rather than on the component so both can import it without
+  tripping the `react-refresh/only-export-components` lint rule.
+- `replaceInsuranceQuoteAddons(quoteId, selections)` — deletes all of a
+  quote's existing addon rows, then inserts the given selection
+  (`{addon, limitUyu, limitCount}[]`); simpler than diffing individual rows,
+  and matches how the form always submits its full current selection.
+  Returns the *raw* Supabase error (not pre-friendlied), because it's meant
+  to compose inside the same `run()` a quote insert/update goes through —
+  `useEntrySubmit`'s `submit()` already runs `toFriendlyError` exactly once
+  on the end result; pre-friendlying here would get overwritten by a
+  generic fallback when `submit()` tried to friendly an already-friendly
+  string.
 
 ### 4. `/costos` page (`src/pages/CostsPage.tsx`)
 
-- Fetch `fetchInsuranceProviders()`, `fetchInsuranceQuotes(50)`,
-  `fetchInsuranceCostStats()` alongside the existing community fetches.
+- Fetch `fetchInsuranceProviders()`, `fetchInsuranceAddons()`,
+  `fetchInsuranceCostStats()` alongside the existing community fetches, and
+  `fetchInsuranceQuotes(50)` — whose result feeds a follow-up
+  `fetchInsuranceQuoteAddons(quoteIds)` call once the quote ids are known
+  (can't fetch a quote's addons before knowing which quotes are shown).
 - D1 gate, same pattern as `realCases`/`service_entries`:
   `preferCommunity({ curated: insurance, community: quotes, minSamples: 5
   })`. Below threshold: render today's static blurb unchanged. At/above:
@@ -254,13 +276,12 @@ New file `supabase/migrations/0043_insurance_quotes.sql`:
     hire date, cost as `$total (N años) → $porAño/año` (both figures
     together, not just the per-year one), and, when present, "Deducible
     $X" (omitted entirely for rows with no `deductible_uyu` rather than
-    showing "Deducible: —"). Rows with `hail_coverage` true get a small
-    "🧊 Granizo sin cargo" badge; `false` rows show nothing (silence, not a
-    "sin granizo" negative badge, matching the deductible-omission
-    convention). Rows with `glass_coverage` true get a "🪟 Cristales sin
-    cargo" badge, or "🪟 Cristales hasta $X" when `glass_coverage_limit_uyu`
-    is also set; `false` rows show nothing, same silent-omission convention
-    — this is where the growing dimension detail is actually visible.
+    showing "Deducible: —"). Below that, one badge per addon the quote
+    includes (`insuranceQuoteAddonDisplays` joined against the fetched
+    catalog, rendered via `addonBadgeText`) — a quote with no addons shows
+    no badge line at all, same silent-omission convention as deductible.
+    This list grows automatically as the catalog does — no `CostsPage` code
+    change needed when a moderator adds a 5th addon.
   - A "Registrar mi seguro" link to `/costos/seguro/nuevo`.
 
 ### 5. New submission page: `src/pages/NewInsuranceQuotePage.tsx`
@@ -289,16 +310,38 @@ on every other level it's shown, and while it's empty a non-blocking warning
 hint appears — *"⚠️ Esta cobertura suele tener deducible — falta este dato
 (podés guardar igual)."* (`formStyles.hintWarning`, amber, new modifier
 alongside the existing neutral `.hint`) — clearing as soon as a value is
-typed. A checkbox — "Incluye reparación de
-granizo sin cargo" — defaulting unchecked, for `hail_coverage`. A second
-checkbox — "Incluye reparación de cristales (parabrisas, etc.)" — for
-`glass_coverage`, which when checked reveals an optional "Límite de
-cobertura (UYU)" input with a hint: *"Dejalo vacío si es sin cargo / sin
-límite."*; unchecking the box clears and hides that input (so an unchecked
-box can never submit a limit, satisfying the DB's
-`glass_limit_requires_coverage` constraint by construction rather than by
-a separate client-side check). `NotesField`, `ShareCheckbox`.
-`useEntrySubmit('seguro')` (new `SavedFlag` member).
+typed.
+
+Below that, one checkbox per row of `fetchInsuranceAddons()` (state keyed
+by addon slug: `{checked, limitValue}` — a single text field regardless of
+`limit_kind`, since only one of `limit_uyu`/`limit_count` ever applies to a
+given addon) — *"Incluye {addon.checkbox_label}"*. Unchecking clears
+`limitValue` too, same as the old glass-specific checkbox did. When checked
+and `addon.limit_kind !== 'none'`, one extra input appears: label
+*"{addon.icon} Límite de cobertura (UYU)"* (`limit_kind: 'cost'`, decimal
+input) or *"{addon.icon} Usos gratis por año"* (`limit_kind: 'count'`,
+numeric input), with a matching hint (*"Dejalo vacío si es sin cargo / sin
+límite."* / *"Dejalo vacío si no tiene límite de usos."*). This is the same
+UX the old hardcoded granizo/cristales checkboxes had — just driven by
+whatever rows the catalog returns, so a 3rd/4th/5th addon (any of the three
+kinds) needs no form code change. `NotesField`, `ShareCheckbox`.
+`useEntrySubmit('seguro')` (`SavedFlag` member).
+
+**Submit is two writes, composed into the one `run()` `useEntrySubmit`
+expects**: insert (new) or update (edit) the `insurance_quotes` row first —
+for a new quote, `.select('id').single()` to get the id back, since it's
+needed for the second write — then `replaceInsuranceQuoteAddons(quoteId,
+selections)` with whichever addons are checked (each carrying its parsed
+`limitUyu`/`limitCount`, validated synchronously beforehand — a `count`
+value must be a positive integer, a `cost` value must be a non-negative
+number — before either write runs, same as every other numeric field in
+this form). Whichever step fails first is the error `submit()` surfaces;
+only a fully successful pair navigates away and clears the toast.
+
+**Edit mode** additionally loads the quote's existing addon selections with
+a second query (`insurance_quote_addons` where `quote_id = id`, separate
+from the quote row itself since it's a join across tables, not a column),
+populating the same `{checked, limitValue}` state the checkboxes read.
 
 ### 6. Routing, dashboard, and the "Registrar" sheet
 
@@ -306,12 +349,85 @@ a separate client-side check). `NotesField`, `ShareCheckbox`.
   → `NewInsuranceQuotePage` (lazy-loaded like the other entry pages).
 - `src/lib/useEntrySubmit.ts`: add `'seguro'` to `SavedFlag`.
 - `src/pages/DashboardPage.tsx`: a 4th "Mi actividad" section, "Seguros",
-  mirroring "Costos de service" exactly — fetch own `insurance_quotes`,
-  list with Editar/Eliminar, CSV export (`exportInsuranceCsv`), `+ Nueva
-  entrada` link to `/costos/seguro/nuevo`, `SAVED_MESSAGES.seguro`.
+  mirroring "Costos de service" exactly — fetch own `insurance_quotes` (plus
+  the addon catalog and the caller's own `insurance_quote_addons`, same
+  fetch-then-fetch-addons chain as `CostsPage`), list with Editar/Eliminar,
+  CSV export (`exportInsuranceCsv`, one "Adicionales incluidos" column —
+  `addonBadgeText` joined with `"; "` — instead of separate hail/glass/
+  glass-limit columns), `+ Nueva entrada` link to `/costos/seguro/nuevo`,
+  `SAVED_MESSAGES.seguro`.
 - `src/components/Layout.tsx`: 4th link in the "¿Qué querés registrar?"
   sheet — "Un seguro" / "Aseguradora, cobertura y costo anual" / 🛡️ icon →
   `/costos/seguro/nuevo`.
+
+### 7. Migration 0044: extensible addons (`insurance_addons`, `insurance_quote_addons`)
+
+**Why.** Hail and glass repair started as two boolean/nullable-amount columns
+directly on `insurance_quotes` (Requirement 1). The owner then asked for
+this to be extensible — more "included at no extra cost" perks are common
+in the Uruguayan market (roadside assistance, a designated-driver service
+for parties) and more will surface over time — without a schema change each
+time. New file `supabase/migrations/0044_insurance_addons.sql`:
+
+- **`insurance_addons`** (moderator-curated catalog, mirrors
+  `insurance_providers`):
+  ```sql
+  create table public.insurance_addons (
+    slug text primary key check (slug ~ '^[a-z0-9-]{2,30}$'),
+    icon text not null check (char_length(icon) between 1 and 8),
+    checkbox_label text not null check (char_length(checkbox_label) between 1 and 100),
+    badge_label text not null check (char_length(badge_label) between 1 and 40),
+    limit_kind text not null default 'none' check (limit_kind in ('none', 'count', 'cost')),
+    sort_order smallint not null default 100,
+    created_at timestamptz not null default now()
+  );
+  ```
+  `checkbox_label` is the full suffix rendered as "Incluye {checkbox_label}"
+  (free text, not a template, so per-addon wording like "sin cargo" can be
+  baked in where it fits — e.g. granizo's, but not cristales'/auxilio's,
+  since those can carry a cap). `badge_label` is the short name used on
+  quote cards. `limit_kind` drives which single input (if any) the form
+  shows for that addon: `none` (flatly included, nothing extra to fill in),
+  `cost` (an optional "up to $X/year" peso cap), `count` (an optional "up to
+  N times/year" cap). RLS matches `insurance_providers` exactly (open
+  select, moderator insert/update, no delete). Seeded with 4 rows
+  (owner-provided/approved, this conversation): `granizo` (🧊, `none`),
+  `cristales` (🪟, `cost`), `auxilio-ruta` (🆘, `count`), `chofer-designado`
+  (🚕, `count`). Not a closed list — a moderator adds a 5th with one
+  `INSERT`; no migration, no frontend change.
+
+- **`insurance_quote_addons`** (junction: one row per addon a quote
+  includes):
+  ```sql
+  create table public.insurance_quote_addons (
+    quote_id uuid not null references public.insurance_quotes (id) on delete cascade,
+    addon text not null references public.insurance_addons (slug),
+    limit_uyu numeric check (limit_uyu between 0 and 1000000),
+    limit_count integer check (limit_count between 1 and 365),
+    primary key (quote_id, addon)
+  );
+  ```
+  A `before insert or update` trigger
+  (`enforce_insurance_quote_addon_limit_kind`) looks up the addon's catalog
+  `limit_kind` and nulls out whichever of `limit_uyu`/`limit_count` doesn't
+  match, so a row can never drift out of sync with its addon's configured
+  kind regardless of what a client sent — the same self-correcting shape as
+  `set_vehicle_id_on_write`/`prevent_unauthorized_verify` elsewhere in this
+  schema, chosen over a same-table `CHECK` because the "which kind" fact
+  lives on the *other* table, out of a `CHECK`'s reach. RLS: `select`
+  mirrors the parent quote's own visibility via an `EXISTS` against
+  `insurance_quotes` (anon: public+non-hidden+non-banned; authenticated:
+  own, public+non-hidden+non-banned, or moderator); `insert` requires owning
+  the parent quote and not being banned; `delete` requires owning the
+  parent quote or being a moderator. No `update` policy — a quote's addon
+  set is edited by replacing it wholesale (delete then insert), never by
+  updating a row in place, so there's nothing to update. No dedicated daily-
+  insert-limit trigger — bounded by the already-limited parent
+  `insurance_quotes` insert and by the primary key (one row per distinct
+  addon per quote, and the catalog itself is small).
+- Backfill: any existing `hail_coverage`/`glass_coverage` data is migrated
+  into `insurance_quote_addons` rows before the old columns are dropped
+  (same statement batch, see Requirement 1's note).
 
 ### Out of scope
 
@@ -325,24 +441,43 @@ a separate client-side check). `NotesField`, `ShareCheckbox`.
 - Per-provider coverage-level catalogs (i.e. which tiers a given provider
   actually sells) — the 5 tiers are offered uniformly in the form regardless
   of selected provider; no provider↔tier mapping table.
+- Editing/retiring `insurance_addons` from the UI — same moderator-only-via-
+  `INSERT`/`UPDATE` situation as providers.
+- An addon carrying both a count cap and a cost cap simultaneously (e.g.
+  "3 repairs/year, each up to $5,000") — `limit_kind` is one of the three
+  values, not a combination; if that shape turns out to be needed, it's a
+  new `limit_kind` value plus a second nullable column, not a redesign.
+- Per-provider addon catalogs (which addons a given provider actually
+  bundles) — same reasoning as the coverage-level bullet above; addons are
+  offered uniformly regardless of selected provider.
 
 ## Files to touch
 
-- `supabase/migrations/0043_insurance_quotes.sql` — new.
-- `src/lib/database.types.ts` — regenerate (`npm run gen:types`).
+- `supabase/migrations/0043_insurance_quotes.sql` — new (providers, quotes,
+  cost stats).
+- `supabase/migrations/0044_insurance_addons.sql` — new (addon catalog,
+  junction table, backfill, drops the three old columns).
+- `src/lib/database.types.ts` — regenerate (`npm run gen:types`) after each
+  migration.
 - `src/types.ts` — `InsuranceCoverageLevel`, `InsuranceZone`,
   `INSURANCE_COVERAGE_LABELS`, `INSURANCE_ZONE_LABELS`, `InsuranceProvider`,
-  `InsuranceQuote`, `InsuranceCostStat`.
+  `InsuranceQuote`, `InsuranceCostStat`, `InsuranceAddonLimitKind`,
+  `InsuranceAddon`, `InsuranceQuoteAddon`.
 - `src/lib/communityData.ts` — fetchers, `MIN_INSURANCE_SAMPLES`,
-  `insuranceCostStatsByProvider`, `insuranceCostStatsByProviderAndCoverage`.
-- `src/lib/communityData.test.ts` — tests for the two new pure helpers.
+  `insuranceCostStatsByProvider`, `insuranceCostStatsByProviderAndCoverage`,
+  `fetchInsuranceAddons`, `fetchInsuranceQuoteAddons`,
+  `insuranceQuoteAddonDisplays`, `addonBadgeText`,
+  `replaceInsuranceQuoteAddons`.
+- `src/lib/communityData.test.ts` — tests for all the pure helpers above.
 - `src/lib/useEntrySubmit.ts` — `SavedFlag` gains `'seguro'`.
+- `src/components/InsuranceQuoteCard.tsx` — renders one addon badge per row
+  via `addonBadgeText`, instead of hardcoded hail/glass JSX.
 - `src/pages/CostsPage.tsx` — fetch + render the new Seguro section,
-  D1-gated.
-- `src/pages/CostsPage.test.tsx` (or equivalent) — gate behavior.
-- New `src/pages/NewInsuranceQuotePage.tsx` + a colocated test file.
-- `src/pages/DashboardPage.tsx` — Seguros section, CSV export,
-  `SAVED_MESSAGES.seguro`.
+  D1-gated, addon badges wired through.
+- New `src/pages/NewInsuranceQuotePage.tsx` + a colocated test file — dynamic
+  addon checkboxes, two-write submit.
+- `src/pages/DashboardPage.tsx` — Seguros section, CSV export (addon
+  column), `SAVED_MESSAGES.seguro`.
 - `src/components/Layout.tsx` — 4th register-sheet link.
 - `src/App.tsx` — new routes, lazy import.
 - `specs/CONTENT-MIGRATION.md` — new row: `costs.json (insurance)` →
@@ -350,69 +485,60 @@ a separate client-side check). `NotesField`, `ShareCheckbox`.
 
 ## Test plan
 
-`src/lib/communityData.test.ts`:
+`src/lib/communityData.test.ts` (mirrors `NewPartPurchasePage.test.tsx`'s
+scoping precedent: this repo tests pure helpers thoroughly and reaches for
+full-component render tests mainly on the more complex forms — neither
+`CostsPage`-as-a-component nor `DashboardPage` has one, so this feature
+doesn't add one either; its own `NewInsuranceQuotePage.test.tsx` is the
+component-level test, matching `NewPartPurchasePage`'s own precedent):
 - `insuranceCostStatsByProvider`: keeps only `coverage_level === null` rows
   at/above `MIN_INSURANCE_SAMPLES`, drops thinner ones, joins to
   `InsuranceProvider` by slug (skips unmatched slugs), sorts ascending by
   `avg_cost_per_year_uyu`.
 - `insuranceCostStatsByProviderAndCoverage`: same, for
   `coverage_level !== null` rows.
-- Fetchers resolve to empty arrays/`null` error when `supabase` is
-  unconfigured, matching every other fetcher's null-guard convention.
-
-`src/pages/CostsPage.test.tsx`:
-- Below 5 public quotes: static `insurance` blurb from `costs.json` still
-  renders; below-threshold community stats/list don't replace it.
-- At/above 5: the curated blurb is replaced by the aggregated tables and
-  quote list; each quote row shows provider name, coverage level label,
-  driver count, average age, zone label, hire date, and both the total
-  cost and the computed per-year cost; a row with `deductible_uyu` set
-  shows "Deducible $X", a row with it `null` shows no deductible line at
-  all; a row with `hail_coverage: true` shows the hail badge, `false` shows
-  no badge (not a "no incluye" negative badge); a row with `glass_coverage:
-  true` and a `glass_coverage_limit_uyu` shows "Cristales hasta $X", `true`
-  with no limit shows "Cristales sin cargo", `false` shows no glass badge.
+- `insuranceQuoteAddonDisplays`: joins rows to their catalog entry in
+  catalog `sort_order` regardless of row order; skips a row whose addon
+  isn't in the given catalog; carries `limit_count` through unchanged for a
+  `count`-kind addon.
+- `addonBadgeText`: `"sin cargo"` for a `none`-kind addon; `"hasta $X"` for
+  `cost` with a limit given, `"sin cargo"` for `cost` with none given;
+  `"hasta Nx/año"` for `count` with a limit given.
 
 `src/pages/NewInsuranceQuotePage.test.tsx`:
 - Required-field validation (provider, coverage level, driver count in
   range, average age in range, zone, valid hire date, period 1-5, total
-  cost) surfaces `FormError` without submitting; deductible, hail coverage,
-  and glass coverage are not part of this check (all optional, the two
-  booleans default `false`).
-- The glass-coverage limit input only renders while its checkbox is
-  checked; unchecking it after entering a value clears the stored value too
-  (not just hides the input).
+  cost) surfaces `FormError` without submitting; deductible and every addon
+  are not part of this check (all optional).
 - The deductible field is hidden only when coverage level is
   `todo_riesgo_sin_franquicia`, shown for every other level (including the
-  unselected default); while shown and empty, the "Falta este dato" warning
+  unselected default); while shown and empty, the "falta este dato" warning
   hint renders, and it disappears as soon as a value is typed.
 - The live per-year preview recomputes as `total_cost_uyu`/`period_years`
   change (e.g. 150000 over 3 años → shows "$50.000/año") and is absent/blank
   when either input is empty or invalid.
-- Successful submit inserts the expected payload — `hire_date`,
-  `period_years`, `total_cost_uyu` as entered, `deductible_uyu` as `null`
-  when left blank or the field is hidden (`todo_riesgo_sin_franquicia`), the
-  entered number otherwise, `hail_coverage` and
-  `glass_coverage` matching their checkbox states, `glass_coverage_limit_uyu`
-  matching that input (or `null` when its checkbox is unchecked or the
-  input is left blank), no client-computed `cost_per_year_uyu` field sent —
-  and navigates to `/mi-actividad` with `{ saved: 'seguro' }`.
-- Edit mode loads an existing quote by id and pre-fills every field
-  (including reconstructing the per-year preview from the loaded row).
-
-`src/pages/DashboardPage.test.tsx`:
-- New "Seguros" section lists the signed-in user's own `insurance_quotes`,
-  Editar/Eliminar work, CSV export produces the expected header row.
+- One checkbox renders per catalog addon (from the mocked
+  `fetchInsuranceAddons`); a `none`-kind addon shows no limit input at all
+  when checked; a `cost`-kind addon reveals a decimal-mode "Límite de
+  cobertura (UYU)" input on check, clears it on uncheck; a `count`-kind
+  addon reveals a numeric-mode "Usos gratis por año" input on check. A
+  non-integer value in a `count`-kind addon's limit surfaces its own
+  `FormError` (*"La cantidad de usos de {badge_label} debe ser un número
+  entero válido."*) without submitting — proof the validation is driven by
+  the catalog's `limit_kind`, not hardcoded per addon.
 
 Manual/runtime verification (via the `verify` skill, mobile viewport):
 - `/costos` renders the existing static Seguro blurb unchanged (no
-  Supabase data yet / below threshold).
-- The "Registrar" sheet shows the new "Un seguro" option; following it opens
-  the new form.
-- Provider/coverage/zone `<select>`s populate correctly; submitting a quote
-  while signed in (where feasible — same auth-gated-flow limitation noted in
-  `specs/trip-draft-autosave.md`) is otherwise covered by the component
-  tests above.
+  Supabase data yet / below threshold), no console errors.
+- The "Registrar" sheet shows the "Un seguro" option (signed-in branch,
+  confirmed by direct review of `Layout.tsx` — not independently driveable
+  by the headless browser, see below); `/costos/seguro/nuevo` redirects to
+  `/login` when signed out, same as every other entry-form route.
+- Provider/coverage/zone/addon fields populate and behave correctly;
+  submitting a quote while signed in (where feasible — same auth-gated-flow
+  limitation noted in `specs/trip-draft-autosave.md`, Turnstile's closed
+  shadow DOM blocks a captcha-less OTP) is otherwise covered by the
+  component tests above.
 
 ## Acceptance criteria
 
@@ -429,6 +555,19 @@ Manual/runtime verification (via the `verify` skill, mobile viewport):
 - [x] Dashboard "Seguros" section, CSV export, and the register-sheet entry
       are wired up.
 - [x] `specs/CONTENT-MIGRATION.md` updated with the new tracked row.
+- [x] Migration 0044 applied (`npx supabase db push`); `insurance_addons`
+      seeded with granizo/cristales/auxilio-ruta/chofer-designado;
+      `insurance_quote_addons`'s `enforce_insurance_quote_addon_limit_kind`
+      trigger keeps `limit_uyu`/`limit_count` in sync with the addon's
+      catalog `limit_kind`; `hail_coverage`/`glass_coverage`/
+      `glass_coverage_limit_uyu` dropped from `insurance_quotes` after a
+      successful backfill.
+- [x] `npm run gen:types` run again after 0044; `src/lib/database.types.ts`
+      committed.
+- [x] Form renders addon checkboxes/limit-inputs entirely from
+      `fetchInsuranceAddons()` — verified by mocking a 3rd, previously-
+      unseen `count`-kind addon in tests and confirming it renders and
+      validates correctly with no form code referencing its slug.
 - [x] `npm run type-check`, `npm run lint`, and `npm test` all pass.
 - [x] Manual verification per the test plan above — `/costos` renders the
       curated blurb cleanly (0 live quotes, gate stays on the "grupo" side)
@@ -438,6 +577,5 @@ Manual/runtime verification (via the `verify` skill, mobile viewport):
       aren't independently driveable by the headless verify browser (same
       documented Turnstile/OTP limitation as `specs/trip-draft-autosave.md`)
       — covered instead by `NewInsuranceQuotePage.test.tsx`'s validation/
-      preview/glass-toggle tests, and by direct review of `Layout.tsx`'s
-      sheet JSX.
+      preview/addon tests, and by direct review of `Layout.tsx`'s sheet JSX.
 - [ ] Commit and push to `origin/main`.

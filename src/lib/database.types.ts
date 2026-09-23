@@ -238,6 +238,36 @@ export type Database = {
           },
         ]
       }
+      insurance_addons: {
+        Row: {
+          badge_label: string
+          checkbox_label: string
+          created_at: string
+          icon: string
+          limit_kind: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          badge_label: string
+          checkbox_label: string
+          created_at?: string
+          icon: string
+          limit_kind?: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          badge_label?: string
+          checkbox_label?: string
+          created_at?: string
+          icon?: string
+          limit_kind?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       insurance_providers: {
         Row: {
           created_at: string
@@ -259,6 +289,42 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_quote_addons: {
+        Row: {
+          addon: string
+          limit_count: number | null
+          limit_uyu: number | null
+          quote_id: string
+        }
+        Insert: {
+          addon: string
+          limit_count?: number | null
+          limit_uyu?: number | null
+          quote_id: string
+        }
+        Update: {
+          addon?: string
+          limit_count?: number | null
+          limit_uyu?: number | null
+          quote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_quote_addons_addon_fkey"
+            columns: ["addon"]
+            isOneToOne: false
+            referencedRelation: "insurance_addons"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "insurance_quote_addons_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_quotes: {
         Row: {
           average_driver_age: number
@@ -267,9 +333,6 @@ export type Database = {
           created_at: string
           deductible_uyu: number | null
           driver_count: number
-          glass_coverage: boolean
-          glass_coverage_limit_uyu: number | null
-          hail_coverage: boolean
           hidden: boolean
           hire_date: string
           id: string
@@ -290,9 +353,6 @@ export type Database = {
           created_at?: string
           deductible_uyu?: number | null
           driver_count: number
-          glass_coverage?: boolean
-          glass_coverage_limit_uyu?: number | null
-          hail_coverage?: boolean
           hidden?: boolean
           hire_date: string
           id?: string
@@ -313,9 +373,6 @@ export type Database = {
           created_at?: string
           deductible_uyu?: number | null
           driver_count?: number
-          glass_coverage?: boolean
-          glass_coverage_limit_uyu?: number | null
-          hail_coverage?: boolean
           hidden?: boolean
           hire_date?: string
           id?: string

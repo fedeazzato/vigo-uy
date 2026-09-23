@@ -17,10 +17,13 @@ import type {
   CommunityTotals,
   ContentComment,
   ContentReaction,
+  InsuranceAddon,
+  InsuranceAddonLimitKind,
   InsuranceCostStat,
   InsuranceCoverageLevel,
   InsuranceProvider,
   InsuranceQuote,
+  InsuranceQuoteAddon,
   ModelTripStat,
   PartPurchase,
   PublicProfile,
@@ -524,6 +527,134 @@ export function insuranceCostStatsByProviderAndCoverage(
     .filter((s) => s.coverage_level !== null && s.sample_count >= MIN_INSURANCE_SAMPLES && bySlug.has(s.provider))
     .map((stat) => ({ provider: bySlug.get(stat.provider)!, coverageLevel: stat.coverage_level!, stat }))
     .sort((a, b) => a.stat.avg_cost_per_year_uyu - b.stat.avg_cost_per_year_uyu)
+}
+
+// ── Insurance addons (extensible "included at no cost" perks, 0044) ──────
+// The catalog (moderator-curated, mirrors insurance_providers) plus the
+// per-quote junction table. A moderator adds a perk with one INSERT into
+// insurance_addons; the form and quote cards pick it up with no code change.
+
+export function fetchInsuranceAddons(): Promise<{ addons: InsuranceAddon[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ addons: [], error: null })
+  return cached(
+    'insuranceAddons',
+    async () => {
+      const { data, error } = await client
+        .from('insurance_addons')
+        .select('*')
+        .order('sort_order')
+        .order('badge_label')
+      return { addons: (data ?? []) as InsuranceAddon[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+// One round trip for a whole page's worth of quotes, grouped by quote_id --
+// same batching shape as fetchReactions/fetchComments.
+export function fetchInsuranceQuoteAddons(
+  quoteIds: string[]
+): Promise<{ addonsByQuote: Map<string, InsuranceQuoteAddon[]>; error: string | null }> {
+  const client = supabase
+  if (!client || quoteIds.length === 0) return Promise.resolve({ addonsByQuote: new Map(), error: null })
+  const key = `insuranceQuoteAddons:${[...quoteIds].sort().join(',')}`
+  return cached(
+    key,
+    async () => {
+      const { data, error } = await client.from('insurance_quote_addons').select('*').in('quote_id', quoteIds)
+      const addonsByQuote = new Map<string, InsuranceQuoteAddon[]>()
+      for (const row of data ?? []) {
+        const list = addonsByQuote.get(row.quote_id) ?? []
+        list.push(row)
+        addonsByQuote.set(row.quote_id, list)
+      }
+      return { addonsByQuote, error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export interface InsuranceAddonDisplay {
+  icon: string
+  badgeLabel: string
+  limitKind: InsuranceAddonLimitKind
+  limitUyu: number | null
+  limitCount: number | null
+}
+
+// Joins a quote's addon selections to their catalog display info, in
+// catalog sort order. Rows whose addon isn't in the given catalog (stale
+// cache, deleted addon) are skipped rather than rendered with blanks.
+export function insuranceQuoteAddonDisplays(
+  rows: InsuranceQuoteAddon[],
+  addons: InsuranceAddon[]
+): InsuranceAddonDisplay[] {
+  const bySlug = new Map(addons.map((a) => [a.slug, a]))
+  return rows
+    .filter((row) => bySlug.has(row.addon))
+    .map((row) => ({ row, def: bySlug.get(row.addon)! }))
+    .sort((a, b) => a.def.sort_order - b.def.sort_order)
+    .map(({ row, def }) => ({
+      icon: def.icon,
+      badgeLabel: def.badge_label,
+      limitKind: def.limit_kind,
+      limitUyu: row.limit_uyu,
+      limitCount: row.limit_count,
+    }))
+}
+
+// Renders one addon's badge text -- "{icon} {badge_label} sin cargo" /
+// "hasta $X" / "hasta Nx/año" depending on its limit_kind and whether a
+// limit was actually given (falls back to "sin cargo" either way, same
+// wording the form's placeholder implies). Shared by InsuranceQuoteCard
+// (JSX) and DashboardPage's CSV export (plain text).
+export function addonBadgeText(addon: InsuranceAddonDisplay): string {
+  if (addon.limitKind === 'cost' && addon.limitUyu != null) {
+    return `${addon.icon} ${addon.badgeLabel} hasta ${formatCurrency(addon.limitUyu, 2)}`
+  }
+  if (addon.limitKind === 'count' && addon.limitCount != null) {
+    return `${addon.icon} ${addon.badgeLabel} hasta ${addon.limitCount}x/año`
+  }
+  return `${addon.icon} ${addon.badgeLabel} sin cargo`
+}
+
+export interface InsuranceQuoteAddonSelection {
+  addon: string
+  limitUyu: number | null
+  limitCount: number | null
+}
+
+// Replaces a quote's whole addon set (delete then insert) -- simpler than
+// diffing/updating individual rows, and matches how the form always submits
+// its full current selection rather than an incremental change. Shared by
+// both the new-quote and edit-quote submit paths. Returns the *raw*
+// Supabase error (not a friendly string): callers compose this into the
+// same `run()` a quote insert/update goes through, and useEntrySubmit's
+// `submit()` already runs toFriendlyError exactly once on whatever error
+// comes out -- pre-friendlying here would just get overwritten by a generic
+// fallback when submit() tries to friendly an already-friendly string.
+export async function replaceInsuranceQuoteAddons(
+  quoteId: string,
+  selections: InsuranceQuoteAddonSelection[]
+): Promise<{ error: unknown }> {
+  const client = supabase
+  if (!client) return { error: null }
+  const { error: deleteError } = await client.from('insurance_quote_addons').delete().eq('quote_id', quoteId)
+  if (deleteError) return { error: deleteError }
+  if (selections.length > 0) {
+    const { error: insertError } = await client.from('insurance_quote_addons').insert(
+      selections.map((s) => ({
+        quote_id: quoteId,
+        addon: s.addon,
+        limit_uyu: s.limitUyu,
+        limit_count: s.limitCount,
+      }))
+    )
+    if (insertError) return { error: insertError }
+  }
+  invalidateCommunityCache()
+  return { error: null }
 }
 
 // ── Reactions & comments (D5, community content only) ────────────────────

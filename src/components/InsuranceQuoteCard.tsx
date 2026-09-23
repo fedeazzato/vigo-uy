@@ -1,6 +1,8 @@
 import { Card, Badge } from './UI'
 import { formatCurrency, formatDate } from '../lib/format'
+import { addonBadgeText } from '../lib/communityData'
 import { INSURANCE_COVERAGE_LABELS, INSURANCE_ZONE_LABELS } from '../types'
+import type { InsuranceAddonDisplay } from '../lib/communityData'
 import type { InsuranceQuote } from '../types'
 // The realCase* classes live in Pages.module.css because CostsPage's curated
 // "real case" cards share the exact same presentation.
@@ -9,12 +11,13 @@ import styles from '../pages/Pages.module.css'
 interface InsuranceQuoteCardProps {
   quote: InsuranceQuote
   providerName: string
+  addons: InsuranceAddonDisplay[]
 }
 
 // A community insurance quote rendered as a "real case" card, mirroring
-// ServiceEntryCard. Deductible/hail/glass lines are omitted entirely when
-// not applicable rather than showing a "no aplica" placeholder.
-export default function InsuranceQuoteCard({ quote, providerName }: InsuranceQuoteCardProps) {
+// ServiceEntryCard. Deductible/addon lines are omitted entirely when not
+// applicable rather than showing a "no aplica" placeholder.
+export default function InsuranceQuoteCard({ quote, providerName, addons }: InsuranceQuoteCardProps) {
   return (
     <Card>
       <div className={styles.realCaseHeader}>
@@ -42,14 +45,14 @@ export default function InsuranceQuoteCard({ quote, providerName }: InsuranceQuo
       {quote.deductible_uyu != null && (
         <p className={styles.realCaseConditions}>💸 Deducible {formatCurrency(quote.deductible_uyu, 2)}</p>
       )}
-      {(quote.hail_coverage || quote.glass_coverage) && (
+      {addons.length > 0 && (
         <p className={styles.realCaseConditions}>
-          {quote.hail_coverage && '🧊 Granizo sin cargo'}
-          {quote.hail_coverage && quote.glass_coverage && ' · '}
-          {quote.glass_coverage &&
-            (quote.glass_coverage_limit_uyu != null
-              ? `🪟 Cristales hasta ${formatCurrency(quote.glass_coverage_limit_uyu, 2)}`
-              : '🪟 Cristales sin cargo')}
+          {addons.map((addon, i) => (
+            <span key={i}>
+              {i > 0 && ' · '}
+              {addonBadgeText(addon)}
+            </span>
+          ))}
         </p>
       )}
       {quote.notes && <p className={styles.realCaseConditions}>💬 {quote.notes}</p>}

@@ -9,11 +9,14 @@ import ServiceEntryCard from '../components/ServiceEntryCard'
 import InsuranceQuoteCard from '../components/InsuranceQuoteCard'
 import {
   cityCostStatItems,
+  fetchInsuranceAddons,
   fetchInsuranceCostStats,
   fetchInsuranceProviders,
+  fetchInsuranceQuoteAddons,
   fetchInsuranceQuotes,
   insuranceCostStatsByProvider,
   insuranceCostStatsByProviderAndCoverage,
+  insuranceQuoteAddonDisplays,
   preferCommunity,
   useCityCostStats,
   useCommunityContent,
@@ -22,7 +25,17 @@ import {
 import styles from './Pages.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 import { INSURANCE_COVERAGE_LABELS } from '../types'
-import type { CostsData, InsuranceCostStat, InsuranceProvider, InsuranceQuote, Model, StatItem, TripLog } from '../types'
+import type {
+  CostsData,
+  InsuranceAddon,
+  InsuranceCostStat,
+  InsuranceProvider,
+  InsuranceQuote,
+  InsuranceQuoteAddon,
+  Model,
+  StatItem,
+  TripLog,
+} from '../types'
 
 // A provider-averages row (name + optional badge + price + sample note),
 // shared by the per-provider and per-provider-per-coverage tables below.
@@ -101,13 +114,23 @@ export default function CostsPage() {
   const cityStats = useCityCostStats()
 
   const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
+  const [insuranceAddons, setInsuranceAddons] = useState<InsuranceAddon[]>([])
   const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
+  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<Map<string, InsuranceQuoteAddon[]>>(
+    new Map()
+  )
   const [insuranceCostStats, setInsuranceCostStats] = useState<InsuranceCostStat[]>([])
   useEffect(() => {
     if (!supabase) return
     void fetchInsuranceProviders().then(({ providers }) => setInsuranceProviders(providers))
-    void fetchInsuranceQuotes(50).then(({ quotes }) => setInsuranceQuotes(quotes))
+    void fetchInsuranceAddons().then(({ addons }) => setInsuranceAddons(addons))
     void fetchInsuranceCostStats().then(({ stats }) => setInsuranceCostStats(stats))
+    void fetchInsuranceQuotes(50).then(({ quotes }) => {
+      setInsuranceQuotes(quotes)
+      void fetchInsuranceQuoteAddons(quotes.map((q) => q.id)).then(({ addonsByQuote }) =>
+        setInsuranceQuoteAddonsByQuote(addonsByQuote)
+      )
+    })
   }, [])
   const insuranceProviderNames = new Map(insuranceProviders.map((p) => [p.slug, p.name]))
   const providerCostStats = insuranceCostStatsByProvider(insuranceCostStats, insuranceProviders)
@@ -335,6 +358,10 @@ export default function CostsPage() {
               key={quote.id}
               quote={quote}
               providerName={insuranceProviderNames.get(quote.provider) ?? quote.provider}
+              addons={insuranceQuoteAddonDisplays(
+                insuranceQuoteAddonsByQuote.get(quote.id) ?? [],
+                insuranceAddons
+              )}
             />
           ))}
         </>

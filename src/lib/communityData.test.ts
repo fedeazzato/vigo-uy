@@ -15,11 +15,13 @@ vi.mock('./supabaseClient', () => ({
 }))
 
 import {
+  addonBadgeText,
   cityCostStatItems,
   createChargingStation,
   fetchLeaderboard,
   insuranceCostStatsByProvider,
   insuranceCostStatsByProviderAndCoverage,
+  insuranceQuoteAddonDisplays,
   invalidateCommunityCache,
   networkCostStats,
   pickCostStat,
@@ -33,8 +35,10 @@ import type {
   ChargingNetwork,
   CityCostStat,
   CommunitySearchResult,
+  InsuranceAddon,
   InsuranceCostStat,
   InsuranceProvider,
+  InsuranceQuoteAddon,
   StationReliability,
 } from '../types'
 
@@ -274,6 +278,91 @@ describe('insuranceCostStatsByProviderAndCoverage', () => {
       'terceros',
       'todo_riesgo_franquicia',
     ])
+  })
+})
+
+describe('insuranceQuoteAddonDisplays', () => {
+  const granizo: InsuranceAddon = {
+    slug: 'granizo',
+    icon: '🧊',
+    checkbox_label: 'reparación de granizo sin cargo',
+    badge_label: 'Granizo',
+    limit_kind: 'none',
+    sort_order: 10,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+  const cristales: InsuranceAddon = {
+    slug: 'cristales',
+    icon: '🪟',
+    checkbox_label: 'reparación de cristales (parabrisas, etc.)',
+    badge_label: 'Cristales',
+    limit_kind: 'cost',
+    sort_order: 20,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+  const auxilio: InsuranceAddon = {
+    slug: 'auxilio-ruta',
+    icon: '🆘',
+    checkbox_label: 'auxilio en ruta',
+    badge_label: 'Auxilio en ruta',
+    limit_kind: 'count',
+    sort_order: 30,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+
+  it('joins rows to their catalog entry, in catalog sort order regardless of row order', () => {
+    const rows: InsuranceQuoteAddon[] = [
+      { quote_id: 'q-1', addon: 'cristales', limit_uyu: 20000, limit_count: null },
+      { quote_id: 'q-1', addon: 'granizo', limit_uyu: null, limit_count: null },
+    ]
+    expect(insuranceQuoteAddonDisplays(rows, [granizo, cristales])).toEqual([
+      { icon: '🧊', badgeLabel: 'Granizo', limitKind: 'none', limitUyu: null, limitCount: null },
+      { icon: '🪟', badgeLabel: 'Cristales', limitKind: 'cost', limitUyu: 20000, limitCount: null },
+    ])
+  })
+
+  it('skips a row whose addon is not in the given catalog', () => {
+    const rows: InsuranceQuoteAddon[] = [{ quote_id: 'q-1', addon: 'discontinued', limit_uyu: null, limit_count: null }]
+    expect(insuranceQuoteAddonDisplays(rows, [granizo])).toEqual([])
+  })
+
+  it('carries limit_count through for a "count"-kind addon', () => {
+    const rows: InsuranceQuoteAddon[] = [{ quote_id: 'q-1', addon: 'auxilio-ruta', limit_uyu: null, limit_count: 2 }]
+    expect(insuranceQuoteAddonDisplays(rows, [auxilio])).toEqual([
+      { icon: '🆘', badgeLabel: 'Auxilio en ruta', limitKind: 'count', limitUyu: null, limitCount: 2 },
+    ])
+  })
+})
+
+describe('addonBadgeText', () => {
+  it('renders "sin cargo" for a none-kind addon', () => {
+    expect(
+      addonBadgeText({ icon: '🧊', badgeLabel: 'Granizo', limitKind: 'none', limitUyu: null, limitCount: null })
+    ).toBe('🧊 Granizo sin cargo')
+  })
+
+  it('renders "hasta $X" for a cost-kind addon with a limit', () => {
+    expect(
+      addonBadgeText({ icon: '🪟', badgeLabel: 'Cristales', limitKind: 'cost', limitUyu: 20000, limitCount: null })
+    ).toBe('🪟 Cristales hasta $20.000,00')
+  })
+
+  it('renders "sin cargo" for a cost-kind addon with no limit given', () => {
+    expect(
+      addonBadgeText({ icon: '🪟', badgeLabel: 'Cristales', limitKind: 'cost', limitUyu: null, limitCount: null })
+    ).toBe('🪟 Cristales sin cargo')
+  })
+
+  it('renders "hasta Nx/año" for a count-kind addon with a limit', () => {
+    expect(
+      addonBadgeText({
+        icon: '🆘',
+        badgeLabel: 'Auxilio en ruta',
+        limitKind: 'count',
+        limitUyu: null,
+        limitCount: 2,
+      })
+    ).toBe('🆘 Auxilio en ruta hasta 2x/año')
   })
 })
 

@@ -6,11 +6,17 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatCurrency, parseLocaleNumber, todayIsoDate, validateIsoDate } from '../lib/format'
 import { useEntrySubmit } from '../lib/useEntrySubmit'
-import { fetchInsuranceProviders } from '../lib/communityData'
+import {
+  fetchInsuranceAddons,
+  fetchInsuranceProviders,
+  replaceInsuranceQuoteAddons,
+  type InsuranceQuoteAddonSelection,
+} from '../lib/communityData'
 import formStyles from '../styles/formControls.module.css'
 import {
   INSURANCE_COVERAGE_LABELS,
   INSURANCE_ZONE_LABELS,
+  type InsuranceAddon,
   type InsuranceCoverageLevel,
   type InsuranceProvider,
   type InsuranceZone,
@@ -38,9 +44,13 @@ export default function NewInsuranceQuotePage() {
   const [periodYears, setPeriodYears] = useState<number>(1)
   const [totalCostUyu, setTotalCostUyu] = useState('')
   const [deductibleUyu, setDeductibleUyu] = useState('')
-  const [hailCoverage, setHailCoverage] = useState(false)
-  const [glassCoverage, setGlassCoverage] = useState(false)
-  const [glassCoverageLimitUyu, setGlassCoverageLimitUyu] = useState('')
+  const [addons, setAddons] = useState<InsuranceAddon[]>([])
+  // Keyed by addon slug. limitValue holds whichever of limit_uyu/limit_count
+  // applies (the addon's limit_kind says which) -- a single text field per
+  // addon regardless of kind, same UX as the old glass-coverage-limit input.
+  const [addonSelections, setAddonSelections] = useState<Record<string, { checked: boolean; limitValue: string }>>(
+    {}
+  )
   const [notes, setNotes] = useState('')
   const [isPublic, setIsPublic] = useState(true)
 
@@ -51,6 +61,7 @@ export default function NewInsuranceQuotePage() {
 
   useEffect(() => {
     void fetchInsuranceProviders().then(({ providers }) => setProviders(providers))
+    void fetchInsuranceAddons().then(({ addons }) => setAddons(addons))
   }, [])
 
   useEffect(() => {
@@ -73,17 +84,30 @@ export default function NewInsuranceQuotePage() {
           setPeriodYears(data.period_years)
           setTotalCostUyu(String(data.total_cost_uyu))
           setDeductibleUyu(data.deductible_uyu != null ? String(data.deductible_uyu) : '')
-          setHailCoverage(data.hail_coverage)
-          setGlassCoverage(data.glass_coverage)
-          setGlassCoverageLimitUyu(
-            data.glass_coverage_limit_uyu != null ? String(data.glass_coverage_limit_uyu) : ''
-          )
           setNotes(data.notes ?? '')
           setIsPublic(data.is_public)
         }
         setLoading(false)
       })
   }, [id, isEdit, setError])
+
+  // Existing addon selections, loaded separately from the quote row itself
+  // (a join across tables, not a column on insurance_quotes).
+  useEffect(() => {
+    if (!isEdit || !supabase) return
+    supabase
+      .from('insurance_quote_addons')
+      .select('*')
+      .eq('quote_id', id!)
+      .then(({ data }) => {
+        const selections: Record<string, { checked: boolean; limitValue: string }> = {}
+        for (const row of data ?? []) {
+          const limitValue = row.limit_uyu ?? row.limit_count
+          selections[row.addon] = { checked: true, limitValue: limitValue != null ? String(limitValue) : '' }
+        }
+        setAddonSelections(selections)
+      })
+  }, [id, isEdit])
 
   // Preview only -- the server's generated cost_per_year_uyu is what's
   // actually stored; this never gets sent to Supabase.
@@ -99,9 +123,18 @@ export default function NewInsuranceQuotePage() {
   // below, never blocked.
   const showDeductible = coverageLevel !== 'todo_riesgo_sin_franquicia'
 
-  function handleGlassCoverageChange(checked: boolean) {
-    setGlassCoverage(checked)
-    if (!checked) setGlassCoverageLimitUyu('')
+  function handleAddonToggle(slug: string, checked: boolean) {
+    setAddonSelections((prev) => ({
+      ...prev,
+      // Unchecking clears any typed limit too, mirroring the old
+      // glass-coverage checkbox: an unchecked addon can never carry a
+      // stray limit value into the submit payload.
+      [slug]: { checked, limitValue: checked ? (prev[slug]?.limitValue ?? '') : '' },
+    }))
+  }
+
+  function handleAddonLimitChange(slug: string, value: string) {
+    setAddonSelections((prev) => ({ ...prev, [slug]: { checked: true, limitValue: value } }))
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -150,13 +183,28 @@ export default function NewInsuranceQuotePage() {
       }
     }
 
-    let glassLimit: number | undefined
-    if (glassCoverage && glassCoverageLimitUyu.trim()) {
-      glassLimit = parseLocaleNumber(glassCoverageLimitUyu)
-      if (glassLimit === undefined || !Number.isFinite(glassLimit) || glassLimit < 0) {
-        setError('El límite de cobertura de cristales debe ser un número válido.')
-        return
+    const addonSelectionsToSave: InsuranceQuoteAddonSelection[] = []
+    for (const addon of addons) {
+      const selection = addonSelections[addon.slug]
+      if (!selection?.checked) continue
+      let limitUyu: number | null = null
+      let limitCount: number | null = null
+      if (addon.limit_kind === 'cost' && selection.limitValue.trim()) {
+        const parsed = parseLocaleNumber(selection.limitValue)
+        if (parsed === undefined || !Number.isFinite(parsed) || parsed < 0) {
+          setError(`El límite de ${addon.badge_label.toLowerCase()} debe ser un número válido.`)
+          return
+        }
+        limitUyu = parsed
+      } else if (addon.limit_kind === 'count' && selection.limitValue.trim()) {
+        const parsed = parseLocaleNumber(selection.limitValue)
+        if (parsed === undefined || !Number.isInteger(parsed) || parsed < 1) {
+          setError(`La cantidad de usos de ${addon.badge_label.toLowerCase()} debe ser un número entero válido.`)
+          return
+        }
+        limitCount = parsed
       }
+      addonSelectionsToSave.push({ addon: addon.slug, limitUyu, limitCount })
     }
 
     const payload = {
@@ -169,19 +217,27 @@ export default function NewInsuranceQuotePage() {
       period_years: periodYears,
       total_cost_uyu: totalCost,
       deductible_uyu: deductible ?? null,
-      hail_coverage: hailCoverage,
-      glass_coverage: glassCoverage,
-      glass_coverage_limit_uyu: glassCoverage ? (glassLimit ?? null) : null,
       notes: notes.trim() || null,
       is_public: isPublic,
     }
 
     const client = supabase
-    await submit(() =>
-      isEdit
-        ? client.from('insurance_quotes').update(payload).eq('id', id!)
-        : client.from('insurance_quotes').insert({ ...payload, user_id: user.id })
-    )
+    await submit(async () => {
+      let quoteId = id
+      if (isEdit) {
+        const { error } = await client.from('insurance_quotes').update(payload).eq('id', id!)
+        if (error) return { error }
+      } else {
+        const { data, error } = await client
+          .from('insurance_quotes')
+          .insert({ ...payload, user_id: user.id })
+          .select('id')
+          .single()
+        if (error) return { error }
+        quoteId = data.id
+      }
+      return replaceInsuranceQuoteAddons(quoteId!, addonSelectionsToSave)
+    })
   }
 
   function handleCancel() {
@@ -371,37 +427,43 @@ export default function NewInsuranceQuotePage() {
           </div>
         )}
 
-        <label className={formStyles.checkboxRow}>
-          <input type="checkbox" checked={hailCoverage} onChange={(e) => setHailCoverage(e.target.checked)} />
-          Incluye reparación de granizo sin cargo
-        </label>
+        {addons.map((addon) => {
+          const selection = addonSelections[addon.slug] ?? { checked: false, limitValue: '' }
+          return (
+            <div key={addon.slug}>
+              <label className={formStyles.checkboxRow}>
+                <input
+                  type="checkbox"
+                  checked={selection.checked}
+                  onChange={(e) => handleAddonToggle(addon.slug, e.target.checked)}
+                />
+                Incluye {addon.checkbox_label}
+              </label>
 
-        <label className={formStyles.checkboxRow}>
-          <input
-            type="checkbox"
-            checked={glassCoverage}
-            onChange={(e) => handleGlassCoverageChange(e.target.checked)}
-          />
-          Incluye reparación de cristales (parabrisas, etc.)
-        </label>
-
-        {glassCoverage && (
-          <div className={formStyles.field}>
-            <label className={formStyles.label} htmlFor="insurance-glass-limit">
-              🪟 Límite de cobertura (UYU)
-            </label>
-            <input
-              id="insurance-glass-limit"
-              type="text"
-              inputMode="decimal"
-              className={formStyles.input}
-              value={glassCoverageLimitUyu}
-              onChange={(e) => setGlassCoverageLimitUyu(e.target.value)}
-              placeholder="Opcional"
-            />
-            <span className={formStyles.hint}>Dejalo vacío si es sin cargo / sin límite.</span>
-          </div>
-        )}
+              {addon.limit_kind !== 'none' && selection.checked && (
+                <div className={formStyles.field}>
+                  <label className={formStyles.label} htmlFor={`insurance-addon-limit-${addon.slug}`}>
+                    {addon.icon} {addon.limit_kind === 'cost' ? 'Límite de cobertura (UYU)' : 'Usos gratis por año'}
+                  </label>
+                  <input
+                    id={`insurance-addon-limit-${addon.slug}`}
+                    type="text"
+                    inputMode={addon.limit_kind === 'cost' ? 'decimal' : 'numeric'}
+                    className={formStyles.input}
+                    value={selection.limitValue}
+                    onChange={(e) => handleAddonLimitChange(addon.slug, e.target.value)}
+                    placeholder="Opcional"
+                  />
+                  <span className={formStyles.hint}>
+                    {addon.limit_kind === 'cost'
+                      ? 'Dejalo vacío si es sin cargo / sin límite.'
+                      : 'Dejalo vacío si no tiene límite de usos.'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        })}
 
         <NotesField
           id="insurance-notes"

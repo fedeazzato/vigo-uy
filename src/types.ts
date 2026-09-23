@@ -418,6 +418,23 @@ export type InsuranceCostStat = Omit<NonNullableRow<Views['insurance_cost_stats'
   coverage_level: InsuranceCoverageLevel | null
 }
 
+// ── Insurance addons (moderator-curated, extensible) ────────────────────────
+// "Included at no extra cost" perks (hail repair, glass repair, roadside
+// assistance, ...) live in a table instead of one boolean column per perk,
+// so a moderator can add a new one with an INSERT -- no migration, no
+// frontend change. See specs/insurance-quotes.md and migration 0044.
+
+export type InsuranceAddonLimitKind = 'none' | 'count' | 'cost'
+
+export type InsuranceAddon = Omit<Tables['insurance_addons']['Row'], 'limit_kind'> & {
+  limit_kind: InsuranceAddonLimitKind
+}
+
+// One row per addon a quote includes. limit_uyu is set only when the
+// addon's limit_kind is 'cost', limit_count only when it's 'count' --
+// enforced server-side by a trigger (0044), not just convention.
+export type InsuranceQuoteAddon = Tables['insurance_quote_addons']['Row']
+
 // ── Vehicles (shared cars) ───────────────────────────────────────────────────
 
 // Vehicles have no public name: the leaderboard labels them by their

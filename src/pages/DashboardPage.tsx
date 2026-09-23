@@ -7,14 +7,21 @@ import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { formatCurrency, formatDate } from '../lib/format'
-import { fetchInsuranceProviders, invalidateCommunityCache } from '../lib/communityData'
+import {
+  addonBadgeText,
+  fetchInsuranceAddons,
+  fetchInsuranceProviders,
+  fetchInsuranceQuoteAddons,
+  insuranceQuoteAddonDisplays,
+  invalidateCommunityCache,
+} from '../lib/communityData'
 import { useToggleSet } from '../lib/useToggleSet'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import ContentReactions from '../components/ContentReactions'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import { INSURANCE_COVERAGE_LABELS } from '../types'
-import type { InsuranceProvider, InsuranceQuote, PartPurchase, ServiceEntry, TripLog } from '../types'
+import type { InsuranceAddon, InsuranceProvider, InsuranceQuote, InsuranceQuoteAddon, PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -60,6 +67,10 @@ export default function DashboardPage() {
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
   const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
   const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
+  const [insuranceAddons, setInsuranceAddons] = useState<InsuranceAddon[]>([])
+  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<Map<string, InsuranceQuoteAddon[]>>(
+    new Map()
+  )
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [loadingTrips, setLoadingTrips] = useState(true)
   const [loadingPurchases, setLoadingPurchases] = useState(true)
@@ -116,12 +127,20 @@ export default function DashboardPage() {
       .eq('user_id', user.id)
       .order('hire_date', { ascending: false })
       .then(({ data, error }) => {
-        if (error) setError(toFriendlyError(error))
-        else setInsuranceQuotes((data ?? []) as InsuranceQuote[])
+        if (error) {
+          setError(toFriendlyError(error))
+        } else {
+          const quotes = (data ?? []) as InsuranceQuote[]
+          setInsuranceQuotes(quotes)
+          void fetchInsuranceQuoteAddons(quotes.map((q) => q.id)).then(({ addonsByQuote }) =>
+            setInsuranceQuoteAddonsByQuote(addonsByQuote)
+          )
+        }
         setLoadingInsurance(false)
       })
 
     void fetchInsuranceProviders().then(({ providers }) => setInsuranceProviders(providers))
+    void fetchInsuranceAddons().then(({ addons }) => setInsuranceAddons(addons))
   }, [user])
 
   const insuranceProviderNames = useMemo(
@@ -302,9 +321,7 @@ export default function DashboardPage() {
       'Costo total (UYU)',
       'Costo por año (UYU)',
       'Deducible (UYU)',
-      'Granizo sin cargo',
-      'Cristales incluidos',
-      'Límite de cristales (UYU)',
+      'Adicionales incluidos',
       'Notas',
       'Público',
     ]
@@ -319,9 +336,9 @@ export default function DashboardPage() {
       q.total_cost_uyu,
       q.cost_per_year_uyu,
       q.deductible_uyu,
-      q.hail_coverage ? 'Sí' : 'No',
-      q.glass_coverage ? 'Sí' : 'No',
-      q.glass_coverage_limit_uyu,
+      insuranceQuoteAddonDisplays(insuranceQuoteAddonsByQuote.get(q.id) ?? [], insuranceAddons)
+        .map(addonBadgeText)
+        .join('; '),
       q.notes,
       q.is_public ? 'Sí' : 'No',
     ])
