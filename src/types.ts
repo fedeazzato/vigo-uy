@@ -369,6 +369,55 @@ export type ChargingCostStat = Omit<NonNullableRow<Views['charging_cost_stats'][
 
 export type StationReliability = NonNullableRow<Views['station_reliability']['Row']>
 
+// ── Insurance quotes (community-submitted) ──────────────────────────────────
+
+export type InsuranceCoverageLevel =
+  | 'soa'
+  | 'terceros'
+  | 'terceros_completo'
+  | 'todo_riesgo_franquicia'
+  | 'todo_riesgo_sin_franquicia'
+
+export const INSURANCE_COVERAGE_LABELS: Record<InsuranceCoverageLevel, string> = {
+  soa: 'SOA (obligatorio)',
+  terceros: 'Responsabilidad Civil (Terceros)',
+  terceros_completo: 'Terceros Completo',
+  todo_riesgo_franquicia: 'Todo Riesgo con Franquicia',
+  todo_riesgo_sin_franquicia: 'Todo Riesgo sin Franquicia',
+}
+
+export type InsuranceZone = 'montevideo' | 'area_metropolitana' | 'interior'
+
+export const INSURANCE_ZONE_LABELS: Record<InsuranceZone, string> = {
+  montevideo: 'Montevideo',
+  area_metropolitana: 'Área Metropolitana (Canelones/San José)',
+  interior: 'Interior',
+}
+
+// Providers live in the insurance_providers table (moderators can add more
+// with an INSERT), so the slug is an open string -- the FK is the real
+// constraint, same as ChargingNetwork.
+export type InsuranceProvider = Tables['insurance_providers']['Row']
+
+export type InsuranceQuote = Omit<
+  Tables['insurance_quotes']['Row'],
+  'coverage_level' | 'zone' | 'cost_per_year_uyu'
+> & {
+  coverage_level: InsuranceCoverageLevel
+  zone: InsuranceZone
+  // Generated column (total_cost_uyu / period_years). Codegen can't prove a
+  // generated column is non-null, but it's derived from two NOT NULL
+  // columns and is never actually null.
+  cost_per_year_uyu: number
+}
+
+// Rolling-730-day average by (provider, coverage_level); coverage_level is
+// null on the per-provider rollup rows (GROUPING SETS), like
+// ChargingCostStat.station_id.
+export type InsuranceCostStat = Omit<NonNullableRow<Views['insurance_cost_stats']['Row']>, 'coverage_level'> & {
+  coverage_level: InsuranceCoverageLevel | null
+}
+
 // ── Vehicles (shared cars) ───────────────────────────────────────────────────
 
 // Vehicles have no public name: the leaderboard labels them by their

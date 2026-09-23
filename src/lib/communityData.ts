@@ -17,6 +17,10 @@ import type {
   CommunityTotals,
   ContentComment,
   ContentReaction,
+  InsuranceCostStat,
+  InsuranceCoverageLevel,
+  InsuranceProvider,
+  InsuranceQuote,
   ModelTripStat,
   PartPurchase,
   PublicProfile,
@@ -424,6 +428,102 @@ export async function createChargingStation(
   if (error) return { station: null, error: toFriendlyError(error) }
   invalidateCommunityCache()
   return { station: data as ChargingStation, error: null }
+}
+
+// ── Insurance quotes ─────────────────────────────────────────────────────
+// Providers (moderator-curated, mirrors charging_networks), user-submitted
+// quotes, and the computed per-(provider, coverage_level) cost average --
+// see specs/insurance-quotes.md.
+
+export function fetchInsuranceProviders(): Promise<{ providers: InsuranceProvider[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ providers: [], error: null })
+  return cached(
+    'insuranceProviders',
+    async () => {
+      const { data, error } = await client
+        .from('insurance_providers')
+        .select('*')
+        .order('sort_order')
+        .order('name')
+      return { providers: data ?? [], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export function fetchInsuranceQuotes(limit: number): Promise<{ quotes: InsuranceQuote[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ quotes: [], error: null })
+  return cached(
+    `insuranceQuotes:${limit}`,
+    async () => {
+      const { data, error } = await client
+        .from('insurance_quotes')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      return { quotes: (data ?? []) as InsuranceQuote[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+export function fetchInsuranceCostStats(): Promise<{ stats: InsuranceCostStat[]; error: string | null }> {
+  const client = supabase
+  if (!client) return Promise.resolve({ stats: [], error: null })
+  return cached(
+    'insuranceCostStats',
+    async () => {
+      const { data, error } = await client.from('insurance_cost_stats').select('*')
+      return { stats: (data ?? []) as InsuranceCostStat[], error: error ? toFriendlyError(error) : null }
+    },
+    (r) => r.error !== null
+  )
+}
+
+// Prices only render at this many real quotes; below it the curated text
+// stays (see specs/CONTENT-MIGRATION.md). Not exported -- unlike
+// MIN_COST_SAMPLES, nothing outside this module needs the raw threshold;
+// the two helpers below apply it internally.
+const MIN_INSURANCE_SAMPLES = 3
+
+export interface ProviderCostStat {
+  provider: InsuranceProvider
+  stat: InsuranceCostStat
+}
+
+// Per-provider rollups (coverage_level null) that clear the sample floor,
+// joined to their provider's display info, cheapest first -- the
+// "which insurer is cheapest overall" view, mirrors networkCostStats.
+export function insuranceCostStatsByProvider(
+  stats: InsuranceCostStat[],
+  providers: InsuranceProvider[]
+): ProviderCostStat[] {
+  const bySlug = new Map(providers.map((p) => [p.slug, p]))
+  return stats
+    .filter((s) => s.coverage_level === null && s.sample_count >= MIN_INSURANCE_SAMPLES && bySlug.has(s.provider))
+    .map((stat) => ({ provider: bySlug.get(stat.provider)!, stat }))
+    .sort((a, b) => a.stat.avg_cost_per_year_uyu - b.stat.avg_cost_per_year_uyu)
+}
+
+export interface ProviderCoverageCostStat {
+  provider: InsuranceProvider
+  coverageLevel: InsuranceCoverageLevel
+  stat: InsuranceCostStat
+}
+
+// Same shape, one level finer: per (provider, coverage_level) rollups.
+export function insuranceCostStatsByProviderAndCoverage(
+  stats: InsuranceCostStat[],
+  providers: InsuranceProvider[]
+): ProviderCoverageCostStat[] {
+  const bySlug = new Map(providers.map((p) => [p.slug, p]))
+  return stats
+    .filter((s) => s.coverage_level !== null && s.sample_count >= MIN_INSURANCE_SAMPLES && bySlug.has(s.provider))
+    .map((stat) => ({ provider: bySlug.get(stat.provider)!, coverageLevel: stat.coverage_level!, stat }))
+    .sort((a, b) => a.stat.avg_cost_per_year_uyu - b.stat.avg_cost_per_year_uyu)
 }
 
 // ── Reactions & comments (D5, community content only) ────────────────────

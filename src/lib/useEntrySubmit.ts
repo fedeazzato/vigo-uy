@@ -5,11 +5,11 @@ import { invalidateCommunityCache } from './communityData'
 
 // What the entry forms put in location.state.saved; Mi actividad maps it to
 // the confirmation toast.
-export type SavedFlag = 'viaje' | 'service' | 'compra'
+export type SavedFlag = 'viaje' | 'service' | 'compra' | 'seguro'
 
 /**
- * The save boilerplate shared by the three entry forms (viaje, service,
- * compra): submitting/error state, friendly error mapping, community-cache
+ * The save boilerplate shared by the entry forms (viaje, service, compra,
+ * seguro): submitting/error state, friendly error mapping, community-cache
  * invalidation, and the redirect to Mi actividad with the saved toast.
  *
  * The page keeps the typed Supabase insert/update itself (passed as `run`)

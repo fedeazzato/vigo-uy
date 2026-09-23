@@ -22,6 +22,7 @@ const MantenimientoPage = lazy(() => import('./pages/MantenimientoPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const NewServiceEntryPage = lazy(() => import('./pages/NewServiceEntryPage'))
+const NewInsuranceQuotePage = lazy(() => import('./pages/NewInsuranceQuotePage'))
 const NewTripLogPage = lazy(() => import('./pages/NewTripLogPage'))
 const PartsPage = lazy(() => import('./pages/PartsPage'))
 const NewPartPurchasePage = lazy(() => import('./pages/NewPartPurchasePage'))
@@ -55,6 +56,8 @@ export default function App() {
             <Route path="mi-actividad" element={<DashboardPage />} />
             <Route path="costos/nuevo" element={<NewServiceEntryPage />} />
             <Route path="costos/:id/editar" element={<NewServiceEntryPage />} />
+            <Route path="costos/seguro/nuevo" element={<NewInsuranceQuotePage />} />
+            <Route path="costos/seguro/:id/editar" element={<NewInsuranceQuotePage />} />
             <Route path="viajes/nuevo" element={<NewTripLogPage />} />
             <Route path="viajes/:id/editar" element={<NewTripLogPage />} />
             <Route path="repuestos/nuevo" element={<NewPartPurchasePage />} />

@@ -18,6 +18,8 @@ import {
   cityCostStatItems,
   createChargingStation,
   fetchLeaderboard,
+  insuranceCostStatsByProvider,
+  insuranceCostStatsByProviderAndCoverage,
   invalidateCommunityCache,
   networkCostStats,
   pickCostStat,
@@ -31,6 +33,8 @@ import type {
   ChargingNetwork,
   CityCostStat,
   CommunitySearchResult,
+  InsuranceCostStat,
+  InsuranceProvider,
   StationReliability,
 } from '../types'
 
@@ -160,6 +164,116 @@ describe('networkCostStats', () => {
   it('skips a stat whose network is not in the given list', () => {
     const orphan: ChargingCostStat = { network: 'dmc', station_id: null, avg_cost_per_kwh: 11, sample_count: 4 }
     expect(networkCostStats([orphan], [ute])).toEqual([])
+  })
+})
+
+describe('insuranceCostStatsByProvider', () => {
+  const bse: InsuranceProvider = { slug: 'bse', name: 'BSE', sort_order: 10, created_at: '2026-07-01T00:00:00Z' }
+  const mapfre: InsuranceProvider = {
+    slug: 'mapfre',
+    name: 'Mapfre Uruguay',
+    sort_order: 20,
+    created_at: '2026-07-01T00:00:00Z',
+  }
+
+  it('keeps only provider-level rollups at or above the sample floor, joined to their provider', () => {
+    const bseStat: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 40000,
+      sample_count: 3,
+    }
+    const thinMapfre: InsuranceCostStat = {
+      provider: 'mapfre',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 45000,
+      sample_count: 2,
+    }
+    const bseCoverageStat: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: 'terceros',
+      avg_cost_per_year_uyu: 30000,
+      sample_count: 9,
+    }
+    expect(insuranceCostStatsByProvider([bseStat, thinMapfre, bseCoverageStat], [bse, mapfre])).toEqual([
+      { provider: bse, stat: bseStat },
+    ])
+  })
+
+  it('sorts cheapest provider first', () => {
+    const pricey: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 50000,
+      sample_count: 5,
+    }
+    const cheap: InsuranceCostStat = {
+      provider: 'mapfre',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 30000,
+      sample_count: 5,
+    }
+    expect(insuranceCostStatsByProvider([pricey, cheap], [bse, mapfre]).map((r) => r.provider.slug)).toEqual([
+      'mapfre',
+      'bse',
+    ])
+  })
+
+  it('skips a stat whose provider is not in the given list', () => {
+    const orphan: InsuranceCostStat = {
+      provider: 'sura',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 35000,
+      sample_count: 4,
+    }
+    expect(insuranceCostStatsByProvider([orphan], [bse])).toEqual([])
+  })
+})
+
+describe('insuranceCostStatsByProviderAndCoverage', () => {
+  const bse: InsuranceProvider = { slug: 'bse', name: 'BSE', sort_order: 10, created_at: '2026-07-01T00:00:00Z' }
+
+  it('keeps only per-(provider, coverage) rollups at or above the sample floor', () => {
+    const rollup: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: null,
+      avg_cost_per_year_uyu: 40000,
+      sample_count: 9,
+    }
+    const covStat: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: 'terceros_completo',
+      avg_cost_per_year_uyu: 38000,
+      sample_count: 3,
+    }
+    const thinCov: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: 'soa',
+      avg_cost_per_year_uyu: 10000,
+      sample_count: 1,
+    }
+    expect(insuranceCostStatsByProviderAndCoverage([rollup, covStat, thinCov], [bse])).toEqual([
+      { provider: bse, coverageLevel: 'terceros_completo', stat: covStat },
+    ])
+  })
+
+  it('sorts cheapest coverage level first', () => {
+    const pricey: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: 'todo_riesgo_franquicia',
+      avg_cost_per_year_uyu: 60000,
+      sample_count: 5,
+    }
+    const cheap: InsuranceCostStat = {
+      provider: 'bse',
+      coverage_level: 'terceros',
+      avg_cost_per_year_uyu: 25000,
+      sample_count: 5,
+    }
+    expect(insuranceCostStatsByProviderAndCoverage([pricey, cheap], [bse]).map((r) => r.coverageLevel)).toEqual([
+      'terceros',
+      'todo_riesgo_franquicia',
+    ])
   })
 })
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Alert } from '../components/UI'
 import TripCard, { TripSummaryButton } from '../components/TripCard'
@@ -7,13 +7,14 @@ import { useRegisterSheet } from '../context/RegisterSheetContext'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
 import { formatCurrency, formatDate } from '../lib/format'
-import { invalidateCommunityCache } from '../lib/communityData'
+import { fetchInsuranceProviders, invalidateCommunityCache } from '../lib/communityData'
 import { useToggleSet } from '../lib/useToggleSet'
 import { toCsv, downloadCsv } from '../lib/csvExport'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import ContentReactions from '../components/ContentReactions'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
-import type { PartPurchase, ServiceEntry, TripLog } from '../types'
+import { INSURANCE_COVERAGE_LABELS } from '../types'
+import type { InsuranceProvider, InsuranceQuote, PartPurchase, ServiceEntry, TripLog } from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -26,6 +27,7 @@ const SAVED_MESSAGES: Record<string, string> = {
   viaje: 'Viaje guardado ✓',
   service: 'Service guardado ✓',
   compra: 'Repuesto guardado ✓',
+  seguro: 'Seguro guardado ✓',
 }
 
 const SAVED_TOAST_MS = 2200
@@ -56,9 +58,12 @@ export default function DashboardPage() {
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
+  const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
+  const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [loadingTrips, setLoadingTrips] = useState(true)
   const [loadingPurchases, setLoadingPurchases] = useState(true)
+  const [loadingInsurance, setLoadingInsurance] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null)
   const [registeringPasskey, setRegisteringPasskey] = useState(false)
@@ -104,7 +109,25 @@ export default function DashboardPage() {
         else setPurchases(data ?? [])
         setLoadingPurchases(false)
       })
+
+    supabase
+      .from('insurance_quotes')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('hire_date', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) setError(toFriendlyError(error))
+        else setInsuranceQuotes((data ?? []) as InsuranceQuote[])
+        setLoadingInsurance(false)
+      })
+
+    void fetchInsuranceProviders().then(({ providers }) => setInsuranceProviders(providers))
   }, [user])
+
+  const insuranceProviderNames = useMemo(
+    () => new Map(insuranceProviders.map((p) => [p.slug, p.name])),
+    [insuranceProviders]
+  )
 
   async function handleDeleteEntry(entryId: string) {
     if (!supabase) return
@@ -143,6 +166,19 @@ export default function DashboardPage() {
     }
     invalidateCommunityCache()
     setPurchases((prev) => prev.filter((p) => p.id !== purchaseId))
+  }
+
+  async function handleDeleteInsurance(quoteId: string) {
+    if (!supabase) return
+    if (!confirm('¿Eliminar este seguro?')) return
+
+    const { error } = await supabase.from('insurance_quotes').delete().eq('id', quoteId)
+    if (error) {
+      setError(toFriendlyError(error))
+      return
+    }
+    invalidateCommunityCache()
+    setInsuranceQuotes((prev) => prev.filter((q) => q.id !== quoteId))
   }
 
   async function handleRegisterPasskey() {
@@ -254,16 +290,56 @@ export default function DashboardPage() {
     downloadCsv('repuestos.csv', toCsv(headers, rows))
   }
 
+  function exportInsuranceCsv() {
+    const headers = [
+      'Aseguradora',
+      'Cobertura',
+      'Conductores',
+      'Edad promedio',
+      'Zona',
+      'Fecha de contratación',
+      'Período (años)',
+      'Costo total (UYU)',
+      'Costo por año (UYU)',
+      'Franquicia (UYU)',
+      'Granizo sin cargo',
+      'Cristales incluidos',
+      'Límite de cristales (UYU)',
+      'Notas',
+      'Público',
+    ]
+    const rows = insuranceQuotes.map((q) => [
+      insuranceProviderNames.get(q.provider) ?? q.provider,
+      INSURANCE_COVERAGE_LABELS[q.coverage_level],
+      q.driver_count,
+      q.average_driver_age,
+      q.zone,
+      q.hire_date,
+      q.period_years,
+      q.total_cost_uyu,
+      q.cost_per_year_uyu,
+      q.deductible_uyu,
+      q.hail_coverage ? 'Sí' : 'No',
+      q.glass_coverage ? 'Sí' : 'No',
+      q.glass_coverage_limit_uyu,
+      q.notes,
+      q.is_public ? 'Sí' : 'No',
+    ])
+    downloadCsv('seguros.csv', toCsv(headers, rows))
+  }
+
   // Nothing registered at all: show one friendly empty state instead of
-  // three empty section cards (mobile redesign).
+  // four empty section cards (mobile redesign).
   const nothingYet =
     !loadingEntries &&
     !loadingTrips &&
     !loadingPurchases &&
+    !loadingInsurance &&
     !error &&
     entries.length === 0 &&
     trips.length === 0 &&
-    purchases.length === 0
+    purchases.length === 0 &&
+    insuranceQuotes.length === 0
 
   return (
     <div>
@@ -487,6 +563,62 @@ export default function DashboardPage() {
                         <TripCard trip={trip} />
                       </div>
                     )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionHeaderTitle}>Seguros</h2>
+              <div className={styles.sectionActions}>
+                {insuranceQuotes.length > 0 && (
+                  <button className={styles.addLink} onClick={exportInsuranceCsv}>
+                    Descargar planilla (CSV)
+                  </button>
+                )}
+                <Link to="/costos/seguro/nuevo" className={styles.addLink}>
+                  + Nueva entrada
+                </Link>
+              </div>
+            </div>
+
+            {loadingInsurance ? (
+              <p className={listStyles.empty}>Cargando…</p>
+            ) : insuranceQuotes.length === 0 ? (
+              <p className={listStyles.empty}>Todavía no registraste ningún seguro.</p>
+            ) : (
+              <ul className={listStyles.list}>
+                {insuranceQuotes.map((quote) => (
+                  <li key={quote.id} className={`${listStyles.item} ${styles.itemThreeCol}`}>
+                    <div>
+                      <div className={listStyles.itemTitle}>
+                        {insuranceProviderNames.get(quote.provider) ?? quote.provider}
+                      </div>
+                      <div className={listStyles.itemMeta}>
+                        {INSURANCE_COVERAGE_LABELS[quote.coverage_level]} · {formatDate(quote.hire_date)} ·{' '}
+                        {quote.period_years} año{quote.period_years === 1 ? '' : 's'} · total{' '}
+                        {formatCurrency(quote.total_cost_uyu, 2)}
+                      </div>
+                    </div>
+                    <div className={listStyles.itemCost}>{formatCurrency(quote.cost_per_year_uyu, 2)}/año</div>
+                    <div className={listStyles.itemActions}>
+                      <Link
+                        to={`/costos/seguro/${quote.id}/editar`}
+                        className={listStyles.actionLink}
+                        aria-label={`Editar seguro de ${insuranceProviderNames.get(quote.provider) ?? quote.provider}`}
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        className={listStyles.actionLink}
+                        onClick={() => handleDeleteInsurance(quote.id)}
+                        aria-label={`Eliminar seguro de ${insuranceProviderNames.get(quote.provider) ?? quote.provider}`}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

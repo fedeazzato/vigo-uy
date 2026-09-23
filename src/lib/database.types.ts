@@ -238,6 +238,121 @@ export type Database = {
           },
         ]
       }
+      insurance_providers: {
+        Row: {
+          created_at: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      insurance_quotes: {
+        Row: {
+          average_driver_age: number
+          cost_per_year_uyu: number | null
+          coverage_level: string
+          created_at: string
+          deductible_uyu: number | null
+          driver_count: number
+          glass_coverage: boolean
+          glass_coverage_limit_uyu: number | null
+          hail_coverage: boolean
+          hidden: boolean
+          hire_date: string
+          id: string
+          is_public: boolean
+          notes: string | null
+          period_years: number
+          provider: string
+          total_cost_uyu: number
+          user_id: string
+          vehicle_id: string | null
+          verified: boolean
+          zone: string
+        }
+        Insert: {
+          average_driver_age: number
+          cost_per_year_uyu?: number | null
+          coverage_level: string
+          created_at?: string
+          deductible_uyu?: number | null
+          driver_count: number
+          glass_coverage?: boolean
+          glass_coverage_limit_uyu?: number | null
+          hail_coverage?: boolean
+          hidden?: boolean
+          hire_date: string
+          id?: string
+          is_public?: boolean
+          notes?: string | null
+          period_years: number
+          provider: string
+          total_cost_uyu: number
+          user_id: string
+          vehicle_id?: string | null
+          verified?: boolean
+          zone: string
+        }
+        Update: {
+          average_driver_age?: number
+          cost_per_year_uyu?: number | null
+          coverage_level?: string
+          created_at?: string
+          deductible_uyu?: number | null
+          driver_count?: number
+          glass_coverage?: boolean
+          glass_coverage_limit_uyu?: number | null
+          hail_coverage?: boolean
+          hidden?: boolean
+          hire_date?: string
+          id?: string
+          is_public?: boolean
+          notes?: string | null
+          period_years?: number
+          provider?: string
+          total_cost_uyu?: number
+          user_id?: string
+          vehicle_id?: string | null
+          verified?: boolean
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_quotes_provider_fkey"
+            columns: ["provider"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "insurance_quotes_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "insurance_quotes_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       join_code_attempts: {
         Row: {
           attempted_at: string
@@ -670,6 +785,23 @@ export type Database = {
           },
         ]
       }
+      insurance_cost_stats: {
+        Row: {
+          avg_cost_per_year_uyu: number | null
+          coverage_level: string | null
+          provider: string | null
+          sample_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_quotes_provider_fkey"
+            columns: ["provider"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       public_profiles: {
         Row: {
           display_name: string | null
@@ -798,12 +930,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -827,11 +959,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -852,11 +984,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -877,11 +1009,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -894,11 +1026,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

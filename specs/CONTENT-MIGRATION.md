@@ -15,6 +15,7 @@ file is finally deleted.
 | parts.json prices | part_purchases (repuestos categories) | per-category ≥3 | pending — parts.json carries no prices yet (`TODO(D1)` in PartsPage) |
 | accessories.json prices | part_purchases (accessory categories, added when the purchase form was broadened to cover both) | per-category ≥3 | pending — same situation as parts.json prices, no curated prices to gate yet (`TODO(D1)` in AccessoriesPage) |
 | charging.json (chargers + alerts) | `charging_stations` + `station_reports` + computed `charging_cost_stats` | per-network ≥3 charges with cost+kWh | gated (D4) |
+| costs.json (insurance) | `insurance_quotes` + computed `insurance_cost_stats` | ≥5 public entries | gated (see `specs/insurance-quotes.md`) |
 | charging.json (home/V2L/troubleshooting/autonomy) | permanently curated | n/a | keep |
 | mantenimiento.json (dealerPrices) | service_entries by type | — | future work |
 | ficha-tecnica.json, tech-faq.json | permanently curated | n/a | keep |

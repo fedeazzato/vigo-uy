@@ -1,18 +1,56 @@
+import { ReactNode, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import rawData from '../data/costs.json'
 import { PageHeader, Card, CardTitle, Alert, Badge, SectionDivider, StatGrid } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
+import { formatCurrency } from '../lib/format'
 import ServiceEntryCard from '../components/ServiceEntryCard'
+import InsuranceQuoteCard from '../components/InsuranceQuoteCard'
 import {
   cityCostStatItems,
+  fetchInsuranceCostStats,
+  fetchInsuranceProviders,
+  fetchInsuranceQuotes,
+  insuranceCostStatsByProvider,
+  insuranceCostStatsByProviderAndCoverage,
   preferCommunity,
   useCityCostStats,
   useCommunityContent,
   verifiedFirst,
 } from '../lib/communityData'
 import styles from './Pages.module.css'
-import type { CostsData, Model, StatItem, TripLog } from '../types'
+import listStyles from '../styles/listPatterns.module.css'
+import { INSURANCE_COVERAGE_LABELS } from '../types'
+import type { CostsData, InsuranceCostStat, InsuranceProvider, InsuranceQuote, Model, StatItem, TripLog } from '../types'
+
+// A provider-averages row (name + optional badge + price + sample note),
+// shared by the per-provider and per-provider-per-coverage tables below.
+function ProviderPriceRow({
+  name,
+  badge,
+  valueLabel,
+  note,
+}: {
+  name: string
+  badge?: ReactNode
+  valueLabel: string
+  note: string
+}) {
+  return (
+    <li className={styles.providerItem}>
+      <span className={styles.providerName}>
+        {name}
+        {badge}
+      </span>
+      <span className={styles.providerPrice}>
+        <span className={styles.providerPriceValue}>{valueLabel}</span>
+        <br />
+        <span className={styles.providerPriceNote}>{note}</span>
+      </span>
+    </li>
+  )
+}
 
 const data = rawData as CostsData
 
@@ -61,6 +99,23 @@ export default function CostsPage() {
   // Curated JSON renders immediately; community blocks fill in async.
   const { trips, entries, names } = useCommunityContent({ limit: 50 })
   const cityStats = useCityCostStats()
+
+  const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
+  const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
+  const [insuranceCostStats, setInsuranceCostStats] = useState<InsuranceCostStat[]>([])
+  useEffect(() => {
+    if (!supabase) return
+    void fetchInsuranceProviders().then(({ providers }) => setInsuranceProviders(providers))
+    void fetchInsuranceQuotes(50).then(({ quotes }) => setInsuranceQuotes(quotes))
+    void fetchInsuranceCostStats().then(({ stats }) => setInsuranceCostStats(stats))
+  }, [])
+  const insuranceProviderNames = new Map(insuranceProviders.map((p) => [p.slug, p.name]))
+  const providerCostStats = insuranceCostStatsByProvider(insuranceCostStats, insuranceProviders)
+  const providerCoverageCostStats = insuranceCostStatsByProviderAndCoverage(insuranceCostStats, insuranceProviders)
+  const communityInsuranceQuotes = verifiedFirst(insuranceQuotes).slice(0, 10)
+  // D1 gate, same pattern as realCases/service_entries above.
+  const communityInsuranceFirst =
+    preferCommunity({ curated: insurance, community: insuranceQuotes, minSamples: 5 }).source === 'comunidad'
 
   const communityStats: StatItem[] = [
     ...cityCostStatItems(cityStats),
@@ -224,16 +279,79 @@ export default function CostsPage() {
 
       <SectionDivider label="Seguro" />
 
-      <Card>
-        <CardTitle icon="🛡️">Rango de precios reportado</CardTitle>
-        <div className={styles.realCaseHeader}>
-          <span className={styles.realCaseCost}>{insurance.range}</span>
-        </div>
-        <Alert type="warning">{insurance.disclaimer}</Alert>
-        <p className={styles.realCaseConditions}>
-          Aseguradoras mencionadas por el grupo: {insurance.insurers.join(', ')}.
-        </p>
-      </Card>
+      {!communityInsuranceFirst && (
+        <Card>
+          <CardTitle icon="🛡️">Rango de precios reportado</CardTitle>
+          <div className={styles.realCaseHeader}>
+            <span className={styles.realCaseCost}>{insurance.range}</span>
+          </div>
+          <Alert type="warning">{insurance.disclaimer}</Alert>
+          <p className={styles.realCaseConditions}>
+            Aseguradoras mencionadas por el grupo: {insurance.insurers.join(', ')}.
+          </p>
+        </Card>
+      )}
+
+      {communityInsuranceFirst && (
+        <>
+          {providerCostStats.length > 0 && (
+            <Card>
+              <CardTitle icon="📊">Promedio por aseguradora</CardTitle>
+              <p className={styles.chargerTip}>
+                Lo que realmente pagó la comunidad por año en cada aseguradora, de la más barata a la más cara.
+              </p>
+              <ul className={styles.providerList}>
+                {providerCostStats.map(({ provider, stat }) => (
+                  <ProviderPriceRow
+                    key={provider.slug}
+                    name={provider.name}
+                    valueLabel={`${formatCurrency(stat.avg_cost_per_year_uyu)}/año`}
+                    note={`${stat.sample_count} ${stat.sample_count === 1 ? 'seguro' : 'seguros'}, últimos 2 años`}
+                  />
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          {providerCoverageCostStats.length > 0 && (
+            <Card>
+              <CardTitle icon="📄">Promedio por cobertura</CardTitle>
+              <ul className={styles.providerList}>
+                {providerCoverageCostStats.map(({ provider, coverageLevel, stat }) => (
+                  <ProviderPriceRow
+                    key={`${provider.slug}:${coverageLevel}`}
+                    name={provider.name}
+                    badge={<Badge color="gray">{INSURANCE_COVERAGE_LABELS[coverageLevel]}</Badge>}
+                    valueLabel={`${formatCurrency(stat.avg_cost_per_year_uyu)}/año`}
+                    note={`${stat.sample_count} ${stat.sample_count === 1 ? 'seguro' : 'seguros'}`}
+                  />
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          {communityInsuranceQuotes.map((quote) => (
+            <InsuranceQuoteCard
+              key={quote.id}
+              quote={quote}
+              providerName={insuranceProviderNames.get(quote.provider) ?? quote.provider}
+            />
+          ))}
+        </>
+      )}
+
+      {supabase && (
+        <Card className={listStyles.ctaCard}>
+          <span>
+            {communityInsuranceFirst
+              ? 'Sumá tu seguro para seguir mejorando el promedio de la comunidad.'
+              : 'Todavía no hay seguros compartidos — registrá el tuyo y ayudá a armar el promedio real.'}
+          </span>
+          <Link to="/costos/seguro/nuevo" className={listStyles.ctaBtn}>
+            + Registrar mi seguro
+          </Link>
+        </Card>
+      )}
     </div>
   )
 }

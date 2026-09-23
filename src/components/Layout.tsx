@@ -304,6 +304,15 @@ export default function Layout() {
                     <span className={styles.sheetDesc}>Qué compraste y dónde lo conseguiste</span>
                   </span>
                 </Link>
+                <Link to="/costos/seguro/nuevo" className={styles.sheetLink} onClick={closeSheet}>
+                  <span className={styles.sheetIcon} aria-hidden="true">
+                    🛡️
+                  </span>
+                  <span>
+                    <span className={styles.sheetTitle}>Un seguro</span>
+                    <span className={styles.sheetDesc}>Aseguradora, cobertura y costo anual</span>
+                  </span>
+                </Link>
               </>
             ) : (
               <Link to="/login" className={styles.sheetLink} onClick={closeSheet}>
