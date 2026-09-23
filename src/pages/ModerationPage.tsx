@@ -6,12 +6,24 @@ import { deleteComment, invalidateCommunityCache } from '../lib/communityData'
 import { useAuth } from '../context/AuthContext'
 import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
-import type { AdminUserRow, ContentComment, PartPurchase, ServiceEntry, TripLog } from '../types'
+import ChargingNetworksAdmin from '../components/ChargingNetworksAdmin'
+import InsuranceProvidersAdmin from '../components/InsuranceProvidersAdmin'
+import InsuranceAddonsAdmin from '../components/InsuranceAddonsAdmin'
+import { INSURANCE_COVERAGE_LABELS } from '../types'
+import type {
+  AdminUserRow,
+  ChargingStation,
+  ContentComment,
+  InsuranceQuote,
+  PartPurchase,
+  ServiceEntry,
+  TripLog,
+} from '../types'
 import styles from './ModerationPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
-type Tab = 'contenido' | 'usuarios'
-type ContentTable = 'service_entries' | 'trip_logs' | 'part_purchases'
+type Tab = 'contenido' | 'catalogos' | 'usuarios'
+type ContentTable = 'service_entries' | 'trip_logs' | 'part_purchases' | 'charging_stations' | 'insurance_quotes'
 
 export default function ModerationPage() {
   const { user } = useAuth()
@@ -19,6 +31,8 @@ export default function ModerationPage() {
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
+  const [stations, setStations] = useState<ChargingStation[]>([])
+  const [quotes, setQuotes] = useState<InsuranceQuote[]>([])
   const [comments, setComments] = useState<ContentComment[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
   const [users, setUsers] = useState<AdminUserRow[]>([])
@@ -33,7 +47,7 @@ export default function ModerationPage() {
     if (!supabase) return
     setLoading(true)
 
-    const [entriesRes, tripsRes, purchasesRes, commentsRes, usersRes] = await Promise.all([
+    const [entriesRes, tripsRes, purchasesRes, stationsRes, quotesRes, commentsRes, usersRes] = await Promise.all([
       supabase
         .from('service_entries')
         .select('*')
@@ -45,16 +59,38 @@ export default function ModerationPage() {
         .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false }),
+      // No is_public column -- charging_stations is public data by nature
+      // (D4 spec), so every row is in scope for moderation.
+      supabase.from('charging_stations').select('*').order('created_at', { ascending: false }),
+      supabase
+        .from('insurance_quotes')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false }),
       // RLS already restricts this to comments on public content (plus the
       // moderator's own) -- no extra filter needed.
       supabase.from('content_comments').select('*').order('created_at', { ascending: false }),
       supabase.rpc('admin_list_users'),
     ])
 
-    if (entriesRes.error || tripsRes.error || purchasesRes.error || commentsRes.error || usersRes.error) {
+    if (
+      entriesRes.error ||
+      tripsRes.error ||
+      purchasesRes.error ||
+      stationsRes.error ||
+      quotesRes.error ||
+      commentsRes.error ||
+      usersRes.error
+    ) {
       setError(
         toFriendlyError(
-          entriesRes.error ?? tripsRes.error ?? purchasesRes.error ?? commentsRes.error ?? usersRes.error
+          entriesRes.error ??
+            tripsRes.error ??
+            purchasesRes.error ??
+            stationsRes.error ??
+            quotesRes.error ??
+            commentsRes.error ??
+            usersRes.error
         )
       )
       setLoading(false)
@@ -64,6 +100,8 @@ export default function ModerationPage() {
     setEntries(entriesRes.data ?? [])
     setTrips((tripsRes.data ?? []) as TripLog[])
     setPurchases(purchasesRes.data ?? [])
+    setStations((stationsRes.data ?? []) as ChargingStation[])
+    setQuotes((quotesRes.data ?? []) as InsuranceQuote[])
     setComments(commentsRes.data ?? [])
 
     const usersData = (usersRes.data ?? []) as AdminUserRow[]
@@ -106,8 +144,12 @@ export default function ModerationPage() {
       setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)))
     } else if (table === 'trip_logs') {
       setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
-    } else {
+    } else if (table === 'part_purchases') {
       setPurchases((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
+    } else if (table === 'charging_stations') {
+      setStations((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+    } else {
+      setQuotes((prev) => prev.map((q) => (q.id === id ? { ...q, ...patch } : q)))
     }
   }
 
@@ -136,7 +178,9 @@ export default function ModerationPage() {
     invalidateCommunityCache()
     if (table === 'service_entries') setEntries((prev) => prev.filter((e) => e.id !== id))
     else if (table === 'trip_logs') setTrips((prev) => prev.filter((t) => t.id !== id))
-    else setPurchases((prev) => prev.filter((p) => p.id !== id))
+    else if (table === 'part_purchases') setPurchases((prev) => prev.filter((p) => p.id !== id))
+    else if (table === 'charging_stations') setStations((prev) => prev.filter((s) => s.id !== id))
+    else setQuotes((prev) => prev.filter((q) => q.id !== id))
   }
 
   async function setModerator(target: AdminUserRow, makeModerator: boolean) {
@@ -189,6 +233,12 @@ export default function ModerationPage() {
           onClick={() => setTab('contenido')}
         >
           Contenido
+        </button>
+        <button
+          className={`${styles.tabBtn} ${tab === 'catalogos' ? styles.tabActive : ''}`}
+          onClick={() => setTab('catalogos')}
+        >
+          Catálogos
         </button>
         <button
           className={`${styles.tabBtn} ${tab === 'usuarios' ? styles.tabActive : ''}`}
@@ -356,6 +406,96 @@ export default function ModerationPage() {
             </Card>
 
             <Card>
+              <h2 className={listStyles.sectionTitle}>Estaciones de carga</h2>
+              {stations.length === 0 ? (
+                <p className={listStyles.empty}>No hay estaciones de la comunidad.</p>
+              ) : (
+                <ul className={listStyles.list}>
+                  {stations.map((station) => (
+                    <li key={station.id} className={`${listStyles.item} ${station.hidden ? styles.hidden : ''}`}>
+                      <div>
+                        <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
+                          {station.name}
+                          {station.verified && <Badge color="blue">Verificado</Badge>}
+                          {station.hidden && <Badge color="gray">Oculto</Badge>}
+                        </div>
+                        <div className={listStyles.itemMeta}>
+                          {station.network}
+                          {station.city && ` · ${station.city}`} · por {names[station.user_id] ?? 'un usuario'}
+                        </div>
+                      </div>
+                      <div className={listStyles.itemActions}>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => toggleFlag('charging_stations', station.id, 'verified', station.verified)}
+                        >
+                          {station.verified ? 'Quitar verificación' : 'Verificar'}
+                        </button>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => toggleFlag('charging_stations', station.id, 'hidden', station.hidden)}
+                        >
+                          {station.hidden ? 'Mostrar' : 'Ocultar'}
+                        </button>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => deleteItem('charging_stations', station.id)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card>
+              <h2 className={listStyles.sectionTitle}>Seguros</h2>
+              {quotes.length === 0 ? (
+                <p className={listStyles.empty}>No hay seguros públicos.</p>
+              ) : (
+                <ul className={listStyles.list}>
+                  {quotes.map((quote) => (
+                    <li key={quote.id} className={`${listStyles.item} ${quote.hidden ? styles.hidden : ''}`}>
+                      <div>
+                        <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
+                          {quote.provider} · {INSURANCE_COVERAGE_LABELS[quote.coverage_level]}
+                          {quote.verified && <Badge color="blue">Verificado</Badge>}
+                          {quote.hidden && <Badge color="gray">Oculto</Badge>}
+                        </div>
+                        <div className={listStyles.itemMeta}>
+                          {quote.hire_date} · {quote.cost_per_year_uyu}/año · por{' '}
+                          {names[quote.user_id] ?? 'un usuario'}
+                        </div>
+                      </div>
+                      <div className={listStyles.itemActions}>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => toggleFlag('insurance_quotes', quote.id, 'verified', quote.verified)}
+                        >
+                          {quote.verified ? 'Quitar verificación' : 'Verificar'}
+                        </button>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => toggleFlag('insurance_quotes', quote.id, 'hidden', quote.hidden)}
+                        >
+                          {quote.hidden ? 'Mostrar' : 'Ocultar'}
+                        </button>
+                        <button
+                          className={listStyles.actionLink}
+                          onClick={() => deleteItem('insurance_quotes', quote.id)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card>
               <h2 className={listStyles.sectionTitle}>Comentarios</h2>
               {comments.length === 0 ? (
                 <p className={listStyles.empty}>No hay comentarios públicos.</p>
@@ -384,6 +524,18 @@ export default function ModerationPage() {
             </Card>
           </>
         ))}
+
+      {tab === 'catalogos' && (
+        <>
+          <p className={listStyles.empty}>
+            Los adicionales sin límite ("granizo") no piden un valor extra al tildarlos; los de límite en $ o de
+            usos por año revelan un campo opcional al tildarlos, igual que en el formulario de seguros.
+          </p>
+          <InsuranceProvidersAdmin />
+          <InsuranceAddonsAdmin />
+          <ChargingNetworksAdmin />
+        </>
+      )}
 
       {tab === 'usuarios' &&
         (loading ? (
