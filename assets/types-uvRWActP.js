@@ -1,1 +1,0 @@
-var e={soa:`SOA (obligatorio)`,terceros:`Responsabilidad Civil (Terceros)`,terceros_completo:`Terceros Completo`,todo_riesgo_franquicia:`Todo Riesgo con Franquicia`,todo_riesgo_sin_franquicia:`Todo Riesgo sin Franquicia`},t={montevideo:`Montevideo`,area_metropolitana:`Área Metropolitana (Canelones/San José)`,interior:`Interior`};export{t as n,e as t};
