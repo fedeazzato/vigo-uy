@@ -6,7 +6,7 @@ type Theme = 'light' | 'dark' | null // null = follow system
 export type EffectiveTheme = 'light' | 'dark'
 
 export const MODELS: Model[] = ['E2', 'E2+']
-export const COLORS: Color[] = ['Blanco', 'Verde', 'Gris', 'Beige', 'Negro']
+export const COLORS: Color[] = ['Blanco', 'Verde', 'Gris', 'Beige', 'Negro', 'Naranja']
 
 export const COLOR_HEX: Record<Color, string> = {
   Blanco: '#EEEEE6',
@@ -14,6 +14,7 @@ export const COLOR_HEX: Record<Color, string> = {
   Gris: '#B8BCBF', // silver
   Beige: '#FFEFD6', // light sand
   Negro: '#1C1C1C',
+  Naranja: '#E8672A', // vivid orange
 }
 
 // CSS border value for each color swatch/dot, or null if no border needed
@@ -23,6 +24,7 @@ export const COLOR_BORDER: Record<Color, string | null> = {
   Gris: 'var(--border-strong)',
   Beige: 'var(--border-strong)',
   Negro: 'var(--swatch-dark-border)',
+  Naranja: null,
 }
 
 // Whether the swatch label/checkmark needs dark text for contrast
@@ -32,6 +34,7 @@ export const COLOR_DARK_TEXT: Record<Color, boolean> = {
   Gris: true, // silver is light
   Beige: true,
   Negro: false,
+  Naranja: true,
 }
 
 const STORAGE_KEY = 'vigo-prefs'

@@ -1,7 +1,7 @@
 // Shared primitive types
 
 export type Model = 'E2' | 'E2+'
-export type Color = 'Blanco' | 'Verde' | 'Gris' | 'Beige' | 'Negro'
+export type Color = 'Blanco' | 'Verde' | 'Gris' | 'Beige' | 'Negro' | 'Naranja'
 
 export interface TipItem {
   bold?: string

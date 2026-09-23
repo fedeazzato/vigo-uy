@@ -9,6 +9,7 @@ const CAR_IMAGE: Record<Color, string> = {
   Gris: `${BASE}car-gris.jpg`,
   Beige: `${BASE}car-beige.jpg`,
   Negro: `${BASE}car-negro.jpg`,
+  Naranja: `${BASE}car-naranja.jpg`,
 }
 
 interface CarPreviewProps {
