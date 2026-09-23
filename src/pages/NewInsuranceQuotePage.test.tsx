@@ -157,11 +157,11 @@ describe('NewInsuranceQuotePage', () => {
     renderForm()
     await waitForAddonsToLoad()
 
-    expect(screen.getByLabelText('Incluye reparación de granizo sin cargo')).toBeTruthy()
-    expect(screen.getByLabelText('Incluye reparación de cristales (parabrisas, etc.)')).toBeTruthy()
-    expect(screen.getByLabelText('Incluye auxilio en ruta (batería, pinchazos, remolque)')).toBeTruthy()
+    expect(screen.getByLabelText('🧊 Incluye reparación de granizo sin cargo')).toBeTruthy()
+    expect(screen.getByLabelText('🪟 Incluye reparación de cristales (parabrisas, etc.)')).toBeTruthy()
+    expect(screen.getByLabelText('🆘 Incluye auxilio en ruta (batería, pinchazos, remolque)')).toBeTruthy()
 
-    fireEvent.click(screen.getByLabelText('Incluye reparación de granizo sin cargo'))
+    fireEvent.click(screen.getByLabelText('🧊 Incluye reparación de granizo sin cargo'))
     expect(screen.queryByLabelText(/Límite de cobertura/)).toBeNull()
     expect(screen.queryByLabelText(/Usos gratis por año/)).toBeNull()
   })
@@ -170,7 +170,7 @@ describe('NewInsuranceQuotePage', () => {
     renderForm()
     await waitForAddonsToLoad()
 
-    const checkbox = screen.getByLabelText('Incluye reparación de cristales (parabrisas, etc.)')
+    const checkbox = screen.getByLabelText('🪟 Incluye reparación de cristales (parabrisas, etc.)')
     expect(screen.queryByLabelText('🪟 Límite de cobertura (UYU)')).toBeNull()
 
     fireEvent.click(checkbox)
@@ -190,7 +190,7 @@ describe('NewInsuranceQuotePage', () => {
     renderForm()
     await waitForAddonsToLoad()
 
-    fireEvent.click(screen.getByLabelText('Incluye auxilio en ruta (batería, pinchazos, remolque)'))
+    fireEvent.click(screen.getByLabelText('🆘 Incluye auxilio en ruta (batería, pinchazos, remolque)'))
 
     const limitInput = screen.getByLabelText('🆘 Usos gratis por año')
     expect(limitInput.getAttribute('inputmode')).toBe('numeric')
@@ -209,7 +209,7 @@ describe('NewInsuranceQuotePage', () => {
     fireEvent.change(screen.getByLabelText('📍 Zona de circulación'), { target: { value: 'montevideo' } })
     fireEvent.change(screen.getByLabelText('💰 Costo total del período (UYU)'), { target: { value: '45000' } })
 
-    fireEvent.click(screen.getByLabelText('Incluye auxilio en ruta (batería, pinchazos, remolque)'))
+    fireEvent.click(screen.getByLabelText('🆘 Incluye auxilio en ruta (batería, pinchazos, remolque)'))
     fireEvent.change(screen.getByLabelText('🆘 Usos gratis por año'), { target: { value: '2.5' } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))

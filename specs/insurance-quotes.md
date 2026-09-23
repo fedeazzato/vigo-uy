@@ -315,7 +315,10 @@ typed.
 Below that, one checkbox per row of `fetchInsuranceAddons()` (state keyed
 by addon slug: `{checked, limitValue}` — a single text field regardless of
 `limit_kind`, since only one of `limit_uyu`/`limit_count` ever applies to a
-given addon) — *"Incluye {addon.checkbox_label}"*. Unchecking clears
+given addon) — *"{addon.icon} Incluye {addon.checkbox_label}"* (icon
+prefixed on the checkbox itself, owner request, so the addon is visually
+recognizable while scanning the list, not just once its limit input is
+revealed). Unchecking clears
 `limitValue` too, same as the old glass-specific checkbox did. When checked
 and `addon.limit_kind !== 'none'`, one extra input appears: label
 *"{addon.icon} Límite de cobertura (UYU)"* (`limit_kind: 'cost'`, decimal

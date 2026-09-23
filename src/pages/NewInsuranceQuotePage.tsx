@@ -437,7 +437,7 @@ export default function NewInsuranceQuotePage() {
                   checked={selection.checked}
                   onChange={(e) => handleAddonToggle(addon.slug, e.target.checked)}
                 />
-                Incluye {addon.checkbox_label}
+                {addon.icon} Incluye {addon.checkbox_label}
               </label>
 
               {addon.limit_kind !== 'none' && selection.checked && (
