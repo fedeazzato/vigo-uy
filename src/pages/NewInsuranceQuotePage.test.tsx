@@ -103,4 +103,33 @@ describe('NewInsuranceQuotePage', () => {
     fireEvent.click(glassCheckbox)
     expect(screen.getByLabelText('🪟 Límite de cobertura (UYU)').getAttribute('value')).toBe('')
   })
+
+  it('hides the deductible field only for "Todo Riesgo sin Deducible", the one tier that structurally has none', async () => {
+    renderForm()
+    await waitForProvidersToLoad()
+
+    expect(screen.getByLabelText('💸 Deducible (UYU)')).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('📄 Nivel de cobertura'), {
+      target: { value: 'todo_riesgo_sin_franquicia' },
+    })
+    expect(screen.queryByLabelText('💸 Deducible (UYU)')).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('📄 Nivel de cobertura'), { target: { value: 'terceros' } })
+    expect(screen.getByLabelText('💸 Deducible (UYU)')).toBeTruthy()
+  })
+
+  it('highlights a missing deductible without blocking submission, on coverage levels that expect one', async () => {
+    renderForm()
+    await waitForProvidersToLoad()
+
+    fireEvent.change(screen.getByLabelText('📄 Nivel de cobertura'), { target: { value: 'terceros' } })
+    expect(screen.getByText(/falta este dato/)).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('💸 Deducible (UYU)'), { target: { value: '5000' } })
+    expect(screen.queryByText(/falta este dato/)).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('💸 Deducible (UYU)'), { target: { value: '' } })
+    expect(screen.getByText(/falta este dato/)).toBeTruthy()
+  })
 })

@@ -93,6 +93,12 @@ export default function NewInsuranceQuotePage() {
       ? totalPreview / periodYears
       : null
 
+  // "Todo Riesgo sin Deducible" is the one tier that structurally can't
+  // carry a deductible; every other tier usually does (owner decision, this
+  // conversation), but the field stays optional -- missing is highlighted
+  // below, never blocked.
+  const showDeductible = coverageLevel !== 'todo_riesgo_sin_franquicia'
+
   function handleGlassCoverageChange(checked: boolean) {
     setGlassCoverage(checked)
     if (!checked) setGlassCoverageLimitUyu('')
@@ -136,7 +142,7 @@ export default function NewInsuranceQuotePage() {
     }
 
     let deductible: number | undefined
-    if (deductibleUyu.trim()) {
+    if (showDeductible && deductibleUyu.trim()) {
       deductible = parseLocaleNumber(deductibleUyu)
       if (deductible === undefined || !Number.isFinite(deductible) || deductible < 0) {
         setError('El deducible debe ser un número válido.')
@@ -343,21 +349,27 @@ export default function NewInsuranceQuotePage() {
           )}
         </div>
 
-        <div className={formStyles.field}>
-          <label className={formStyles.label} htmlFor="insurance-deductible">
-            💸 Deducible (UYU)
-          </label>
-          <input
-            id="insurance-deductible"
-            type="text"
-            inputMode="decimal"
-            className={formStyles.input}
-            value={deductibleUyu}
-            onChange={(e) => setDeductibleUyu(e.target.value)}
-            placeholder="Opcional"
-          />
-          <span className={formStyles.hint}>Dejalo vacío si tu cobertura no tiene deducible.</span>
-        </div>
+        {showDeductible && (
+          <div className={formStyles.field}>
+            <label className={formStyles.label} htmlFor="insurance-deductible">
+              💸 Deducible (UYU)
+            </label>
+            <input
+              id="insurance-deductible"
+              type="text"
+              inputMode="decimal"
+              className={formStyles.input}
+              value={deductibleUyu}
+              onChange={(e) => setDeductibleUyu(e.target.value)}
+              placeholder="Opcional"
+            />
+            {deductibleUyu.trim() === '' && (
+              <span className={formStyles.hintWarning}>
+                ⚠️ Esta cobertura suele tener deducible — falta este dato (podés guardar igual).
+              </span>
+            )}
+          </div>
+        )}
 
         <label className={formStyles.checkboxRow}>
           <input type="checkbox" checked={hailCoverage} onChange={(e) => setHailCoverage(e.target.checked)} />

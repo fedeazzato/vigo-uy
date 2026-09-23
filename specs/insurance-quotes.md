@@ -277,8 +277,19 @@ live-computed, non-submitted preview: *"= $X/año"*, recalculated
 client-side from `total_cost_uyu / period_years` as the user types (purely
 a preview — the server's generated `cost_per_year_uyu` is what's actually
 stored and is not sent by the client). An optional deductible input —
-"Deducible (UYU)" — with a hint: *"Dejalo vacío si tu cobertura no tiene
-deducible."*; empty submits `null`. A checkbox — "Incluye reparación de
+"Deducible (UYU)" — soft-required, not hard-required (owner decision, this
+conversation): every coverage level except `todo_riesgo_sin_franquicia`
+("Todo Riesgo sin Deducible", the one tier that structurally can't carry
+one) usually has a deductible, but a submitter who doesn't know or doesn't
+want to look it up must still be able to save. So: the field is hidden
+entirely when `coverageLevel === 'todo_riesgo_sin_franquicia'` (and its
+value, whatever state it holds, is forced to `null` on submit regardless of
+what's in the input — no DB constraint enforces this, so the client must);
+on every other level it's shown, and while it's empty a non-blocking warning
+hint appears — *"⚠️ Esta cobertura suele tener deducible — falta este dato
+(podés guardar igual)."* (`formStyles.hintWarning`, amber, new modifier
+alongside the existing neutral `.hint`) — clearing as soon as a value is
+typed. A checkbox — "Incluye reparación de
 granizo sin cargo" — defaulting unchecked, for `hail_coverage`. A second
 checkbox — "Incluye reparación de cristales (parabrisas, etc.)" — for
 `glass_coverage`, which when checked reveals an optional "Límite de
@@ -371,12 +382,17 @@ a separate client-side check). `NotesField`, `ShareCheckbox`.
 - The glass-coverage limit input only renders while its checkbox is
   checked; unchecking it after entering a value clears the stored value too
   (not just hides the input).
+- The deductible field is hidden only when coverage level is
+  `todo_riesgo_sin_franquicia`, shown for every other level (including the
+  unselected default); while shown and empty, the "Falta este dato" warning
+  hint renders, and it disappears as soon as a value is typed.
 - The live per-year preview recomputes as `total_cost_uyu`/`period_years`
   change (e.g. 150000 over 3 años → shows "$50.000/año") and is absent/blank
   when either input is empty or invalid.
 - Successful submit inserts the expected payload — `hire_date`,
   `period_years`, `total_cost_uyu` as entered, `deductible_uyu` as `null`
-  when left blank or the entered number otherwise, `hail_coverage` and
+  when left blank or the field is hidden (`todo_riesgo_sin_franquicia`), the
+  entered number otherwise, `hail_coverage` and
   `glass_coverage` matching their checkbox states, `glass_coverage_limit_uyu`
   matching that input (or `null` when its checkbox is unchecked or the
   input is left blank), no client-computed `cost_per_year_uyu` field sent —
