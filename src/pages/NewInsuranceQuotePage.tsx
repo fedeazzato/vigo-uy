@@ -139,7 +139,7 @@ export default function NewInsuranceQuotePage() {
     if (deductibleUyu.trim()) {
       deductible = parseLocaleNumber(deductibleUyu)
       if (deductible === undefined || !Number.isFinite(deductible) || deductible < 0) {
-        setError('La franquicia debe ser un número válido.')
+        setError('El deducible debe ser un número válido.')
         return
       }
     }
@@ -345,7 +345,7 @@ export default function NewInsuranceQuotePage() {
 
         <div className={formStyles.field}>
           <label className={formStyles.label} htmlFor="insurance-deductible">
-            💸 Franquicia (UYU)
+            💸 Deducible (UYU)
           </label>
           <input
             id="insurance-deductible"
@@ -356,7 +356,7 @@ export default function NewInsuranceQuotePage() {
             onChange={(e) => setDeductibleUyu(e.target.value)}
             placeholder="Opcional"
           />
-          <span className={formStyles.hint}>Dejalo vacío si tu cobertura no tiene franquicia.</span>
+          <span className={formStyles.hint}>Dejalo vacío si tu cobertura no tiene deducible.</span>
         </div>
 
         <label className={formStyles.checkboxRow}>

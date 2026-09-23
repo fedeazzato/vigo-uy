@@ -40,7 +40,7 @@ export default function InsuranceQuoteCard({ quote, providerName }: InsuranceQuo
         {INSURANCE_ZONE_LABELS[quote.zone]} · 📅 {formatDate(quote.hire_date)}
       </p>
       {quote.deductible_uyu != null && (
-        <p className={styles.realCaseConditions}>💸 Franquicia {formatCurrency(quote.deductible_uyu, 2)}</p>
+        <p className={styles.realCaseConditions}>💸 Deducible {formatCurrency(quote.deductible_uyu, 2)}</p>
       )}
       {(quote.hail_coverage || quote.glass_coverage) && (
         <p className={styles.realCaseConditions}>

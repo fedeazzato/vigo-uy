@@ -301,7 +301,7 @@ export default function DashboardPage() {
       'Período (años)',
       'Costo total (UYU)',
       'Costo por año (UYU)',
-      'Franquicia (UYU)',
+      'Deducible (UYU)',
       'Granizo sin cargo',
       'Cristales incluidos',
       'Límite de cristales (UYU)',

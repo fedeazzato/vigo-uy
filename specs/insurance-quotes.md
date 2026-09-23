@@ -47,7 +47,10 @@ lists are not required to match.
 **Coverage levels.** Five tiers, generic industry terminology rather than
 per-company branded plan names (branded names couldn't be verified reliably
 — see conversation): SOA, Responsabilidad Civil (Terceros), Terceros
-Completo, Todo Riesgo con Franquicia, Todo Riesgo sin Franquicia.
+Completo, Todo Riesgo con Deducible, Todo Riesgo sin Deducible. ("Franquicia"
+was the original wording; renamed to "Deducible" — owner decision, more
+widely recognized — the `todo_riesgo_franquicia`/`todo_riesgo_sin_franquicia`
+DB slugs are unchanged, only the display label.)
 
 **Zone.** Coarse fixed enum (owner decision, this conversation), not the
 `CityCombobox` free-text pattern used elsewhere — insurers themselves mostly
@@ -249,9 +252,9 @@ New file `supabase/migrations/0043_insurance_quotes.sql`:
     slice(0, 10)`, matching the service-entries list), each row showing
     provider, coverage level label, driver count, average age, zone label,
     hire date, cost as `$total (N años) → $porAño/año` (both figures
-    together, not just the per-year one), and, when present, "Franquicia
+    together, not just the per-year one), and, when present, "Deducible
     $X" (omitted entirely for rows with no `deductible_uyu` rather than
-    showing "Franquicia: —"). Rows with `hail_coverage` true get a small
+    showing "Deducible: —"). Rows with `hail_coverage` true get a small
     "🧊 Granizo sin cargo" badge; `false` rows show nothing (silence, not a
     "sin granizo" negative badge, matching the deductible-omission
     convention). Rows with `glass_coverage` true get a "🪟 Cristales sin
@@ -274,8 +277,8 @@ live-computed, non-submitted preview: *"= $X/año"*, recalculated
 client-side from `total_cost_uyu / period_years` as the user types (purely
 a preview — the server's generated `cost_per_year_uyu` is what's actually
 stored and is not sent by the client). An optional deductible input —
-"Franquicia (UYU)" — with a hint: *"Dejalo vacío si tu cobertura no tiene
-franquicia."*; empty submits `null`. A checkbox — "Incluye reparación de
+"Deducible (UYU)" — with a hint: *"Dejalo vacío si tu cobertura no tiene
+deducible."*; empty submits `null`. A checkbox — "Incluye reparación de
 granizo sin cargo" — defaulting unchecked, for `hail_coverage`. A second
 checkbox — "Incluye reparación de cristales (parabrisas, etc.)" — for
 `glass_coverage`, which when checked reveals an optional "Límite de
@@ -353,7 +356,7 @@ a separate client-side check). `NotesField`, `ShareCheckbox`.
   quote list; each quote row shows provider name, coverage level label,
   driver count, average age, zone label, hire date, and both the total
   cost and the computed per-year cost; a row with `deductible_uyu` set
-  shows "Franquicia $X", a row with it `null` shows no deductible line at
+  shows "Deducible $X", a row with it `null` shows no deductible line at
   all; a row with `hail_coverage: true` shows the hail badge, `false` shows
   no badge (not a "no incluye" negative badge); a row with `glass_coverage:
   true` and a `glass_coverage_limit_uyu` shows "Cristales hasta $X", `true`
