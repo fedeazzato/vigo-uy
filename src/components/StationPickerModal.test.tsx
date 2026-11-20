@@ -14,6 +14,10 @@ vi.mock('../context/UserPrefsContext', () => ({
 // Same rationale as StationsMap.test.tsx / LocationPicker.test.tsx:
 // react-leaflet needs real DOM layout jsdom doesn't provide, so the map
 // primitives are replaced with simple, inspectable stand-ins.
+// The OpenFreeMap base layer needs WebGL (MapLibre), which jsdom lacks: stand it in with a marker element.
+vi.mock('./BaseMap', () => ({
+  BaseMap: ({ theme }: { theme: string }) => <div data-testid="base-map" data-theme={theme} />,
+}))
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>

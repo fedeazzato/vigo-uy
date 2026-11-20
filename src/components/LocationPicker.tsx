@@ -3,11 +3,11 @@
 // this component only ever reads/writes through them. See
 // specs/charging-stations-map.md.
 import { useEffect, useState } from 'react'
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import type L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useUserPrefs } from '../context/UserPrefsContext'
-import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapTiles'
+import { BaseMap } from './BaseMap'
 import { dotIcon } from '../lib/mapMarkerIcon'
 import { Alert } from './UI'
 import styles from './LocationPicker.module.css'
@@ -79,7 +79,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
     <div>
       <div className={styles.mapWrap}>
         <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} className={styles.map}>
-          <TileLayer url={TILE_URL[effectiveTheme]} attribution={TILE_ATTRIBUTION} />
+          <BaseMap theme={effectiveTheme} />
           <ClickHandler onPick={onChange} />
           {value && (
             <Marker

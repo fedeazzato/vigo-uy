@@ -2,8 +2,8 @@
 // theme-aware tile layer, same "fit all markers, or center on the one
 // point" logic, same empty state when there's nothing to place.
 import { ReactNode, useEffect } from 'react'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { TILE_URL, TILE_ATTRIBUTION } from '../lib/mapTiles'
+import { MapContainer, useMap } from 'react-leaflet'
+import { BaseMap } from './BaseMap'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
 import styles from './FittedMapContainer.module.css'
 
@@ -53,7 +53,7 @@ export default function FittedMapContainer({
   return (
     <div className={styles.mapWrap}>
       <MapContainer center={FALLBACK_CENTER} zoom={FALLBACK_ZOOM} className={styles.map}>
-        <TileLayer url={TILE_URL[effectiveTheme]} attribution={TILE_ATTRIBUTION} />
+        <BaseMap theme={effectiveTheme} />
         <FitBounds positions={positions} />
         {children}
       </MapContainer>

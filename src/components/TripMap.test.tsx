@@ -27,6 +27,10 @@ vi.mock('../lib/nominatimGeocoding', () => ({
 // jsdom doesn't provide; TripMap's own logic (which points render, the
 // unresolved-stop note, the empty state) is what these tests cover, so the
 // map primitives are replaced with simple, inspectable stand-ins.
+// The OpenFreeMap base layer needs WebGL (MapLibre), which jsdom lacks: stand it in with a marker element.
+vi.mock('./BaseMap', () => ({
+  BaseMap: ({ theme }: { theme: string }) => <div data-testid="base-map" data-theme={theme} />,
+}))
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>

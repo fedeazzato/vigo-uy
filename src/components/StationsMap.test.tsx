@@ -15,6 +15,10 @@ vi.mock('../context/UserPrefsContext', () => ({
 // jsdom doesn't provide, so the map primitives are replaced with simple,
 // inspectable stand-ins and this file only asserts StationsMap's own logic
 // (which stations get a marker, the empty state, popup content).
+// The OpenFreeMap base layer needs WebGL (MapLibre), which jsdom lacks: stand it in with a marker element.
+vi.mock('./BaseMap', () => ({
+  BaseMap: ({ theme }: { theme: string }) => <div data-testid="base-map" data-theme={theme} />,
+}))
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>

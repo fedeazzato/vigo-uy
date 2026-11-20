@@ -16,6 +16,10 @@ vi.mock('../context/UserPrefsContext', () => ({
 // this component adds on top of plain display are exercised by capturing
 // the handlers react-leaflet would normally wire up and invoking them
 // directly, rather than trying to simulate real map gestures.
+// The OpenFreeMap base layer needs WebGL (MapLibre), which jsdom lacks: stand it in with a marker element.
+vi.mock('./BaseMap', () => ({
+  BaseMap: ({ theme }: { theme: string }) => <div data-testid="base-map" data-theme={theme} />,
+}))
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
