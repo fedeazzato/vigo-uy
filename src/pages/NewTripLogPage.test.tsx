@@ -409,14 +409,14 @@ describe('NewTripLogPage wizard (mobile)', () => {
     // No preferred model in prefs, sharing on by default -> hint visible.
     expect(screen.getByText(/Elegí E2 o E2\+ para poder compartir/)).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'E2' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'E2' }))
     expect(screen.queryByText(/Elegí E2 o E2\+ para poder compartir/)).toBeNull()
   })
 
   it('hides the model hint when sharing is off', () => {
     renderNewTrip()
     goToShareStep()
-    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('switch'))
     expect(screen.queryByText(/Elegí E2 o E2\+ para poder compartir/)).toBeNull()
   })
 })
@@ -436,7 +436,7 @@ describe('NewTripLogPage single page (desktop)', () => {
     // Fields from every wizard step are on screen together.
     expect(screen.getByLabelText('📍 Origen')).toBeTruthy()
     expect(screen.getByText('⭐ ¿Cómo estuvo el viaje?')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'E2' })).toBeTruthy()
+    expect(screen.getByRole('radio', { name: 'E2' })).toBeTruthy()
     // Battery details stay behind the inline disclosure.
     expect(screen.queryByLabelText('🔋 Batería al salir (%)')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: /Agregar detalles de batería y carga/ }))
@@ -557,7 +557,7 @@ describe('NewTripLogPage draft submit/edit interaction (real timers)', () => {
     fireEvent.change(screen.getByLabelText('📍 Origen'), { target: { value: 'Montevideo' } })
     fireEvent.change(screen.getByLabelText('🏁 Destino'), { target: { value: 'Rocha' } })
     fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: '210' } })
-    fireEvent.click(screen.getByRole('button', { name: 'E2' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'E2' }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Guardar viaje' }))
     await waitFor(() => expect(loadDraft()).toBeNull())

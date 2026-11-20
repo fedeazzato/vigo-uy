@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton } from '../components/UI'
+import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton, Segmented } from '../components/UI'
 import { TripDetail, TripSummaryButton } from '../components/TripCard'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
 import { supabase } from '../lib/supabaseClient'
@@ -27,11 +27,11 @@ type TypeFilter = 'todos' | 'viajes' | 'services' | 'repuestos'
 type ModelFilter = 'todos' | 'E2' | 'E2+'
 type SortOrder = 'recientes' | 'puntuacion'
 
-const TYPE_CHIPS: { key: TypeFilter; label: string }[] = [
-  { key: 'todos', label: 'Todo' },
-  { key: 'viajes', label: 'Viajes' },
-  { key: 'services', label: 'Services' },
-  { key: 'repuestos', label: 'Compras' },
+const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
+  { value: 'todos', label: 'Todo' },
+  { value: 'viajes', label: 'Viajes' },
+  { value: 'services', label: 'Services' },
+  { value: 'repuestos', label: 'Compras' },
 ]
 
 // One mixed feed instead of per-type columns: with few entries of some
@@ -239,19 +239,14 @@ export default function CommunityFeedPage() {
       {/* Type filter as chips (mobile redesign): one tap, no dropdown.
           On desktop the chips and search share one row. */}
       <div className={styles.feedControls}>
-        <div className={styles.chipsRow} role="group" aria-label="Mostrar">
-          {TYPE_CHIPS.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              className={`${styles.chip} ${typeFilter === key ? styles.chipActive : ''}`}
-              onClick={() => setTypeFilter(key)}
-              aria-pressed={typeFilter === key}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Mostrar"
+          options={TYPE_CHIPS}
+          value={typeFilter}
+          onChange={setTypeFilter}
+          block
+          className={styles.chipsRow}
+        />
 
         <div className={styles.searchRow}>
           <input

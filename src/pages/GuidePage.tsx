@@ -7,14 +7,14 @@ import { useAuth } from '../context/AuthContext'
 const MI_VIGO_LINK: GuideLinkItem = {
   to: '/mi-vigo',
   label: 'Mi Vigo',
-  icon: '🚗',
+  icon: 'car',
   description: 'Configurá tu modelo, tu color y tu cuenta.',
 }
 
 const MODERATION_LINK: GuideLinkItem = {
   to: '/moderacion',
   label: 'Moderación',
-  icon: '🛡️',
+  icon: 'shield',
   description: 'Gestión de contenido y usuarios.',
 }
 

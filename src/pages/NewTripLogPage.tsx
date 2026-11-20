@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PageHeader, Card, FormError, Alert, Skeleton } from '../components/UI'
+import { PageHeader, Card, FormError, Alert, Skeleton, Segmented } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
 import { supabase } from '../lib/supabaseClient'
@@ -1068,22 +1068,16 @@ export default function NewTripLogPage() {
               <div className={styles.shareBlock}>
                 <div className={formStyles.field}>
                   <span className={formStyles.label}>🚙 Modelo</span>
-                  <div className={styles.modelRow}>
-                    {MODELS.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        className={`${styles.modelBtn} ${model === m ? styles.modelBtnSelected : ''}`}
-                        onClick={() => {
-                          setModel(m)
-                          setDirty(true)
-                        }}
-                        aria-pressed={model === m}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
+                  <Segmented
+                    label="Modelo"
+                    options={MODELS.map((m) => ({ value: m, label: m }))}
+                    value={model}
+                    onChange={(m) => {
+                      setModel(m)
+                      setDirty(true)
+                    }}
+                    className={styles.modelPicker}
+                  />
                   {isPublic && !model && (
                     <span className={styles.modelHint}>
                       Elegí E2 o E2+ para poder compartir el viaje con la comunidad.

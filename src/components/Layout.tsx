@@ -3,19 +3,21 @@ import { Link, NavLink, Outlet } from 'react-router-dom'
 import ErrorBoundary from './ErrorBoundary'
 import OfflineBanner from './OfflineBanner'
 import SiteSearch from './SiteSearch'
-import { Skeleton } from './UI'
+import { Segmented, Skeleton } from './UI'
+import { Icon } from './Icon'
+import type { IconName } from './Icon'
 import { GUIDE_LINKS } from './GuideLinks'
 import { PRIMARY_NAV } from '../lib/primaryNav'
 import type { NavItem } from '../lib/primaryNav'
 import styles from './Layout.module.css'
-import { useUserPrefs, COLOR_HEX, COLOR_BORDER } from '../context/UserPrefsContext'
+import { useUserPrefs, COLOR_HEX, COLOR_BORDER, COLOR_DARK_TEXT } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
 import { useAuth } from '../context/AuthContext'
 import { RegisterSheetContext } from '../context/RegisterSheetContext'
 
-const THEME_ICON: Record<EffectiveTheme, string> = {
-  light: '☀️',
-  dark: '🌙',
+const THEME_ICON: Record<EffectiveTheme, IconName> = {
+  light: 'sun',
+  dark: 'moon',
 }
 
 const THEME_LABEL: Record<EffectiveTheme, string> = {
@@ -23,7 +25,12 @@ const THEME_LABEL: Record<EffectiveTheme, string> = {
   dark: 'Oscuro',
 }
 
-const MODERATION_ITEM: NavItem = { to: '/moderacion', label: 'Moderación', icon: '🛡️' }
+const THEME_OPTIONS = [
+  { value: 'light', label: THEME_LABEL.light },
+  { value: 'dark', label: THEME_LABEL.dark },
+] as const
+
+const MODERATION_ITEM: NavItem = { to: '/moderacion', label: 'Moderación', icon: 'shield' }
 
 // One bottom-bar tab. The central "Registrar" control is a <button>, not a
 // TabLink, because it opens the sheet instead of navigating.
@@ -36,7 +43,7 @@ function TabLink({
 }: {
   to: string
   end?: boolean
-  icon: string
+  icon: IconName
   label: string
   onClick: () => void
 }) {
@@ -47,11 +54,34 @@ function TabLink({
       className={({ isActive }) => `${styles.tabLink} ${isActive ? styles.tabActive : ''}`}
       onClick={onClick}
     >
-      <span className={styles.tabIcon} aria-hidden="true">
-        {icon}
-      </span>
+      <Icon name={icon} size={24} className={styles.tabIcon} />
       <span className={styles.tabLabel}>{label}</span>
     </NavLink>
+  )
+}
+
+// One option of the Registrar sheet.
+function SheetLink({
+  to,
+  icon,
+  title,
+  desc,
+  onClick,
+}: {
+  to: string
+  icon: IconName
+  title: string
+  desc: string
+  onClick: () => void
+}) {
+  return (
+    <Link to={to} className={styles.sheetLink} onClick={onClick}>
+      <Icon name={icon} size={24} className={styles.sheetIcon} />
+      <span>
+        <span className={styles.sheetTitle}>{title}</span>
+        <span className={styles.sheetDesc}>{desc}</span>
+      </span>
+    </Link>
   )
 }
 
@@ -81,6 +111,8 @@ export default function Layout() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [sheetOpen])
 
+  // Car left tab rail: full-width rows, the selected one highlighted with an
+  // accent line on its right edge (see Layout.module.css).
   function renderNavLink({ to, label, icon, end }: NavItem, extraClass = '') {
     return (
       <NavLink
@@ -89,8 +121,8 @@ export default function Layout() {
         end={end}
         className={({ isActive }) => `${styles.navLink} ${extraClass} ${isActive ? styles.active : ''}`}
       >
-        <span className={styles.navIcon} aria-hidden="true">
-          {icon}
+        <span className={styles.navIconBox}>
+          <Icon name={icon} size={22} className={styles.navIcon} />
         </span>
         <span>{label}</span>
       </NavLink>
@@ -102,9 +134,7 @@ export default function Layout() {
       <div className={styles.shell}>
         <aside className={styles.sidebar}>
           <div className={styles.brand}>
-            <div className={styles.brandIcon} aria-hidden="true">
-              ⚡
-            </div>
+            <Icon name="charge" size={26} className={styles.brandIcon} />
             <div>
               <div className={styles.brandName}>Wiki Vigo</div>
               <div className={styles.brandSub}>Uruguay 🇺🇾</div>
@@ -117,7 +147,7 @@ export default function Layout() {
             onClick={() => setSearchOpen(true)}
             aria-label="Buscar en el sitio"
           >
-            <span aria-hidden="true">🔍</span>
+            <Icon name="search" size={18} />
             <span>Buscar...</span>
           </button>
 
@@ -163,17 +193,16 @@ export default function Layout() {
                 </NavLink>
               )
             )}
-            <button
-              className={styles.themeToggle}
-              onClick={toggleTheme}
-              title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
-              aria-label={`Tema actual: ${THEME_LABEL[effectiveTheme]}. Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
-            >
-              <span className={styles.themeIcon} aria-hidden="true">
-                {THEME_ICON[effectiveTheme]}
-              </span>
-              <span>{THEME_LABEL[effectiveTheme]}</span>
-            </button>
+            {/* Claro / Oscuro as the car's radio-group pill; picking one is the
+                same explicit choice the old toggle made (CLAUDE.md "Theme"). */}
+            <Segmented
+              label="Tema"
+              options={THEME_OPTIONS}
+              value={effectiveTheme}
+              onChange={setTheme}
+              block
+              className={styles.themePicker}
+            />
             <div className={styles.footerLinks}>
               <a
                 href="https://forms.gle/SiNjQ77d71bUHvJ96"
@@ -192,53 +221,52 @@ export default function Layout() {
                 Código en GitHub
               </a>
             </div>
-            <div className={styles.footerText}>Basado en el grupo de WhatsApp</div>
-            <div className={styles.footerSub}>Amantes de la Vigo 🇺🇾</div>
+            <div className={styles.footerText}>
+              Basado en el grupo de WhatsApp
+              <br />
+              Amantes de la Vigo 🇺🇾
+            </div>
           </div>
         </aside>
 
         <div className={styles.mobileHeader}>
           <div className={styles.mobileHeaderTop}>
-            <div className={styles.brand} style={{ padding: '0 1rem' }}>
-              <div className={styles.brandIcon} aria-hidden="true">
-                ⚡
-              </div>
-              <div>
-                <div className={styles.brandName}>Wiki Vigo Uruguay</div>
-              </div>
+            <div className={styles.brand}>
+              <Icon name="charge" size={24} className={styles.brandIcon} />
+              <div className={styles.brandName}>Wiki Vigo Uruguay</div>
             </div>
             <div className={styles.mobileHeaderActions}>
               <button
                 type="button"
-                className={styles.searchButtonMobile}
+                className={styles.headerButton}
                 onClick={() => setSearchOpen(true)}
                 aria-label="Buscar en el sitio"
               >
-                🔍
+                <Icon name="search" size={22} />
               </button>
               <a
                 href="https://forms.gle/SiNjQ77d71bUHvJ96"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.suggestLinkMobile}
+                className={styles.headerButton}
                 title="Sugerir info"
                 aria-label="Sugerir info (abre un formulario)"
               >
-                💬
+                <Icon name="chat" size={22} />
               </a>
               <button
-                className={styles.themeToggleMobile}
+                className={styles.headerButton}
                 onClick={toggleTheme}
                 title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
                 aria-label={`Tema actual: ${THEME_LABEL[effectiveTheme]}. Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
               >
-                {THEME_ICON[effectiveTheme]}
+                <Icon name={THEME_ICON[effectiveTheme]} size={22} />
               </button>
               {/* Always the car icon (a stable anchor for users); the selected
                 vehicle color only tints the button background. */}
               <Link
                 to="/mi-vigo"
-                className={styles.miVigoLinkMobile}
+                className={styles.headerButton}
                 title="Mi Vigo"
                 aria-label="Mi Vigo"
                 style={
@@ -246,11 +274,12 @@ export default function Layout() {
                     ? {
                         background: COLOR_HEX[color],
                         borderColor: COLOR_BORDER[color] ?? 'transparent',
+                        color: COLOR_DARK_TEXT[color] ? '#1a1a18' : '#ffffff',
                       }
                     : undefined
                 }
               >
-                🚗
+                <Icon name="car" size={22} />
               </Link>
             </div>
           </div>
@@ -274,75 +303,70 @@ export default function Layout() {
         {sheetOpen && <div className={styles.sheetBackdrop} onClick={closeSheet} aria-hidden="true" />}
         {sheetOpen && (
           <div className={styles.sheet} role="dialog" aria-label="¿Qué querés registrar?">
-            <div className={styles.sheetHeader}>¿Qué querés registrar?</div>
+            <div className={styles.sheetHeader}>
+              <button type="button" className={styles.sheetClose} onClick={closeSheet} aria-label="Cerrar">
+                <Icon name="close" size={22} />
+              </button>
+              <span>¿Qué querés registrar?</span>
+            </div>
             {status === 'signedIn' ? (
               <>
-                <Link to="/viajes/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                  <span className={styles.sheetIcon} aria-hidden="true">
-                    🗺️
-                  </span>
-                  <span>
-                    <span className={styles.sheetTitle}>Un viaje</span>
-                    <span className={styles.sheetDesc}>Cuánto recorriste y hacia dónde</span>
-                  </span>
-                </Link>
-                <Link to="/costos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                  <span className={styles.sheetIcon} aria-hidden="true">
-                    🛠️
-                  </span>
-                  <span>
-                    <span className={styles.sheetTitle}>Un service</span>
-                    <span className={styles.sheetDesc}>Qué le hiciste y cuánto costó</span>
-                  </span>
-                </Link>
-                <Link to="/repuestos/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                  <span className={styles.sheetIcon} aria-hidden="true">
-                    🔩
-                  </span>
-                  <span>
-                    <span className={styles.sheetTitle}>Un repuesto</span>
-                    <span className={styles.sheetDesc}>Qué compraste y dónde lo conseguiste</span>
-                  </span>
-                </Link>
-                <Link to="/costos/seguro/nuevo" className={styles.sheetLink} onClick={closeSheet}>
-                  <span className={styles.sheetIcon} aria-hidden="true">
-                    🛡️
-                  </span>
-                  <span>
-                    <span className={styles.sheetTitle}>Un seguro</span>
-                    <span className={styles.sheetDesc}>Aseguradora, cobertura y costo anual</span>
-                  </span>
-                </Link>
+                <SheetLink
+                  to="/viajes/nuevo"
+                  icon="route"
+                  title="Un viaje"
+                  desc="Cuánto recorriste y hacia dónde"
+                  onClick={closeSheet}
+                />
+                <SheetLink
+                  to="/costos/nuevo"
+                  icon="maintenance"
+                  title="Un service"
+                  desc="Qué le hiciste y cuánto costó"
+                  onClick={closeSheet}
+                />
+                <SheetLink
+                  to="/repuestos/nuevo"
+                  icon="parts"
+                  title="Un repuesto"
+                  desc="Qué compraste y dónde lo conseguiste"
+                  onClick={closeSheet}
+                />
+                <SheetLink
+                  to="/costos/seguro/nuevo"
+                  icon="shield"
+                  title="Un seguro"
+                  desc="Aseguradora, cobertura y costo anual"
+                  onClick={closeSheet}
+                />
               </>
             ) : (
-              <Link to="/login" className={styles.sheetLink} onClick={closeSheet}>
-                <span className={styles.sheetIcon} aria-hidden="true">
-                  🔑
-                </span>
-                <span>
-                  <span className={styles.sheetTitle}>Iniciá sesión para registrar</span>
-                  <span className={styles.sheetDesc}>Solo necesitás tu email, sin contraseña</span>
-                </span>
-              </Link>
+              <SheetLink
+                to="/login"
+                icon="user"
+                title="Iniciá sesión para registrar"
+                desc="Solo necesitás tu email, sin contraseña"
+                onClick={closeSheet}
+              />
             )}
           </div>
         )}
         <nav className={styles.tabBar}>
-          <TabLink to="/" end icon="🏠" label="Inicio" onClick={closeSheet} />
-          <TabLink to="/comunidad" icon="🌐" label="Comunidad" onClick={closeSheet} />
+          <TabLink to="/" end icon="home" label="Inicio" onClick={closeSheet} />
+          <TabLink to="/comunidad" icon="community" label="Comunidad" onClick={closeSheet} />
           <button
             type="button"
             className={styles.tabLink}
             onClick={() => setSheetOpen((o) => !o)}
             aria-expanded={sheetOpen}
           >
-            <span className={`${styles.tabIcon} ${styles.tabRegisterIcon}`} aria-hidden="true">
-              ➕
+            <span className={styles.tabRegisterIcon} aria-hidden="true">
+              <Icon name="plus" size={20} />
             </span>
             <span className={styles.tabLabel}>Registrar</span>
           </button>
-          <TabLink to="/mi-actividad" icon="🗒️" label="Mi actividad" onClick={closeSheet} />
-          <TabLink to="/guia" icon="📖" label="Guía" onClick={closeSheet} />
+          <TabLink to="/mi-actividad" icon="activity" label="Mi actividad" onClick={closeSheet} />
+          <TabLink to="/guia" icon="guide" label="Guía" onClick={closeSheet} />
         </nav>
 
         <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />

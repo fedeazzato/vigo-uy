@@ -88,32 +88,6 @@
   margin-bottom: 0;
 }
 
-.standardPicker {
-  display: flex;
-  gap: 4px;
-}
-
-.standardBtn {
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-primary);
-  background: var(--fill-secondary);
-  border: none;
-  transition: background 0.12s;
-}
-
-.standardBtn:hover {
-  background: var(--fill-hover);
-}
-
-.standardBtnActive,
-.standardBtnActive:hover {
-  background: var(--fill-selected);
-  color: var(--text-on-fill-selected);
-}
-
 .autonomyGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

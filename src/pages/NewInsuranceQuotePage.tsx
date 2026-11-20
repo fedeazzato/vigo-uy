@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { FormError } from '../components/UI'
+import { FormError, Switch } from '../components/UI'
 import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
@@ -431,14 +431,9 @@ export default function NewInsuranceQuotePage() {
           const selection = addonSelections[addon.slug] ?? { checked: false, limitValue: '' }
           return (
             <div key={addon.slug}>
-              <label className={formStyles.checkboxRow}>
-                <input
-                  type="checkbox"
-                  checked={selection.checked}
-                  onChange={(e) => handleAddonToggle(addon.slug, e.target.checked)}
-                />
+              <Switch checked={selection.checked} onChange={(checked) => handleAddonToggle(addon.slug, checked)}>
                 {addon.icon} Incluye {addon.checkbox_label}
-              </label>
+              </Switch>
 
               {addon.limit_kind !== 'none' && selection.checked && (
                 <div className={formStyles.field}>

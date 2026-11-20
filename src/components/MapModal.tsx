@@ -3,6 +3,7 @@
 // content, so only the body is left to the caller.
 import { ReactNode } from 'react'
 import { useEscapeToClose } from '../lib/useEscapeToClose'
+import { Icon } from './Icon'
 import styles from './MapModal.module.css'
 
 interface MapModalProps {
@@ -22,11 +23,12 @@ export default function MapModal({ open, onClose, title, ariaLabel, children }: 
     <>
       <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
       <div className={styles.panel} role="dialog" aria-label={ariaLabel}>
+        {/* Car dialog: the close icon sits at the top-left, before the title. */}
         <div className={styles.header}>
-          <span className={styles.headerTitle}>{title}</span>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Cerrar mapa">
-            ✕
+            <Icon name="close" size={22} />
           </button>
+          <span className={styles.headerTitle}>{title}</span>
         </div>
         {children}
       </div>

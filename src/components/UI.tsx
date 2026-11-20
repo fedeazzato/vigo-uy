@@ -1,5 +1,7 @@
-import { ReactNode, useEffect, useRef } from 'react'
+import { CSSProperties, KeyboardEvent, ReactNode, useEffect, useRef } from 'react'
 import styles from './UI.module.css'
+import { Icon } from './Icon'
+import type { IconName } from './Icon'
 import type { TipItem, StatItem, BadgeColor } from '../types'
 
 interface PageHeaderProps {
@@ -87,11 +89,11 @@ export function Badge({ children, color = 'gray' }: BadgeProps) {
 
 type AlertType = 'warning' | 'danger' | 'info' | 'success'
 
-const ALERT_ICON: Record<AlertType, string> = {
-  warning: '⚠️',
-  danger: '🚨',
-  info: 'ℹ️',
-  success: '✅',
+const ALERT_ICON: Record<AlertType, IconName> = {
+  warning: 'warning',
+  danger: 'danger',
+  info: 'info',
+  success: 'success',
 }
 
 interface AlertProps {
@@ -106,9 +108,7 @@ export function Alert({ children, type = 'warning' }: AlertProps) {
       className={`${styles.alert} ${styles[`alert_${type}`]}`}
       role={type === 'danger' || type === 'warning' ? 'alert' : 'status'}
     >
-      <span className={styles.alertIcon} aria-hidden="true">
-        {ALERT_ICON[type]}
-      </span>
+      <Icon name={ALERT_ICON[type]} size={18} className={styles.alertIcon} />
       <span>{children}</span>
     </div>
   )
@@ -193,6 +193,126 @@ export function Skeleton({ lines = 3 }: SkeletonProps) {
       {Array.from({ length: lines }, (_, i) => (
         <div key={i} className={styles.skeletonBar} />
       ))}
+    </div>
+  )
+}
+
+interface SwitchProps {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  children: ReactNode
+  hint?: ReactNode
+  disabled?: boolean
+}
+
+// The car's DFSwitch, recreated in CSS: a native checkbox exposed as
+// role="switch" (Space toggles it, the label is the accessible name), the
+// visual track first and the texts after it, like the car's option rows.
+export function Switch({ checked, onChange, children, hint, disabled = false }: SwitchProps) {
+  return (
+    <label className={`${styles.switchRow} ${disabled ? styles.switchDisabled : ''}`}>
+      <input
+        type="checkbox"
+        role="switch"
+        className={styles.switchInput}
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => {
+          if (!disabled) onChange(e.target.checked)
+        }}
+      />
+      <span className={styles.switchTrack} aria-hidden="true">
+        <span className={styles.switchKnob} />
+      </span>
+      <span className={styles.switchText}>
+        {children}
+        {hint && <span className={styles.switchHint}>{hint}</span>}
+      </span>
+    </label>
+  )
+}
+
+export interface SegmentedOption<T extends string> {
+  value: T
+  label: ReactNode
+}
+
+interface SegmentedProps<T extends string> {
+  options: readonly SegmentedOption<T>[]
+  value: T | null
+  onChange: (value: T) => void
+  // Accessible name of the group, e.g. "Modelo".
+  label: string
+  // Stretch to the container width instead of sizing to the widest option.
+  block?: boolean
+  className?: string
+}
+
+// The car's radio-group "pill" (SelectionRadioGroup): equal-width options on
+// the secondary fill, the checked one under a selected-fill slider that moves
+// to it. A WAI-ARIA radio group: one tab stop, arrow keys move and select.
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+  block = false,
+  className = '',
+}: SegmentedProps<T>) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([])
+  const index = options.findIndex((o) => o.value === value)
+
+  function select(i: number) {
+    const next = (i + options.length) % options.length
+    onChange(options[next].value)
+    refs.current[next]?.focus()
+  }
+
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, i: number) {
+    const moves: Record<string, number> = {
+      ArrowRight: i + 1,
+      ArrowDown: i + 1,
+      ArrowLeft: i - 1,
+      ArrowUp: i - 1,
+      Home: 0,
+      End: options.length - 1,
+    }
+    if (e.key in moves) {
+      e.preventDefault()
+      select(moves[e.key])
+    }
+  }
+
+  const style = { '--seg-count': options.length, '--seg-index': Math.max(index, 0) } as CSSProperties
+
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className={`${styles.segmented} ${block ? styles.segmentedBlock : ''} ${className}`}
+      style={style}
+    >
+      {index >= 0 && <span className={styles.segThumb} aria-hidden="true" />}
+      {options.map((o, i) => {
+        const checked = i === index
+        return (
+          <button
+            key={o.value}
+            ref={(el) => {
+              refs.current[i] = el
+            }}
+            type="button"
+            role="radio"
+            aria-checked={checked}
+            tabIndex={checked || (index < 0 && i === 0) ? 0 : -1}
+            className={`${styles.segOption} ${checked ? styles.segChecked : ''}`}
+            onClick={() => onChange(o.value)}
+            onKeyDown={(e) => onKeyDown(e, i)}
+          >
+            {o.label}
+          </button>
+        )
+      })}
     </div>
   )
 }

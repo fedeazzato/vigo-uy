@@ -115,25 +115,11 @@
 
 /* ── Model ── */
 
-.modelRow {
-  display: flex;
-  gap: 8px;
-}
-
-.modelBtn {
-  background: var(--fill-secondary);
-  color: var(--text-primary);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.modelBtnSelected {
-  background: var(--fill-selected);
-  color: var(--text-on-fill-selected);
+/* E2 / E2+ as the car's radio-group pill (Segmented), a little wider than
+   its two short labels need. */
+.modelPicker {
+  min-width: 200px;
+  align-self: flex-start;
 }
 
 /* ── Wizard chrome (Paso X de 3) ── */

@@ -97,6 +97,15 @@ Step 1 — tokens, Roboto, shapes:
 - Buttons compose `src/styles/buttons.module.css` (primary = car confirm, secondary = car cancel, danger = error text on the secondary fill); pressed = 60 % opacity, disabled = 30 % fill with grey text (a `color-mix`), hover = 85 % (web only).
 - The browser `theme-color` follows the page background of the active theme (`UserPrefsContext`), and the PWA manifest colours are the car night black. The app icon (`public/favicon.svg` and the generated PNGs, still green) was left alone: see open questions.
 
+Step 2 — components:
+- `src/components/Icon.tsx`: our own line icons (24 grid, 2 px round strokes, `currentColor`) for the rail, the bottom bar, the header buttons, the Registrar sheet, the guide grid and alerts. `NavItem.icon` / `GuideLinkItem.icon` are now icon names instead of emoji (nothing else consumed the emoji). Page titles and card titles keep their emoji: replacing those is content, not chrome.
+- Rail (desktop sidebar): sits on the page background with a 2 px `--divider-page` line, 48 px rows (42 px for the Guía sub-items), selected = `--selected-bg` 3 px inset + 3 px accent line on the right edge, animated in (300 ms scale / 200 ms fade, off with `prefers-reduced-motion`); by day the selected icon sits on a tan square. The nav list scrolls when the window is shorter than the rail. The rail is 240 px wide, not 160 (0.5 x 320): Spanish labels such as "Mantenimiento" need it.
+- Theme: the rail footer's toggle became a Claro / Oscuro `Segmented` (same two explicit states; the system default still applies until one is picked). The mobile header keeps its one-tap icon toggle (sun / moon).
+- Mobile: header buttons are car secondary buttons with line icons (the Mi Vigo button keeps the car-colour tint); the bottom bar keeps the B1 structure with grey items and an accent line under the active one; Registrar is a plus on the primary fill.
+- New primitives in `UI.tsx`: `Switch` (native checkbox with `role="switch"`, DFSwitch replica 40 x 17 / 14 px knob, 200 ms) and `Segmented` (WAI-ARIA radio group with roving tab stop, arrow keys / Home / End, sliding selected fill). Adopted by: the share toggle of every entry form and the insurance add-ons (Switch); trip-form model, station-picker list/map, Comunidad type filter, Carga autonomy cycle, theme (Segmented). Tests that clicked those as `button`/`checkbox` now use `radio`/`switch`.
+- Dialogs (`MapModal`, used by the stations and trip maps and the station picker; the Registrar sheet) follow the car dialog: card colour, 4 px, `--scrim` dim, no border/shadow, the close icon at the top-left before the title. Site search keeps its close button at the end of the search field (a field affordance, not a dialog title bar).
+- Alerts: card colour, 3 px status bar, a line icon in the status colour. Offline banner and the save toast use the same treatment.
+
 ## Acceptance criteria
 - Both themes use only role tokens mapped to the car's values (R1); no `--green-*` left; Roboto everywhere; 4 px corners; no shadows.
 - Navigation, cards, buttons, badges, dialogs, alerts and charts follow R5 in both themes on phone and desktop.

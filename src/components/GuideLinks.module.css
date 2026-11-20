@@ -37,10 +37,15 @@
   text-decoration: none;
 }
 
+/* Line icon in the car's style: grey glyph, the accent on hover. */
 .icon {
-  font-size: 20px;
-  line-height: 1.2;
   flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--text-secondary);
+  transition: color 0.12s;
+}
+.item:hover .icon {
+  color: var(--accent);
 }
 
 .text {

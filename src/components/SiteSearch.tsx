@@ -8,6 +8,7 @@ import { searchCuratedContent } from '../lib/siteSearch'
 import { isAccessoryCategory } from '../lib/purchaseCatalog'
 import { useEscapeToClose } from '../lib/useEscapeToClose'
 import { Badge } from './UI'
+import { Icon } from './Icon'
 import styles from './SiteSearch.module.css'
 import type { CommunitySearchResult, CuratedSearchResult } from '../types'
 
@@ -97,9 +98,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
       <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
       <div className={styles.panel} role="dialog" aria-label="Buscar en el sitio">
         <div className={styles.inputRow}>
-          <span className={styles.inputIcon} aria-hidden="true">
-            🔍
-          </span>
+          <Icon name="search" size={20} className={styles.inputIcon} />
           <input
             ref={inputRef}
             type="search"
@@ -109,7 +108,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
             onChange={(e) => setQuery(e.target.value)}
           />
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Cerrar búsqueda">
-            ✕
+            <Icon name="close" size={20} />
           </button>
         </div>
 

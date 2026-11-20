@@ -9,6 +9,7 @@ import {
   Alert,
   StatGrid,
   SectionDivider,
+  Segmented,
 } from '../components/UI'
 import CommunityStations from '../components/CommunityStations'
 import { useUserPrefs } from '../context/UserPrefsContext'
@@ -73,17 +74,12 @@ export default function ChargingPage() {
       <Card>
         <div className={styles.autonomyHeader}>
           <CardTitle icon="🔋">Autonomía</CardTitle>
-          <div className={styles.standardPicker}>
-            {autonomy.standards.map((s) => (
-              <button
-                key={s}
-                className={`${styles.standardBtn} ${standard === s ? styles.standardBtnActive : ''}`}
-                onClick={() => setStandard(s)}
-              >
-                {STANDARD_LABELS[s]}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="Ciclo de homologación"
+            options={autonomy.standards.map((s) => ({ value: s, label: STANDARD_LABELS[s] }))}
+            value={standard}
+            onChange={setStandard}
+          />
         </div>
 
         <div className={styles.autonomyGrid}>

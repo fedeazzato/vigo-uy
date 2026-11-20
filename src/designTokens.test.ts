@@ -119,6 +119,12 @@ describe('token usage across src/', () => {
     for (const text of [indexCss, ...CSS_SOURCES.map(([, t]) => t)]) {
       for (const [, name] of stripComments(text).matchAll(/(--[a-z0-9-]+)\s*:/g)) defined.add(name)
     }
+    // Custom properties set from components as inline-style keys
+    // (e.g. Segmented's '--seg-index').
+    for (const [path, text] of Object.entries(SOURCES)) {
+      if (path.endsWith('.css')) continue
+      for (const [, name] of text.matchAll(/['"](--[a-z0-9-]+)['"]\s*:/g)) defined.add(name)
+    }
     for (const [path, text] of Object.entries(SOURCES)) {
       for (const [, name] of text.matchAll(/var\((--[a-z0-9-]+)/g)) {
         expect(defined.has(name), `${path} uses undefined ${name}`).toBe(true)

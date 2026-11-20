@@ -123,13 +123,13 @@ describe('StationPickerModal', () => {
   describe('map view', () => {
     it('renders one marker per filtered station', () => {
       renderPicker()
-      fireEvent.click(screen.getByRole('button', { name: '🗺️ Mapa' }))
+      fireEvent.click(screen.getByRole('radio', { name: '🗺️ Mapa' }))
       expect(screen.getAllByTestId('marker')).toHaveLength(3)
     })
 
     it('picking a marker\'s "Elegir esta estación" button calls onSelect and onClose', () => {
       const { onSelect, onClose } = renderPicker()
-      fireEvent.click(screen.getByRole('button', { name: '🗺️ Mapa' }))
+      fireEvent.click(screen.getByRole('radio', { name: '🗺️ Mapa' }))
       // No geolocation set: entries are alphabetical, so the first pick
       // button belongs to "DMC Rocha ruta 9" (STATIONS[2]).
       const pickButtons = screen.getAllByText('✅ Elegir esta estación')

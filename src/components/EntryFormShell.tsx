@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { PageHeader, Card, Skeleton, StarRating } from './UI'
+import { PageHeader, Card, Skeleton, StarRating, Switch } from './UI'
 import formStyles from '../styles/formControls.module.css'
 import styles from './EntryFormShell.module.css'
 
@@ -97,12 +97,12 @@ interface ShareCheckboxProps {
   onChange: (checked: boolean) => void
 }
 
-// The "share with the community" row, identical in all three entry forms.
+// The "share with the community" row, identical in every entry form (a car
+// switch row, see Switch in UI.tsx).
 export function ShareCheckbox({ checked, onChange }: ShareCheckboxProps) {
   return (
-    <label className={formStyles.checkboxRow}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <Switch checked={checked} onChange={onChange}>
       Compartir con la comunidad (se muestra sin tu email, solo tu nombre)
-    </label>
+    </Switch>
   )
 }

@@ -82,14 +82,6 @@
   gap: 14px;
 }
 
-.checkboxRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
 /* "← Volver" above the header replaces the old Cancelar button. Margin is
    left to the caller: the trip wizard's top bar spaces it itself. */
 .backBtn {

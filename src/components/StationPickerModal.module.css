@@ -28,24 +28,8 @@
 }
 
 .viewToggle {
-  display: flex;
-  gap: 6px;
-}
-
-.viewBtn {
-  background: var(--fill-secondary);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  font-family: inherit;
-}
-.viewBtnSelected {
-  background: var(--fill-selected);
-  color: var(--text-on-fill-selected);
+  align-self: flex-start;
+  min-width: 220px;
 }
 
 .empty {

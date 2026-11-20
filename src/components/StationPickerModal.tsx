@@ -11,7 +11,7 @@ import { foldAccents } from '../lib/cities'
 import { haversineKm, type GeoPoint } from '../lib/geo'
 import { dotIcon } from '../lib/mapMarkerIcon'
 import { COUNTRIES, COUNTRY_LABELS } from '../lib/stations'
-import { Alert, Badge } from './UI'
+import { Alert, Badge, Segmented } from './UI'
 import MapModal from './MapModal'
 import FittedMapContainer from './FittedMapContainer'
 import type { ChargingNetwork, ChargingStation } from '../types'
@@ -22,6 +22,11 @@ const STATION_COLOR = '#1D9E75'
 const ME_COLOR = '#2A6EF3'
 const stationIcon = dotIcon(STATION_COLOR)
 const meIcon = dotIcon(ME_COLOR)
+
+const VIEW_OPTIONS = [
+  { value: 'list', label: 'Lista' },
+  { value: 'map', label: '🗺️ Mapa' },
+] as const
 
 // Same grouped-by-country layout as CommunityStations' own network filter
 // (kept local here -- CommunityStations isn't touched by this change).
@@ -188,24 +193,13 @@ export default function StationPickerModal({
 
         {geoError && <Alert type="warning">{geoError}</Alert>}
 
-        <div className={styles.viewToggle}>
-          <button
-            type="button"
-            className={`${styles.viewBtn} ${view === 'list' ? styles.viewBtnSelected : ''}`}
-            aria-pressed={view === 'list'}
-            onClick={() => setView('list')}
-          >
-            Lista
-          </button>
-          <button
-            type="button"
-            className={`${styles.viewBtn} ${view === 'map' ? styles.viewBtnSelected : ''}`}
-            aria-pressed={view === 'map'}
-            onClick={() => setView('map')}
-          >
-            🗺️ Mapa
-          </button>
-        </div>
+        <Segmented
+          label="Vista"
+          options={VIEW_OPTIONS}
+          value={view}
+          onChange={setView}
+          className={styles.viewToggle}
+        />
 
         {entries.length === 0 ? (
           <p className={styles.empty}>No hay estaciones que coincidan con el filtro.</p>

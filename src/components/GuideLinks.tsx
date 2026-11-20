@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
+import { Icon } from './Icon'
+import type { IconName } from './Icon'
 import styles from './GuideLinks.module.css'
 
 export interface GuideLinkItem {
   to: string
   label: string
-  icon: string
+  icon: IconName
   description: string
 }
 
@@ -14,27 +16,27 @@ export const GUIDE_LINKS: GuideLinkItem[] = [
   {
     to: '/ficha-tecnica',
     label: 'Ficha técnica',
-    icon: '📋',
+    icon: 'spec',
     description: 'Especificaciones completas del E2 y E2+.',
   },
-  { to: '/carga', label: 'Carga', icon: '⚡', description: 'Cargadores, redes públicas y consejos.' },
-  { to: '/rutas', label: 'Rutas', icon: '🗺️', description: 'Viajes reales y autonomía en ruta.' },
-  { to: '/costos', label: 'Costos', icon: '💰', description: 'Costo por km, patente y seguro.' },
-  { to: '/mantenimiento', label: 'Mantenimiento', icon: '🛠️', description: 'Services, precios y talleres.' },
+  { to: '/carga', label: 'Carga', icon: 'charge', description: 'Cargadores, redes públicas y consejos.' },
+  { to: '/rutas', label: 'Rutas', icon: 'route', description: 'Viajes reales y autonomía en ruta.' },
+  { to: '/costos', label: 'Costos', icon: 'costs', description: 'Costo por km, patente y seguro.' },
+  { to: '/mantenimiento', label: 'Mantenimiento', icon: 'maintenance', description: 'Services, precios y talleres.' },
   {
     to: '/repuestos',
     label: 'Repuestos',
-    icon: '🔩',
+    icon: 'parts',
     description: 'Dónde conseguir repuestos y consumibles.',
   },
   {
     to: '/accesorios',
     label: 'Accesorios',
-    icon: '🔧',
+    icon: 'accessories',
     description: 'Accesorios recomendados por el grupo.',
   },
-  { to: '/tecnologia', label: 'Tecnología', icon: '📱', description: 'App, pantalla y trucos de software.' },
-  { to: '/faq', label: 'FAQ', icon: '💬', description: 'Preguntas frecuentes del grupo.' },
+  { to: '/tecnologia', label: 'Tecnología', icon: 'tech', description: 'App, pantalla y trucos de software.' },
+  { to: '/faq', label: 'FAQ', icon: 'faq', description: 'Preguntas frecuentes del grupo.' },
 ]
 
 interface GuideLinksProps {
@@ -46,9 +48,7 @@ export function GuideLinks({ links = GUIDE_LINKS }: GuideLinksProps) {
     <div className={styles.grid}>
       {links.map(({ to, label, icon, description }) => (
         <Link key={to} to={to} className={styles.item}>
-          <span className={styles.icon} aria-hidden="true">
-            {icon}
-          </span>
+          <Icon name={icon} size={22} className={styles.icon} />
           <span className={styles.text}>
             <span className={styles.linkLabel}>{label}</span>
             <span className={styles.description}>{description}</span>

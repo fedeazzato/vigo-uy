@@ -15,8 +15,8 @@
   width: min(720px, calc(100vw - 32px));
   max-height: 84vh;
   z-index: 305;
+  /* Car dialog: card colour, 4 px corners, no shadow (the dim does the work). */
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
@@ -24,17 +24,15 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
+  gap: 6px;
+  padding: 6px 14px 6px 6px;
   flex-shrink: 0;
 }
 
 .headerTitle {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-title);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -42,13 +40,17 @@
 
 .closeButton {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
+  background: none;
+  border: none;
+}
+.closeButton:hover {
+  color: var(--text-title);
+  background: var(--fill-hover);
 }
