@@ -72,3 +72,11 @@ describe('MyVigoPage placeholder-name prompt (A2)', () => {
     expect(screen.queryByText(/Elegí cómo querés aparecer en la comunidad/)).toBeNull()
   })
 })
+
+describe('MyVigoPage Bóveda card (specs/secret-vault.md)', () => {
+  it('links signed-in members to the vault', () => {
+    renderSignedIn('Ana')
+    const link = screen.getByRole('link', { name: 'Abrir la bóveda' })
+    expect(link.getAttribute('href')).toBe('/mi-vigo/boveda')
+  })
+})

@@ -39,6 +39,142 @@ export type Database = {
   }
   public: {
     Tables: {
+      car_devices: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          last_request_ts: number
+          last_seen_at: string | null
+          name: string
+          public_key: string
+          revoked_at: string | null
+          revoked_by: string | null
+          vehicle_id: string
+          window_count: number
+          window_started_at: string | null
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_request_ts?: number
+          last_seen_at?: string | null
+          name: string
+          public_key: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          vehicle_id: string
+          window_count?: number
+          window_started_at?: string | null
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_request_ts?: number
+          last_seen_at?: string | null
+          name?: string
+          public_key?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          vehicle_id?: string
+          window_count?: number
+          window_started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_devices_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_devices_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_pairing_attempts: {
+        Row: {
+          attempted_at: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      car_pairing_requests: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          code: string
+          created_at: string
+          device_id: string | null
+          device_name: string
+          expires_at: string
+          public_key: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          code: string
+          created_at?: string
+          device_id?: string | null
+          device_name: string
+          expires_at: string
+          public_key: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          code?: string
+          created_at?: string
+          device_id?: string | null
+          device_name?: string
+          expires_at?: string
+          public_key?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_pairing_requests_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       charging_networks: {
         Row: {
           country: string
@@ -721,6 +857,75 @@ export type Database = {
           },
         ]
       }
+      vault_items: {
+        Row: {
+          ciphertext: string
+          iv: string
+          kind: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          ciphertext: string
+          iv: string
+          kind: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Update: {
+          ciphertext?: string
+          iv?: string
+          kind?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      vault_keys: {
+        Row: {
+          created_at: string
+          credential_id: string
+          label: string
+          prf_salt: string
+          user_id: string
+          wrapped_dk: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          label: string
+          prf_salt: string
+          user_id?: string
+          wrapped_dk: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          label?: string
+          prf_salt?: string
+          user_id?: string
+          wrapped_dk?: string
+        }
+        Relationships: []
+      }
+      vault_write_log: {
+        Row: {
+          at: string
+          user_id: string
+        }
+        Insert: {
+          at?: string
+          user_id: string
+        }
+        Update: {
+          at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicle_members: {
         Row: {
           joined_at: string
@@ -945,17 +1150,47 @@ export type Database = {
         Returns: undefined
       }
       assert_moderator: { Args: never; Returns: undefined }
+      car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
+      car_device_accept: {
+        Args: { p_device_id: string; p_ts: number }
+        Returns: {
+          accepted_vehicle: string
+          reject_reason: string
+        }[]
+      }
+      car_device_public_key: { Args: { p_device_id: string }; Returns: string }
+      car_heartbeat: {
+        Args: { p_app_version?: string; p_device_id: string; p_ts: number }
+        Returns: Json
+      }
+      car_unpair: { Args: { p_device_id: string; p_ts: number }; Returns: Json }
+      car_vehicle_member_names: {
+        Args: { p_vehicle_id: string }
+        Returns: Json
+      }
+      claim_car_pairing: {
+        Args: { p_code: string; p_name?: string }
+        Returns: Json
+      }
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
       current_user_vehicle_id: { Args: never; Returns: string }
+      generate_car_pairing_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
+      is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
+      poll_car_pairing: { Args: { p_code: string }; Returns: Json }
       remove_vehicle_member: {
         Args: { target_user: string }
         Returns: undefined
       }
+      request_car_pairing: {
+        Args: { p_device_name?: string; p_public_key: string }
+        Returns: Json
+      }
       reset_my_vehicle: { Args: never; Returns: string }
+      revoke_car_device: { Args: { p_device_id: string }; Returns: undefined }
       search_community_content: {
         Args: { result_limit?: number; search_query: string }
         Returns: {

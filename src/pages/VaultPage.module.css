@@ -1,0 +1,113 @@
+/* Bóveda (specs/secret-vault.md). Car look: flat fills, 4 px corners, the
+   car's confirm/cancel buttons (buttons.module.css), no shadows. */
+
+.text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.status {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.primaryBtn {
+  composes: primary from '../styles/buttons.module.css';
+}
+
+.secondaryBtn {
+  composes: secondary from '../styles/buttons.module.css';
+}
+
+.dangerBtn {
+  composes: danger from '../styles/buttons.module.css';
+  flex-shrink: 0;
+}
+
+.keyList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.keyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.keyRow:last-child {
+  border-bottom: none;
+}
+
+.keyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.keyName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.enrol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 10px;
+  max-width: 480px;
+}
+
+.revealed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.secret {
+  display: block;
+  padding: 12px;
+  background: var(--fill-secondary);
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: 15px;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.mono {
+  font-family: monospace;
+}
+
+.footnote {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}

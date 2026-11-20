@@ -13,6 +13,7 @@ import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../component
 import { CarPreview } from '../components/CarPreview'
 import ProfileCard from '../components/ProfileCard'
 import VehicleCard from '../components/VehicleCard'
+import CarDevicesCard from '../components/CarDevicesCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
@@ -176,6 +177,18 @@ export default function MyVigoPage() {
           )}
           <ProfileCard />
           <VehicleCard />
+          <CarDevicesCard />
+          <Card>
+            <CardTitle icon="🔐">Bóveda</CardTitle>
+            <p className={styles.vaultText}>
+              Guardá cifradas la frase de recuperación de la dashcam y la clave de respaldo de ajustes. Solo
+              se abren con la huella o el rostro de tus dispositivos; WikiVigo guarda únicamente datos
+              cifrados.
+            </p>
+            <Link to="/mi-vigo/boveda" className={styles.vaultLink}>
+              Abrir la bóveda
+            </Link>
+          </Card>
         </>
       )}
 

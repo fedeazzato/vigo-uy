@@ -3,7 +3,18 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default tseslint.config(
-  { ignores: ['dist', 'dev-dist', 'node_modules', 'src/lib/database.types.ts'] },
+  {
+    ignores: [
+      'dist',
+      'dev-dist',
+      'node_modules',
+      'src/lib/database.types.ts',
+      // Deno entry points of the Edge Functions (Deno globals, `.ts` imports);
+      // their logic lives in supabase/functions/_shared, which IS linted and
+      // type-checked (tsconfig.functions.json).
+      'supabase/functions/*/index.ts',
+    ],
+  },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [...tseslint.configs.recommendedTypeChecked],

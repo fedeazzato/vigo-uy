@@ -377,11 +377,7 @@ export type StationReliability = NonNullableRow<Views['station_reliability']['Ro
 // ── Insurance quotes (community-submitted) ──────────────────────────────────
 
 export type InsuranceCoverageLevel =
-  | 'soa'
-  | 'terceros'
-  | 'terceros_completo'
-  | 'todo_riesgo_franquicia'
-  | 'todo_riesgo_sin_franquicia'
+  'soa' | 'terceros' | 'terceros_completo' | 'todo_riesgo_franquicia' | 'todo_riesgo_sin_franquicia'
 
 export const INSURANCE_COVERAGE_LABELS: Record<InsuranceCoverageLevel, string> = {
   soa: 'SOA (obligatorio)',
@@ -419,7 +415,10 @@ export type InsuranceQuote = Omit<
 // Rolling-730-day average by (provider, coverage_level); coverage_level is
 // null on the per-provider rollup rows (GROUPING SETS), like
 // ChargingCostStat.station_id.
-export type InsuranceCostStat = Omit<NonNullableRow<Views['insurance_cost_stats']['Row']>, 'coverage_level'> & {
+export type InsuranceCostStat = Omit<
+  NonNullableRow<Views['insurance_cost_stats']['Row']>,
+  'coverage_level'
+> & {
   coverage_level: InsuranceCoverageLevel | null
 }
 
@@ -452,6 +451,39 @@ export type Vehicle = Omit<Tables['vehicles']['Row'], 'model'> & {
 // Row shape of the vehicle_km_leaderboard view (public; never join_code/plate).
 // Every column is grouped/coalesced — never null despite the view codegen.
 export type VehicleLeaderboardEntry = NonNullableRow<Views['vehicle_km_leaderboard']['Row']>
+
+// A car head unit linked to the vehicle (specs/car-link-phase0.md). Only the
+// columns `authenticated` is granted (0045): the public key and the replay /
+// rate-limit counters never leave the server.
+export type CarDevice = Pick<
+  Tables['car_devices']['Row'],
+  | 'id'
+  | 'vehicle_id'
+  | 'name'
+  | 'app_version'
+  | 'created_by'
+  | 'created_at'
+  | 'last_seen_at'
+  | 'revoked_at'
+  | 'revoked_by'
+>
+
+// Bóveda (specs/secret-vault.md, 0046): ciphertext only, own rows only.
+export type VaultItemKind = 'dashcam_recovery' | 'settings_backup_passphrase'
+
+// One enrolled passkey: its PRF salt and its wrap of the user's data key.
+export type VaultKeyRow = Pick<
+  Tables['vault_keys']['Row'],
+  'credential_id' | 'prf_salt' | 'wrapped_dk' | 'label' | 'created_at'
+>
+
+// One encrypted secret; `kind` narrowed to the CHECK constraint's values.
+export type VaultItemRow = Omit<
+  Pick<Tables['vault_items']['Row'], 'kind' | 'version' | 'iv' | 'ciphertext' | 'updated_at'>,
+  'kind'
+> & {
+  kind: VaultItemKind
+}
 
 // ── Community aggregates (Supabase views) ────────────────────────────────────
 
