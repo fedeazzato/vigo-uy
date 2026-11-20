@@ -178,6 +178,17 @@ export default function MyVigoPage() {
           <ProfileCard />
           <VehicleCard />
           <CarDevicesCard />
+          <Card>
+            <CardTitle icon="🔐">Bóveda</CardTitle>
+            <p className={styles.vaultText}>
+              Guardá cifradas la frase de recuperación de la dashcam y la clave de respaldo de ajustes. Solo
+              se abren con la huella o el rostro de tus dispositivos; WikiVigo guarda únicamente datos
+              cifrados.
+            </p>
+            <Link to="/mi-vigo/boveda" className={styles.vaultLink}>
+              Abrir la bóveda
+            </Link>
+          </Card>
         </>
       )}
 

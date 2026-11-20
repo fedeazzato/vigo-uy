@@ -1,0 +1,33 @@
+/* Camera view of the vault's QR scanner: square-ish, 4 px corners, no
+   shadow (specs/stock-head-unit-look.md). */
+.scanner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.video {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--fill-secondary);
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--danger-text);
+}
+
+.cancelBtn {
+  composes: secondary from '../styles/buttons.module.css';
+}

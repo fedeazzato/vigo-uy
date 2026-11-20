@@ -29,6 +29,7 @@ const NewPartPurchasePage = lazy(() => import('./pages/NewPartPurchasePage'))
 const CommunityFeedPage = lazy(() => import('./pages/CommunityFeedPage'))
 const ModerationPage = lazy(() => import('./pages/ModerationPage'))
 const LinkCarPage = lazy(() => import('./pages/LinkCarPage'))
+const VaultPage = lazy(() => import('./pages/VaultPage'))
 
 export default function App() {
   return (
@@ -57,6 +58,8 @@ export default function App() {
             <Route path="mi-actividad" element={<DashboardPage />} />
             {/* The car's QR opens #/mi-vigo/vincular?c=CODE (specs/car-link-phase0.md). */}
             <Route path="mi-vigo/vincular" element={<LinkCarPage />} />
+            {/* End-to-end encrypted secrets, passkey PRF (specs/secret-vault.md). */}
+            <Route path="mi-vigo/boveda" element={<VaultPage />} />
             <Route path="costos/nuevo" element={<NewServiceEntryPage />} />
             <Route path="costos/:id/editar" element={<NewServiceEntryPage />} />
             <Route path="costos/seguro/nuevo" element={<NewInsuranceQuotePage />} />

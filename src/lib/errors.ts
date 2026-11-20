@@ -20,6 +20,8 @@ const KNOWN_TRIGGER_MESSAGES = [
   'Demasiados intentos',
   'Tu vehículo ya tiene',
   'Ese dispositivo no está vinculado',
+  // Bóveda (0046); its daily limit starts with 'Límite diario' too
+  'Ya tenés 10 llaves',
 ]
 
 export function toFriendlyError(error: unknown): string {

@@ -857,6 +857,75 @@ export type Database = {
           },
         ]
       }
+      vault_items: {
+        Row: {
+          ciphertext: string
+          iv: string
+          kind: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          ciphertext: string
+          iv: string
+          kind: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Update: {
+          ciphertext?: string
+          iv?: string
+          kind?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      vault_keys: {
+        Row: {
+          created_at: string
+          credential_id: string
+          label: string
+          prf_salt: string
+          user_id: string
+          wrapped_dk: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          label: string
+          prf_salt: string
+          user_id?: string
+          wrapped_dk: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          label?: string
+          prf_salt?: string
+          user_id?: string
+          wrapped_dk?: string
+        }
+        Relationships: []
+      }
+      vault_write_log: {
+        Row: {
+          at: string
+          user_id: string
+        }
+        Insert: {
+          at?: string
+          user_id: string
+        }
+        Update: {
+          at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicle_members: {
         Row: {
           joined_at: string

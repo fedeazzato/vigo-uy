@@ -196,6 +196,18 @@
   flex-shrink: 0;
 }
 
+/* Bóveda entry card (specs/secret-vault.md). */
+.vaultText {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.vaultLink {
+  composes: secondary from '../styles/buttons.module.css';
+}
+
 /* Desktop: model and color pickers side by side. */
 @media (min-width: 900px) {
   .pickersRow {
