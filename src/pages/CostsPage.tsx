@@ -166,11 +166,7 @@ export default function CostsPage() {
             <div key={i} className={styles.priceRow}>
               <div className={styles.priceLabel}>
                 {row.label}
-                {row.badge && (
-                  <span className={`${styles.inlineBadge} ${styles[`badge_${row.badgeColor}`]}`}>
-                    {row.badge}
-                  </span>
-                )}
+                {row.badge && row.badgeColor && <Badge color={row.badgeColor}>{row.badge}</Badge>}
               </div>
               <div className={styles.priceValue}>
                 {row.value}

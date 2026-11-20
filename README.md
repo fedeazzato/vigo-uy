@@ -142,7 +142,7 @@ npm run type-check
 MIT — see [LICENSE](LICENSE). Free to use, share, and modify.
 
 This covers the project's own source code. Bundled fonts and JS dependencies
-carry their own permissive licenses (mostly MIT, plus OFL-1.1 for the Inter
-and Space Grotesk fonts), and a handful of vehicle preview photos are
+carry their own permissive licenses (mostly MIT, plus OFL-1.1 for the Roboto
+font), and a handful of vehicle preview photos are
 third-party manufacturer images excluded from that grant — see
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the full breakdown.

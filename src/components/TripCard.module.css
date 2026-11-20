@@ -11,10 +11,9 @@
 }
 
 .routeTitle {
-  font-family: var(--font-display);
   font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 500;
+  color: var(--text-title);
   margin-bottom: 6px;
 }
 
@@ -26,7 +25,7 @@
 
 .routeDistance {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .routeMap {
@@ -63,7 +62,6 @@
   border-radius: 50%;
   border: 2px solid var(--surface);
   flex-shrink: 0;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
 .routeLine {
@@ -111,8 +109,8 @@
   border: none;
   padding: 0;
   font-size: 12.5px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
 }
 .mapTrigger:hover {
   text-decoration: underline;
@@ -124,8 +122,8 @@
   padding-top: 10px;
   border-top: 1px solid var(--border);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
 }
 
 .routeTips {
@@ -137,7 +135,7 @@
 .routeTipsTitle {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 6px;
@@ -221,13 +219,13 @@
 
 .summaryTitle {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
 .summaryMeta {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
@@ -235,8 +233,8 @@
   display: inline-block;
   margin-top: 4px;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
 }
 
 .summaryToggle:hover .summaryHint {

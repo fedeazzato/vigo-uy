@@ -174,7 +174,7 @@ export default function TripCard({ trip, authorName }: TripCardProps) {
             )}
             {/* "Privado" only ever shows on the owner's Mi actividad view:
                 community surfaces fetch public trips exclusively. */}
-            <Badge color={trip.verified ? 'blue' : 'gray'}>
+            <Badge color={trip.verified ? 'blue' : trip.is_public ? 'community' : 'gray'}>
               {trip.verified ? 'Oficial' : trip.is_public ? 'Comunidad' : 'Privado'}
             </Badge>
             {trip.model && <Badge color="blue">{trip.model}</Badge>}

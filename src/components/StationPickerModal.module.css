@@ -19,29 +19,12 @@
 
 .filterLabel {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
 .nearMeBtn {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  min-height: 44px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
-.nearMeBtn:hover:not(:disabled) {
-  background: var(--surface);
-}
-.nearMeBtn:disabled {
-  opacity: 0.6;
-  cursor: default;
+  composes: secondary from '../styles/buttons.module.css';
 }
 
 .viewToggle {
@@ -50,27 +33,26 @@
 }
 
 .viewBtn {
-  background: var(--surface-secondary);
-  border: 1.5px solid var(--border-strong);
+  background: var(--fill-secondary);
+  border: none;
   border-radius: var(--radius-md);
   padding: 6px 14px;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-weight: 500;
+  color: var(--text-primary);
   cursor: pointer;
   font-family: inherit;
 }
 .viewBtnSelected {
-  background: var(--green-50);
-  border-color: var(--green-400);
-  color: var(--green-600);
+  background: var(--fill-selected);
+  color: var(--text-on-fill-selected);
 }
 
 .empty {
   padding: 24px 8px;
   text-align: center;
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .list {
@@ -91,21 +73,20 @@
   align-items: flex-start;
   gap: 2px;
   text-align: left;
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
+  background: var(--fill-secondary);
+  border: none;
   border-radius: var(--radius-md);
   padding: 10px 12px;
   cursor: pointer;
   font-family: inherit;
 }
 .stationRow:hover {
-  background: var(--surface);
-  border-color: var(--border-strong);
+  background: var(--fill-hover);
 }
 
 .stationName {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
   display: inline-flex;
   align-items: center;
@@ -115,28 +96,17 @@
 
 .stationMeta {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .distance {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
 }
 
 .pickBtn {
-  display: block;
+  composes: primary from '../styles/buttons.module.css';
   margin-top: 6px;
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.pickBtn:hover {
-  background: var(--green-600);
+  padding: 0 14px;
 }

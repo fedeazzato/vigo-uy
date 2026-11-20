@@ -19,7 +19,7 @@ export default function ServiceEntryCard({ entry, authorName }: ServiceEntryCard
       <div className={styles.realCaseHeader}>
         <span className={styles.realCaseTitle}>
           {entry.service_type}{' '}
-          <Badge color={entry.verified ? 'blue' : 'gray'}>{entry.verified ? 'Oficial' : 'Comunidad'}</Badge>
+          <Badge color={entry.verified ? 'blue' : 'community'}>{entry.verified ? 'Oficial' : 'Comunidad'}</Badge>
         </span>
         <span className={styles.realCaseCost}>{formatCurrency(entry.cost_uyu)}</span>
       </div>

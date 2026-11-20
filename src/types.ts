@@ -32,10 +32,15 @@ export interface AutonomyData {
 
 export type SourceTag = 'manual' | 'comunidad'
 
+// Badge colour names used by curated JSON (badgeColor fields). The Badge
+// primitive maps each to a role: green/amber/red = status, blue = curated /
+// official, gray = neutral (src/components/UI.module.css).
+export type BadgeColor = 'green' | 'amber' | 'red' | 'blue' | 'gray'
+
 export interface Charger {
   name: string
   badge: string
-  badgeColor: string
+  badgeColor: BadgeColor
   details: string
   tips?: string
   source?: SourceTag
@@ -100,7 +105,7 @@ export interface PerKmRow {
   label: string
   value: string
   badge?: string
-  badgeColor?: string
+  badgeColor?: BadgeColor
 }
 
 export interface ChargeOption {

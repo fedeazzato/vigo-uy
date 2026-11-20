@@ -1,0 +1,72 @@
+/* Car buttons (specs/stock-head-unit-look.md R5): the head unit's dialog
+   confirm/cancel buttons, recreated in CSS. Flat fill, 4 px corners, medium
+   weight, no border, no ripple, no shadow. States follow the car: pressed =
+   60 % alpha, disabled = 30 % fill with grey text; hover is a web-only nudge
+   between the two.
+
+   Page modules reuse these with `composes: primary from '…/buttons.module.css'`
+   and only add their own sizing/spacing. */
+
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.base:hover:not(:disabled) {
+  opacity: 0.85;
+  text-decoration: none;
+}
+.base:active:not(:disabled) {
+  opacity: 0.6;
+}
+.base:disabled {
+  cursor: not-allowed;
+}
+
+/* Confirm: #3d3d3d at night, tan by day. */
+.primary {
+  composes: base;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+.primary:disabled {
+  background: color-mix(in srgb, var(--btn-primary-bg) 30%, transparent);
+  color: var(--text-secondary);
+}
+
+/* Cancel / secondary: #242424 at night, #dad1ca by day. */
+.secondary {
+  composes: base;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+.secondary:disabled {
+  background: color-mix(in srgb, var(--btn-secondary-bg) 30%, transparent);
+  color: var(--text-secondary);
+}
+
+/* Destructive action: the error colour as text on the secondary fill. The
+   car has no red button; the error colour is its only "danger" signal. */
+.danger {
+  composes: base;
+  background: var(--fill-secondary);
+  color: var(--danger-text);
+}
+.danger:disabled {
+  background: color-mix(in srgb, var(--fill-secondary) 30%, transparent);
+  color: var(--text-secondary);
+}

@@ -30,14 +30,15 @@
 .feedCard {
   border-left: 3px solid transparent;
 }
+/* Type tones: the car's chart series plus the accent. */
 .feedCard_viaje {
-  border-left-color: var(--green-400);
+  border-left-color: var(--chart-1);
 }
 .feedCard_service {
-  border-left-color: var(--amber-400);
+  border-left-color: var(--accent);
 }
 .feedCard_repuesto {
-  border-left-color: var(--blue-600);
+  border-left-color: var(--chart-2);
 }
 
 .feedCardHead {
@@ -48,28 +49,20 @@
   margin-bottom: 8px;
 }
 
+/* Flat chip in the secondary fill; the card's type tone shows as its left
+   edge, so the chip text stays in the (always legible) body colour. */
 .typeChip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--fill-secondary);
+  color: var(--text-primary);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-.typeChip_viaje {
-  background: var(--green-50);
-  color: var(--green-600);
-}
-.typeChip_service {
-  background: var(--amber-50);
-  color: var(--amber-600);
-}
-.typeChip_repuesto {
-  background: var(--blue-50);
-  color: var(--blue-600);
 }
 
 .feedCardFoot {
@@ -104,25 +97,25 @@
   min-height: 44px; /* comfortable tap target */
   padding: 8px 16px;
   border: none;
-  border-radius: 22px;
-  background: var(--surface);
-  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  background: var(--fill-secondary);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition:
     background 0.12s,
     color 0.12s;
 }
 .chip:hover {
-  color: var(--text-primary);
+  background: var(--fill-hover);
 }
 
 .chipActive,
 .chipActive:hover {
-  background: var(--green-50);
-  color: var(--green-600);
+  background: var(--fill-selected);
+  color: var(--text-on-fill-selected);
 }
 
 .searchRow {
@@ -164,6 +157,6 @@
 
 .toolbarLabel {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
 }

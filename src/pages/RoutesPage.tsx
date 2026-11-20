@@ -6,11 +6,11 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { preferCommunity, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import styles from '../components/TripCard.module.css'
-import type { RoutesData } from '../types'
+import type { BadgeColor, RoutesData } from '../types'
 
 const data = rawData as RoutesData
 
-const DIFFICULTY_COLOR: Record<string, string> = {
+const DIFFICULTY_COLOR: Record<string, BadgeColor> = {
   'Muy fácil': 'green',
   Fácil: 'green',
   Media: 'amber',

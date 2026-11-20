@@ -6,99 +6,176 @@
   padding: 0;
 }
 
+/* ── Design tokens ──
+   WikiVigo wears the design language of the Vigo's own head unit (see
+   specs/stock-head-unit-look.md; the measured values come from the companion
+   repo's design/STOCK_DESIGN_SYSTEM.md). Only VALUES are reused: no firmware
+   asset (PNG, 9-patch, icon, Lottie) is ever copied into this repo.
+
+   Tokens are role-based: components reference a role (surface, text, accent,
+   status...), never a raw colour, so the two themes stay a pure token swap.
+   Light = the car's day theme (warm beige/brown), dark = the car's night theme
+   (black window, layered greys, one amber accent). Where a car value fails
+   WCAG AA on the web it is darkened along its own hue; the car value is noted
+   next to it. src/designTokens.test.ts checks both themes define the same
+   roles and the contrast of every text/background pair below.
+
+   Car-to-web scale (R4). The car's 1920x970 screen (1 dp = 1 px, read at arm's
+   length) maps to the web at about 0.5, with a 44 px minimum touch target:
+
+   | Car element (dp / sp)                 | Web (px)                          |
+   |---------------------------------------|-----------------------------------|
+   | rail tab item 320 x 90                | rail 240 wide (Spanish labels), rows 48 |
+   | rail label 30 sp, accent line 5 dp    | 15-16 px label, 3 px line         |
+   | hero number 60 sp                     | 30 px                             |
+   | page label / dialog title 36 sp       | 20-22 px, weight 500              |
+   | stat value 36 sp + unit 24 sp         | 20 px + 12 px                     |
+   | card title / row title 28 sp          | 15 px, weight 500                 |
+   | body, dialog message 28 sp            | 14-15 px                          |
+   | label, unit 24 sp                     | 12-13 px                          |
+   | hint, axis label 20-22 sp             | 11-12 px                          |
+   | card padding 40 h / 32 v              | 20 / 16                           |
+   | gap between cards 16                  | 12                                |
+   | primary button 240-280 x 64-88        | min 120 x 44                      |
+   | DFSwitch track 80 x 34, knob 28       | 40 x 17, knob 14 (in a 44 px row)  |
+   | radio-group "pill" height 70          | 36-44                             |
+   | corner radius 4, dividers 2           | 4 (not scaled), 1-2               | */
+
 :root {
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+
+  /* Roboto is the head unit's system font (fontsource, self-hosted). */
+  --font-body: 'Roboto', system-ui, sans-serif;
+
+  --sidebar-width: 240px;
+  --header-height: 56px;
+}
+
+/* Car day */
+:root,
+[data-theme='light'] {
   /* Lets native form controls (e.g. the date input's calendar icon) render
      with the right palette for the active theme instead of the OS default,
      which is invisible against a dark surface. */
   color-scheme: light;
 
-  --green-50: #e1f5ee;
-  --green-100: #9fe1cb;
-  --green-400: #1d9e75;
-  --green-600: #0f6e56;
-  --green-800: #085041;
-
-  --amber-50: #faeeda;
-  --amber-100: #fac775;
-  --amber-400: #ba7517;
-  --amber-600: #854f0b;
-  --amber-800: #633806;
-
-  --blue-50: #e6f1fb;
-  --blue-400: #378add;
-  --blue-600: #185fa5;
-
-  --red-50: #fcebeb;
-  --red-400: #e24b4a;
-  --red-600: #a32d2d;
-
-  --gray-50: #f5f5f3;
-  --gray-100: #eaeae6;
-  --gray-200: #d3d1c7;
-  --gray-400: #888780;
-  --gray-600: #5f5e5a;
-  --gray-800: #2c2c2a;
-
-  --text-primary: #1a1a18;
-  --text-secondary: #5f5e5a;
-  --text-tertiary: #888780;
-
+  /* Surfaces: page (window bg), card (color_dialog), secondary fill for
+     inputs/tracks (rg_background_color), selected fill (radio-group slider),
+     hover fill for rows (web only; night = the car's color_subscribe_time),
+     translucent highlight of the selected rail tab (img_tab_bg). */
+  --surface-secondary: #f7f7f7;
   --surface: #ffffff;
-  --surface-secondary: #f5f5f3;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-strong: rgba(0, 0, 0, 0.18);
+  --fill-secondary: #f1efec;
+  --fill-selected: #c39f84;
+  --fill-hover: #e9e4de;
+  --selected-bg: rgba(245, 228, 203, 0.6);
+
+  /* Text: titles (text_title_color), body (color_black), secondary
+     (select_false #897267, darkened to pass AA on #f1efec). */
+  --text-title: #47382f;
+  --text-primary: #614d40;
+  --text-secondary: #7d685e;
+  /* On --fill-selected. The car uses white on its tan (2.4:1), the title
+     brown keeps the tan and passes AA. */
+  --text-on-fill-selected: #47382f;
+
+  /* Accent: marks = selected-tab line, focus ring, switch on (#af7d5f);
+     text = links and accent values (darkened, AA); fill = tan surfaces. */
+  --accent: #af7d5f;
+  --accent-text: #906348;
+  --accent-fill: #c39f84;
+
+  /* Buttons (df_dialog_confirm_btn / df_dialog_cancel_btn). */
+  --btn-primary-bg: #c39f84;
+  --btn-primary-text: #47382f;
+  --btn-secondary-bg: #dad1ca;
+  --btn-secondary-text: #614d40;
+
+  /* DFSwitch off track. */
+  --switch-off: #e0d3ca;
+
+  /* Lines: dividers in cards and on the page (bottom_line_color), stronger
+     input/control borders, the card outline (day only; night cards are flat). */
+  --border: #ece8e3;
+  --border-strong: #cfc3b9;
+  --divider-page: #ece8e3;
+  --card-border: #ece8e3;
   --swatch-dark-border: rgba(0, 0, 0, 0.15);
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  /* Status: marks (bars, dots; >= 3:1) and text (>= 4.5:1). Car day values:
+     warning #f29913, error #ca6d36. Success is the one muted green kept on
+     purpose (decision D1); the car itself has no green. */
+  --warning: #c2790b;
+  --warning-text: #995f08;
+  --danger: #ca6d36;
+  --danger-text: #a4582b;
+  --success: #589865;
+  --success-text: #45774f;
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  /* Dialog dim (df_color_dialog_mask). */
+  --scrim: rgba(0, 0, 0, 0.6);
 
-  --sidebar-width: 220px;
-  --header-height: 56px;
+  /* Charts: the Energy 7-day curve palette (#bb81c8, #6a98fb, #ded8e7, axis
+     #e0dbe8). Series 1/2 darkened slightly by day to reach 3:1 on white. */
+  --chart-1: #b678c4;
+  --chart-2: #568afa;
+  --chart-3: #ded8e7;
+  --chart-axis: #e0dbe8;
+  --chart-value: #4b405e;
 }
 
+/* Car night */
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --text-primary: #eeeee8;
-  --text-secondary: #a8a8a0;
-  --text-tertiary: #6e6e66;
+  --surface-secondary: #000000;
+  --surface: #1a1a1a;
+  --fill-secondary: #242424;
+  --fill-selected: #3d3d3d;
+  --fill-hover: #303030;
+  --selected-bg: rgba(255, 255, 255, 0.1);
 
-  --surface: #1e1e1c;
-  --surface-secondary: #161614;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  /* Secondary: car color_gray #666666, lifted for AA on #242424. */
+  --text-title: #ffffff;
+  --text-primary: #dbdbdb;
+  --text-secondary: #8c8c8c;
+  --text-on-fill-selected: #ffffff;
+
+  --accent: #e0a876;
+  --accent-text: #e0a876;
+  --accent-fill: #e0a876;
+
+  --btn-primary-bg: #3d3d3d;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #242424;
+  --btn-secondary-text: #dbdbdb;
+
+  --switch-off: #393939;
+
+  --border: #3d3d3d;
+  --border-strong: #575757;
+  --divider-page: #1a1a1a;
+  --card-border: transparent;
   --swatch-dark-border: rgba(255, 255, 255, 0.22);
 
-  --green-50: #0d2b20;
-  --green-100: #1a4535;
-  --green-400: #2db888;
-  --green-600: #4dd4a4;
-  --green-800: #a8f0d8;
+  --warning: #ffa800;
+  --warning-text: #ffa800;
+  --danger: #ff3e3e;
+  /* alert_color #ff3e3e, lifted a little for AA on #242424. */
+  --danger-text: #ff4d4d;
+  --success: #7fb58a;
+  --success-text: #7fb58a;
 
-  --amber-50: #2b1e08;
-  --amber-100: #4a3210;
-  --amber-400: #d4922a;
-  --amber-600: #e8b060;
+  --scrim: rgba(0, 0, 0, 0.8);
 
-  --blue-50: #091e33;
-  --blue-400: #4fa3ed;
-  --blue-600: #7ec1f5;
-
-  --red-50: #2b0d0d;
-  --red-400: #e86b6a;
-  --red-600: #f09090;
-
-  --gray-50: #1e1e1c;
-  --gray-100: #2a2a28;
-  --gray-200: #3a3a38;
-  --gray-400: #787870;
-  --gray-600: #a0a098;
-  --gray-800: #d8d8d0;
+  --chart-1: #bb81c8;
+  --chart-2: #6a98fb;
+  --chart-3: #ded8e7;
+  --chart-axis: #e0dbe8;
+  --chart-value: #dbdbdb;
 }
 
 html {
@@ -115,7 +192,7 @@ body {
 }
 
 a {
-  color: var(--green-600);
+  color: var(--accent-text);
   text-decoration: none;
 }
 
@@ -128,6 +205,18 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* One focus treatment everywhere: the accent ring (no glow, no shadow). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Wide desktop: cap body-copy line length so paragraphs on text-heavy pages
@@ -146,6 +235,6 @@ button {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--gray-200);
-  border-radius: 3px;
+  background: var(--fill-selected);
+  border-radius: var(--radius-sm);
 }

@@ -20,7 +20,6 @@
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--surface-secondary);
 }
 
 .stopHeader {
@@ -31,8 +30,8 @@
 
 .stopHeaderLabel {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .stopMainRow {
@@ -43,7 +42,7 @@
 
 .smallLabel {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .removeStopBtn {
@@ -51,12 +50,12 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: underline;
   cursor: pointer;
 }
 .removeStopBtn:hover {
-  color: var(--red-600);
+  color: var(--danger-text);
 }
 
 .addStopBtn {
@@ -65,8 +64,8 @@
   border: none;
   padding: 0;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
   cursor: pointer;
 }
 .addStopBtn:hover {
@@ -75,7 +74,7 @@
 
 .emptyStops {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .addStationBtn {
@@ -84,8 +83,8 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -99,7 +98,7 @@
 
 .selectedStationName {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
@@ -122,26 +121,19 @@
 }
 
 .modelBtn {
-  background: var(--surface);
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-strong);
+  background: var(--fill-secondary);
+  color: var(--text-primary);
+  border: none;
   border-radius: var(--radius-md);
   padding: 8px 20px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-.modelBtn:hover {
-  border-color: var(--text-tertiary);
+  transition: background 0.15s;
 }
 .modelBtnSelected {
-  background: var(--green-50);
-  border-color: var(--green-400);
-  color: var(--green-600);
+  background: var(--fill-selected);
+  color: var(--text-on-fill-selected);
 }
 
 /* ── Wizard chrome (Paso X de 3) ── */
@@ -156,8 +148,8 @@
 
 .stepCounter {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 400px) {
@@ -182,7 +174,7 @@
 }
 .disclosureBtn:hover {
   color: var(--text-primary);
-  background: var(--surface-secondary);
+  background: var(--fill-hover);
 }
 
 .detailsSection {
@@ -192,7 +184,6 @@
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--surface-secondary);
 }
 
 .shareBlock {
@@ -206,7 +197,7 @@
 
 .modelHint {
   font-size: 12px;
-  color: var(--amber-400);
+  color: var(--warning-text);
   margin-top: 6px;
   display: block;
 }
@@ -236,10 +227,10 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: underline;
   cursor: pointer;
 }
 .discardBtn:hover {
-  color: var(--red-600);
+  color: var(--danger-text);
 }

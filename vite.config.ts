@@ -13,8 +13,10 @@ export default defineConfig({
         short_name: 'Vigo Wiki',
         lang: 'es',
         description: 'Wiki de la comunidad Amantes de la Vigo Uruguay — guía colaborativa de carga, rutas, costos y accesorios.',
-        theme_color: '#1D9E75',
-        background_color: '#ffffff',
+        // Car night (specs/stock-head-unit-look.md); the page updates the
+        // theme-color meta to the active theme at runtime.
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         start_url: '.',
         icons: [

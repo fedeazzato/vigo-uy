@@ -89,6 +89,14 @@ Migrations live in `supabase/migrations/` as numbered `NNNN_name.sql` files and 
 - After every migration, regenerate DB types: `npm run gen:types` (see `src/lib/database.types.ts`).
 - Local Docker development (`supabase start`) is optional, not required.
 
+## Design system (the Vigo head-unit look)
+
+- WikiVigo wears the design language of the car's own screens: `specs/stock-head-unit-look.md`; the measured stock values live in the companion repo's `design/STOCK_DESIGN_SYSTEM.md`. **Light theme = car day** (beige/brown), **dark theme = car night** (black window, layered greys, one amber accent).
+- Tokens in `src/index.css` are **role-based** (`--surface`, `--surface-secondary`, `--fill-secondary`, `--fill-selected`, `--text-title/primary/secondary`, `--accent` / `--accent-text` / `--accent-fill`, `--btn-*`, `--warning/--danger/--success` plus their `-text` variants, `--chart-*`). Reference roles, never raw hex values; the old `--green-*`/`--blue-*`/… scales are gone. `src/designTokens.test.ts` enforces that both themes define the same roles, that no retired or undefined token is referenced, that there are no shadows, and the WCAG AA contrast of every text/background pair — add a pair there when you put a token on a new background.
+- Shapes: 4 px corners everywhere (only dots and progress bars are round), no shadows, no gradients, no pill buttons, Roboto (self-hosted `@fontsource/roboto`) at 400/500/700. Buttons compose the car's confirm/cancel styles from `src/styles/buttons.module.css` (`composes: primary|secondary|danger from …`).
+- Green (`--success`) is reserved for success states; the car's "on/selected" colour is the amber accent.
+- **Never copy firmware assets** (stock PNGs, 9-patches, icons, Lottie files from the vigo-hack repo): the site is public and those are Dongfeng's. Recreate everything with CSS/SVG from the documented values.
+
 ## Theme (dark mode)
 
 - Implemented via `data-theme="light"|"dark"` on `<html>`, set by `UserPrefsContext`

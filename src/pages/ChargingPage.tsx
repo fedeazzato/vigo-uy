@@ -158,7 +158,7 @@ export default function ChargingPage() {
               <span className={styles.chargerName}>{c.name}</span>
               <div>
                 {c.source && (
-                  <Badge color={c.source === 'manual' ? 'blue' : 'gray'}>
+                  <Badge color={c.source === 'manual' ? 'blue' : 'community'}>
                     {c.source === 'manual' ? 'Oficial' : 'Comunidad'}
                   </Badge>
                 )}{' '}

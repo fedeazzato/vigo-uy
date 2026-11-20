@@ -14,9 +14,9 @@
 }
 
 .title {
-  font-family: var(--font-display);
   font-size: 20px;
-  color: var(--text-primary);
+  font-weight: 500;
+  color: var(--text-title);
   margin: 0 0 6px;
 }
 
@@ -27,16 +27,5 @@
 }
 
 .reloadBtn {
-  background: var(--green-600);
-  color: var(--surface);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.reloadBtn:hover {
-  background: var(--green-400);
+  composes: primary from '../styles/buttons.module.css';
 }

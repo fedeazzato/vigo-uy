@@ -7,5 +7,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['src/test/setup.ts'],
+    // CSS stays stubbed in tests, except `?raw` imports: the design-token
+    // test (src/designTokens.test.ts) reads the stylesheets as text.
+    css: { include: [/\?raw/] },
   },
 })

@@ -8,10 +8,9 @@
 /* Like the shared .sectionTitle but without its bottom margin — the
    surrounding .sectionHeader provides the spacing. */
 .sectionHeaderTitle {
-  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-title);
 }
 
 .sectionActions {
@@ -22,8 +21,8 @@
 
 .addLink {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
   text-decoration: none;
   background: none;
   border: none;
@@ -70,14 +69,16 @@
   bottom: 24px;
   transform: translateX(-50%);
   z-index: 250;
-  padding: 10px 16px;
+  padding: 10px 16px 10px 13px;
   border-radius: var(--radius-md);
-  background: var(--gray-800);
-  color: var(--surface);
+  /* Car toast/banner: card colour, a 3 px status bar, no shadow. */
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--success);
+  color: var(--text-primary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   animation: toastUp 0.15s ease-out;
 }
 
@@ -104,34 +105,21 @@
 
 .emptyStateTitle {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .emptyStateText {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   line-height: 1.5;
   max-width: 42ch;
   margin: 0 auto 14px;
 }
 
 .emptyStateBtn {
-  min-height: 46px;
-  padding: 0 20px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--green-400);
-  color: #fff;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.emptyStateBtn:hover {
-  background: var(--green-600);
+  composes: primary from '../styles/buttons.module.css';
 }
 
 @media (max-width: 500px) {

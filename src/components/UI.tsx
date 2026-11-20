@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef } from 'react'
 import styles from './UI.module.css'
-import type { TipItem, StatItem } from '../types'
+import type { TipItem, StatItem, BadgeColor } from '../types'
 
 interface PageHeaderProps {
   title: string
@@ -76,10 +76,12 @@ export function TipList({ items }: TipListProps) {
 
 interface BadgeProps {
   children: ReactNode
-  color?: string
+  // 'community' = community-submitted content: always visually distinct from
+  // curated/official ('blue'), see CLAUDE.md.
+  color?: BadgeColor | 'community'
 }
 
-export function Badge({ children, color = 'green' }: BadgeProps) {
+export function Badge({ children, color = 'gray' }: BadgeProps) {
   return <span className={`${styles.badge} ${styles[`badge_${color}`]}`}>{children}</span>
 }
 

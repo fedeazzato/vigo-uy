@@ -23,7 +23,7 @@ export default function InsuranceQuoteCard({ quote, providerName, addons }: Insu
       <div className={styles.realCaseHeader}>
         <span className={styles.realCaseTitle}>
           {providerName}{' '}
-          <Badge color={quote.verified ? 'blue' : 'gray'}>{quote.verified ? 'Oficial' : 'Comunidad'}</Badge>
+          <Badge color={quote.verified ? 'blue' : 'community'}>{quote.verified ? 'Oficial' : 'Comunidad'}</Badge>
         </span>
         <span className={styles.realCaseCost}>
           {formatCurrency(quote.total_cost_uyu, 2)}

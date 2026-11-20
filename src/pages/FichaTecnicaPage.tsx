@@ -2,7 +2,7 @@ import rawData from '../data/ficha-tecnica.json'
 import { PageHeader, Card, CardTitle, TipList, Badge, Alert, SectionDivider } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import styles from './Pages.module.css'
-import type { FichaTecnicaData, LightSeverity } from '../types'
+import type { BadgeColor, FichaTecnicaData, LightSeverity } from '../types'
 
 const data = rawData as FichaTecnicaData
 
@@ -12,7 +12,7 @@ const SEVERITY_LABEL: Record<LightSeverity, string> = {
   info: 'Indicador de estado',
 }
 
-const SEVERITY_BADGE: Record<LightSeverity, string> = {
+const SEVERITY_BADGE: Record<LightSeverity, BadgeColor> = {
   danger: 'red',
   warning: 'amber',
   info: 'green',

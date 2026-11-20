@@ -16,10 +16,8 @@ dependency (anything in `package.json`'s `"dependencies"`, not
 The OFL requires that the copyright notice and license text travel with any
 redistribution of the font files, so both are reproduced in full below.
 
-- **Inter** — `@fontsource/inter`
-  Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
-- **Space Grotesk** — `@fontsource/space-grotesk`
-  Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
+- **Roboto** — `@fontsource/roboto`
+  Copyright 2011 The Roboto Project Authors (https://github.com/googlefonts/roboto-classic)
 
 <details>
 <summary>SIL Open Font License, Version 1.1 (full text)</summary>

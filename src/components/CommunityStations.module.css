@@ -12,33 +12,11 @@
 }
 
 .addBtn {
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.addBtn:hover {
-  background: var(--green-600);
+  composes: primary from '../styles/buttons.module.css';
 }
 
 .mapBtn {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.mapBtn:hover {
-  background: var(--surface);
+  composes: secondary from '../styles/buttons.module.css';
 }
 
 /* Provider/city/connector/power filter controls above the network cards.
@@ -72,7 +50,7 @@
   min-height: 44px;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
@@ -106,27 +84,13 @@
 
 .stationLabel {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
 .stationSubmitBtn {
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.stationSubmitBtn:hover {
-  background: var(--green-600);
-}
-.stationSubmitBtn:disabled {
-  opacity: 0.6;
-  cursor: default;
+  composes: primary from '../styles/buttons.module.css';
+  align-self: flex-start;
 }
 
 /* ── Station list ── */
@@ -180,7 +144,7 @@
 
 .stationName {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
   display: inline-flex;
   align-items: center;
@@ -189,16 +153,15 @@
 }
 
 .stationPrice {
-  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
   white-space: nowrap;
 }
 
 .stationMeta {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
@@ -209,8 +172,8 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--green-600);
+  font-weight: 500;
+  color: var(--accent-text);
   cursor: pointer;
   font-family: inherit;
 }
@@ -220,7 +183,7 @@
 
 .stationPriceNote {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
@@ -241,30 +204,17 @@
 
 .reportLabel {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .reportBtn {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  min-height: 36px;
+  composes: secondary from '../styles/buttons.module.css';
+  padding: 0 12px;
   font-size: 12px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-}
-.reportBtn:hover {
-  background: var(--gray-100);
-  color: var(--text-primary);
 }
 
 @media (max-width: 500px) {
   .formRow {
     grid-template-columns: 1fr;
-  }
-  .reportBtn {
-    min-height: 44px;
   }
 }

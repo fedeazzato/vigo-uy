@@ -14,7 +14,6 @@
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   max-height: 240px;
   overflow-y: auto;
 }
@@ -29,5 +28,5 @@
 
 .option:hover,
 .optionActive {
-  background: var(--surface-secondary);
+  background: var(--fill-hover);
 }

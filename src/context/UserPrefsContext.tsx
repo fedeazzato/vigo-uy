@@ -95,6 +95,10 @@ export function UserPrefsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', effectiveTheme)
+    // Browser chrome (mobile address bar, PWA title bar) follows the page
+    // background token of the active theme: car night black / car day grey.
+    const pageBg = getComputedStyle(document.documentElement).getPropertyValue('--surface-secondary').trim()
+    if (pageBg) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', pageBg)
   }, [effectiveTheme])
 
   return (

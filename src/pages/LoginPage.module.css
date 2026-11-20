@@ -16,7 +16,7 @@
 .divider {
   text-align: center;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin: 12px 0;
 }
 
@@ -36,12 +36,12 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: underline;
   cursor: pointer;
 }
 .linkBtn:hover:not(:disabled) {
-  color: var(--green-600);
+  color: var(--accent-text);
 }
 .linkBtn:disabled {
   opacity: 0.5;

@@ -9,30 +9,31 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: 1.5px solid var(--border-strong);
+  background: var(--fill-secondary);
+  border: none;
   border-radius: var(--radius-md);
-  padding: 5px 10px;
+  min-height: 36px;
+  padding: 5px 12px;
   font-family: inherit;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    color 0.15s;
+  transition: opacity 0.15s;
 }
 .likeBtn:hover:not(:disabled) {
-  border-color: var(--green-400);
-  color: var(--green-600);
+  opacity: 0.85;
+}
+.likeBtn:active:not(:disabled) {
+  opacity: 0.6;
 }
 .likeBtn:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  color: var(--text-secondary);
 }
+/* Liked = the car's selected fill. */
 .likeBtnActive {
-  border-color: var(--green-400);
-  color: var(--green-600);
-  background: var(--green-50);
+  background: var(--fill-selected);
+  color: var(--text-on-fill-selected);
 }
 
 .commentsToggle {
@@ -40,12 +41,12 @@
   border: none;
   padding: 0;
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   cursor: pointer;
   text-decoration: underline;
 }
 .commentsToggle:hover {
-  color: var(--green-600);
+  color: var(--accent-text);
 }
 
 .comments {
@@ -75,8 +76,8 @@
 
 .commentAuthor {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .commentDelete {
@@ -84,12 +85,12 @@
   border: none;
   padding: 0;
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: underline;
   cursor: pointer;
 }
 .commentDelete:hover {
-  color: var(--red-400);
+  color: var(--danger-text);
 }
 
 .commentForm {
@@ -103,29 +104,15 @@
 }
 
 .commentSubmit {
-  background: var(--green-400);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
+  composes: primary from '../styles/buttons.module.css';
   padding: 0 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.commentSubmit:hover:not(:disabled) {
-  background: var(--green-600);
-}
-.commentSubmit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .signInHint {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 .signInHint a {
-  color: var(--green-600);
-  font-weight: 600;
+  color: var(--accent-text);
+  font-weight: 500;
 }

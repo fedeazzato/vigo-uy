@@ -143,7 +143,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
                     <span className={styles.resultTitle}>{r.title}</span>
                     <span className={styles.resultSubtitle}>{r.subtitle}</span>
                   </span>
-                  <Badge color="blue">Comunidad</Badge>
+                  <Badge color="community">Comunidad</Badge>
                 </button>
               ))}
             </div>

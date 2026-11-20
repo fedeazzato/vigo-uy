@@ -4,16 +4,15 @@
    divergences (extra grid columns, flex titles, right-aligned costs). */
 
 .sectionTitle {
-  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-title);
   margin-bottom: 12px;
 }
 
 .empty {
   font-size: 14px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   padding: 8px 0;
 }
 
@@ -37,26 +36,26 @@
 
 .itemTitle {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
 .itemMeta {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
 .itemCost {
   font-size: 14px;
   font-weight: 700;
-  color: var(--green-600);
+  color: var(--accent-text);
   white-space: nowrap;
 }
 
 .author {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -70,13 +69,13 @@
   border: none;
   padding: 0;
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: underline;
   cursor: pointer;
   white-space: nowrap;
 }
 .actionLink:hover {
-  color: var(--green-600);
+  color: var(--accent-text);
 }
 
 /* "Register yours too" call-to-action card. */
@@ -91,21 +90,7 @@
 }
 
 .ctaBtn {
-  display: inline-block;
-  padding: 8px 14px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--green-400);
-  color: #fff;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.ctaBtn:hover {
-  background: var(--green-600);
+  composes: primary from './buttons.module.css';
 }
 
 @media (max-width: 500px) {
