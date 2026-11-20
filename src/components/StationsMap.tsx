@@ -10,7 +10,7 @@ import FittedMapContainer from './FittedMapContainer'
 import { Badge } from './UI'
 import type { ChargingStation } from '../types'
 
-const MARKER_COLOR = '#1D9E75'
+const MARKER_COLOR = 'var(--accent)'
 const markerIcon = dotIcon(MARKER_COLOR)
 
 interface StationsMapProps {

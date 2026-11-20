@@ -1,3 +1,8 @@
+/* Route polyline: neutral, so the coloured stop dots stay the focus. */
+.routeLine {
+  stroke: var(--text-secondary);
+}
+
 .note {
   padding: 10px 14px;
   font-size: 12.5px;

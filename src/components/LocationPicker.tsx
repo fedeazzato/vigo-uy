@@ -23,7 +23,7 @@ const DEFAULT_CENTER: [number, number] = [-32.8, -56.0]
 const DEFAULT_ZOOM = 7
 const PICKED_ZOOM = 14
 
-const markerIcon = dotIcon('#1D9E75')
+const markerIcon = dotIcon('var(--accent)')
 
 function ClickHandler({ onPick }: { onPick: (next: LatLng) => void }) {
   useMapEvents({

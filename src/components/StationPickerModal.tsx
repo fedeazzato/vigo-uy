@@ -18,8 +18,9 @@ import type { ChargingNetwork, ChargingStation } from '../types'
 import styles from './StationPickerModal.module.css'
 import formStyles from '../styles/formControls.module.css'
 
-const STATION_COLOR = '#1D9E75'
-const ME_COLOR = '#2A6EF3'
+// Stations in the accent, "me" in the second chart series (blue).
+const STATION_COLOR = 'var(--accent)'
+const ME_COLOR = 'var(--chart-2)'
 const stationIcon = dotIcon(STATION_COLOR)
 const meIcon = dotIcon(ME_COLOR)
 

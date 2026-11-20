@@ -41,9 +41,11 @@
   text-overflow: ellipsis;
 }
 
+/* The car's distribution bar (progress_chart): a thin round bar in the first
+   chart series (#bb81c8) on the secondary fill. */
 .barTrack {
-  margin-top: 4px;
-  height: 8px;
+  margin-top: 5px;
+  height: 6px;
   border-radius: 999px;
   background: var(--fill-secondary);
   overflow: hidden;

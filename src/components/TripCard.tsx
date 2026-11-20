@@ -6,11 +6,12 @@ import { formatDate } from '../lib/format'
 import type { Stop, StopType, TripLog } from '../types'
 import styles from './TripCard.module.css'
 
+// Same colours as the trip map markers (TripMap.tsx).
 const STOP_TYPE_STYLES: Record<StopType, { dot: string; label: string }> = {
-  origin: { dot: '#1D9E75', label: 'Origen' },
-  destination: { dot: '#185FA5', label: 'Destino' },
-  charge: { dot: '#BA7517', label: 'Cargar aquí' },
-  warning: { dot: '#E24B4A', label: 'Cuidado' },
+  origin: { dot: 'var(--chart-1)', label: 'Origen' },
+  destination: { dot: 'var(--chart-2)', label: 'Destino' },
+  charge: { dot: 'var(--accent)', label: 'Cargar aquí' },
+  warning: { dot: 'var(--danger)', label: 'Cuidado' },
 }
 
 interface RouteMapProps {

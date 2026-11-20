@@ -17,21 +17,21 @@ import FittedMapContainer from './FittedMapContainer'
 import type { ChargingStation, TripLog } from '../types'
 import styles from './TripMap.module.css'
 
+// The car's chart series for the trip ends and its accent for charging
+// stops; the same colours mark the stops on TripCard's timeline.
 const POINT_COLOR: Record<TripMapPointType, string> = {
-  origin: '#1D9E75',
-  charge: '#BA7517',
-  destination: '#185FA5',
+  origin: 'var(--chart-1)',
+  charge: 'var(--accent)',
+  destination: 'var(--chart-2)',
 }
 
-// Match the marker dot colors (green/amber/blue) instead of a formal
+// Match the marker dot colors (purple/amber/blue) instead of a formal
 // "Origen:"/"Destino:" text label.
 const POINT_EMOJI: Record<TripMapPointType, string> = {
-  origin: '🟢',
+  origin: '🟣',
   charge: '🟠',
   destination: '🔵',
 }
-
-const ROUTE_LINE_COLOR = '#64748B'
 
 interface TripMapProps {
   trip: TripLog
@@ -148,7 +148,9 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
   return (
     <MapModal open={open} onClose={onClose} title={trip.title} ariaLabel={`Mapa de ${trip.title}`}>
       <FittedMapContainer positions={positions} effectiveTheme={effectiveTheme} emptyMessage={emptyMessage}>
-        {routeLine && <Polyline positions={routeLine} pathOptions={{ color: ROUTE_LINE_COLOR, weight: 3 }} />}
+        {/* Stroke colour comes from CSS (a theme token), not from Leaflet's
+            colour option, which only takes literal colours. */}
+        {routeLine && <Polyline positions={routeLine} pathOptions={{ className: styles.routeLine, weight: 3 }} />}
         {allPoints.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={dotIcon(POINT_COLOR[p.type])}>
             <Popup>

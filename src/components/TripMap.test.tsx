@@ -127,7 +127,7 @@ describe('TripMap', () => {
   it('labels points with emoji instead of formal "Origen:"/"Destino:" text', async () => {
     render(<TripMap trip={makeTrip()} open onClose={vi.fn()} />)
     await waitFor(() => expect(screen.getAllByTestId('marker')).toHaveLength(2))
-    expect(screen.getByText(/🟢 Montevideo/)).toBeTruthy()
+    expect(screen.getByText(/🟣 Montevideo/)).toBeTruthy()
     expect(screen.getByText(/🔵 Rocha/)).toBeTruthy()
     expect(screen.queryByText(/Origen/)).toBeNull()
     expect(screen.queryByText(/Destino/)).toBeNull()
@@ -236,7 +236,7 @@ describe('TripMap', () => {
     expect(screen.queryByText('No pudimos ubicar este viaje en el mapa todavía.')).toBeNull()
 
     resolveGeocode({ lat: -34.82, lng: -55.97 })
-    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+    await waitFor(() => expect(screen.getByText(/🟣 Solymar/)).toBeTruthy())
   })
 
   it('places a pin from live geocoding when a city misses the curated lookup', async () => {
@@ -246,7 +246,7 @@ describe('TripMap', () => {
     const trip = makeTrip({ origin: 'Solymar', destination: 'Rocha' })
     render(<TripMap trip={trip} open onClose={vi.fn()} />)
 
-    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+    await waitFor(() => expect(screen.getByText(/🟣 Solymar/)).toBeTruthy())
     expect(screen.getByText(/🔵 Rocha/)).toBeTruthy()
   })
 
@@ -267,7 +267,7 @@ describe('TripMap', () => {
     const trip = makeTrip({ origin: 'Solymar', destination: 'Nowhereville' })
     render(<TripMap trip={trip} open onClose={vi.fn()} />)
 
-    await waitFor(() => expect(screen.getByText(/🟢 Solymar/)).toBeTruthy())
+    await waitFor(() => expect(screen.getByText(/🟣 Solymar/)).toBeTruthy())
     expect(screen.getByText('No encontramos "Nowhereville" para ubicarlo en el mapa.')).toBeTruthy()
   })
 })
