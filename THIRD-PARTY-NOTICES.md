@@ -147,6 +147,18 @@ transparency:
 - `sharp` (PWA icon generation) — Apache-2.0 AND LGPL-3.0-or-later (native `libvips` binaries)
 - `caniuse-lite`, `mdn-data` (browser compatibility data used by build tooling) — CC-BY-4.0 / CC0-1.0
 
+## Data from Open Charge Map
+
+Charging station data shown on the stations map (the "Open Charge Map" layer,
+`specs/ocm-proxy.md`) and the stations seeded into `charging_stations`
+(`specs/charging-stations-seed.md`) come from [Open Charge Map](https://openchargemap.org).
+User-contributed Open Charge Map data is licensed under
+[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/);
+data imported by Open Charge Map from other providers remains under that
+provider's licence. The proxy requests only openly licensed data
+(`opendata=true`) and every answer carries the attribution, including any
+other provider and its licence, which the site shows next to the map.
+
 ## Images that are **not** covered by this project's MIT license
 
 - `public/car-blanco.jpg`, `public/car-beige.jpg`, `public/car-gris.jpg`,

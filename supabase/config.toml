@@ -390,6 +390,11 @@ deno_version = 2
 [functions.car-device]
 verify_jwt = false
 
+# Open Charge Map proxy (specs/ocm-proxy.md): anon-callable on purpose (the
+# car and signed-out visitors); budgets and rate limits live in 0047.
+[functions.ocm-stations]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

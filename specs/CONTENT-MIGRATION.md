@@ -40,3 +40,7 @@ Notes:
   badge) so the list isn't empty for new users. This doesn't change the
   gate above — it only raises the starting row count community
   submissions are compared against.
+- Open Charge Map stations on the stations map (`specs/ocm-proxy.md`) are a
+  third, external source: fetched live through the `ocm-stations` Edge
+  Function, never stored in `charging_stations`, always badged "Open Charge
+  Map". They don't count toward any gate above.

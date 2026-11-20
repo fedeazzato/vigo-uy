@@ -15,3 +15,15 @@ export function dotIcon(color: string): L.DivIcon {
     iconAnchor: [8, 8],
   })
 }
+
+// Hollow ring marker for stations that come from outside WikiVigo (Open
+// Charge Map, specs/ocm-proxy.md): the card colour inside a ring of `color`,
+// so it reads as a different kind of point than the filled WikiVigo dot.
+export function ringIcon(color: string): L.DivIcon {
+  return L.divIcon({
+    className: '',
+    html: `<span style="display:block;box-sizing:border-box;width:16px;height:16px;border-radius:50%;border:3px solid ${color};outline:1px solid var(--surface);background:var(--surface)"></span>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  })
+}
