@@ -135,6 +135,14 @@ Step 4 — car screen (R7):
 - On the car screen the rail footer drops the links/credits (the car rail has none) and keeps the account line and the Claro / Oscuro picker.
 - To check at the car: that the head unit's browser/WebView reports `pointer: coarse` and a 1920 px landscape viewport, and that Leaflet maps pan/zoom and take taps correctly under CSS `zoom` (Leaflet 1.9 compensates for scaled containers; not verifiable offline).
 
+## Open questions for the owner
+1. **Map tiles (pre-existing, affects production now):** CARTO's key-less basemaps answer with "API KEY REQUIRED" watermark tiles. Options: a CARTO account and key (it would be public in the bundle, so only if CARTO allows restricting it to the site's domain), OpenStreetMap's standard tiles (light only; a dark look would need a CSS filter), or another provider with a dark style (terms and attribution to check). The R5 "warmer light tile" choice depends on this.
+2. **Day primary buttons:** dark brown text on the car's tan (AA, implemented) or the car's white on tan (2.4:1, fails AA)?
+3. **Car-screen query:** keep `(pointer: coarse)` (desktop 1080p browsers keep the normal layout) or use the literal R7 query (they would get the 1:1 car layout too)?
+4. **App icon:** `public/favicon.svg` and the generated PWA PNGs are still the green ⚡ square. Redraw in the car palette (e.g. amber bolt on black) and regenerate with `@vite-pwa/assets-generator`?
+5. **Emoji in page and card titles** stay (they are content). Replace them with line icons too, in a follow-up?
+6. `--text-tertiary` was folded into `--text-secondary` (two text levels, like the car). Acceptable, or is a third, dimmer level wanted for large text only?
+
 ## Acceptance criteria
 - Both themes use only role tokens mapped to the car's values (R1); no `--green-*` left; Roboto everywhere; 4 px corners; no shadows.
 - Navigation, cards, buttons, badges, dialogs, alerts and charts follow R5 in both themes on phone and desktop.
