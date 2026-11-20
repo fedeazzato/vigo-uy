@@ -1,6 +1,6 @@
 # Head-unit look: WikiVigo styled like the Vigo's own screens
 
-Status: **approved by the owner 2026-11-19** (decisions D1-D4 below). Not deployed until the owner reviews the result (`npm run deploy` is manual).
+Status: **approved by the owner 2026-11-19** (decisions D1-D4 below); **implemented 2026-11-19** (steps 1-4, see "Implementation notes"), pushed to `main`, **not deployed**: waiting for the owner's visual review (`npm run deploy` is manual).
 
 ## Context
 
@@ -86,6 +86,23 @@ When WikiVigo is opened on a 1920-wide landscape screen (a future "Mi Vigo" view
 - Visual review: screenshots of Home, Mi Vigo, Trip form, Stations map, Costs in both themes at 390 px and 1280 px, side by side with the car photos/uiautomator references in `vigo-hack\design\`; owner review.
 - `npm run type-check`, `npm run lint`, `npm test` all green.
 
+Done (2026-11-19):
+- `src/designTokens.test.ts` (16 tests): same role set in both theme blocks; every R1 role present; car values for the main roles; 4 px radii; no retired `--green-*`/`--blue-*`/`--amber-*`/`--red-*`/`--gray-*` token anywhere in `src/`; every `var(--x)` defined; no shadows / display font; WCAG ratios of 24 text pairs (>= 4.5:1) and 11 UI-mark pairs (>= 3:1) per theme; the car-screen query identical everywhere, zooming 1.875 with zoom-aware viewport units.
+- `src/components/UI.test.tsx` (9 tests): Switch (role, name, checked state, row click, disabled), Segmented (radiogroup/radio roles, single tab stop, click, arrows with wrap, Home/End, other keys ignored), curated vs community badge classes.
+- Existing tests updated where controls changed role (`button` -> `radio` for E2/E2+ and Lista/Mapa, `checkbox` -> `switch` for sharing) and for the origin popup emoji (🟢 -> 🟣).
+- Screenshots: taken with the locally installed Chrome in headless mode driven over the DevTools protocol (no new dev dependency), Home / Mi Vigo / Nuevo viaje / stations map / Costos x dark / light x 390, 1280, 1920 x 970 (touch, car screen) and 1920 x 970 desktop (mouse, to show it keeps the normal layout); saved under `screenshots/stock-head-unit-look/` (gitignored). The trip form needs a session: the harness put a dummy local session in localStorage (the API rejects it, the form still renders). Side-by-side with the car references is the owner's step.
+
+Manual review checklist (owner, before `npm run deploy`):
+1. Dark theme on a phone: black page, `#1a1a1a` cards without outlines, amber only on links / selected marks / switches; text readable outdoors.
+2. Light theme on a phone: warm grey page, white cards with hairline outline, brown text, tan primary buttons with dark-brown text (deviation from the car's white-on-tan, see notes).
+3. Bottom bar: active tab = title colour + amber line under it; Registrar sheet opens as a card with the close icon top-left.
+4. Desktop 1280: the rail (highlight + amber line on the right edge of the selected row), Claro / Oscuro picker in the rail footer, the list scrolls on short windows.
+5. Curated vs community badges are clearly different (filled grey "Oficial" vs amber-outlined "Comunidad"), status badges show a coloured dot.
+6. Forms: inputs on the secondary fill, focus ring amber, the share switch, E2 / E2+ segmented; keyboard: Tab reaches one option per segmented group, arrows move it.
+7. Maps: marker colours per theme, popups and zoom buttons flat; note the CARTO "API KEY REQUIRED" tiles (pre-existing, see open questions).
+8. Car screen (head unit or a 1920 touch tablet in landscape): 320 px rail with 90 px rows, ~28-30 px labels, 88 px buttons; maps pan/zoom/tap correctly.
+9. Theme default: with no choice saved the site follows the phone's system theme; picking Claro or Oscuro sticks.
+
 ## Implementation notes (2026-11-19)
 
 Step 1 — tokens, Roboto, shapes:
@@ -111,6 +128,12 @@ Step 3 — charts and maps:
 - Map markers use tokens (the marker markup lives in the page, so `var()` follows the theme): stations and the location picker in the accent, "me" in `--chart-2`; trip maps and the TripCard timeline share origin = `--chart-1`, destination = `--chart-2`, charge = accent, warning = `--danger` (the popups' colour emoji moved from 🟢 to 🟣 for the origin). The route polyline gets its stroke from CSS (`--text-secondary`), since Leaflet's colour option takes only literal colours. Markers lost their shadow (flat ring + hairline outline).
 - Leaflet chrome (zoom buttons, popups, attribution) restyled globally in `index.css`: card colour, 4 px, hairline border, no shadow.
 - Tiles: still CARTO `light_all` / `dark_all` per theme; the dark softening filter stays (it now sits between the `#000` window and the `#1a1a1a` dialog). **Found while reviewing: CARTO's basemaps currently answer every request with an "API KEY REQUIRED" watermark tile** (checked 2026-11-19 with and without the production Referer; also `rastertiles/voyager`), so the maps are degraded in production too, independently of this change. The "warmer light tile" question (R5) cannot be judged until the tile source is settled — see open questions.
+
+Step 4 — car screen (R7):
+- Implemented as one media query, `(min-width: 1900px) and (orientation: landscape) and (pointer: coarse)`, that sets `zoom: 1.875` on `body` (1.875 = 30 / 16, the inverse of the R4 scale) and a 171 px rail (x 1.875 = the car's 320 dp). Everything else follows from the web sizes: 48 px rows -> 90, 15-16 px labels -> 28-30, 47 px buttons -> 88, 17 x 21.3 px card padding -> 32 x 40, content padding 28 -> 52 (car 56). The viewport becomes 1024 x 517 CSS px, so the >700 px rules keep the rail and hide the mobile bar. Zoom instead of per-component overrides keeps one source of sizes; it needed the `--vh`/`--vw` tokens (raw `100vh` would be zoomed too and overflow the 970 px screen), enforced by the token test.
+- **Deviation:** the spec's query was `(min-width: 1900px) and (orientation: landscape)`. That also matches every maximised browser on a 1920 x 1080 desktop monitor (same width, landscape), which would get the giant car layout. `(pointer: coarse)` limits it to touch screens (the head unit, tablets). Dropping that clause restores the literal spec in one line in each of the four CSS files that carry the query (the token test keeps them identical).
+- On the car screen the rail footer drops the links/credits (the car rail has none) and keeps the account line and the Claro / Oscuro picker.
+- To check at the car: that the head unit's browser/WebView reports `pointer: coarse` and a 1920 px landscape viewport, and that Leaflet maps pan/zoom and take taps correctly under CSS `zoom` (Leaflet 1.9 compensates for scaled containers; not verifiable offline).
 
 ## Acceptance criteria
 - Both themes use only role tokens mapped to the car's values (R1); no `--green-*` left; Roboto everywhere; 4 px corners; no shadows.

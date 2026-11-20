@@ -37,6 +37,13 @@
   cursor: not-allowed;
 }
 
+/* Car screen (index.css): 47 px x 1.875 zoom = the car's 88 px buttons. */
+@media (min-width: 1900px) and (orientation: landscape) and (pointer: coarse) {
+  .base {
+    min-height: 47px;
+  }
+}
+
 /* Confirm: #3d3d3d at night, tan by day. */
 .primary {
   composes: base;

@@ -150,7 +150,9 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
       <FittedMapContainer positions={positions} effectiveTheme={effectiveTheme} emptyMessage={emptyMessage}>
         {/* Stroke colour comes from CSS (a theme token), not from Leaflet's
             colour option, which only takes literal colours. */}
-        {routeLine && <Polyline positions={routeLine} pathOptions={{ className: styles.routeLine, weight: 3 }} />}
+        {routeLine && (
+          <Polyline positions={routeLine} pathOptions={{ className: styles.routeLine, weight: 3 }} />
+        )}
         {allPoints.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={dotIcon(POINT_COLOR[p.type])}>
             <Popup>

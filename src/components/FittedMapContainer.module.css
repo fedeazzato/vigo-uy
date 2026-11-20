@@ -1,5 +1,5 @@
 .mapWrap {
-  height: min(60vh, 480px);
+  height: min(calc(60 * var(--vh)), 480px);
 }
 
 .map {

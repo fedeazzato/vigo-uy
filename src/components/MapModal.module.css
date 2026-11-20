@@ -12,8 +12,8 @@
   left: 50%;
   top: 8%;
   transform: translateX(-50%);
-  width: min(720px, calc(100vw - 32px));
-  max-height: 84vh;
+  width: min(720px, calc(100 * var(--vw) - 32px));
+  max-height: calc(84 * var(--vh));
   z-index: 305;
   /* Car dialog: card colour, 4 px corners, no shadow (the dim does the work). */
   background: var(--surface);

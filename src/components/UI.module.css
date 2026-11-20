@@ -32,6 +32,14 @@
   margin-bottom: 12px;
 }
 
+/* Car screen (index.css): 17 x 21.3 px x 1.875 zoom = the car's 32 x 40 dp
+   card padding. */
+@media (min-width: 1900px) and (orientation: landscape) and (pointer: coarse) {
+  .card {
+    padding: 17px 21.33px;
+  }
+}
+
 .cardTitle {
   display: flex;
   align-items: center;

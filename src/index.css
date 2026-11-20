@@ -39,7 +39,11 @@
    | primary button 240-280 x 64-88        | min 120 x 44                      |
    | DFSwitch track 80 x 34, knob 28       | 40 x 17, knob 14 (in a 44 px row)  |
    | radio-group "pill" height 70          | 36-44                             |
-   | corner radius 4, dividers 2           | 4 (not scaled), 1-2               | */
+   | corner radius 4, dividers 2           | 4 (not scaled), 1-2               |
+
+   On the car's own screen (or any 1920-wide landscape touch screen) the
+   "Car screen" block at the end of this file zooms the whole layout back to
+   1:1 car sizes (R7). */
 
 :root {
   --radius-sm: 4px;
@@ -52,6 +56,12 @@
 
   --sidebar-width: 240px;
   --header-height: 56px;
+
+  /* Viewport units for layout code. They equal 1vh/1vw, except under the
+     car-screen zoom (end of this file), where a raw 100vh would be zoomed too
+     and overflow the screen. */
+  --vh: 1vh;
+  --vw: 1vw;
 }
 
 /* Car day */
@@ -190,7 +200,7 @@ body {
   color: var(--text-primary);
   background: var(--surface-secondary);
   line-height: 1.6;
-  min-height: 100vh;
+  min-height: calc(100 * var(--vh));
 }
 
 a {
@@ -273,6 +283,27 @@ html .leaflet-container .leaflet-control-attribution a {
 @media (min-width: 1100px) {
   main p {
     max-width: 65ch;
+  }
+}
+
+/* ── Car screen (R7, decision D3) ──
+   A 1920-wide landscape touch screen — the head unit itself (1920 x 970 app
+   area) or a tablet — gets the car's own sizes 1:1. The web layout is the car
+   layout at ~0.53 (see the scale table at the top), so zooming it by 1.875
+   restores the car: 48 px rail rows -> 90, 16 px labels -> 30, 15 px -> 28,
+   44-47 px buttons -> 82-88, 21 px card padding -> 40, and the 171 px rail ->
+   320. The viewport is then 1024 x 517 CSS px; >700 px rules keep the rail and
+   hide the mobile bar. The pointer condition keeps ordinary 1080p desktop
+   browsers (mouse, same width) on the normal layout. */
+@media (min-width: 1900px) and (orientation: landscape) and (pointer: coarse) {
+  :root {
+    --sidebar-width: 171px;
+    --vh: calc(1vh / 1.875);
+    --vw: calc(1vw / 1.875);
+  }
+
+  body {
+    zoom: 1.875;
   }
 }
 

@@ -1,6 +1,6 @@
 .shell {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100 * var(--vh));
 }
 
 /* ── Rail (desktop) ──
@@ -13,7 +13,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
+  height: calc(100 * var(--vh));
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -247,7 +247,7 @@
   margin-left: var(--sidebar-width);
   flex: 1;
   min-width: 0;
-  min-height: 100vh;
+  min-height: calc(100 * var(--vh));
 }
 
 .content {
@@ -292,7 +292,7 @@
   left: 50%;
   top: 28%;
   transform: translateX(-50%);
-  width: min(420px, calc(100vw - 32px));
+  width: min(420px, calc(100 * var(--vw) - 32px));
   z-index: 195;
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -543,6 +543,48 @@
     transform: none;
     width: auto;
     animation: sheetUp 0.15s ease-out;
+  }
+}
+
+/* Car screen (index.css zooms everything by 1.875): the 171 px rail becomes
+   the car's 320 dp one, so tighten the row padding to keep the longest
+   Spanish labels on one line; rows stay 48 px (= 90 dp). */
+@media (min-width: 1900px) and (orientation: landscape) and (pointer: coarse) {
+  .brand {
+    padding: 14px 12px 10px;
+  }
+  .searchTrigger {
+    margin: 0 10px;
+  }
+  .vigoTag {
+    padding: 8px 12px 4px;
+  }
+  .navLink {
+    gap: 10px;
+    padding: 0 10px;
+  }
+  .navGroupLabel {
+    margin: 10px 12px 2px;
+  }
+  .navLinkGuide {
+    font-size: 15px;
+  }
+  /* The car rail has no footer: keep only the account line and the theme
+     picker so the tabs get the height. */
+  .sidebarFooter {
+    padding: 8px 10px 10px;
+    gap: 6px;
+  }
+  .footerLinks,
+  .footerText {
+    display: none;
+  }
+  .sidebarFooter [role='radio'] {
+    padding: 0 4px;
+    font-size: 13px;
+  }
+  .content {
+    padding: 1.25rem 1.75rem 3rem;
   }
 }
 

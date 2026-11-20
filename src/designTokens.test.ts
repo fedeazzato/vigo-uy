@@ -142,6 +142,33 @@ describe('token usage across src/', () => {
   })
 })
 
+describe('car screen (R7)', () => {
+  const CAR_QUERY = '(min-width: 1900px) and (orientation: landscape) and (pointer: coarse)'
+
+  it('zooms the layout to 1:1 car sizes and rescales the viewport units', () => {
+    const block = stripComments(indexCss).split(`@media ${CAR_QUERY}`)[1] ?? ''
+    expect(block).toMatch(/zoom:\s*1\.875/)
+    expect(block).toMatch(/--vh:\s*calc\(1vh \/ 1\.875\)/)
+    expect(block).toMatch(/--sidebar-width:\s*171px/) // x 1.875 = the car's 320 dp rail
+  })
+
+  it('uses one identical media query everywhere, so all parts switch together', () => {
+    for (const [path, text] of CSS_SOURCES) {
+      for (const [query] of stripComments(text).matchAll(/@media[^{]*1900px[^{]*/g)) {
+        expect(query.trim(), path).toBe(`@media ${CAR_QUERY}`)
+      }
+    }
+  })
+
+  it('keeps layout code on the zoom-aware viewport units', () => {
+    // Only the --vh / --vw token definitions may use raw viewport units.
+    const tokenDefs = /--v[hw]:\s*(1v[hw]|calc\(1v[hw] \/ 1\.875\));/g
+    for (const [path, text] of CSS_SOURCES) {
+      expect(/\d(vh|vw)\b/.test(stripComments(text).replace(tokenDefs, '')), path).toBe(false)
+    }
+  })
+})
+
 // ── WCAG contrast ──
 
 type Rgba = [number, number, number, number]
