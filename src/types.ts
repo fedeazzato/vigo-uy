@@ -453,6 +453,22 @@ export type Vehicle = Omit<Tables['vehicles']['Row'], 'model'> & {
 // Every column is grouped/coalesced — never null despite the view codegen.
 export type VehicleLeaderboardEntry = NonNullableRow<Views['vehicle_km_leaderboard']['Row']>
 
+// A car head unit linked to the vehicle (specs/car-link-phase0.md). Only the
+// columns `authenticated` is granted (0045): the public key and the replay /
+// rate-limit counters never leave the server.
+export type CarDevice = Pick<
+  Tables['car_devices']['Row'],
+  | 'id'
+  | 'vehicle_id'
+  | 'name'
+  | 'app_version'
+  | 'created_by'
+  | 'created_at'
+  | 'last_seen_at'
+  | 'revoked_at'
+  | 'revoked_by'
+>
+
 // ── Community aggregates (Supabase views) ────────────────────────────────────
 
 // city is filtered non-null in the view; the aggregates never are.

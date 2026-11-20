@@ -1,0 +1,41 @@
+/* "Vincular auto": the form layout comes from formControls.module.css; only
+   the code field and the result block are specific. */
+
+.steps {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* The code reads like the car shows it: monospace, wide letter spacing. */
+.codeInput {
+  font-family: monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-align: center;
+  max-width: 260px;
+}
+
+.target {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.submitBtn {
+  composes: submitBtn from '../styles/formControls.module.css';
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.primaryLink {
+  composes: primary from '../styles/buttons.module.css';
+}

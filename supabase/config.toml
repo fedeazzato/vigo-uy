@@ -385,6 +385,11 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Car link (specs/car-link-phase0.md): the car authenticates every request
+# with its ECDSA P-256 device signature, not with a Supabase JWT.
+[functions.car-device]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

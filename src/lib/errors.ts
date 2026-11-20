@@ -16,6 +16,10 @@ const KNOWN_TRIGGER_MESSAGES = [
   'Para salir del vehículo',
   'Solo quien creó el vehículo',
   'Ese usuario no es integrante',
+  // Car link (0045)
+  'Demasiados intentos',
+  'Tu vehículo ya tiene',
+  'Ese dispositivo no está vinculado',
 ]
 
 export function toFriendlyError(error: unknown): string {

@@ -13,6 +13,7 @@ import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../component
 import { CarPreview } from '../components/CarPreview'
 import ProfileCard from '../components/ProfileCard'
 import VehicleCard from '../components/VehicleCard'
+import CarDevicesCard from '../components/CarDevicesCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
@@ -176,6 +177,7 @@ export default function MyVigoPage() {
           )}
           <ProfileCard />
           <VehicleCard />
+          <CarDevicesCard />
         </>
       )}
 
