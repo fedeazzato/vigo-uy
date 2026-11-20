@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#1D9E75"/>
-  <text x="16" y="22" text-anchor="middle" font-size="18" fill="white">⚡</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 30 120 120">
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="30" y1="30" x2="72" y2="150">
+      <stop offset="0" stop-color="#ecbd8c"/><stop offset="1" stop-color="#b37b4f"/>
+    </linearGradient>
+    <clipPath id="t"><rect x="30" y="30" width="120" height="120" rx="4"/></clipPath>
+    <mask id="m"><rect x="30" y="30" width="120" height="120" fill="#fff"/><polygon points="60.4,55.6 119.6,55.6 124.6,72.4 55.4,72.4" fill="#000"/><rect x="49.2" y="82.6" width="81.6" height="1.7" fill="#000"/><rect x="47.4" y="81.4" width="2" height="14.4" fill="#000"/><rect x="130.6" y="81.4" width="2" height="14.4" fill="#000"/><rect x="48.6" y="101.6" width="82.8" height="1.3" fill="#000"/><rect x="67.5" y="105.6" width="45" height="5" rx="1.2" fill="#000"/><polygon points="92.6,86.4 86.4,94.6 89.9,94.6 88.2,100.4 94.4,92.2 90.9,92.2" fill="#000"/></mask>
+  </defs>
+  <g clip-path="url(#t)">
+    <rect x="30" y="30" width="120" height="120" fill="url(#g)"/>
+    <circle cx="120" cy="52" r="70" fill="#fff" fill-opacity="0.090"/>
+    <circle cx="120" cy="52" r="46" fill="#fff" fill-opacity="0.135"/>
+    <rect x="30" y="128" width="120" height="22" fill="#fff" fill-opacity="0.12"/>
+    <g fill="#ffffff" mask="url(#m)"><polygon points="62,51.8 118,51.8 120.6,54.2 126.6,74.6 133.6,78.9 134.7,113.6 45.3,113.6 46.4,78.9 53.4,74.6 59.4,54.2"/><rect x="66.5" y="49.4" width="6" height="3.2" rx="0.8"/><rect x="107.5" y="49.4" width="6" height="3.2" rx="0.8"/><rect x="42.6" y="63.2" width="9.8" height="9.2" rx="1.6"/><rect x="127.6" y="63.2" width="9.8" height="9.2" rx="1.6"/><rect x="51.5" y="68.2" width="6" height="2.4" rx="0.4"/><rect x="122.5" y="68.2" width="6" height="2.4" rx="0.4"/><rect x="45.6" y="114.9" width="13" height="11.1" rx="2.2"/><rect x="121.4" y="114.9" width="13" height="11.1" rx="2.2"/></g>
+  </g>
 </svg>

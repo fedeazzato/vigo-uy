@@ -15,6 +15,9 @@ import type { EffectiveTheme } from '../context/UserPrefsContext'
 import { useAuth } from '../context/AuthContext'
 import { RegisterSheetContext } from '../context/RegisterSheetContext'
 
+// The car launcher-tile brand mark (public/favicon.svg, made by scripts/make-brand-icon.cjs).
+const BRAND_ICON = `${import.meta.env.BASE_URL}favicon.svg`
+
 const THEME_ICON: Record<EffectiveTheme, IconName> = {
   light: 'sun',
   dark: 'moon',
@@ -134,7 +137,7 @@ export default function Layout() {
       <div className={styles.shell}>
         <aside className={styles.sidebar}>
           <div className={styles.brand}>
-            <Icon name="charge" size={26} className={styles.brandIcon} />
+            <img src={BRAND_ICON} width={32} height={32} alt="" className={styles.brandIcon} />
             <div>
               <div className={styles.brandName}>Wiki Vigo</div>
               <div className={styles.brandSub}>Uruguay 🇺🇾</div>
@@ -232,7 +235,7 @@ export default function Layout() {
         <div className={styles.mobileHeader}>
           <div className={styles.mobileHeaderTop}>
             <div className={styles.brand}>
-              <Icon name="charge" size={24} className={styles.brandIcon} />
+              <img src={BRAND_ICON} width={28} height={28} alt="" className={styles.brandIcon} />
               <div className={styles.brandName}>Wiki Vigo Uruguay</div>
             </div>
             <div className={styles.mobileHeaderActions}>
