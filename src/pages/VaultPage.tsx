@@ -385,14 +385,15 @@ function DashcamCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📹">Frase de recuperación de la dashcam</CardTitle>
       <p className={styles.text}>
-        Las 24 palabras que abren las grabaciones de la dashcam después de un reinicio de fábrica. El auto las
-        muestra con un QR en el primer arranque y en <strong>Ajustes › Frase de recuperación</strong> (después
-        del PIN).
+        Las 24 palabras que abren las grabaciones de la dashcam después de un reinicio de fábrica. Dónde
+        encontrarlas: en el auto, <strong>Dashcam › Ajustes › Frase de recuperación</strong> (después del PIN):
+        escanea el QR que muestra el auto. La app Dashcam también lo muestra en su primer arranque. Si la Dashcam
+        todavía no está instalada en el auto, aún no hay frase.
       </p>
       <p className={styles.status}>
         {item
           ? `Guardada · última actualización el ${formatTimestampDate(item.updated_at)}`
-          : 'Todavía no guardaste la frase.'}
+          : 'Todavía no guardaste la frase. En el auto: Dashcam › Ajustes › Frase de recuperación, escanea el QR que muestra el auto.'}
       </p>
       <Feedback error={fb.error} message={fb.message} />
 

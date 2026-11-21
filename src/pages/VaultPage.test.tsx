@@ -138,6 +138,15 @@ describe('VaultPage', () => {
     expect(db.keys[0].label).toBe('Pixel de Ana')
   })
 
+  it('tells where the dashcam words are when none is saved (specs/vault-onboarding.md R-A1/R-A2)', async () => {
+    renderPage()
+    await enrol()
+    const hint = await screen.findByText(/Todavía no guardaste la frase\./)
+    expect(hint.textContent).toContain('Dashcam › Ajustes › Frase de recuperación')
+    expect(hint.textContent).toContain('escanea el QR que muestra el auto')
+    expect(screen.getByText(/todavía no está instalada en el auto/)).toBeTruthy()
+  })
+
   it('validates pasted words live and saves only ciphertext', async () => {
     renderPage()
     await enrol()
