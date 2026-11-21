@@ -20,7 +20,7 @@ const DK_BYTES = 32
 const TAG_BYTES = 16
 export const WRAPPED_DK_BYTES = IV_BYTES + DK_BYTES + TAG_BYTES
 
-export type VaultSource = 'qr' | 'paste' | 'generated' | 'typed'
+export type VaultSource = 'qr' | 'paste' | 'generated' | 'typed' | 'car'
 
 /** What is inside an item's ciphertext (never stored or sent in the clear). */
 export interface VaultPlaintext {
@@ -167,7 +167,7 @@ function decodePlaintext(bytes: Uint8Array): VaultPlaintext {
     p.v !== 1 ||
     typeof p.value !== 'string' ||
     typeof p.savedAt !== 'string' ||
-    !['qr', 'paste', 'generated', 'typed'].includes(p.source as string)
+    !['qr', 'paste', 'generated', 'typed', 'car'].includes(p.source as string)
   ) {
     throw new VaultCryptoError('bad_format')
   }

@@ -21,9 +21,11 @@ import {
   signalUnknownVaultCredential,
   vaultAuthErrorMessage,
 } from './webauthn'
-import { deleteVaultItem, deleteVaultKey, insertVaultKey, saveVaultItem } from './vaultApi'
+import { deleteInboxKey, deleteInboxRow, deleteVaultItem, deleteVaultKey, insertVaultKey, publishInboxKey, saveVaultItem } from './vaultApi'
+import { decryptInbox, generateInboxKeyPair, packInboxPrivate, unpackInboxPrivate } from './inbox'
+import { RecoveryCodeError, canonicalRecoveryCode, recoveryErrorMessage } from './recoveryCode'
 import { base64ToBytes, bytesToBase64 } from './encoding'
-import type { VaultItemKind, VaultItemRow, VaultKeyRow } from '../../types'
+import type { VaultInboxRow, VaultItemKind, VaultItemRow, VaultKeyRow } from '../../types'
 
 export const MAX_LABEL_LENGTH = 40
 
@@ -199,4 +201,75 @@ export async function deleteStoredItems(items: VaultItemRow[]): Promise<{ error:
     if (result.error) return result
   }
   return { error: null }
+}
+
+// ── Inbox (specs/vault-onboarding.md Phase C) ────────────────────────────────
+
+/**
+ * Lets the linked car send the dashcam words: a new inbox key pair, its
+ * private half stored as a vault item (encrypted with the data key), its
+ * public half published. One passkey prompt. Re-running rotates the key
+ * (anything the car sent to the old one can no longer be opened).
+ */
+export async function enableInbox(user: VaultUser, keys: VaultKeyRow[], now: Date = new Date()): Promise<{ error: string | null }> {
+  if (keys.length === 0) return { error: 'Primero activá la bóveda con una llave de acceso.' }
+  try {
+    const dataKey = await unlockDataKey(user, keys, false)
+    const pair = await generateInboxKeyPair()
+    const published = await publishInboxKey(pair.publicKey)
+    if (published.error || !published.keyId) return { error: published.error ?? 'No se pudo activar el envío desde el auto.' }
+    const encrypted = await encryptItem(dataKey, user.id, 'vault_inbox_private_key', {
+      v: 1,
+      value: packInboxPrivate(published.keyId, pair.privateKey),
+      source: 'generated',
+      savedAt: now.toISOString(),
+    })
+    const saved = await saveVaultItem({ kind: 'vault_inbox_private_key', ...encrypted })
+    if (saved.error) {
+      // A published key without its private half would swallow what the car sends.
+      await deleteInboxKey()
+      return saved
+    }
+    return { error: null }
+  } catch (error) {
+    return { error: vaultErrorMessage(error) }
+  }
+}
+
+/**
+ * Moves what the car sent into the vault: decrypts the inbox row with the
+ * private key item, checks the words, stores a normal dashcam_recovery item,
+ * deletes the row. One passkey prompt.
+ */
+export async function importInbox(
+  user: VaultUser,
+  keys: VaultKeyRow[],
+  privateItem: VaultItemRow,
+  row: VaultInboxRow,
+  now: Date = new Date()
+): Promise<{ error: string | null }> {
+  if (keys.length === 0) return { error: 'No hay ninguna llave que pueda abrir la bóveda.' }
+  if (row.kind !== 'dashcam_recovery') return { error: 'Envío desconocido.' }
+  try {
+    const dataKey = await unlockDataKey(user, keys, false)
+    const stored = await decryptItem(dataKey, user.id, 'vault_inbox_private_key', privateItem)
+    const priv = unpackInboxPrivate(stored.value)
+    if (!priv || priv.keyId !== row.key_id.toLowerCase()) {
+      return { error: 'Este envío se cifró con una llave anterior. Pedile al auto que lo envíe de nuevo.' }
+    }
+    const words = await decryptInbox(priv.pkcs8, user.id, 'dashcam_recovery', row.key_id, row)
+    const canonical = await canonicalRecoveryCode(words)
+    const encrypted = await encryptItem(dataKey, user.id, 'dashcam_recovery', {
+      v: 1,
+      value: canonical,
+      source: 'car',
+      savedAt: now.toISOString(),
+    })
+    const saved = await saveVaultItem({ kind: 'dashcam_recovery', ...encrypted })
+    if (saved.error) return saved
+    return await deleteInboxRow(row.id)
+  } catch (error) {
+    if (error instanceof RecoveryCodeError) return { error: recoveryErrorMessage(error) }
+    return { error: vaultErrorMessage(error) }
+  }
 }

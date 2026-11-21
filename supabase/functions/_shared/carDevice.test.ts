@@ -395,3 +395,82 @@ describe('handleCarDevice: heartbeat and unpair', () => {
     expect((await call(post(reformatted, SIG), rpc)).status).toBe(401)
   })
 })
+
+// Bóveda inbox (specs/vault-onboarding.md Phase C).
+describe('handleCarDevice: inbox', () => {
+  const KEY_ID = '0b9d6a7e-1c2f-4e3d-8a5b-9c0d1e2f3a4b'
+  const USER = '11111111-2222-4333-8444-555555555555'
+  const IV = 'AQIDBAUGBwgJCgsM'
+  const CT = 'A'.repeat(96)
+  const putBody = (o: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      v: 1,
+      action: 'inbox_put',
+      device_id: DEVICE,
+      ts: VECTOR_NOW,
+      kind: 'dashcam_recovery',
+      key_id: KEY_ID,
+      epk: SPKI,
+      iv: IV,
+      ciphertext: CT,
+      ...o,
+    })
+
+  it('parses inbox_key and inbox_put and rejects bad fields', () => {
+    expect(parseCarRequest(`{"v":1,"action":"inbox_key","device_id":"${DEVICE}","ts":1}`)).toEqual({
+      action: 'inbox_key',
+      ts: 1,
+      deviceId: DEVICE,
+    })
+    expect(parseCarRequest(putBody())).toMatchObject({ action: 'inbox_put', keyId: KEY_ID, epk: SPKI })
+    for (const bad of [
+      { kind: 'settings_backup_passphrase' },
+      { key_id: 'x' },
+      { epk: 'MFkw' },
+      { iv: 'short' },
+      { ciphertext: 'A'.repeat(1404) },
+      { ciphertext: 'A'.repeat(10) },
+      { ciphertext: 'A!'.repeat(20) },
+    ]) {
+      expect(parseCarRequest(putBody(bad))).toBeNull()
+    }
+  })
+
+  it('inbox_key returns the owner key only after the device signature verified', async () => {
+    const body = `{"v":1,"action":"inbox_key","device_id":"${DEVICE}","ts":${VECTOR_NOW}}`
+    const answer = ok({ user_id: USER, key_id: KEY_ID, public_key: SPKI })
+    const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: answer })
+    const r = await call(post(body, await fresh.sign(body)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, user_id: USER, key_id: KEY_ID, public_key: SPKI, server_time: VECTOR_NOW })
+    expect(calls[1]).toEqual({ fn: 'car_vault_inbox_key', args: { p_device_id: DEVICE, p_ts: VECTOR_NOW } })
+
+    const forged = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: answer })
+    expect((await call(post(body, SIG), forged.rpc)).status).toBe(401)
+    expect(forged.calls).toHaveLength(1) // never reached the inbox function
+  })
+
+  it('inbox_put forwards the ciphertext fields and maps no_inbox / stale_key', async () => {
+    const body = putBody()
+    const sig = await fresh.sign(body)
+    const okRun = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_put: ok({ ok: true }) })
+    const r = await call(post(body, sig), okRun.rpc)
+    expect(r.status).toBe(200)
+    expect(okRun.calls[1]).toEqual({
+      fn: 'car_vault_inbox_put',
+      args: { p_device_id: DEVICE, p_ts: VECTOR_NOW, p_kind: 'dashcam_recovery', p_key_id: KEY_ID, p_epk: SPKI, p_iv: IV, p_ciphertext: CT },
+    })
+    for (const [guard, status] of [['no_inbox', 404], ['stale_key', 409], ['replay', 409]] as const) {
+      const run = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_put: ok({ error: guard }) })
+      const res = await call(post(body, sig), run.rpc)
+      expect(res.status).toBe(status)
+      expect(res.body.error).toBe(guard)
+    }
+  })
+
+  it('a malformed inbox_key row is a 500, not a leaked partial answer', async () => {
+    const body = `{"v":1,"action":"inbox_key","device_id":"${DEVICE}","ts":${VECTOR_NOW}}`
+    const run = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: ok({ user_id: USER, key_id: KEY_ID, public_key: 'x' }) })
+    expect((await call(post(body, await fresh.sign(body)), run.rpc)).status).toBe(500)
+  })
+})

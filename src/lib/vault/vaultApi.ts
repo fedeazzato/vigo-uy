@@ -4,7 +4,7 @@
 // comes from the column default (auth.uid()), never from the client.
 import { supabase } from '../supabaseClient'
 import { toFriendlyError } from '../errors'
-import type { VaultItemKind, VaultItemRow, VaultKeyRow } from '../../types'
+import type { VaultInboxKeyRow, VaultInboxRow, VaultItemKind, VaultItemRow, VaultKeyRow } from '../../types'
 
 const UNAVAILABLE_MESSAGE = 'La bóveda no está disponible en este momento.'
 export const VAULT_KEY_COLUMNS = 'credential_id, prf_salt, wrapped_dk, label, created_at'
@@ -77,5 +77,46 @@ export async function saveVaultItem(item: EncryptedVaultItem): Promise<{ error: 
 export async function deleteVaultItem(kind: VaultItemKind): Promise<{ error: string | null }> {
   if (!supabase) return { error: UNAVAILABLE_MESSAGE }
   const { error } = await supabase.from('vault_items').delete().eq('kind', kind)
+  return { error: error ? toFriendlyError(error) : null }
+}
+
+// ── Inbox (migration 0049, specs/vault-onboarding.md Phase C) ─────────────────
+// Only called when VAULT_INBOX_ENABLED (the tables do not exist before 0049).
+
+export interface InboxSnapshot {
+  key: VaultInboxKeyRow | null
+  rows: VaultInboxRow[]
+}
+
+export async function fetchInbox(): Promise<InboxSnapshot & { error: string | null }> {
+  if (!supabase) return { key: null, rows: [], error: UNAVAILABLE_MESSAGE }
+  const [key, rows] = await Promise.all([
+    supabase.from('vault_inbox_keys').select('key_id, public_key, created_at').maybeSingle(),
+    supabase.from('vault_inbox').select('id, kind, key_id, epk, iv, ciphertext, created_at'),
+  ])
+  const error = key.error ?? rows.error
+  if (error) return { key: null, rows: [], error: toFriendlyError(error) }
+  return { key: key.data ?? null, rows: rows.data ?? [], error: null }
+}
+
+/** Publishes the inbox public key (replacing an older one) and returns its new key_id. */
+export async function publishInboxKey(publicKey: string): Promise<{ keyId: string | null; error: string | null }> {
+  if (!supabase) return { keyId: null, error: UNAVAILABLE_MESSAGE }
+  const removed = await supabase.from('vault_inbox_keys').delete().not('key_id', 'is', null)
+  if (removed.error) return { keyId: null, error: toFriendlyError(removed.error) }
+  const { data, error } = await supabase.from('vault_inbox_keys').insert({ public_key: publicKey }).select('key_id').single()
+  if (error) return { keyId: null, error: toFriendlyError(error) }
+  return { keyId: data.key_id, error: null }
+}
+
+export async function deleteInboxKey(): Promise<{ error: string | null }> {
+  if (!supabase) return { error: UNAVAILABLE_MESSAGE }
+  const { error } = await supabase.from('vault_inbox_keys').delete().not('key_id', 'is', null)
+  return { error: error ? toFriendlyError(error) : null }
+}
+
+export async function deleteInboxRow(id: string): Promise<{ error: string | null }> {
+  if (!supabase) return { error: UNAVAILABLE_MESSAGE }
+  const { error } = await supabase.from('vault_inbox').delete().eq('id', id)
   return { error: error ? toFriendlyError(error) : null }
 }

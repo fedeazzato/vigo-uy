@@ -932,6 +932,65 @@ export type Database = {
           },
         ]
       }
+      // Hand-written for migration 0049 (vault inbox, specs/vault-onboarding.md Phase C) until it is applied and
+      // `npm run gen:types` regenerates this file; the shapes follow 0049_vault_inbox.sql.
+      vault_inbox: {
+        Row: {
+          ciphertext: string
+          created_at: string
+          device_id: string | null
+          epk: string
+          id: string
+          iv: string
+          key_id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          ciphertext: string
+          created_at?: string
+          device_id?: string | null
+          epk: string
+          id?: string
+          iv: string
+          key_id: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          ciphertext?: string
+          created_at?: string
+          device_id?: string | null
+          epk?: string
+          id?: string
+          iv?: string
+          key_id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vault_inbox_keys: {
+        Row: {
+          created_at: string
+          key_id: string
+          public_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          key_id?: string
+          public_key: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          key_id?: string
+          public_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vault_items: {
         Row: {
           ciphertext: string

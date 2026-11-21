@@ -66,4 +66,52 @@ Proposed instead, a **vault inbox** with asymmetric encryption, keeping the serv
 
 ## Decisions for the owner
 - Phase B: built (owner 2026-11-21).
-- Phase C: worth the migration and car-side work, or is one QR scan in the Dashcam app (Phase A wording) enough?
+- Phase C: built, waiting for the owner to apply the migration and deploy the function (steps above).
+
+## Phase C as built (2026-11-21): code ready, NOT applied to production
+
+Owner: "do as much as you can now". Everything below is in the repository and tested; nothing was pushed to the database or
+deployed to Edge Functions, and the web UI is hidden behind a build flag, so the live site is unchanged.
+
+**Crypto (C1-C3, refined).** `src/lib/vault/inbox.ts` (WebCrypto) and its Java twin in vigo-hack
+`accounts_proxy/core/.../InboxCrypto.java`; a fixed cross-language vector (`src/lib/vault/inboxVectors.ts`, pinned byte for byte on
+both sides):
+- shared = ECDH-P256(ephemeral, recipient); key = HKDF-SHA-256(ikm = shared, salt = utf8(key_id),
+  info = "vigo-vault/inbox/v1" 0x00 user_id 0x00 kind); AES-256-GCM, 12-byte IV,
+  AAD = "vigo-vault/inbox-aad/v1" 0x00 user_id 0x00 kind 0x00 key_id; plaintext = the canonical words.
+- The private key is a normal vault item, kind `vault_inbox_private_key`, value "<key_id> <PKCS#8 base64>", encrypted with the
+  data key like every item (so the passkey is still the only way in).
+- **Rotation:** "Generar una llave nueva" replaces the public key (new key_id) and the private item; anything sent to the old key is
+  refused by the server (`stale_key`) or, if already stored, shown with "se cifró con una llave anterior".
+- **Replay:** device calls go through `car_device_accept` (signed ts, monotonic, 120/h); a replayed upload of an old ciphertext can at
+  worst re-deliver the same words. One row per user and kind; a new sending replaces the old.
+- **Recipient:** the member who paired the device (`car_devices.created_by`) while still a member of its vehicle (`car_vault_recipient`).
+- **One passkey prompt** per operation: `enableInbox` (generate, publish, store private) and `importInbox` (unwrap, decrypt, check
+  the words with the recovery-code checksum, store as `dashcam_recovery` with source `car`, delete the row).
+
+**Database:** `supabase/migrations/0049_vault_inbox.sql` (0048 belongs to the unmerged car-status-e1 branch): kind CHECK extended,
+`vault_inbox_keys`, `vault_inbox`, RLS (own rows; inbox insert only through the service-role RPC), write-limit trigger on the key,
+`car_vault_recipient`, `car_vault_inbox_key`, `car_vault_inbox_put` (service_role only). Hand-written types in
+`src/lib/database.types.ts` until `gen:types`.
+
+**Edge Function:** `car-device` actions `inbox_key` (returns user_id, key_id, public_key) and `inbox_put` (kind, key_id, epk, iv,
+ciphertext), strict parsing, errors `no_inbox` 404 and `stale_key` 409. NOTE: the car-status-e1 branch also changes `carDevice.ts`
+(action `status`); merging both needs a small manual merge of the parser/handler switch.
+
+**Web:** `InboxCard` in the Bóveda ("Recibir la frase desde el auto"), rendered only when `VITE_VAULT_INBOX=1`
+(`src/lib/vault/inboxFlag.ts`); with the flag off the inbox tables are never queried.
+
+**Car (vigo-hack):** Mi Vigo sends (it owns the device key and the signed client); the Dashcam app hands it the words after the PIN.
+See vigo-hack `accounts_proxy/MIVIGO.md` and `dashcam` for the switch (default off).
+
+**Tests:** `inbox.test.ts` (vector, round trip, tamper/wrong user/wrong key_id/wrong key, labels, packing), `vaultInbox.test.ts`
+(enable -> car sends -> import, rotation refusal, bad words, withdraw key on failure, needs a passkey), `VaultPage.inbox.test.tsx`
+(flag off = no card and no queries; enable/send/save; discard), `carDevice.test.ts` (parse, signature first, forwarding, error
+mapping, malformed row).
+
+**Owner steps to switch it on** (each needs the owner's OK):
+1. `npx supabase db push` (applies 0049; check it applies cleanly after whatever is merged first).
+2. `npm run gen:types` (should equal the hand-written types; commit).
+3. `npx supabase functions deploy car-device --no-verify-jwt`.
+4. Build and deploy the site with `VITE_VAULT_INBOX=1` (e.g. add it to `.env.production` or the deploy command).
+5. On the car: install the Mi Vigo and Dashcam builds with the inbox, set `vault_inbox=true` in mivigo.conf (car steps in vigo-hack).
