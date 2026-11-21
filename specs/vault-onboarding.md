@@ -101,8 +101,12 @@ ciphertext), strict parsing, errors `no_inbox` 404 and `stale_key` 409. NOTE: th
 **Web:** `InboxCard` in the Bóveda ("Recibir la frase desde el auto"), rendered only when `VITE_VAULT_INBOX=1`
 (`src/lib/vault/inboxFlag.ts`); with the flag off the inbox tables are never queried.
 
-**Car (vigo-hack):** Mi Vigo sends (it owns the device key and the signed client); the Dashcam app hands it the words after the PIN.
-See vigo-hack `accounts_proxy/MIVIGO.md` and `dashcam` for the switch (default off).
+**Car (vigo-hack 229e2d0, not pushed):** Mi Vigo 2.2 sends (it owns the device key and the signed client): core `InboxCrypto`
+(reproduces the vector's ciphertext byte for byte), `Client.sendWords` (signed `inbox_key` -> encrypt -> signed `inbox_put`, one
+re-fetch on `stale_key`), `VaultReceiver` (explicit ordered broadcast `com.vigo.mivigo.VAULT_SEND`, signature permission
+`VAULT_SEND`, words never stored or logged), switch `vault_inbox=true` in mivigo.conf (default false). The Dashcam app's
+"Enviar a mi Bóveda" button (recovery-phrase dialog, after the PIN) exists only in a `VAULT_INBOX=1` build. Details and car checks:
+vigo-hack `accounts_proxy/MIVIGO.md` section 10.
 
 **Tests:** `inbox.test.ts` (vector, round trip, tamper/wrong user/wrong key_id/wrong key, labels, packing), `vaultInbox.test.ts`
 (enable -> car sends -> import, rotation refusal, bad words, withdraw key on failure, needs a passkey), `VaultPage.inbox.test.tsx`
