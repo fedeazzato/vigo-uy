@@ -561,6 +561,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ocm_rate_counters: {
+        Row: {
+          bucket: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          bucket?: string
+          hits?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      ocm_tile_cache: {
+        Row: {
+          expires_at: string | null
+          failed_at: string | null
+          fetched_at: string | null
+          lease_until: string | null
+          payload: Json | null
+          station_count: number
+          tile_key: string
+          truncated: boolean
+          updated_at: string
+        }
+        Insert: {
+          expires_at?: string | null
+          failed_at?: string | null
+          fetched_at?: string | null
+          lease_until?: string | null
+          payload?: Json | null
+          station_count?: number
+          tile_key: string
+          truncated?: boolean
+          updated_at?: string
+        }
+        Update: {
+          expires_at?: string | null
+          failed_at?: string | null
+          fetched_at?: string | null
+          lease_until?: string | null
+          payload?: Json | null
+          station_count?: number
+          tile_key?: string
+          truncated?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ocm_upstream_state: {
+        Row: {
+          blocked_until: string | null
+          id: number
+          last_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          id?: number
+          last_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          id?: number
+          last_error?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       part_purchases: {
         Row: {
           category: string
@@ -1177,6 +1252,15 @@ export type Database = {
       is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
+      ocm_tiles_begin: {
+        Args: { p_can_fetch?: boolean; p_client: string; p_tiles: string[] }
+        Returns: Json
+      }
+      ocm_tiles_fail: {
+        Args: { p_keys: string[]; p_reason: string }
+        Returns: undefined
+      }
+      ocm_tiles_store: { Args: { p_tiles: Json }; Returns: number }
       poll_car_pairing: { Args: { p_code: string }; Returns: Json }
       remove_vehicle_member: {
         Args: { target_user: string }
