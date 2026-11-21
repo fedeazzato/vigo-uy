@@ -61,6 +61,7 @@ const GUARD_ERRORS: Record<string, CarErrorCode> = {
   clock: 'clock',
   replay: 'replay',
   rate_limited: 'rate_limited',
+  bad_request: 'bad_request', // car_submit_status: a value the database refuses
   no_inbox: 'no_inbox', // Bóveda inbox: nobody to send to (no key published / recipient left the vehicle)
   stale_key: 'stale_key', // Bóveda inbox: encrypted to a rotated key
 }
@@ -83,6 +84,7 @@ export type CarRequest =
   | { action: 'poll'; ts: number; code: string }
   | { action: 'heartbeat'; ts: number; deviceId: string; appVersion: string | null }
   | { action: 'unpair'; ts: number; deviceId: string }
+  | { action: 'status'; ts: number; deviceId: string; status: CarStatus }
   | { action: 'inbox_key'; ts: number; deviceId: string }
   | {
       action: 'inbox_put'
@@ -94,6 +96,52 @@ export type CarRequest =
       iv: string
       ciphertext: string
     }
+
+/** Last known status snapshot (specs/car-status-e1.md); no location field exists. */
+export interface CarStatus {
+  event: 'trip_end' | 'charge_end'
+  observed_at: number
+  soc: number | null
+  range_km: number | null
+  charging: boolean | null
+  plugged: boolean | null
+  charge_end_reason: string | null
+}
+
+const CHARGE_END_REASONS = ['completa', 'limite', 'desenchufado', 'fallo', 'detenida', 'sin_datos']
+const STATUS_KEYS = ['event', 'observed_at', 'soc', 'range_km', 'charging', 'plugged', 'charge_end_reason']
+
+function optInt(v: unknown, min: number, max: number): number | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max ? v : undefined
+}
+
+function optBool(v: unknown): boolean | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'boolean' ? v : undefined
+}
+
+/** Validates the "status" object of a status call; null = bad_request. Unknown keys are refused (nothing extra is stored). */
+export function parseCarStatus(raw: unknown): CarStatus | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+  const o = raw as Record<string, unknown>
+  if (Object.keys(o).some((k) => !STATUS_KEYS.includes(k))) return null
+  if (o.event !== 'trip_end' && o.event !== 'charge_end') return null
+  const observed = o.observed_at
+  if (typeof observed !== 'number' || !Number.isSafeInteger(observed) || observed <= 0) return null
+  const soc = optInt(o.soc, 0, 100)
+  const range = optInt(o.range_km, 0, 1500)
+  const charging = optBool(o.charging)
+  const plugged = optBool(o.plugged)
+  if (soc === undefined || range === undefined || charging === undefined || plugged === undefined) return null
+  let reason: string | null = null
+  if (o.charge_end_reason !== undefined && o.charge_end_reason !== null) {
+    if (o.event !== 'charge_end' || typeof o.charge_end_reason !== 'string') return null
+    if (!CHARGE_END_REASONS.includes(o.charge_end_reason)) return null
+    reason = o.charge_end_reason
+  }
+  return { event: o.event, observed_at: observed, soc, range_km: range, charging, plugged, charge_end_reason: reason }
+}
 
 export function isP256Spki(key: unknown): key is string {
   return typeof key === 'string' && P256_SPKI.test(key)
@@ -169,6 +217,12 @@ export function parseCarRequest(text: string): CarRequest | null {
     case 'unpair':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
       return { action: 'unpair', ts, deviceId: o.device_id.toLowerCase() }
+    case 'status': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      const status = parseCarStatus(o.status)
+      if (!status) return null
+      return { action: 'status', ts, deviceId: o.device_id.toLowerCase(), status }
+    }
     // Bóveda inbox (specs/vault-onboarding.md Phase C): the owner's inbox public key / ECIES ciphertext upload.
     case 'inbox_key':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
@@ -295,7 +349,7 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       }
     }
 
-    // heartbeat / unpair / inbox: verify with the device's stored key first.
+    // heartbeat / unpair / status / inbox: verify with the device's stored key first.
     const keyRes = await deps.rpc('car_device_public_key', { p_device_id: parsed.deviceId })
     if (keyRes.error) {
       log(`car_device_public_key failed: ${keyRes.error}`)
@@ -344,7 +398,13 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
             p_ts: parsed.ts,
             p_app_version: parsed.appVersion,
           })
-        : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+        : parsed.action === 'status'
+          ? await deps.rpc('car_submit_status', {
+              p_device_id: parsed.deviceId,
+              p_ts: parsed.ts,
+              p_status: parsed.status,
+            })
+          : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
     if (res.error) {
       log(`${parsed.action} failed: ${res.error}`)
       return fail('server', now)
@@ -356,6 +416,7 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
     }
     if (typeof row.error === 'string') return fail(GUARD_ERRORS[row.error] ?? 'server', now)
     if (parsed.action === 'unpair') return reply(200, { ok: true }, now)
+    if (parsed.action === 'status') return reply(200, { ok: true, stored: row.stored === true }, now)
     return reply(
       200,
       { ok: true, device_id: row.device_id, device_name: row.device_name, members: memberNames(row.members) },

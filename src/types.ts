@@ -545,3 +545,17 @@ export interface CuratedSearchResult {
   title: string
   subtitle?: string
 }
+
+// Last known status of the linked car (specs/car-status-e1.md R4). No location column exists.
+export type CarStatus = Pick<
+  Tables['car_status']['Row'],
+  | 'vehicle_id'
+  | 'event'
+  | 'soc'
+  | 'range_km'
+  | 'charging'
+  | 'plugged'
+  | 'charge_end_reason'
+  | 'observed_at'
+  | 'received_at'
+>

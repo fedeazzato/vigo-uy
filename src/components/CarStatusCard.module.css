@@ -1,0 +1,12 @@
+/* "Estado del auto" (specs/car-status-e1.md R4): two muted lines under the stat grid. */
+.when {
+  margin: 10px 0 2px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
