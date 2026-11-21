@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
+import VaultChecklist from '../components/VaultChecklist'
 import { supabase } from '../lib/supabaseClient'
 import {
   MAX_DEVICE_NAME_LENGTH,
@@ -75,6 +76,8 @@ export default function LinkCarPage() {
             <Link to="/mi-vigo" className={styles.primaryLink}>
               Ver dispositivos vinculados
             </Link>
+            {/* specs/vault-onboarding.md Phase B: the next steps instead of a dead end. */}
+            <VaultChecklist />
           </div>
         ) : (
           <form className={formStyles.form} onSubmit={submit}>

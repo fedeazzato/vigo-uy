@@ -1,6 +1,6 @@
 # Bóveda onboarding: say where the dashcam words are, and a guided flow after pairing the car
 
-**Status:** Phase A implemented (wording + test). Phases B and C are design only, for the owner to decide.
+**Status:** Phase A implemented. Phase B implemented and deployed (owner 2026-11-21: "do as much as you can now"). Phase C: see its section.
 
 ## Context
 
@@ -22,7 +22,7 @@ The project's end goal is to reach non-technical Vigo owners (`vigo-hack/wikivig
 - Files: `src/pages/VaultPage.tsx`, `src/pages/VaultPage.test.tsx`, `specs/secret-vault.md` (R6 line).
 - Test plan: the empty dashcam card shows "Dashcam › Ajustes › Frase de recuperación" and "escanea el QR que muestra el auto".
 
-## Phase B (design): guided flow right after "Vinculado"
+## Phase B (implemented): guided flow right after "Vinculado"
 
 After `claim_car_pairing` succeeds, `LinkCarPage` shows a short checklist instead of a dead end:
 1. **Llave de acceso** (if the user has none): "Activar con huella o rostro" inline (the Bóveda's enrolment), with the nudge to add a
@@ -32,6 +32,13 @@ After `claim_car_pairing` succeeds, `LinkCarPage` shows a short checklist instea
 3. **Frase de la dashcam**: if the paired car reports the Dashcam app (car-link device info), "En el auto: Dashcam › Ajustes › Frase de
    recuperación → escanea el QR"; the scanner opens here. If not installed: "Cuando instales la Dashcam".
 Each step can be skipped ("Más tarde") and is then shown in the Bóveda. Nothing new is stored; it only re-arranges existing actions.
+
+As built (2026-11-21): `src/components/VaultChecklist.tsx` rendered by `LinkCarPage` after a successful claim. The car does not report
+whether the Dashcam is installed (no such device info today), so step 3 always shows the hint with "Todavía no tengo la Dashcam" as
+its skip. Steps 2 and 3 need step 1 (the passkey) first. A generated passphrase is shown once (2 min, cleared on hide/pagehide).
+"Guardar una que ya tengo" stays in the Bóveda (linked). Tests: `src/components/VaultChecklist.test.tsx` (order and real state,
+already-saved items, skipping, bad QR saves nothing, no-PRF browser, passphrase hidden on visibilitychange); `LinkCarPage.test.tsx`
+checks the checklist appears after "Vinculado".
 
 ## Phase C (design): no second QR at all: the car sends the words into the vault, still end-to-end
 
@@ -58,5 +65,5 @@ Proposed instead, a **vault inbox** with asymmetric encryption, keeping the serv
   car-link client. Medium.
 
 ## Decisions for the owner
-- Phase B: build it (small, no schema change)?
+- Phase B: built (owner 2026-11-21).
 - Phase C: worth the migration and car-side work, or is one QR scan in the Dashcam app (Phase A wording) enough?
