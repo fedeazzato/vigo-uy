@@ -1,6 +1,6 @@
 # Car status E1: "last known status" of the linked car
 
-**Status:** Implemented on branch `car-status-e1` (migration + Edge Function action + tests); **not applied, not deployed**. The web card (R4) is specified but not built. The car side is built offline in the companion repo (`vigo-hack`: Mi Vigo `StatusReceiver`, Carga `StatusShare`), switched **off** by default. Owner steps at the end.
+**Status:** Merged into `main` with R4 built and the site deployed (2026-11-21); the card stays hidden until migration 0048 is applied. **Migration and Edge Function NOT applied** (owner OK pending, see "Production steps"). Car side in `vigo-hack`, off by default (`share_status=false`).
 
 ## Context
 
@@ -50,7 +50,7 @@ STATUS_BODY = {"v":1,"action":"status","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b
 - **Mi Vigo** (`accounts_proxy`, `StatusReceiver` + `StatusSender`): accepts the broadcast only from holders of `com.vigo.accountslauncher.permission.STATUS` (signature); keeps the newest snapshot; sends it signed inside `goAsync` when `share_status=true`, linked and online; otherwise waits for the next trip/charge end or "Sincronizar ahora". Drops it on `bad_request` / `revoked` / unknown device; keeps it on network / server / rate-limit errors.
 - Expected volume: a few calls per day per car (well under the 120/hour device cap).
 
-### R4. Web card "Estado del auto" (Mi Vigo, signed in; NOT built in this branch)
+### R4. Web card "Estado del auto" (Mi Vigo, signed in; built 2026-11-21: `src/components/CarStatusCard.tsx`, `src/lib/carStatus.ts`)
 
 - Under "Mi vehículo", only when a `car_status` row exists for the vehicle: "Batería 80 %", "Autonomía 266 km", "Cargando" / "Enchufado" / "Desenchufado", the event in words ("al terminar una carga: llegó al límite" / "al terminar un viaje") and "hace 2 h" from `observed_at`, plus a muted line "Último dato que el auto envió con conexión; no es en vivo."
 - Select explicit columns; empty state: nothing (or a hint to turn on `share_status` on the car).
@@ -83,9 +83,28 @@ STATUS_BODY = {"v":1,"action":"status","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b
 | Another app on the car injects snapshots into Mi Vigo | The receiver requires a signature permission of the project key; Mi Vigo validates every value again. |
 | Replay of a captured status call | Same as every car call: TLS, signed body, strictly increasing ts, 5-minute window. |
 
-## Owner steps
+## Production steps (owner OK required; run once, applies BOTH 0048 car status and 0049 Bóveda inbox)
 
-1. Review `0048_car_status.sql` and the `carDevice.ts` changes; `npm test`, `npm run type-check`, `npm run lint` pass on the branch.
-2. `npx supabase db push`; `npx supabase functions deploy car-device --no-verify-jwt`; `npm run gen:types`.
-3. Decide on R4 (the web card) and build it as a follow-up.
-4. Car: install Mi Vigo and Carga from `vigo-hack`, put `share_status=true` in `mivigo.conf` only when you want it.
+What changes in production:
+- Database: new tables `car_status` (0048; members of a vehicle can read their row; written only by `car_submit_status`) and
+  `vault_inbox_keys` / `vault_inbox` (0049; owners only), their RLS policies, the SQL functions `car_submit_status`,
+  `car_vault_inbox_key`, `car_vault_inbox_put`, `car_vault_recipient`. No existing table or column is changed; 0048 and 0049 do not
+  reference each other.
+- Edge Function `car-device`: three new signed actions (`status`, `inbox_key`, `inbox_put`); the existing `poll` / `heartbeat` /
+  `unpair` behave as before (58 tests).
+- Site: nothing visible changes until a car sends a status (card) or `VITE_VAULT_INBOX=1` is built (inbox card).
+
+Commands (from `C:Projectsigo-wiki`, on an up-to-date `main`):
+```
+git pull
+npx supabase db push                                  # applies 0048_car_status.sql and 0049_vault_inbox.sql (it lists them first)
+npx supabase functions deploy car-device --no-verify-jwt
+npm run gen:types                                     # replaces the hand-written car_status / vault_inbox* types
+npm run type-check && npm run lint && npm test
+git commit -am "Regenerate DB types after 0048 and 0049" && git push
+npm run deploy                                        # only needed if gen:types changed anything visible (it should not)
+```
+Undo (if ever needed): a new migration dropping those tables/functions; redeploy the previous `car-device` from git.
+
+Car (vigo-hack NEXT_VISIT): Mi Vigo 2.2 + Carga installed; `share_status=true` in `mivigo.conf` when the owner wants it; end a short trip
+online, then the card shows on Mi Vigo.

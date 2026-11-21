@@ -25,6 +25,7 @@ const PAIRING_CODE = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const APP_VERSION = /^[0-9A-Za-z._+-]{1,20}$/
 const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
+const IV_B64 = /^[A-Za-z0-9+/]{16}$/
 
 export type CarErrorCode =
   | 'bad_request'
@@ -36,6 +37,8 @@ export type CarErrorCode =
   | 'too_large'
   | 'rate_limited'
   | 'server'
+  | 'no_inbox'
+  | 'stale_key'
 
 const STATUS: Record<CarErrorCode, number> = {
   bad_request: 400,
@@ -47,6 +50,8 @@ const STATUS: Record<CarErrorCode, number> = {
   too_large: 413,
   rate_limited: 429,
   server: 500,
+  no_inbox: 404,
+  stale_key: 409,
 }
 
 /** What the SQL guard (car_device_accept) may answer, mapped to the wire. */
@@ -57,6 +62,8 @@ const GUARD_ERRORS: Record<string, CarErrorCode> = {
   replay: 'replay',
   rate_limited: 'rate_limited',
   bad_request: 'bad_request', // car_submit_status: a value the database refuses
+  no_inbox: 'no_inbox', // Bóveda inbox: nobody to send to (no key published / recipient left the vehicle)
+  stale_key: 'stale_key', // Bóveda inbox: encrypted to a rotated key
 }
 
 export interface RpcResult {
@@ -78,6 +85,17 @@ export type CarRequest =
   | { action: 'heartbeat'; ts: number; deviceId: string; appVersion: string | null }
   | { action: 'unpair'; ts: number; deviceId: string }
   | { action: 'status'; ts: number; deviceId: string; status: CarStatus }
+  | { action: 'inbox_key'; ts: number; deviceId: string }
+  | {
+      action: 'inbox_put'
+      ts: number
+      deviceId: string
+      kind: 'dashcam_recovery'
+      keyId: string
+      epk: string
+      iv: string
+      ciphertext: string
+    }
 
 /** Last known status snapshot (specs/car-status-e1.md); no location field exists. */
 export interface CarStatus {
@@ -205,6 +223,29 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (!status) return null
       return { action: 'status', ts, deviceId: o.device_id.toLowerCase(), status }
     }
+    // Bóveda inbox (specs/vault-onboarding.md Phase C): the owner's inbox public key / ECIES ciphertext upload.
+    case 'inbox_key':
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      return { action: 'inbox_key', ts, deviceId: o.device_id.toLowerCase() }
+    case 'inbox_put': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      if (o.kind !== 'dashcam_recovery') return null
+      if (typeof o.key_id !== 'string' || !UUID.test(o.key_id)) return null
+      if (!isP256Spki(o.epk)) return null
+      if (typeof o.iv !== 'string' || !IV_B64.test(o.iv)) return null
+      const ct = o.ciphertext
+      if (typeof ct !== 'string' || ct.length < 24 || ct.length > 1400 || ct.length % 4 !== 0 || !BASE64.test(ct)) return null
+      return {
+        action: 'inbox_put',
+        ts,
+        deviceId: o.device_id.toLowerCase(),
+        kind: 'dashcam_recovery',
+        keyId: o.key_id.toLowerCase(),
+        epk: o.epk,
+        iv: o.iv,
+        ciphertext: ct,
+      }
+    }
     default:
       return null
   }
@@ -308,7 +349,7 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       }
     }
 
-    // heartbeat / unpair / status: verify with the device's stored key first.
+    // heartbeat / unpair / status / inbox: verify with the device's stored key first.
     const keyRes = await deps.rpc('car_device_public_key', { p_device_id: parsed.deviceId })
     if (keyRes.error) {
       log(`car_device_public_key failed: ${keyRes.error}`)
@@ -317,6 +358,38 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
     const key = keyRes.data
     if (!isP256Spki(key)) return fail('bad_signature', now)
     if (!(await verifyCarSignature(key, signature, bytes))) return fail('bad_signature', now)
+
+    if (parsed.action === 'inbox_key' || parsed.action === 'inbox_put') {
+      const inboxRes =
+        parsed.action === 'inbox_key'
+          ? await deps.rpc('car_vault_inbox_key', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+          : await deps.rpc('car_vault_inbox_put', {
+              p_device_id: parsed.deviceId,
+              p_ts: parsed.ts,
+              p_kind: parsed.kind,
+              p_key_id: parsed.keyId,
+              p_epk: parsed.epk,
+              p_iv: parsed.iv,
+              p_ciphertext: parsed.ciphertext,
+            })
+      if (inboxRes.error) {
+        log(`${parsed.action} failed: ${inboxRes.error}`)
+        return fail('server', now)
+      }
+      const inboxRow = asRecord(inboxRes.data)
+      if (!inboxRow) return fail('server', now)
+      if (typeof inboxRow.error === 'string') return fail(GUARD_ERRORS[inboxRow.error] ?? 'server', now)
+      if (parsed.action === 'inbox_put') return reply(200, { ok: true }, now)
+      if (!isP256Spki(inboxRow.public_key) || typeof inboxRow.key_id !== 'string' || typeof inboxRow.user_id !== 'string') {
+        log('inbox_key: malformed row')
+        return fail('server', now)
+      }
+      return reply(
+        200,
+        { ok: true, user_id: inboxRow.user_id, key_id: inboxRow.key_id, public_key: inboxRow.public_key },
+        now
+      )
+    }
 
     const res =
       parsed.action === 'heartbeat'

@@ -16,6 +16,9 @@ vi.mock('../lib/carLink', async (importOriginal) => ({
   fetchMyVehicleMemberNames: mocks.fetchMyVehicleMemberNames,
 }))
 
+// The Bóveda checklist has its own tests (VaultChecklist.test.tsx).
+vi.mock('../components/VaultChecklist', () => ({ default: () => <div>Checklist de la bóveda</div> }))
+
 import LinkCarPage from './LinkCarPage'
 
 function renderAt(path: string) {
@@ -82,6 +85,7 @@ describe('LinkCarPage', () => {
     await screen.findByText(/quedó vinculado a tu vehículo/)
     expect(mocks.claimCarPairing).toHaveBeenCalledWith('K7Q2M9', 'Mi Vigo')
     expect(screen.getByRole('link', { name: 'Ver dispositivos vinculados' })).toBeTruthy()
+    expect(screen.getByText('Checklist de la bóveda')).toBeTruthy() // vault-onboarding.md Phase B
   })
 
   it('shows the server error and keeps the form', async () => {

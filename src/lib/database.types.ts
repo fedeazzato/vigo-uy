@@ -175,6 +175,47 @@ export type Database = {
           },
         ]
       }
+      // Hand-written for migration 0048 (car status E1, specs/car-status-e1.md) until it is applied and
+      // `npm run gen:types` regenerates this file; the shapes follow 0048_car_status.sql.
+      car_status: {
+        Row: {
+          charge_end_reason: string | null
+          charging: boolean | null
+          device_id: string | null
+          event: string
+          observed_at: string
+          plugged: boolean | null
+          range_km: number | null
+          received_at: string
+          soc: number | null
+          vehicle_id: string
+        }
+        Insert: {
+          charge_end_reason?: string | null
+          charging?: boolean | null
+          device_id?: string | null
+          event: string
+          observed_at: string
+          plugged?: boolean | null
+          range_km?: number | null
+          received_at?: string
+          soc?: number | null
+          vehicle_id: string
+        }
+        Update: {
+          charge_end_reason?: string | null
+          charging?: boolean | null
+          device_id?: string | null
+          event?: string
+          observed_at?: string
+          plugged?: boolean | null
+          range_km?: number | null
+          received_at?: string
+          soc?: number | null
+          vehicle_id?: string
+        }
+        Relationships: []
+      }
       charging_networks: {
         Row: {
           country: string
@@ -931,6 +972,65 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      // Hand-written for migration 0049 (vault inbox, specs/vault-onboarding.md Phase C) until it is applied and
+      // `npm run gen:types` regenerates this file; the shapes follow 0049_vault_inbox.sql.
+      vault_inbox: {
+        Row: {
+          ciphertext: string
+          created_at: string
+          device_id: string | null
+          epk: string
+          id: string
+          iv: string
+          key_id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          ciphertext: string
+          created_at?: string
+          device_id?: string | null
+          epk: string
+          id?: string
+          iv: string
+          key_id: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          ciphertext?: string
+          created_at?: string
+          device_id?: string | null
+          epk?: string
+          id?: string
+          iv?: string
+          key_id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vault_inbox_keys: {
+        Row: {
+          created_at: string
+          key_id: string
+          public_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          key_id?: string
+          public_key: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          key_id?: string
+          public_key?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       vault_items: {
         Row: {

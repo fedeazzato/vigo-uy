@@ -469,7 +469,15 @@ export type CarDevice = Pick<
 >
 
 // Bóveda (specs/secret-vault.md, 0046): ciphertext only, own rows only.
-export type VaultItemKind = 'dashcam_recovery' | 'settings_backup_passphrase'
+export type VaultItemKind = 'dashcam_recovery' | 'settings_backup_passphrase' | 'vault_inbox_private_key'
+
+// Bóveda inbox (0049, specs/vault-onboarding.md Phase C): the user's inbox public key and what the car sent (ciphertext).
+export type VaultInboxKeyRow = Pick<Tables['vault_inbox_keys']['Row'], 'key_id' | 'public_key' | 'created_at'>
+export type VaultInboxRow = Pick<
+  Tables['vault_inbox']['Row'],
+  'id' | 'kind' | 'key_id' | 'epk' | 'iv' | 'ciphertext' | 'created_at'
+>
+
 
 // One enrolled passkey: its PRF salt and its wrap of the user's data key.
 export type VaultKeyRow = Pick<
@@ -537,3 +545,17 @@ export interface CuratedSearchResult {
   title: string
   subtitle?: string
 }
+
+// Last known status of the linked car (specs/car-status-e1.md R4). No location column exists.
+export type CarStatus = Pick<
+  Tables['car_status']['Row'],
+  | 'vehicle_id'
+  | 'event'
+  | 'soc'
+  | 'range_km'
+  | 'charging'
+  | 'plugged'
+  | 'charge_end_reason'
+  | 'observed_at'
+  | 'received_at'
+>

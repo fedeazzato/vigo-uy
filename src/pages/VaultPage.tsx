@@ -4,11 +4,21 @@ import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import QrScanner from '../components/QrScanner'
 import RecoveryWordsGrid from '../components/RecoveryWordsGrid'
 import { useAuth } from '../context/AuthContext'
-import { deleteVaultItem, fetchVault, type VaultSnapshot } from '../lib/vault/vaultApi'
+import {
+  deleteInboxRow,
+  deleteVaultItem,
+  fetchInbox,
+  fetchVault,
+  type InboxSnapshot,
+  type VaultSnapshot,
+} from '../lib/vault/vaultApi'
+import { VAULT_INBOX_ENABLED } from '../lib/vault/inboxFlag'
 import { detectPrfSupport, PRF_UNSUPPORTED_MESSAGE, type PrfSupport } from '../lib/vault/webauthn'
 import {
   MAX_LABEL_LENGTH,
   deleteStoredItems,
+  enableInbox,
+  importInbox,
   enrolPasskey,
   guessDeviceLabel,
   removePasskey,
@@ -26,7 +36,7 @@ import {
 import { generatePassphrase, passphraseError } from '../lib/vault/passphrase'
 import type { VaultPlaintext } from '../lib/vault/envelope'
 import { formatTimestampDate } from '../lib/carLink'
-import type { VaultItemKind, VaultItemRow, VaultKeyRow } from '../types'
+import type { VaultInboxRow, VaultItemKind, VaultItemRow, VaultKeyRow } from '../types'
 import styles from './VaultPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
@@ -385,14 +395,15 @@ function DashcamCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📹">Frase de recuperación de la dashcam</CardTitle>
       <p className={styles.text}>
-        Las 24 palabras que abren las grabaciones de la dashcam después de un reinicio de fábrica. El auto las
-        muestra con un QR en el primer arranque y en <strong>Ajustes › Frase de recuperación</strong> (después
-        del PIN).
+        Las 24 palabras que abren las grabaciones de la dashcam después de un reinicio de fábrica. Dónde
+        encontrarlas: en el auto, <strong>Dashcam › Ajustes › Frase de recuperación</strong> (después del PIN):
+        escanea el QR que muestra el auto. La app Dashcam también lo muestra en su primer arranque. Si la Dashcam
+        todavía no está instalada en el auto, aún no hay frase.
       </p>
       <p className={styles.status}>
         {item
           ? `Guardada · última actualización el ${formatTimestampDate(item.updated_at)}`
-          : 'Todavía no guardaste la frase.'}
+          : 'Todavía no guardaste la frase. En el auto: Dashcam › Ajustes › Frase de recuperación, escanea el QR que muestra el auto.'}
       </p>
       <Feedback error={fb.error} message={fb.message} />
 
@@ -504,6 +515,103 @@ function DashcamCard({ shared }: { shared: Shared }) {
           )}
         </div>
       )}
+    </Card>
+  )
+}
+
+// ── Recibir la frase desde el auto (inbox, specs/vault-onboarding.md Phase C) ──
+
+function InboxCard({ shared }: { shared: Shared }) {
+  const [inbox, setInbox] = useState<InboxSnapshot | null>(null)
+  const fb = useFeedback()
+  const canUse = shared.prfUsable && shared.keys.length > 0
+  const privateItem = itemOf(shared.items, 'vault_inbox_private_key')
+
+  const { setError } = fb // stable (useState setter); `fb` itself is a new object on every render
+  const load = useCallback(async () => {
+    const r = await fetchInbox()
+    if (r.error) setError(r.error)
+    setInbox({ key: r.key, rows: r.rows })
+  }, [setError])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  async function enable() {
+    if (
+      inbox?.key &&
+      !confirm('Ya está activado. Si generás una llave nueva, lo que el auto haya enviado con la anterior ya no se puede abrir. ¿Seguir?')
+    )
+      return
+    fb.reset()
+    shared.setBusy(true)
+    const r = await enableInbox(shared.user, shared.keys)
+    shared.setBusy(false)
+    if (r.error) {
+      fb.setError(r.error)
+      return
+    }
+    fb.setMessage('Listo: el auto ya puede enviar la frase de la dashcam a tu bóveda.')
+    await shared.reload()
+    await load()
+  }
+
+  async function importRow(row: VaultInboxRow) {
+    if (!privateItem) {
+      fb.setError('Falta la llave del envío: activá de nuevo «Recibir desde el auto» y pedile al auto que lo envíe otra vez.')
+      return
+    }
+    if (itemOf(shared.items, 'dashcam_recovery') && !confirm('Ya hay una frase guardada. ¿Reemplazarla por la que envió el auto?')) return
+    fb.reset()
+    shared.setBusy(true)
+    const r = await importInbox(shared.user, shared.keys, privateItem, row)
+    shared.setBusy(false)
+    if (r.error) {
+      fb.setError(r.error)
+      return
+    }
+    fb.setMessage('Frase guardada cifrada en la bóveda.')
+    await shared.reload()
+    await load()
+  }
+
+  async function discard(row: VaultInboxRow) {
+    fb.reset()
+    const r = await deleteInboxRow(row.id)
+    if (r.error) fb.setError(r.error)
+    await load()
+  }
+
+  return (
+    <Card>
+      <CardTitle icon="📥">Recibir la frase desde el auto</CardTitle>
+      <p className={styles.text}>
+        Así el auto envía la frase de la dashcam directo a tu bóveda, sin escanear nada: en el auto, Dashcam › Ajustes › Frase de
+        recuperación › «Enviar a mi bóveda». Viaja cifrada: WikiVigo no puede leerla.
+      </p>
+      <p className={styles.status}>
+        {inbox === null ? 'Cargando…' : inbox.key ? `Activado el ${formatTimestampDate(inbox.key.created_at)}` : 'Sin activar.'}
+      </p>
+      <Feedback error={fb.error} message={fb.message} />
+      {inbox?.rows.map((row) => (
+        <div key={row.id} className={styles.revealed}>
+          <span className={styles.meta}>El auto envió la frase de la dashcam el {formatTimestampDate(row.created_at)}.</span>
+          <div className={styles.actions}>
+            <button type="button" className={styles.primaryBtn} onClick={() => void importRow(row)} disabled={!canUse || shared.busy}>
+              Guardar en la bóveda
+            </button>
+            <button type="button" className={styles.secondaryBtn} onClick={() => void discard(row)} disabled={shared.busy}>
+              Descartar
+            </button>
+          </div>
+        </div>
+      ))}
+      <div className={styles.actions}>
+        <button type="button" className={inbox?.key ? styles.secondaryBtn : styles.primaryBtn} onClick={() => void enable()} disabled={!canUse || shared.busy}>
+          {inbox?.key ? 'Generar una llave nueva' : 'Permitir que el auto envíe la frase'}
+        </button>
+      </div>
     </Card>
   )
 }
@@ -786,6 +894,7 @@ export default function VaultPage() {
         <>
           <KeysCard shared={shared} />
           <DashcamCard shared={shared} />
+          {VAULT_INBOX_ENABLED && <InboxCard shared={shared} />}
           <PassphraseCard shared={shared} />
           <p className={styles.footnote}>
             Si perdés <strong>todas</strong> tus llaves, nadie puede abrir la bóveda, tampoco WikiVigo: así

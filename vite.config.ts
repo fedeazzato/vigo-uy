@@ -28,6 +28,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico,woff2}'],
+        // Static legal pages (specs/legal-pages-dashcam.md) must never get the SPA shell.
+        navigateFallbackDenylist: [/\/legal\//],
         runtimeCaching: [
           {
             // Auth/session and community data must always hit the network —
