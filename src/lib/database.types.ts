@@ -175,8 +175,6 @@ export type Database = {
           },
         ]
       }
-      // Hand-written for migration 0048 (car status E1, specs/car-status-e1.md) until it is applied and
-      // `npm run gen:types` regenerates this file; the shapes follow 0048_car_status.sql.
       car_status: {
         Row: {
           charge_end_reason: string | null
@@ -214,7 +212,29 @@ export type Database = {
           soc?: number | null
           vehicle_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "car_status_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_status_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_status_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       charging_networks: {
         Row: {
@@ -973,8 +993,6 @@ export type Database = {
           },
         ]
       }
-      // Hand-written for migration 0049 (vault inbox, specs/vault-onboarding.md Phase C) until it is applied and
-      // `npm run gen:types` regenerates this file; the shapes follow 0049_vault_inbox.sql.
       vault_inbox: {
         Row: {
           ciphertext: string
@@ -1009,7 +1027,15 @@ export type Database = {
           kind?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vault_inbox_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vault_inbox_keys: {
         Row: {
@@ -1335,7 +1361,28 @@ export type Database = {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
         Returns: Json
       }
+      car_submit_status: {
+        Args: { p_device_id: string; p_status: Json; p_ts: number }
+        Returns: Json
+      }
       car_unpair: { Args: { p_device_id: string; p_ts: number }; Returns: Json }
+      car_vault_inbox_key: {
+        Args: { p_device_id: string; p_ts: number }
+        Returns: Json
+      }
+      car_vault_inbox_put: {
+        Args: {
+          p_ciphertext: string
+          p_device_id: string
+          p_epk: string
+          p_iv: string
+          p_key_id: string
+          p_kind: string
+          p_ts: number
+        }
+        Returns: Json
+      }
+      car_vault_recipient: { Args: { p_device_id: string }; Returns: string }
       car_vehicle_member_names: {
         Args: { p_vehicle_id: string }
         Returns: Json
