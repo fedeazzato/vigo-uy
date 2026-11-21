@@ -1,0 +1,42 @@
+/* Open Charge Map status line under the stations map (specs/ocm-proxy.md):
+   legend, what the layer is doing, and the data credit. */
+.ocmBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 8px 14px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The two markers in miniature: filled accent dot (WikiVigo), hollow ring
+   (Open Charge Map), same as src/lib/mapMarkerIcon.ts. */
+.legendWiki,
+.legendOcm {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendWiki {
+  background: var(--accent);
+}
+
+.legendOcm {
+  margin-left: 8px;
+  border: 2px solid var(--text-secondary);
+  background: var(--surface);
+}
+
+.credit {
+  font-size: 12px;
+}

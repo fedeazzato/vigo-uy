@@ -201,8 +201,12 @@ describe('CommunityStations filters', () => {
 // by its own test file; here it's stubbed so these tests only assert which
 // stations CommunityStations hands it.
 vi.mock('./StationsMap', () => ({
-  default: ({ stations, open }: { stations: ChargingStation[]; open: boolean }) =>
-    open ? <div data-testid="stations-map">{stations.map((s) => s.name).join(', ')}</div> : null,
+  default: ({ stations, open, ocm }: { stations: ChargingStation[]; open: boolean; ocm: unknown }) =>
+    open ? (
+      <div data-testid="stations-map" data-ocm={JSON.stringify(ocm)}>
+        {stations.map((s) => s.name).join(', ')}
+      </div>
+    ) : null,
 }))
 
 describe('CommunityStations map + add-station form', () => {
@@ -228,6 +232,33 @@ describe('CommunityStations map + add-station form', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver Axion Prado en el mapa' }))
 
     expect(screen.getByTestId('stations-map').textContent).toBe('Axion Prado')
+    // A single station's map stays WikiVigo-only (specs/ocm-proxy.md D5).
+    expect(screen.getByTestId('stations-map').getAttribute('data-ocm')).toBe('null')
+  })
+
+  it('the toolbar map also asks for Open Charge Map stations, with the connector and power filters mapped', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver todas las estaciones en el mapa' }))
+    expect(screen.getByTestId('stations-map').getAttribute('data-ocm')).toBe('{}')
+
+    fireEvent.change(screen.getByLabelText('🔌 Conector'), { target: { value: 'CCS2' } })
+    fireEvent.change(screen.getByLabelText('⚡ Potencia mínima'), { target: { value: '60' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver todas las estaciones en el mapa' }))
+    expect(JSON.parse(screen.getByTestId('stations-map').getAttribute('data-ocm') ?? '')).toEqual({
+      connectiontypeid: [33],
+      minKw: 60,
+    })
+  })
+
+  it('keeps the map WikiVigo-only while a network or city filter is active', async () => {
+    renderStations()
+    await screen.findByText('Axion Carrasco')
+
+    fireEvent.change(screen.getByLabelText('📍 Ciudad'), { target: { value: 'Rocha' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ver todas las estaciones en el mapa' }))
+    expect(screen.getByTestId('stations-map').getAttribute('data-ocm')).toBe('null')
   })
 
   it('blocks submitting the add-station form until a location is set', async () => {

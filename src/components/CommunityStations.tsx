@@ -31,6 +31,7 @@ import CityCombobox from './CityCombobox'
 import LocationPicker from './LocationPicker'
 import type { LatLng } from './LocationPicker'
 import StationsMap from './StationsMap'
+import { ocmFilterFor, type OcmFilter } from '../lib/ocmStations'
 import {
   CONNECTORS_BY_CURRENT,
   COUNTRIES,
@@ -106,8 +107,9 @@ export default function CommunityStations() {
   const [busy, setBusy] = useState(false)
   // Also doubles as the modal's open flag: null means closed. Holds either
   // the full filtered list ("Ver en mapa" in the toolbar) or a single
-  // station (a station's own "Ver en mapa" link).
-  const [mapStations, setMapStations] = useState<ChargingStation[] | null>(null)
+  // station (a station's own "Ver en mapa" link), plus the Open Charge Map
+  // filters for the toolbar map (specs/ocm-proxy.md D5; null = WikiVigo only).
+  const [mapView, setMapView] = useState<{ stations: ChargingStation[]; ocm: OcmFilter | null } | null>(null)
 
   const [providerFilter, setProviderFilter] = useState('')
   const [cityQuery, setCityQuery] = useState('')
@@ -253,15 +255,22 @@ export default function CommunityStations() {
             type="button"
             className={styles.mapBtn}
             aria-label="Ver todas las estaciones en el mapa"
-            onClick={() => setMapStations(filteredStations)}
+            onClick={() =>
+              setMapView({
+                stations: filteredStations,
+                // OCM has no WikiVigo network or city: with those filters the map stays WikiVigo-only.
+                ocm: providerFilter || cityQuery.trim() ? null : ocmFilterFor(connectorFilter, minPowerFilter),
+              })
+            }
           >
             🗺️ Ver en mapa
           </button>
         </div>
         <StationsMap
-          stations={mapStations ?? []}
-          open={mapStations !== null}
-          onClose={() => setMapStations(null)}
+          stations={mapView?.stations ?? []}
+          ocm={mapView?.ocm ?? null}
+          open={mapView !== null}
+          onClose={() => setMapView(null)}
         />
 
         {status !== 'signedIn' && (
@@ -529,7 +538,7 @@ export default function CommunityStations() {
                     type="button"
                     className={styles.stationMapBtn}
                     aria-label={`Ver ${station.name} en el mapa`}
-                    onClick={() => setMapStations([station])}
+                    onClick={() => setMapView({ stations: [station], ocm: null })}
                   >
                     🗺️ Ver en mapa
                   </button>

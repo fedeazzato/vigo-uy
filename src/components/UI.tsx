@@ -79,8 +79,9 @@ export function TipList({ items }: TipListProps) {
 interface BadgeProps {
   children: ReactNode
   // 'community' = community-submitted content: always visually distinct from
-  // curated/official ('blue'), see CLAUDE.md.
-  color?: BadgeColor | 'community'
+  // curated/official ('blue'), see CLAUDE.md. 'external' = data from an
+  // outside source (Open Charge Map), distinct from both.
+  color?: BadgeColor | 'community' | 'external'
 }
 
 export function Badge({ children, color = 'gray' }: BadgeProps) {

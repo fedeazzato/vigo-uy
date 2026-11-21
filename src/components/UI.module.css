@@ -100,6 +100,7 @@
    - gray      = neutral tag: secondary fill, secondary text
    - community = community-submitted: accent outline (must stay visibly
                  different from curated, see CLAUDE.md)
+   - external  = outside source (Open Charge Map): dashed neutral outline
    - green / amber / red = status (good / caution / problem): a round status
      dot, like the car's chart legend dots, so text stays legible. */
 .badge {
@@ -126,6 +127,15 @@
   background: transparent;
   border-color: var(--accent);
   color: var(--accent-text);
+}
+
+/* external = data from an outside source (Open Charge Map): dashed neutral
+   outline, so it differs from curated (filled) and community (accent). */
+.badge_external {
+  background: transparent;
+  border-color: var(--border-strong);
+  border-style: dashed;
+  color: var(--text-secondary);
 }
 
 .badge_green::before,
