@@ -89,6 +89,17 @@ export type CarRequest =
   | { action: 'inbox_key'; ts: number; deviceId: string }
   | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
   | {
+      action: 'diag_put'
+      ts: number
+      deviceId: string
+      uploadId: string
+      part: number
+      parts: number
+      data: string
+      note: string | null
+      apps: CarDiagApp[] | null
+    }
+  | {
       action: 'inbox_put'
       ts: number
       deviceId: string
@@ -98,6 +109,44 @@ export type CarRequest =
       iv: string
       ciphertext: string
     }
+
+/** Diagnostics from the car (specs/car-diagnostics.md R2): one part of an upload; note and apps come with part 0 only. */
+export const DIAG_PART_CHARS = 24000
+export const DIAG_MAX_PARTS = 40
+export const DIAG_MAX_NOTE = 500
+export const DIAG_MAX_APPS = 16
+export const DIAG_STATES = ['ok', 'no_answer', 'not_installed', 'file', 'invalid'] as const
+
+export interface CarDiagApp {
+  app: string
+  version: string
+  state: (typeof DIAG_STATES)[number]
+  crashes: number
+  chars: number
+}
+
+/** Validates the per-app summary of part 0; null = bad_request. Unknown keys are refused. */
+export function parseDiagApps(v: unknown): CarDiagApp[] | null {
+  if (!Array.isArray(v) || v.length > DIAG_MAX_APPS) return null
+  const out: CarDiagApp[] = []
+  for (const item of v) {
+    const a =
+      typeof item === 'object' && item !== null && !Array.isArray(item)
+        ? (item as Record<string, unknown>)
+        : null
+    if (!a) return null
+    if (Object.keys(a).some((k) => !['app', 'version', 'state', 'crashes', 'chars'].includes(k))) return null
+    const { app, version, state, crashes, chars } = a
+    if (typeof app !== 'string' || app.length < 1 || app.length > 80) return null
+    if (typeof version !== 'string' || version.length > 40) return null
+    if (typeof state !== 'string' || !(DIAG_STATES as readonly string[]).includes(state)) return null
+    if (typeof crashes !== 'number' || !Number.isInteger(crashes) || crashes < 0 || crashes > 1000)
+      return null
+    if (typeof chars !== 'number' || !Number.isInteger(chars) || chars < 0 || chars > 10_000_000) return null
+    out.push({ app, version, state: state as CarDiagApp['state'], crashes, chars })
+  }
+  return out
+}
 
 /** Last known status snapshot (specs/car-status-e1.md); no location field exists. */
 export interface CarStatus {
@@ -389,6 +438,44 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (!draft) return null
       return { action: 'trip_draft', ts, deviceId: o.device_id.toLowerCase(), draft }
     }
+    // Diagnostics (specs/car-diagnostics.md): one base64 slice of gzip(report JSON); note + per-app summary with part 0.
+    case 'diag_put': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      if (typeof o.upload_id !== 'string' || !UUID.test(o.upload_id)) return null
+      const { part, parts, data } = o
+      if (typeof parts !== 'number' || !Number.isInteger(parts) || parts < 1 || parts > DIAG_MAX_PARTS)
+        return null
+      if (typeof part !== 'number' || !Number.isInteger(part) || part < 0 || part >= parts) return null
+      if (
+        typeof data !== 'string' ||
+        data.length < 4 ||
+        data.length > DIAG_PART_CHARS ||
+        data.length % 4 !== 0 ||
+        !BASE64.test(data)
+      )
+        return null
+      let note: string | null = null
+      let apps: CarDiagApp[] | null = null
+      if (part === 0) {
+        if (typeof o.note !== 'string' || [...o.note].length > DIAG_MAX_NOTE) return null
+        apps = parseDiagApps(o.apps)
+        if (!apps) return null
+        note = o.note
+      } else if (o.note !== undefined || o.apps !== undefined) {
+        return null
+      }
+      return {
+        action: 'diag_put',
+        ts,
+        deviceId: o.device_id.toLowerCase(),
+        uploadId: o.upload_id.toLowerCase(),
+        part,
+        parts,
+        data,
+        note,
+        apps,
+      }
+    }
     // Bóveda inbox (specs/vault-onboarding.md Phase C): the owner's inbox public key / ECIES ciphertext upload.
     case 'inbox_key':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
@@ -587,7 +674,18 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
                 p_ts: parsed.ts,
                 p_draft: parsed.draft,
               })
-            : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+            : parsed.action === 'diag_put'
+              ? await deps.rpc('car_submit_diag_part', {
+                  p_device_id: parsed.deviceId,
+                  p_ts: parsed.ts,
+                  p_upload_id: parsed.uploadId,
+                  p_part: parsed.part,
+                  p_parts: parsed.parts,
+                  p_note: parsed.note,
+                  p_apps: parsed.apps,
+                  p_data: parsed.data,
+                })
+              : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
     if (res.error) {
       log(`${parsed.action} failed: ${res.error}`)
       return fail('server', now)
@@ -601,6 +699,12 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
     if (parsed.action === 'unpair') return reply(200, { ok: true }, now)
     if (parsed.action === 'status' || parsed.action === 'trip_draft')
       return reply(200, { ok: true, stored: row.stored === true }, now)
+    if (parsed.action === 'diag_put')
+      return reply(
+        200,
+        { ok: true, received: Number(row.received) || 0, complete: row.complete === true },
+        now
+      )
     return reply(
       200,
       { ok: true, device_id: row.device_id, device_name: row.device_name, members: memberNames(row.members) },

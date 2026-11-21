@@ -3,7 +3,10 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import {
   decodeBase64,
+  DIAG_MAX_PARTS,
+  DIAG_PART_CHARS,
   handleCarDevice,
+  parseDiagApps,
   isP256Spki,
   MAX_BODY_BYTES,
   MAX_ROUTE_POINTS,
@@ -737,5 +740,136 @@ describe('handleCarDevice: trip_draft', () => {
       car_submit_trip_draft: ok({ error: 'bad_request' }),
     })
     expect((await call(post(TRIP_BODY, await fresh.sign(TRIP_BODY)), rpc)).status).toBe(400)
+  })
+})
+
+// ---- diagnostics (specs/car-diagnostics.md)
+const UPLOAD = '0b9d6a7e-1c2f-4e3d-8a5b-9c0d1e2f3a4b'
+const APPS = [
+  { app: 'com.vigo.accountslauncher', version: '2.4 (7)', state: 'ok', crashes: 0, chars: 1200 },
+  { app: 'com.vigo.carga', version: '0.3', state: 'no_answer', crashes: 0, chars: 0 },
+]
+const diagBody = (extra: Record<string, unknown>) =>
+  JSON.stringify({ v: 1, action: 'diag_put', device_id: DEVICE, ts: VECTOR_NOW, upload_id: UPLOAD, ...extra })
+const PART0 = diagBody({ part: 0, parts: 2, note: 'Se cerró Carga', apps: APPS, data: 'QUJDRA==' })
+const PART1 = diagBody({ part: 1, parts: 2, data: 'QUJD' })
+
+describe('parseCarRequest: diag_put', () => {
+  it('accepts part 0 with note and apps, and later parts with data only', () => {
+    const p0 = parseCarRequest(PART0)
+    expect(p0).toMatchObject({
+      action: 'diag_put',
+      uploadId: UPLOAD,
+      part: 0,
+      parts: 2,
+      note: 'Se cerró Carga',
+    })
+    expect(p0 && p0.action === 'diag_put' ? p0.apps : null).toHaveLength(2)
+    expect(parseCarRequest(PART1)).toMatchObject({ action: 'diag_put', part: 1, note: null, apps: null })
+  })
+
+  it('lower-cases the ids', () => {
+    const r = parseCarRequest(diagBody({ upload_id: UPLOAD.toUpperCase(), part: 1, parts: 2, data: 'QUJD' }))
+    expect(r && r.action === 'diag_put' ? r.uploadId : null).toBe(UPLOAD)
+  })
+
+  it('refuses bad parts, data, notes and app summaries', () => {
+    const bad: Record<string, unknown>[] = [
+      { part: 2, parts: 2, data: 'QUJD' },
+      { part: -1, parts: 2, data: 'QUJD' },
+      { part: 0, parts: DIAG_MAX_PARTS + 1, note: '', apps: [], data: 'QUJD' },
+      { part: 0.5, parts: 2, data: 'QUJD' },
+      { part: 1, parts: 2, data: 'QUJ' },
+      { part: 1, parts: 2, data: 'QU!D' },
+      { part: 1, parts: 2, data: '' },
+      { part: 1, parts: 2, data: 'A'.repeat(DIAG_PART_CHARS + 4) },
+      { part: 1, parts: 2, data: 'QUJD', note: 'x' },
+      { part: 1, parts: 2, data: 'QUJD', apps: [] },
+      { part: 0, parts: 2, data: 'QUJD', apps: [] },
+      { part: 0, parts: 2, data: 'QUJD', note: 'n' },
+      { part: 0, parts: 2, data: 'QUJD', note: 'ñ'.repeat(501), apps: [] },
+      { upload_id: 'nope', part: 1, parts: 2, data: 'QUJD' },
+    ]
+    for (const b of bad) expect(parseCarRequest(diagBody(b))).toBeNull()
+    expect(
+      parseCarRequest(diagBody({ part: 0, parts: 2, data: 'QUJD', note: 'ñ'.repeat(500), apps: [] }))
+    ).not.toBeNull()
+  })
+
+  it('parseDiagApps refuses unknown keys, states and out-of-range numbers', () => {
+    expect(parseDiagApps(APPS)).toHaveLength(2)
+    expect(parseDiagApps([{ ...APPS[0], x: 1 }])).toBeNull()
+    expect(parseDiagApps([{ ...APPS[0], state: 'boom' }])).toBeNull()
+    expect(parseDiagApps([{ ...APPS[0], crashes: -1 }])).toBeNull()
+    expect(parseDiagApps([{ ...APPS[0], chars: 1.5 }])).toBeNull()
+    expect(parseDiagApps([{ ...APPS[0], app: '' }])).toBeNull()
+    expect(parseDiagApps(Array.from({ length: 17 }, () => APPS[0]))).toBeNull()
+    expect(parseDiagApps('x')).toBeNull()
+  })
+
+  it('a full part with a 500-character note and 16 apps fits the body limit', () => {
+    const apps = Array.from({ length: 16 }, (_, i) => ({
+      ...APPS[0],
+      app: `com.vigo.app${i}`.padEnd(80, 'x'),
+    }))
+    const body = diagBody({
+      part: 0,
+      parts: 40,
+      note: 'ñ'.repeat(500),
+      apps,
+      data: 'A'.repeat(DIAG_PART_CHARS),
+    })
+    expect(new TextEncoder().encode(body).length).toBeLessThan(MAX_BODY_BYTES)
+    expect(parseCarRequest(body)).not.toBeNull()
+  })
+})
+
+describe('handleCarDevice: diag_put', () => {
+  it('verifies, then stores the part through car_submit_diag_part', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_diag_part: ok({ ok: true, received: 1, parts: 2, complete: false }),
+    })
+    const r = await call(post(PART0, await fresh.sign(PART0)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, received: 1, complete: false, server_time: VECTOR_NOW })
+    expect(calls[1].fn).toBe('car_submit_diag_part')
+    expect(calls[1].args).toMatchObject({
+      p_device_id: DEVICE,
+      p_upload_id: UPLOAD,
+      p_part: 0,
+      p_parts: 2,
+      p_note: 'Se cerró Carga',
+      p_data: 'QUJDRA==',
+    })
+    expect(calls[1].args.p_apps).toHaveLength(2)
+  })
+
+  it('the last part reports complete; later parts send null note and apps', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_diag_part: ok({ ok: true, received: 2, parts: 2, complete: true }),
+    })
+    const r = await call(post(PART1, await fresh.sign(PART1)), rpc)
+    expect(r.body).toEqual({ ok: true, received: 2, complete: true, server_time: VECTOR_NOW })
+    expect(calls[1].args.p_note).toBeNull()
+    expect(calls[1].args.p_apps).toBeNull()
+  })
+
+  it('maps the database refusals (rate limit per vehicle, unknown upload)', async () => {
+    for (const [error, status] of [
+      ['rate_limited', 429],
+      ['bad_request', 400],
+      ['revoked', 410],
+    ] as const) {
+      const { rpc } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_submit_diag_part: ok({ error }) })
+      expect((await call(post(PART1, await fresh.sign(PART1)), rpc)).status).toBe(status)
+    }
+  })
+
+  it('a bad signature never reaches the database function', async () => {
+    const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki) })
+    expect((await call(post(PART1, SIG), rpc)).status).toBe(401)
+    expect(calls.map((c) => c.fn)).not.toContain('car_submit_diag_part')
   })
 })

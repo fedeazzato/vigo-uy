@@ -16,6 +16,7 @@ import VehicleCard from '../components/VehicleCard'
 import CarDevicesCard from '../components/CarDevicesCard'
 import CarStatusCard from '../components/CarStatusCard'
 import CarDraftsCard from '../components/CarDraftsCard'
+import CarDiagnosticsCard from '../components/CarDiagnosticsCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
@@ -182,6 +183,7 @@ export default function MyVigoPage() {
           <CarDevicesCard />
           <CarStatusCard />
           <CarDraftsCard />
+          <CarDiagnosticsCard />
           <Card>
             <CardTitle icon="🔐">Bóveda</CardTitle>
             <p className={styles.vaultText}>

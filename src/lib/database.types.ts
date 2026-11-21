@@ -175,6 +175,86 @@ export type Database = {
           },
         ]
       }
+      car_diagnostic_parts: {
+        Row: {
+          data: string
+          diagnostic_id: string
+          part: number
+        }
+        Insert: {
+          data: string
+          diagnostic_id: string
+          part: number
+        }
+        Update: {
+          data?: string
+          diagnostic_id?: string
+          part?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_diagnostic_parts_diagnostic_id_fkey"
+            columns: ["diagnostic_id"]
+            isOneToOne: false
+            referencedRelation: "car_diagnostics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_diagnostics: {
+        Row: {
+          apps: Json
+          complete: boolean
+          completed_at: string | null
+          created_at: string
+          device_id: string | null
+          id: string
+          note: string
+          parts: number
+          received: number
+          vehicle_id: string
+        }
+        Insert: {
+          apps?: Json
+          complete?: boolean
+          completed_at?: string | null
+          created_at?: string
+          device_id?: string | null
+          id: string
+          note?: string
+          parts: number
+          received?: number
+          vehicle_id: string
+        }
+        Update: {
+          apps?: Json
+          complete?: boolean
+          completed_at?: string | null
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          note?: string
+          parts?: number
+          received?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_diagnostics_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_diagnostics_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_status: {
         Row: {
           charge_end_reason: string | null

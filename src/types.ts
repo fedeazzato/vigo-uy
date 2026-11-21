@@ -562,3 +562,7 @@ export type CarStatus = Pick<
 
 // A trip shared from the linked car, waiting for review (specs/car-trip-drafts.md R3). Route and charges are jsonb.
 export type CarTripDraftRow = Tables['car_trip_drafts']['Row']
+
+// A diagnostic sent from the linked car (specs/car-diagnostics.md R3); apps is the jsonb per-app summary of part 0.
+export type CarDiagnosticRow = Tables['car_diagnostics']['Row']
+export type CarDiagnosticPartRow = Tables['car_diagnostic_parts']['Row']
