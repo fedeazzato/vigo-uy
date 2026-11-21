@@ -80,3 +80,12 @@ describe('MyVigoPage Bóveda card (specs/secret-vault.md)', () => {
     expect(link.getAttribute('href')).toBe('/mi-vigo/boveda')
   })
 })
+
+describe('MyVigoPage "Preparar mi Vigo" card (specs/prepare-my-vigo.md R5)', () => {
+  it('links signed-in owners to the preparation page', () => {
+    renderSignedIn('Ana')
+    expect(screen.getByRole('link', { name: 'Preparar mi Vigo' }).getAttribute('href')).toBe(
+      '/mi-vigo/preparar'
+    )
+  })
+})

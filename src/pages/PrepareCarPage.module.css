@@ -1,0 +1,116 @@
+/* "Preparar mi Vigo" (specs/prepare-my-vigo.md). Form controls and buttons come from the shared modules. */
+
+.disclaimer {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.disclaimer h3 {
+  margin: 14px 0 4px;
+  font-size: 15px;
+  color: var(--text-title);
+}
+
+.disclaimer p {
+  margin: 0 0 8px;
+}
+
+.disclaimer ul,
+.list {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.accept {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-title);
+  cursor: pointer;
+}
+
+.accept input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.echo {
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: monospace;
+}
+
+.pdsnInput {
+  font-family: monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+/* The codes are typed on the car: large, monospace, spaced, and selectable. */
+.code {
+  margin: 6px 0 12px;
+  padding: 12px 14px;
+  background: var(--fill-secondary);
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text-title);
+  text-align: center;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.hintCase {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.photo {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.photoBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  margin-bottom: 4px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: 28px;
+}
+
+.download {
+  composes: primary from '../styles/buttons.module.css';
+  margin: 4px 0 12px;
+  text-decoration: none;
+}

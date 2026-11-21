@@ -191,6 +191,16 @@ export default function MyVigoPage() {
               Abrir la bóveda
             </Link>
           </Card>
+          <Card>
+            <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
+            <p className={styles.vaultText}>
+              Cómo activar el modo de ingeniería de la pantalla e instalar Carga, Cargadores, Mi Vigo, la voz
+              en español y Copiloto desde una computadora con Windows.
+            </p>
+            <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
+              Preparar mi Vigo
+            </Link>
+          </Card>
         </>
       )}
 
