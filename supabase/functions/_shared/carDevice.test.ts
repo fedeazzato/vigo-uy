@@ -395,3 +395,105 @@ describe('handleCarDevice: heartbeat and unpair', () => {
     expect((await call(post(reformatted, SIG), rpc)).status).toBe(401)
   })
 })
+
+// ---------------------------------------------------------------- status (specs/car-status-e1.md)
+
+// The exact body the car builds (vigo-hack accounts_proxy core Wire.statusBody pins the same string).
+const STATUS_BODY =
+  '{"v":1,"action":"status","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f","ts":1763640000000,' +
+  '"status":{"event":"charge_end","observed_at":1763639990000,"soc":80,"range_km":266,"charging":false,' +
+  '"plugged":true,"charge_end_reason":"limite"}}'
+
+describe('parseCarRequest: status', () => {
+  const base = (status: unknown) =>
+    JSON.stringify({ v: 1, action: 'status', device_id: DEVICE, ts: VECTOR_NOW, status })
+  const good = { event: 'trip_end', observed_at: VECTOR_NOW - 1000, soc: 64, range_km: 266, charging: false, plugged: false }
+
+  it('parses the car-built body exactly', () => {
+    expect(parseCarRequest(STATUS_BODY)).toEqual({
+      action: 'status',
+      ts: VECTOR_NOW,
+      deviceId: DEVICE,
+      status: {
+        event: 'charge_end',
+        observed_at: 1763639990000,
+        soc: 80,
+        range_km: 266,
+        charging: false,
+        plugged: true,
+        charge_end_reason: 'limite',
+      },
+    })
+  })
+
+  it('nulls and missing optional fields are allowed', () => {
+    const r = parseCarRequest(base({ event: 'trip_end', observed_at: VECTOR_NOW }))
+    expect(r && r.action === 'status' && r.status).toEqual({
+      event: 'trip_end',
+      observed_at: VECTOR_NOW,
+      soc: null,
+      range_km: null,
+      charging: null,
+      plugged: null,
+      charge_end_reason: null,
+    })
+  })
+
+  it.each([
+    ['unknown event', { ...good, event: 'parked' }],
+    ['soc over 100', { ...good, soc: 101 }],
+    ['fractional soc', { ...good, soc: 50.5 }],
+    ['negative range', { ...good, range_km: -1 }],
+    ['range as text', { ...good, range_km: '266' }],
+    ['charging as number', { ...good, charging: 1 }],
+    ['missing observed_at', { ...good, observed_at: undefined }],
+    ['reason on a trip', { ...good, charge_end_reason: 'completa' }],
+    ['unknown reason', { ...good, event: 'charge_end', charge_end_reason: 'boom' }],
+    ['an extra key (no location may slip in)', { ...good, lat: -34.9 }],
+    ['not an object', 'trip_end'],
+  ])('refuses %s', (_name, status) => {
+    expect(parseCarRequest(base(status))).toBeNull()
+  })
+})
+
+describe('handleCarDevice: status', () => {
+  it('verifies, then stores through car_submit_status and returns stored', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_status: ok({ ok: true, stored: true }),
+    })
+    const r = await call(post(STATUS_BODY, await fresh.sign(STATUS_BODY)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, stored: true, server_time: VECTOR_NOW })
+    expect(calls[1].fn).toBe('car_submit_status')
+    expect(calls[1].args.p_device_id).toBe(DEVICE)
+    expect(calls[1].args.p_ts).toBe(VECTOR_NOW)
+    expect((calls[1].args.p_status as Record<string, unknown>).soc).toBe(80)
+  })
+
+  it('an older snapshot is accepted but not stored', async () => {
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_status: ok({ ok: true, stored: false }),
+    })
+    const r = await call(post(STATUS_BODY, await fresh.sign(STATUS_BODY)), rpc)
+    expect(r.body).toEqual({ ok: true, stored: false, server_time: VECTOR_NOW })
+  })
+
+  it('a value the database refuses is a 400, a guard refusal maps as for heartbeat', async () => {
+    for (const [answer, status] of [
+      ['bad_request', 400],
+      ['revoked', 410],
+      ['replay', 409],
+    ] as const) {
+      const { rpc } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_submit_status: ok({ error: answer }) })
+      expect((await call(post(STATUS_BODY, await fresh.sign(STATUS_BODY)), rpc)).status).toBe(status)
+    }
+  })
+
+  it('a bad signature never reaches the database write', async () => {
+    const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki) })
+    expect((await call(post(STATUS_BODY, SIG), rpc)).status).toBe(401)
+    expect(calls.map((c) => c.fn)).toEqual(['car_device_public_key'])
+  })
+})
