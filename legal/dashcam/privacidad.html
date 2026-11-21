@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vigo Dashcam: política de privacidad</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1a1a1a; --muted: #555; --link: #0b5cad; --line: #ddd; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #000; --fg: #eee; --muted: #aaa; --link: #6fb3ff; --line: #333; } }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, sans-serif; margin: 0; padding: 0 16px; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 0 48px; }
+  h1 { font-size: 26px; margin: 0 0 4px; } h2 { font-size: 19px; margin: 28px 0 8px; }
+  .muted { color: var(--muted); } a { color: var(--link); }
+  nav { border-top: 1px solid var(--line); margin-top: 32px; padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Política de privacidad de Vigo Dashcam</h1>
+<p class="muted">Última actualización: 21 de noviembre de 2026.</p>
+
+<p>Vigo Dashcam es una app gratuita de la comunidad de dueños de la Dongfeng Vigo que funciona en la pantalla del auto. Esta política
+explica qué datos usa, dónde quedan y cómo controlarlos.</p>
+
+<h2>1. Qué datos usa la app</h2>
+<ul>
+  <li><strong>Videos de las cámaras del auto.</strong> Se graban y guardan cifrados en la memoria del auto. Llevan impresas la fecha,
+    la hora y la velocidad. Vos decidís si se suben a Drive.</li>
+  <li><strong>Recorrido GPS.</strong> Junto a cada clip el auto guarda, cifrado, el recorrido (posición y velocidad) para poder buscar
+    clips en el mapa. Queda solo en el auto: no se sube a Drive ni a ningún otro lado.</li>
+  <li><strong>Acceso a tu Google Drive, limitado.</strong> Si iniciás sesión con Google, la app pide solo el permiso
+    <code>https://www.googleapis.com/auth/drive.file</code>: crear archivos en tu Drive y ver, modificar o borrar únicamente los
+    archivos que la propia app creó. No puede leer ningún otro archivo de tu Drive, ni tu correo, contactos o fotos.</li>
+  <li><strong>El inicio de sesión.</strong> Google le entrega a la app una credencial («token») para subir archivos. Se guarda solo en
+    el auto, cifrada con una clave del almacén seguro del auto (Android Keystore). Nunca se muestra, no se registra en los logs y no
+    sale del auto salvo hacia Google.</li>
+  <li><strong>El nombre de tu Wi-Fi.</strong> La app lo lee en el auto solo para subir clips únicamente en las redes que elegiste.</li>
+</ul>
+
+<h2>2. Dónde quedan los datos</h2>
+<p>Los clips van directo del auto a <strong>tu propio Google Drive</strong>, a una carpeta <code>Dashcam</code>. No pasan por
+servidores de quien desarrolla la app ni de la Wiki Vigo Uruguay, y nadie más tiene acceso a ellos. La app no tiene servidores propios
+que reciban tus datos.</p>
+<p>Si usás la búsqueda en el mapa, el auto descarga las imágenes del mapa de OpenStreetMap, que ve qué zona del mapa se pidió (como
+cualquier mapa web; ver la <a href="https://osmfoundation.org/wiki/Privacy_Policy">política de privacidad de OpenStreetMap</a>).
+Tu recorrido no se envía.</p>
+
+<h2>3. Lo que la app NO hace</h2>
+<ul>
+  <li>No usa publicidad, analíticas ni seguimiento.</li>
+  <li>No vende, alquila ni comparte tus datos con nadie.</li>
+  <li>No usa tus datos de Google para entrenar modelos de inteligencia artificial ni para ningún fin distinto de subir tus clips.</li>
+</ul>
+
+<h2>4. Uso limitado de los datos de Google</h2>
+<p>El uso y la transferencia a cualquier otra aplicación de la información recibida de las API de Google se ajustará a la
+<a href="https://developers.google.com/terms/api-services-user-data-policy">Política de Datos de Usuario de los Servicios de API de
+Google</a>, incluidos los requisitos de Uso Limitado.</p>
+
+<h2>5. Cuánto tiempo se guardan</h2>
+<ul>
+  <li>En Drive: las copias no marcadas se borran solas a los 7 días; los clips que marcaste como importantes quedan hasta que los
+    borres vos.</li>
+  <li>En el auto: los clips no marcados se borran solos (por defecto a las 48 horas, o antes si falta espacio); los clips marcados
+    se conservan hasta que los borres. El recorrido GPS se borra junto con su clip.</li>
+  <li>La credencial de Google queda en el auto hasta que cerrás la sesión.</li>
+</ul>
+
+<h2>6. Cómo controlar o borrar tus datos</h2>
+<ul>
+  <li>En el auto: Dashcam &gt; Ajustes &gt; Subida a Drive &gt; Cuenta de Google &gt; <strong>Cerrar sesión</strong> borra la
+    credencial guardada.</li>
+  <li>En Google: <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a> &gt; Vigo Dashcam &gt;
+    <strong>Quitar acceso</strong>.</li>
+  <li>Los clips que ya están en tu Drive son tuyos: podés borrarlos desde Drive cuando quieras.</li>
+</ul>
+
+<h2>7. Menores</h2>
+<p>La app está pensada para conductores adultos y no está dirigida a menores.</p>
+
+<h2>8. Cambios</h2>
+<p>Si esta política cambia, se publica aquí con la nueva fecha.</p>
+
+<h2>9. Contacto</h2>
+<p><a href="https://github.com/fedeazzato/vigo-uy/issues">github.com/fedeazzato/vigo-uy/issues</a></p>
+
+<nav>
+  <a href="index.html">Vigo Dashcam</a> · <a href="terminos.html">Términos del servicio</a>
+</nav>
+</main>
+</body>
+</html>
