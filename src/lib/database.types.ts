@@ -306,6 +306,13 @@ export type Database = {
             foreignKeyName: "car_trip_drafts_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_trip_drafts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
@@ -1438,6 +1445,10 @@ export type Database = {
       }
       car_submit_status: {
         Args: { p_device_id: string; p_status: Json; p_ts: number }
+        Returns: Json
+      }
+      car_submit_trip_draft: {
+        Args: { p_device_id: string; p_draft: Json; p_ts: number }
         Returns: Json
       }
       car_unpair: { Args: { p_device_id: string; p_ts: number }; Returns: Json }
