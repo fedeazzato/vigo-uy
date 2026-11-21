@@ -31,6 +31,7 @@ const ModerationPage = lazy(() => import('./pages/ModerationPage'))
 const LinkCarPage = lazy(() => import('./pages/LinkCarPage'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
 const PrepareCarPage = lazy(() => import('./pages/PrepareCarPage'))
+const CarDraftsPage = lazy(() => import('./pages/CarDraftsPage'))
 
 export default function App() {
   return (
@@ -62,6 +63,8 @@ export default function App() {
             {/* End-to-end encrypted secrets, passkey PRF (specs/secret-vault.md). */}
             <Route path="mi-vigo/boveda" element={<VaultPage />} />
             <Route path="mi-vigo/preparar" element={<PrepareCarPage />} />
+            {/* Trips shared from the car, as drafts (specs/car-trip-drafts.md). */}
+            <Route path="mi-vigo/borradores" element={<CarDraftsPage />} />
             <Route path="costos/nuevo" element={<NewServiceEntryPage />} />
             <Route path="costos/:id/editar" element={<NewServiceEntryPage />} />
             <Route path="costos/seguro/nuevo" element={<NewInsuranceQuotePage />} />

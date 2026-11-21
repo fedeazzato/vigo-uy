@@ -1,0 +1,36 @@
+/* "Borradores del auto" (specs/car-trip-drafts.md R3). */
+.back {
+  display: inline-block;
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.charges {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.charges li + li {
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* Route polyline: neutral, so the coloured dots stay the focus (same as TripMap). */
+.routeLine {
+  stroke: var(--text-secondary);
+}

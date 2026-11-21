@@ -6,6 +6,8 @@ import {
   handleCarDevice,
   isP256Spki,
   MAX_BODY_BYTES,
+  MAX_ROUTE_POINTS,
+  parseTripDraft,
   parseCarRequest,
   SIGNATURE_HEADER,
   SIGNING_PREFIX,
@@ -199,7 +201,7 @@ describe('handleCarDevice: transport checks', () => {
     expect(r.body).toEqual({ ok: false, error: 'method', server_time: VECTOR_NOW })
   })
 
-  it('413 over 8 KB', async () => {
+  it('413 over the body limit (32 KB since trip_draft)', async () => {
     const { rpc, calls } = fakeRpc({})
     const r = await call(post('x'.repeat(MAX_BODY_BYTES + 1), SIG), rpc)
     expect(r.status).toBe(413)
@@ -407,7 +409,14 @@ const STATUS_BODY =
 describe('parseCarRequest: status', () => {
   const base = (status: unknown) =>
     JSON.stringify({ v: 1, action: 'status', device_id: DEVICE, ts: VECTOR_NOW, status })
-  const good = { event: 'trip_end', observed_at: VECTOR_NOW - 1000, soc: 64, range_km: 266, charging: false, plugged: false }
+  const good = {
+    event: 'trip_end',
+    observed_at: VECTOR_NOW - 1000,
+    soc: 64,
+    range_km: 266,
+    charging: false,
+    plugged: false,
+  }
 
   it('parses the car-built body exactly', () => {
     expect(parseCarRequest(STATUS_BODY)).toEqual({
@@ -486,7 +495,10 @@ describe('handleCarDevice: status', () => {
       ['revoked', 410],
       ['replay', 409],
     ] as const) {
-      const { rpc } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_submit_status: ok({ error: answer }) })
+      const { rpc } = fakeRpc({
+        car_device_public_key: ok(fresh.spki),
+        car_submit_status: ok({ error: answer }),
+      })
       expect((await call(post(STATUS_BODY, await fresh.sign(STATUS_BODY)), rpc)).status).toBe(status)
     }
   })
@@ -544,7 +556,13 @@ describe('handleCarDevice: inbox', () => {
     const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: answer })
     const r = await call(post(body, await fresh.sign(body)), rpc)
     expect(r.status).toBe(200)
-    expect(r.body).toEqual({ ok: true, user_id: USER, key_id: KEY_ID, public_key: SPKI, server_time: VECTOR_NOW })
+    expect(r.body).toEqual({
+      ok: true,
+      user_id: USER,
+      key_id: KEY_ID,
+      public_key: SPKI,
+      server_time: VECTOR_NOW,
+    })
     expect(calls[1]).toEqual({ fn: 'car_vault_inbox_key', args: { p_device_id: DEVICE, p_ts: VECTOR_NOW } })
 
     const forged = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: answer })
@@ -560,10 +578,25 @@ describe('handleCarDevice: inbox', () => {
     expect(r.status).toBe(200)
     expect(okRun.calls[1]).toEqual({
       fn: 'car_vault_inbox_put',
-      args: { p_device_id: DEVICE, p_ts: VECTOR_NOW, p_kind: 'dashcam_recovery', p_key_id: KEY_ID, p_epk: SPKI, p_iv: IV, p_ciphertext: CT },
+      args: {
+        p_device_id: DEVICE,
+        p_ts: VECTOR_NOW,
+        p_kind: 'dashcam_recovery',
+        p_key_id: KEY_ID,
+        p_epk: SPKI,
+        p_iv: IV,
+        p_ciphertext: CT,
+      },
     })
-    for (const [guard, status] of [['no_inbox', 404], ['stale_key', 409], ['replay', 409]] as const) {
-      const run = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_put: ok({ error: guard }) })
+    for (const [guard, status] of [
+      ['no_inbox', 404],
+      ['stale_key', 409],
+      ['replay', 409],
+    ] as const) {
+      const run = fakeRpc({
+        car_device_public_key: ok(fresh.spki),
+        car_vault_inbox_put: ok({ error: guard }),
+      })
       const res = await call(post(body, sig), run.rpc)
       expect(res.status).toBe(status)
       expect(res.body.error).toBe(guard)
@@ -572,7 +605,137 @@ describe('handleCarDevice: inbox', () => {
 
   it('a malformed inbox_key row is a 500, not a leaked partial answer', async () => {
     const body = `{"v":1,"action":"inbox_key","device_id":"${DEVICE}","ts":${VECTOR_NOW}}`
-    const run = fakeRpc({ car_device_public_key: ok(fresh.spki), car_vault_inbox_key: ok({ user_id: USER, key_id: KEY_ID, public_key: 'x' }) })
+    const run = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_vault_inbox_key: ok({ user_id: USER, key_id: KEY_ID, public_key: 'x' }),
+    })
     expect((await call(post(body, await fresh.sign(body)), run.rpc)).status).toBe(500)
+  })
+})
+
+// Car trip drafts (specs/car-trip-drafts.md)
+const DRAFT = {
+  client_id: '3f2a1b0c-9d8e-4f7a-b6c5-d4e3f2a1b0c9',
+  started_at: VECTOR_NOW - 3 * 3600_000,
+  ended_at: VECTOR_NOW - 600_000,
+  trip_count: 2,
+  distance_km: 182.4,
+  energy_kwh: 27.5,
+  start_soc: 90,
+  end_soc: 31,
+  avg_speed_kmh: 78.2,
+  route: [
+    [-34.9011, -56.1645],
+    [-34.85, -55.95],
+    [-34.7, -55.0],
+  ],
+  charges: [
+    {
+      started_at: VECTOR_NOW - 7000_000,
+      ended_at: VECTOR_NOW - 5200_000,
+      start_soc: 35,
+      end_soc: 80,
+      energy_kwh: 23.1,
+      end_reason: 'limite',
+      lat: -34.85,
+      lon: -55.95,
+    },
+  ],
+}
+const draftBody = (draft: unknown) =>
+  JSON.stringify({ v: 1, action: 'trip_draft', device_id: DEVICE, ts: VECTOR_NOW, draft })
+const TRIP_BODY = draftBody(DRAFT)
+
+describe('parseTripDraft', () => {
+  it('accepts a full draft and lower-cases the client id', () => {
+    const d = parseTripDraft({ ...DRAFT, client_id: DRAFT.client_id.toUpperCase() })
+    expect(d?.client_id).toBe(DRAFT.client_id)
+    expect(d?.route).toHaveLength(3)
+    expect(d?.charges[0].end_reason).toBe('limite')
+  })
+
+  it('accepts a minimal draft (no route, no charges, unknown numbers)', () => {
+    const rest: Record<string, unknown> = { ...DRAFT }
+    for (const k of ['route', 'charges', 'energy_kwh', 'start_soc', 'end_soc', 'avg_speed_kmh'])
+      delete rest[k]
+    const d = parseTripDraft(rest)
+    expect(d).not.toBeNull()
+    expect(d?.route).toEqual([])
+    expect(d?.energy_kwh).toBeNull()
+  })
+
+  it.each([
+    ['an extra key', { ...DRAFT, vin: 'X' }],
+    ['a bad client id', { ...DRAFT, client_id: 'abc' }],
+    ['end before start', { ...DRAFT, ended_at: DRAFT.started_at - 1 }],
+    ['zero trips', { ...DRAFT, trip_count: 0 }],
+    ['21 trips', { ...DRAFT, trip_count: 21 }],
+    ['negative distance', { ...DRAFT, distance_km: -1 }],
+    ['soc 101', { ...DRAFT, end_soc: 101 }],
+    ['a route point out of range', { ...DRAFT, route: [[-91, 0]] }],
+    ['a route point with three numbers', { ...DRAFT, route: [[1, 2, 3]] }],
+    [
+      'too many route points',
+      { ...DRAFT, route: Array.from({ length: MAX_ROUTE_POINTS + 1 }, () => [0, 0]) },
+    ],
+    ['a charge with an extra key', { ...DRAFT, charges: [{ ...DRAFT.charges[0], station: 'x' }] }],
+    ['a charge with lat but no lon', { ...DRAFT, charges: [{ started_at: 1, ended_at: 2, lat: 1 }] }],
+    ['an unknown end reason', { ...DRAFT, charges: [{ ...DRAFT.charges[0], end_reason: 'boom' }] }],
+    ['not an object', [1, 2]],
+  ])('refuses %s', (_name, draft) => {
+    expect(parseTripDraft(draft)).toBeNull()
+    expect(parseCarRequest(draftBody(draft))).toBeNull()
+  })
+
+  it('parseCarRequest routes the trip_draft action', () => {
+    const r = parseCarRequest(TRIP_BODY)
+    expect(r?.action).toBe('trip_draft')
+  })
+})
+
+describe('handleCarDevice: trip_draft', () => {
+  it('verifies, then stores through car_submit_trip_draft and returns stored', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_trip_draft: ok({ ok: true, stored: true }),
+    })
+    const r = await call(post(TRIP_BODY, await fresh.sign(TRIP_BODY)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, stored: true, server_time: VECTOR_NOW })
+    expect(calls[1].fn).toBe('car_submit_trip_draft')
+    expect(calls[1].args.p_device_id).toBe(DEVICE)
+    expect((calls[1].args.p_draft as Record<string, unknown>).distance_km).toBe(182.4)
+  })
+
+  it('a retry of the same client id is accepted but not stored again', async () => {
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_trip_draft: ok({ ok: true, stored: false }),
+    })
+    const r = await call(post(TRIP_BODY, await fresh.sign(TRIP_BODY)), rpc)
+    expect(r.body).toEqual({ ok: true, stored: false, server_time: VECTOR_NOW })
+  })
+
+  it('a large route still fits under the limit and goes through', async () => {
+    // the car rounds to 5 decimals and caps the route at 1200 points (specs/car-trip-drafts.md D3)
+    const route = Array.from({ length: 1200 }, (_, i) => [
+      +(-34.12345 - i / 100000).toFixed(5),
+      +(-55.54321 - i / 100000).toFixed(5),
+    ])
+    const body = draftBody({ ...DRAFT, route })
+    expect(new TextEncoder().encode(body).length).toBeLessThan(MAX_BODY_BYTES)
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_trip_draft: ok({ ok: true, stored: true }),
+    })
+    expect((await call(post(body, await fresh.sign(body)), rpc)).status).toBe(200)
+  })
+
+  it('a database refusal maps like the other actions', async () => {
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_submit_trip_draft: ok({ error: 'bad_request' }),
+    })
+    expect((await call(post(TRIP_BODY, await fresh.sign(TRIP_BODY)), rpc)).status).toBe(400)
   })
 })

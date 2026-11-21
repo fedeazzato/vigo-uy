@@ -15,7 +15,8 @@
 export const PROTOCOL_VERSION = 1
 export const SIGNING_PREFIX = 'vigo-car-v1\n'
 export const SIGNATURE_HEADER = 'x-vigo-signature'
-export const MAX_BODY_BYTES = 8192
+// 32 KB since the trip_draft action (specs/car-trip-drafts.md D4): every action keeps its own strict parser.
+export const MAX_BODY_BYTES = 32768
 export const MAX_SKEW_MS = 5 * 60 * 1000
 
 // The fixed 27-byte DER prefix of an uncompressed P-256 SubjectPublicKeyInfo,
@@ -86,6 +87,7 @@ export type CarRequest =
   | { action: 'unpair'; ts: number; deviceId: string }
   | { action: 'status'; ts: number; deviceId: string; status: CarStatus }
   | { action: 'inbox_key'; ts: number; deviceId: string }
+  | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
   | {
       action: 'inbox_put'
       ts: number
@@ -106,6 +108,32 @@ export interface CarStatus {
   charging: boolean | null
   plugged: boolean | null
   charge_end_reason: string | null
+}
+
+/** A trip shared from the car as a draft (specs/car-trip-drafts.md); route and charge locations are what the driver chose to share. */
+export interface CarTripDraftCharge {
+  started_at: number
+  ended_at: number
+  start_soc?: number
+  end_soc?: number
+  energy_kwh?: number
+  end_reason?: string
+  lat?: number
+  lon?: number
+}
+
+export interface CarTripDraft {
+  client_id: string
+  started_at: number
+  ended_at: number
+  trip_count: number
+  distance_km: number
+  energy_kwh: number | null
+  start_soc: number | null
+  end_soc: number | null
+  avg_speed_kmh: number | null
+  route: [number, number][]
+  charges: CarTripDraftCharge[]
 }
 
 const CHARGE_END_REASONS = ['completa', 'limite', 'desenchufado', 'fallo', 'detenida', 'sin_datos']
@@ -140,7 +168,138 @@ export function parseCarStatus(raw: unknown): CarStatus | null {
     if (!CHARGE_END_REASONS.includes(o.charge_end_reason)) return null
     reason = o.charge_end_reason
   }
-  return { event: o.event, observed_at: observed, soc, range_km: range, charging, plugged, charge_end_reason: reason }
+  return {
+    event: o.event,
+    observed_at: observed,
+    soc,
+    range_km: range,
+    charging,
+    plugged,
+    charge_end_reason: reason,
+  }
+}
+
+const DRAFT_KEYS = [
+  'client_id',
+  'started_at',
+  'ended_at',
+  'trip_count',
+  'distance_km',
+  'energy_kwh',
+  'start_soc',
+  'end_soc',
+  'avg_speed_kmh',
+  'route',
+  'charges',
+]
+const CHARGE_KEYS = [
+  'started_at',
+  'ended_at',
+  'start_soc',
+  'end_soc',
+  'energy_kwh',
+  'end_reason',
+  'lat',
+  'lon',
+]
+export const MAX_ROUTE_POINTS = 2000
+export const MAX_DRAFT_CHARGES = 30
+
+function isMs(v: unknown): v is number {
+  return typeof v === 'number' && Number.isSafeInteger(v) && v > 0
+}
+
+function optNum(v: unknown, min: number, max: number): number | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : undefined
+}
+
+function isLat(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v) && v >= -90 && v <= 90
+}
+
+function isLon(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v) && v >= -180 && v <= 180
+}
+
+function parseDraftCharge(c: unknown): CarTripDraftCharge | null {
+  if (typeof c !== 'object' || c === null || Array.isArray(c)) return null
+  const r = c as Record<string, unknown>
+  if (Object.keys(r).some((k) => !CHARGE_KEYS.includes(k))) return null
+  if (!isMs(r.started_at) || !isMs(r.ended_at) || r.ended_at < r.started_at) return null
+  const out: CarTripDraftCharge = { started_at: r.started_at, ended_at: r.ended_at }
+  if (r.start_soc !== undefined) {
+    const v = optInt(r.start_soc, 0, 100)
+    if (v == null) return null
+    out.start_soc = v
+  }
+  if (r.end_soc !== undefined) {
+    const v = optInt(r.end_soc, 0, 100)
+    if (v == null) return null
+    out.end_soc = v
+  }
+  if (r.energy_kwh !== undefined) {
+    const v = optNum(r.energy_kwh, 0, 200)
+    if (v == null) return null
+    out.energy_kwh = v
+  }
+  if (r.end_reason !== undefined) {
+    if (typeof r.end_reason !== 'string' || !CHARGE_END_REASONS.includes(r.end_reason)) return null
+    out.end_reason = r.end_reason
+  }
+  if ((r.lat === undefined) !== (r.lon === undefined)) return null
+  if (r.lat !== undefined) {
+    if (!isLat(r.lat) || !isLon(r.lon)) return null
+    out.lat = r.lat
+    out.lon = r.lon
+  }
+  return out
+}
+
+/** Validates the "draft" object of a trip_draft call; null = bad_request. Unknown keys are refused at every level. */
+export function parseTripDraft(raw: unknown): CarTripDraft | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+  const o = raw as Record<string, unknown>
+  if (Object.keys(o).some((k) => !DRAFT_KEYS.includes(k))) return null
+  if (typeof o.client_id !== 'string' || !UUID.test(o.client_id)) return null
+  if (!isMs(o.started_at) || !isMs(o.ended_at) || o.ended_at < o.started_at) return null
+  const trips = o.trip_count
+  if (typeof trips !== 'number' || !Number.isInteger(trips) || trips < 1 || trips > 20) return null
+  const dist = o.distance_km
+  if (typeof dist !== 'number' || !Number.isFinite(dist) || dist < 0 || dist > 5000) return null
+  const energy = optNum(o.energy_kwh, 0, 1000)
+  const ssoc = optInt(o.start_soc, 0, 100)
+  const esoc = optInt(o.end_soc, 0, 100)
+  const speed = optNum(o.avg_speed_kmh, 0, 250)
+  if (energy === undefined || ssoc === undefined || esoc === undefined || speed === undefined) return null
+  const routeRaw = o.route ?? []
+  if (!Array.isArray(routeRaw) || routeRaw.length > MAX_ROUTE_POINTS) return null
+  const route: [number, number][] = []
+  for (const p of routeRaw as unknown[]) {
+    if (!Array.isArray(p) || p.length !== 2 || !isLat(p[0]) || !isLon(p[1])) return null
+    route.push([p[0], p[1]])
+  }
+  const chargesRaw = o.charges ?? []
+  if (!Array.isArray(chargesRaw) || chargesRaw.length > MAX_DRAFT_CHARGES) return null
+  const charges: CarTripDraftCharge[] = []
+  for (const c of chargesRaw as unknown[]) {
+    const parsedCharge = parseDraftCharge(c)
+    if (!parsedCharge) return null
+    charges.push(parsedCharge)
+  }
+  return {
+    client_id: o.client_id.toLowerCase(),
+    started_at: o.started_at,
+    ended_at: o.ended_at,
+    trip_count: trips,
+    distance_km: dist,
+    energy_kwh: energy,
+    start_soc: ssoc,
+    end_soc: esoc,
+    avg_speed_kmh: speed,
+    route,
+    charges,
+  }
 }
 
 export function isP256Spki(key: unknown): key is string {
@@ -223,6 +382,13 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (!status) return null
       return { action: 'status', ts, deviceId: o.device_id.toLowerCase(), status }
     }
+    // Car trip drafts (specs/car-trip-drafts.md): a trip the driver chose to share, stored as a draft.
+    case 'trip_draft': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      const draft = parseTripDraft(o.draft)
+      if (!draft) return null
+      return { action: 'trip_draft', ts, deviceId: o.device_id.toLowerCase(), draft }
+    }
     // Bóveda inbox (specs/vault-onboarding.md Phase C): the owner's inbox public key / ECIES ciphertext upload.
     case 'inbox_key':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
@@ -234,7 +400,14 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (!isP256Spki(o.epk)) return null
       if (typeof o.iv !== 'string' || !IV_B64.test(o.iv)) return null
       const ct = o.ciphertext
-      if (typeof ct !== 'string' || ct.length < 24 || ct.length > 1400 || ct.length % 4 !== 0 || !BASE64.test(ct)) return null
+      if (
+        typeof ct !== 'string' ||
+        ct.length < 24 ||
+        ct.length > 1400 ||
+        ct.length % 4 !== 0 ||
+        !BASE64.test(ct)
+      )
+        return null
       return {
         action: 'inbox_put',
         ts,
@@ -380,7 +553,11 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       if (!inboxRow) return fail('server', now)
       if (typeof inboxRow.error === 'string') return fail(GUARD_ERRORS[inboxRow.error] ?? 'server', now)
       if (parsed.action === 'inbox_put') return reply(200, { ok: true }, now)
-      if (!isP256Spki(inboxRow.public_key) || typeof inboxRow.key_id !== 'string' || typeof inboxRow.user_id !== 'string') {
+      if (
+        !isP256Spki(inboxRow.public_key) ||
+        typeof inboxRow.key_id !== 'string' ||
+        typeof inboxRow.user_id !== 'string'
+      ) {
         log('inbox_key: malformed row')
         return fail('server', now)
       }
@@ -404,7 +581,13 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
               p_ts: parsed.ts,
               p_status: parsed.status,
             })
-          : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+          : parsed.action === 'trip_draft'
+            ? await deps.rpc('car_submit_trip_draft', {
+                p_device_id: parsed.deviceId,
+                p_ts: parsed.ts,
+                p_draft: parsed.draft,
+              })
+            : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
     if (res.error) {
       log(`${parsed.action} failed: ${res.error}`)
       return fail('server', now)
@@ -416,7 +599,8 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
     }
     if (typeof row.error === 'string') return fail(GUARD_ERRORS[row.error] ?? 'server', now)
     if (parsed.action === 'unpair') return reply(200, { ok: true }, now)
-    if (parsed.action === 'status') return reply(200, { ok: true, stored: row.stored === true }, now)
+    if (parsed.action === 'status' || parsed.action === 'trip_draft')
+      return reply(200, { ok: true, stored: row.stored === true }, now)
     return reply(
       200,
       { ok: true, device_id: row.device_id, device_name: row.device_name, members: memberNames(row.members) },

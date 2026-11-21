@@ -236,6 +236,81 @@ export type Database = {
           },
         ]
       }
+      car_trip_drafts: {
+        Row: {
+          avg_speed_kmh: number | null
+          charges: Json
+          client_id: string
+          device_id: string | null
+          distance_km: number
+          end_soc: number | null
+          ended_at: string
+          energy_kwh: number | null
+          id: string
+          received_at: string
+          route: Json
+          start_soc: number | null
+          started_at: string
+          status: string
+          trip_count: number
+          used_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          avg_speed_kmh?: number | null
+          charges?: Json
+          client_id: string
+          device_id?: string | null
+          distance_km: number
+          end_soc?: number | null
+          ended_at: string
+          energy_kwh?: number | null
+          id?: string
+          received_at?: string
+          route?: Json
+          start_soc?: number | null
+          started_at: string
+          status?: string
+          trip_count: number
+          used_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          avg_speed_kmh?: number | null
+          charges?: Json
+          client_id?: string
+          device_id?: string | null
+          distance_km?: number
+          end_soc?: number | null
+          ended_at?: string
+          energy_kwh?: number | null
+          id?: string
+          received_at?: string
+          route?: Json
+          start_soc?: number | null
+          started_at?: string
+          status?: string
+          trip_count?: number
+          used_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_trip_drafts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_trip_drafts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       charging_networks: {
         Row: {
           country: string

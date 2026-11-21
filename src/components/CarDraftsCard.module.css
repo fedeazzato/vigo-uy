@@ -1,0 +1,12 @@
+/* Mi Vigo entry to "Borradores del auto" (specs/car-trip-drafts.md R3). */
+.text {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
