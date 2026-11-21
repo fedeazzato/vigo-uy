@@ -34,25 +34,51 @@ const COL = {
 // ---- glyph: shapes are {p: polygon} or {r: [x0, y0, x1, y1, radius]}; WHITE is the union, CUT is removed from it
 const rect = (x0, y0, x1, y1, rad = 0) => ({ r: [x0, y0, x1, y1, rad] });
 const sym = (x0, y0, x1, y1, rad = 0) => [rect(x0, y0, x1, y1, rad), rect(180 - x1, y0, 180 - x0, y1, rad)];
-const BODY = [[62, 51.8], [118, 51.8], [120.6, 54.2], [126.6, 74.6], [133.6, 78.9], [134.7, 113.6], [45.3, 113.6], [46.4, 78.9],
-  [53.4, 74.6], [59.4, 54.2]];
+// 2026-11-21 redraw (owner: "like the car icon of the head unit's bottom bar"): an ORIGINAL drawing in the spirit of that dock icon
+// (smooth crossover silhouette: rounded roof, cabin narrower than the body, soft shoulders, light bar ending in swept headlights),
+// not a copy of Dongfeng's bitmap (wikivigo/DISTRIBUTION.md section 5). Keeps the wide windshield with thin A-pillars (owner 2026-11-20).
+// Options: --no-bolt drops the EV lightning bolt.
+const arc = (cx, cy, r, a0, a1, n = 8) => Array.from({ length: n + 1 }, (_, i) => {
+  const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; return [+(cx + r * Math.cos(a)).toFixed(2), +(cy + r * Math.sin(a)).toFixed(2)];
+});
+const mirrorX = p => p.map(([x, y]) => [+(180 - x).toFixed(2), y]).reverse();
+// left half, top to bottom, then mirrored: roof with round corners, cabin tapering out, shoulder, body with round lower corners
+const HALF = [
+  [90, 49.2], ...arc(70.5, 56.2, 7, 270, 200, 6),         // roof line to the left round corner
+  [57.4, 74.2], [50.2, 78.4],                             // A-pillar foot, shoulder
+  ...arc(52.4, 83.6, 6, 220, 180, 4),                     // soft shoulder corner
+  [46.4, 108.6], ...arc(52.4, 108.6, 6, 180, 90, 6), [90, 114.6],
+];
+const BODY = [...HALF, ...mirrorX(HALF.slice(1, -1))];
 const WHITE = [
   { p: BODY },
-  ...sym(66.5, 49.4, 72.5, 52.6, 0.8),                    // roof-rail stubs
-  ...sym(42.6, 63.2, 52.4, 72.4, 1.6),                    // mirrors
-  ...sym(51.5, 68.2, 57.5, 70.6, 0.4),                    // mirror arms
-  ...sym(45.6, 114.9, 58.6, 126, 2.2),                    // tyres seen from the front
+  ...sym(41.8, 66.4, 51.2, 73.2, 2.2),                    // mirrors
+  ...sym(49.6, 69.2, 55.4, 71.4, 0.4),                    // mirror arms
+  ...sym(48.6, 113, 62.6, 125.4, 2.6),                    // tyres seen from the front
 ];
-const WIND = [[60.4, 55.6], [119.6, 55.6], [124.6, 72.4], [55.4, 72.4]];   // wide windshield, thin A-pillars (owner 2026-11-20)
-const BOLT = [[92.6, 86.4], [86.4, 94.6], [89.9, 94.6], [88.2, 100.4], [94.4, 92.2], [90.9, 92.2]];
+// windshield inset ~2.5 px inside the cabin outline (x = 63.5 - 0.339 * (y - 56.2) on the left): wide glass, thin but visible A-pillars
+const WIND = [[67.6, 56.6], [112.4, 56.6], [114.4, 57.8], [119.3, 71.2], [60.7, 71.2], [65.6, 57.8]];
+const LAMP = [[47.6, 84.2], [62, 85.4], [62, 87.8], [50.2, 92.6], [48.2, 91.2]];                       // swept headlight (left)
+const BOLT = [[92.6, 89.6], [86.6, 97.4], [89.9, 97.4], [88.3, 102.6], [94.3, 94.8], [91, 94.8]];
 const CUT = [
   { p: WIND },                                            // windshield
-  rect(49.2, 82.6, 130.8, 84.3),                          // light bar across the front
-  ...sym(47.4, 81.4, 49.4, 95.8),                         // the two vertical headlights at the ends of the light bar
-  rect(48.6, 101.6, 131.4, 102.9),                        // bumper line under the plate
-  rect(67.5, 105.6, 112.5, 110.6, 1.2),                   // grille slot
-  { p: BOLT },                                            // lightning bolt on the face
+  rect(61, 85.4, 119, 87.8, 1.2),                         // light bar across the front
+  { p: LAMP }, { p: mirrorX(LAMP) },                      // headlights sweeping down at the ends of the light bar
+  rect(66.5, 105.2, 113.5, 109.4, 2.1),                   // lower grille slot
+  ...(process.argv.includes('--no-bolt') ? [] : [{ p: BOLT, keepShape: true }]),   // lightning bolt on the face (EV)
 ];
+// Proportions (owner 2026-11-21: "less tall, or wider"): the whole glyph is stretched SX wide and SY tall around its centre
+// (90, GY); the bolt only moves with it (its own shape is kept).
+const SX = 1.10, SY = 0.94, GY = 87;
+const tx = x => +(90 + (x - 90) * SX).toFixed(2), ty = y => +(GY + (y - GY) * SY).toFixed(2);
+const fit = s => {
+  if (s.r) return rect(tx(s.r[0]), ty(s.r[1]), tx(s.r[2]), ty(s.r[3]), s.r[4]);
+  if (!s.keepShape) return { p: s.p.map(([x, y]) => [tx(x), ty(y)]) };
+  const cx = s.p.reduce((a, q) => a + q[0], 0) / s.p.length, cy = s.p.reduce((a, q) => a + q[1], 0) / s.p.length;
+  return { p: s.p.map(([x, y]) => [+(x - cx + tx(cx)).toFixed(2), +(y - cy + ty(cy)).toFixed(2)]) };
+};
+WHITE.splice(0, WHITE.length, ...WHITE.map(fit));
+CUT.splice(0, CUT.length, ...CUT.map(fit));
 const inShape = (x, y, s) => s.p ? inPoly(x, y, s.p) : rrect(x, y, s.r[0], s.r[1], s.r[2], s.r[3], s.r[4]);
 const glyphAt = (x, y) => {
   if (!WHITE.some(s => inShape(x, y, s))) return null;
