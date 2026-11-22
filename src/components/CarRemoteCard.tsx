@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardTitle, Alert, StatGrid } from './UI'
+import { Card, CardTitle, Alert } from './UI'
 import {
   cancelCarOrder,
   clampLimit,
   connectionLabel,
   createCarOrder,
   fetchCarRemote,
-  formatRemain,
-  isLiveFresh,
   isOnline,
   LIMIT_MAX,
   LIMIT_MIN,
@@ -16,7 +14,6 @@ import {
   orderMeta,
   orderPhase,
   orderStateView,
-  plugLabel,
   POLL_MS,
   type CarOrderKind,
   type CarRemoteData,
@@ -24,7 +21,9 @@ import {
 import styles from './CarRemoteCard.module.css'
 
 // "Control remoto" (specs/car-remote-e3.md R6): orders for the linked car (windows, ventilate, charge limit, stop charging),
-// whether the car is online, its live status while awake, and the last orders with their result. Mounted only with
+// whether the car is online, and the last orders with their result. The car's status (battery, range, cable, time to full,
+// limit) is shown only by "Estado del auto"; this card reads it just to offer "Detener la carga" and to start the limit
+// stepper at the car's limit (owner at the car 2026-11-22: no repeated status). Mounted only with
 // VITE_CAR_REMOTE=1 (after migration 0052); hidden when the fetch fails or the vehicle has no linked car. Polls every 3 s
 // while the page is visible (no Realtime) and stops when it is hidden.
 const CONFIRM: Partial<Record<CarOrderKind, string>> = {
@@ -69,8 +68,7 @@ export default function CarRemoteCard() {
   if (!data || !data.hasCar) return null
 
   const status = data.status
-  const live = isLiveFresh(status, now) ? status : null
-  const charging = (live ?? status)?.charging === true
+  const charging = status?.charging === true
   const shownLimit = limit ?? clampLimit(status?.limit_pct ?? 80)
 
   async function send(kind: CarOrderKind, pct?: number) {
@@ -93,16 +91,6 @@ export default function CarRemoteCard() {
     void load()
   }
 
-  const plug = live ? plugLabel(live) : null
-  const stats = live
-    ? [
-        live.soc != null && { value: `${live.soc} %`, label: 'Batería' },
-        live.range_km != null && { value: `${live.range_km} km`, label: 'Autonomía' },
-        plug && { value: plug, label: 'Cable' },
-        live.limit_pct != null && { value: `${live.limit_pct} %`, label: 'Límite de carga' },
-      ].filter((x): x is { value: string; label: string } => Boolean(x))
-    : []
-
   const online = isOnline(data.lastSeenAt, now)
 
   return (
@@ -116,15 +104,6 @@ export default function CarRemoteCard() {
         El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se
         cancela.
       </p>
-
-      {live && (
-        <div className={styles.live}>
-          {stats.length > 0 && <StatGrid stats={stats} />}
-          {live.charging === true && live.remain_charge_min != null && (
-            <p className={styles.remain}>Carga completa en {formatRemain(live.remain_charge_min)}</p>
-          )}
-        </div>
-      )}
 
       {error && <Alert type="danger">{error}</Alert>}
 

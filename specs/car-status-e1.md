@@ -53,6 +53,7 @@ STATUS_BODY = {"v":1,"action":"status","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b
 ### R4. Web card "Estado del auto" (Mi Vigo, signed in; built 2026-11-21: `src/components/CarStatusCard.tsx`, `src/lib/carStatus.ts`)
 
 - Under "Mi vehículo", only when a `car_status` row exists for the vehicle: "Batería 80 %", "Autonomía 266 km", "Cargando" / "Enchufado" / "Desenchufado", the event in words ("al terminar una carga: llegó al límite" / "al terminar un viaje") and "hace 2 h" from `observed_at`, plus a muted line "Último dato que el auto envió con conexión; no es en vivo."
+- **The only place for the car's status** (owner at the car 2026-11-22; "Control remoto", `car-remote-e3.md` R6, no longer repeats it). When the row is a fresh `live` row (`received_at` < 2 min, server clock) it also shows **"Carga completa en ~1 h 35 min"** (`remain_charge_min`, only while charging) and **"Límite de carga 90 %"** (`limit_pct`), the event reads "con el auto encendido", and the muted line becomes "El auto lo envía mientras está encendido y con internet." The card re-reads the row every 10 s while the page is visible (stops when hidden) so a live row stays current.
 - Select explicit columns; empty state: nothing (or a hint to turn on `share_status` on the car).
 - Needs `npm run gen:types` after the migration (the generated types add `car_status`).
 

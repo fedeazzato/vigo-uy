@@ -155,8 +155,10 @@ describe('createCarOrder / cancelCarOrder', () => {
 })
 
 describe('wording', () => {
-  it('connection: online under 30 s, otherwise when it was seen', () => {
+  it('connection: online under 35 s (10 s polls, one late poll tolerated), otherwise when it was seen', () => {
     expect(connectionLabel(ago(10_000), NOW)).toBe('En línea')
+    expect(connectionLabel(ago(34_000), NOW)).toBe('En línea')
+    expect(connectionLabel(ago(35_000), NOW)).toBe('Sin conexión — visto hace un momento')
     expect(connectionLabel(ago(2 * 3600_000), NOW)).toBe('Sin conexión — visto hace 2 h')
     expect(connectionLabel(null, NOW)).toBe('Sin conexión — todavía no se conectó')
   })

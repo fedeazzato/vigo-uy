@@ -1,6 +1,7 @@
-// specs/car-status-e1.md R4: the card shows only when a status row exists (also inert before migration 0048).
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+// specs/car-status-e1.md R4: the card shows only when a status row exists (also inert before migration 0048). It is the only
+// place for the car's status: a fresh live row adds time to full and the charge limit (moved from "Control remoto").
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import type { CarStatus } from '../types'
 
 const mocks = vi.hoisted(() => ({ fetchCarStatus: vi.fn() }))
@@ -12,6 +13,8 @@ vi.mock('../lib/carStatus', async (importOriginal) => ({
 
 import CarStatusCard from './CarStatusCard'
 
+const iso = (msAgo: number) => new Date(Date.now() - msAgo).toISOString()
+
 const ROW: CarStatus = {
   vehicle_id: 'v',
   event: 'charge_end',
@@ -20,12 +23,31 @@ const ROW: CarStatus = {
   charging: false,
   plugged: true,
   charge_end_reason: 'limite',
-  observed_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-  received_at: new Date().toISOString(),
+  remain_charge_min: null,
+  limit_pct: null,
+  observed_at: iso(2 * 3600 * 1000),
+  received_at: iso(0),
+}
+
+const LIVE: CarStatus = {
+  ...ROW,
+  event: 'live',
+  soc: 64,
+  range_km: 212,
+  charging: true,
+  charge_end_reason: null,
+  remain_charge_min: 95,
+  limit_pct: 90,
+  observed_at: iso(6_000),
+  received_at: iso(5_000),
 }
 
 describe('CarStatusCard', () => {
   beforeEach(() => mocks.fetchCarStatus.mockReset())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
 
   it('renders nothing when there is no row (or the table is missing)', async () => {
     mocks.fetchCarStatus.mockResolvedValue(null)
@@ -35,7 +57,7 @@ describe('CarStatusCard', () => {
   })
 
   it('shows battery, range, cable state, when, and the not-live note', async () => {
-    mocks.fetchCarStatus.mockResolvedValue(ROW)
+    mocks.fetchCarStatus.mockResolvedValue({ ...ROW, limit_pct: 90 })
     render(<CarStatusCard />)
     expect(await screen.findByText('Estado del auto')).toBeTruthy()
     expect(screen.getByText('80 %')).toBeTruthy()
@@ -43,5 +65,54 @@ describe('CarStatusCard', () => {
     expect(screen.getByText('Enchufado')).toBeTruthy()
     expect(screen.getByText(/al terminar una carga: llegó al límite · hace 2 h/)).toBeTruthy()
     expect(screen.getByText(/no es en vivo/)).toBeTruthy()
+    // not a fresh live row: no time to full, no limit
+    expect(screen.queryByText(/Carga completa en/)).toBeNull()
+    expect(screen.queryByText(/Límite de carga/)).toBeNull()
+  })
+
+  it('a fresh live row while charging also shows time to full and the charge limit', async () => {
+    mocks.fetchCarStatus.mockResolvedValue(LIVE)
+    render(<CarStatusCard />)
+    expect(await screen.findByText('64 %')).toBeTruthy()
+    expect(screen.getByText('212 km')).toBeTruthy()
+    expect(screen.getByText('Cargando')).toBeTruthy()
+    expect(screen.getByText('Carga completa en ~1 h 35 min')).toBeTruthy()
+    expect(screen.getByText('Límite de carga 90 %')).toBeTruthy()
+    expect(screen.getByText(/Último dato con el auto encendido/)).toBeTruthy()
+    expect(screen.queryByText(/no es en vivo/)).toBeNull()
+  })
+
+  it('a live row older than 2 min shows neither time to full nor the limit', async () => {
+    mocks.fetchCarStatus.mockResolvedValue({ ...LIVE, observed_at: iso(3 * 60_000), received_at: iso(3 * 60_000) })
+    render(<CarStatusCard />)
+    expect(await screen.findByText('64 %')).toBeTruthy()
+    expect(screen.queryByText(/Carga completa en/)).toBeNull()
+    expect(screen.queryByText(/Límite de carga/)).toBeNull()
+    expect(screen.getByText(/no es en vivo/)).toBeTruthy()
+  })
+
+  it('re-reads every 10 s while visible and stops when the page is hidden', async () => {
+    vi.useFakeTimers()
+    mocks.fetchCarStatus.mockResolvedValue(LIVE)
+    let visibility: DocumentVisibilityState = 'visible'
+    vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibility)
+    const { unmount } = render(<CarStatusCard />)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(mocks.fetchCarStatus).toHaveBeenCalledTimes(1)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20_000)
+    })
+    expect(mocks.fetchCarStatus).toHaveBeenCalledTimes(3)
+    visibility = 'hidden'
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000)
+    })
+    expect(mocks.fetchCarStatus).toHaveBeenCalledTimes(3)
+    unmount()
   })
 })

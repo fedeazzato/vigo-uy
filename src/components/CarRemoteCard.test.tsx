@@ -92,16 +92,19 @@ describe('CarRemoteCard', () => {
     expect(second.container.innerHTML).toBe('')
   })
 
-  it('shows online, the live block with time to full, the buttons and the orders', async () => {
+  it('shows online, the buttons and the orders, but not the status ("Estado del auto" shows it)', async () => {
     mocks.fetchCarRemote.mockResolvedValue(data())
     render(<CarRemoteCard />)
     expect(await screen.findByText('Control remoto')).toBeTruthy()
     expect(screen.getByText('En línea')).toBeTruthy()
     expect(screen.getByText(/si no la recibe en 2 minutos, se cancela/)).toBeTruthy()
-    expect(screen.getByText('64 %')).toBeTruthy()
-    expect(screen.getByText('212 km')).toBeTruthy()
-    expect(screen.getByText('Cargando')).toBeTruthy()
-    expect(screen.getByText('Carga completa en ~1 h 35 min')).toBeTruthy()
+    // owner at the car 2026-11-22: no repeated battery / range / cable / time to full
+    expect(screen.queryByText('64 %')).toBeNull()
+    expect(screen.queryByText('212 km')).toBeNull()
+    expect(screen.queryByText('Cargando')).toBeNull()
+    expect(screen.queryByText(/Carga completa en/)).toBeNull()
+    expect(screen.queryByText('Batería')).toBeNull()
+    // the status still drives the controls
     expect(screen.getByRole('button', { name: 'Detener la carga' })).toBeTruthy()
     expect(screen.getByText('Cerrar todas las ventanas', { selector: 'span' })).toBeTruthy()
     expect(screen.getByText(/En cola/)).toBeTruthy()
@@ -122,7 +125,17 @@ describe('CarRemoteCard', () => {
     expect(screen.queryByRole('button', { name: 'Cancelar' })).toBeNull()
   })
 
-  it('offline: "Sin conexión", no live block, no stop button when not charging', async () => {
+  it('"En línea" tolerates one late 10 s poll (seen 34 s ago), not more', async () => {
+    mocks.fetchCarRemote.mockResolvedValue(data({ lastSeenAt: iso(34_000) }))
+    const first = render(<CarRemoteCard />)
+    expect(await screen.findByText('En línea')).toBeTruthy()
+    first.unmount()
+    mocks.fetchCarRemote.mockResolvedValue(data({ lastSeenAt: iso(40_000) }))
+    render(<CarRemoteCard />)
+    expect(await screen.findByText(/^Sin conexión — visto/)).toBeTruthy()
+  })
+
+  it('offline: "Sin conexión", no stop button when not charging', async () => {
     mocks.fetchCarRemote.mockResolvedValue(
       data({
         lastSeenAt: iso(2 * 3600_000),

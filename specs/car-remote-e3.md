@@ -115,10 +115,12 @@ ORDER_RESULT_BODY = {"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c
 
 ## R6. Web card "Control remoto" (Mi Vigo page, signed in, `VITE_CAR_REMOTE=1`)
 
-- Shown to members of a vehicle with a linked car. Top line: **"En línea"** (device `last_seen` < 30 s) / **"Sin conexión — visto hace X"**
+- Shown to members of a vehicle with a linked car. Top line: **"En línea"** (device `last_seen` < 35 s: the car polls every 10 s while on or
+  charging, so one late poll does not flip it) / **"Sin conexión — visto hace X"**
   with the muted explanation "El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se cancela."
-- Live block when `car_status.event = 'live'` and fresh: battery %, range, Cargando / Enchufado / Desenchufado, **"Carga completa en ~1 h 35 min"**
-  (from `remain_charge_min`), limit %.
+- **No status display** (owner at the car 2026-11-22: it repeated "Estado del auto"). The live block (battery, range, cable, time to full,
+  limit) moved to "Estado del auto" (`car-status-e1.md` R4). The card still reads `car_status` to show "Detener la carga" while charging
+  and to start the limit stepper at `limit_pct`.
 - Buttons (stock-look, large): **Ventilar**, **Abrir todas las ventanas**, **Cerrar todas las ventanas**, **Detener la carga** (only when
   charging), **Límite de carga** (stepper 60-100 by 5, "Aplicar"). "Abrir"/"Ventilar" ask for one confirmation ("¿Abrir las 4 ventanas?").
 - Order list (last 10): kind in words, who sent it, state with an icon (en cola → recibida → hecha / falló: reason in words from R3 /

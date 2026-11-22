@@ -1,4 +1,15 @@
-/* "Estado del auto" (specs/car-status-e1.md R4): two muted lines under the stat grid. */
+/* "Estado del auto" (specs/car-status-e1.md R4): live charge lines, then two muted lines under the stat grid. */
+.live {
+  margin-top: 10px;
+}
+
+.liveLine {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
 .when {
   margin: 10px 0 2px;
   font-size: 13px;

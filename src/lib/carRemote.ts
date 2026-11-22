@@ -1,4 +1,5 @@
-// "Control remoto" (specs/car-remote-e3.md R6): remote orders for the linked car, its connection state and live status.
+// "Control remoto" (specs/car-remote-e3.md R6): remote orders for the linked car and its connection state. The status row is
+// read only to drive the controls (stop button, limit stepper); "Estado del auto" (carStatus.ts) is the one that shows it.
 // Fetch helpers + Spanish wording. The car picks an order up only while it is awake and online; an order it does not pick
 // up within 2 minutes expires (server side, and shown as expired here as soon as the time has passed).
 import { supabase } from './supabaseClient'
@@ -6,6 +7,8 @@ import { toFriendlyError } from './errors'
 import { fetchAuthorNames } from './communityData'
 import { formatRelativeTime } from './format'
 import type { CarOrder, CarRemoteStatus } from '../types'
+
+export { formatRemain, isLiveFresh, LIVE_FRESH_MS } from './carStatus'
 
 export type CarOrderKind =
   'windows_open_all' | 'windows_close_all' | 'ventilate' | 'charge_limit' | 'charge_stop'
@@ -19,10 +22,11 @@ const ORDER_COLUMNS =
 
 export const ORDER_LIST_SIZE = 10
 export const POLL_MS = 3000
-/** "En línea" when the car called within this time (it polls every 10-60 s while awake). */
-export const ONLINE_MS = 30_000
-/** A live snapshot older than this (server receive time) is not shown as live. */
-export const LIVE_FRESH_MS = 2 * 60_000
+/**
+ * "En línea" when the car called within this time. It polls every 10 s while on or charging; 35 s (30 s plus a margin)
+ * tolerates one late poll without flipping to "Sin conexión".
+ */
+export const ONLINE_MS = 35_000
 /**
  * A taken order with no result after this long (since taken_at, server clock) shows as "Sin respuesta del auto". Display
  * only: the row stays `taken` and a late result still updates it.
@@ -126,29 +130,6 @@ export function connectionLabel(lastSeenAt: string | null, now: Date = new Date(
   if (isOnline(lastSeenAt, now)) return 'En línea'
   if (!lastSeenAt) return 'Sin conexión — todavía no se conectó'
   return `Sin conexión — visto ${formatRelativeTime(new Date(lastSeenAt), now)}`
-}
-
-/** True for a live snapshot the server received recently (server clock: the car's clock may be off). */
-export function isLiveFresh(s: CarRemoteStatus | null, now: Date = new Date()): s is CarRemoteStatus {
-  if (!s || s.event !== 'live') return false
-  const t = new Date(s.received_at).getTime()
-  return Number.isFinite(t) && now.getTime() - t < LIVE_FRESH_MS
-}
-
-/** 95 -> "~1 h 35 min", 120 -> "~2 h", 40 -> "~40 min", 0 -> "menos de 1 min". */
-export function formatRemain(minutes: number): string {
-  if (minutes < 1) return 'menos de 1 min'
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  if (h === 0) return `~${m} min`
-  return m === 0 ? `~${h} h` : `~${h} h ${m} min`
-}
-
-export function plugLabel(s: Pick<CarRemoteStatus, 'charging' | 'plugged'>): string | null {
-  if (s.charging === true) return 'Cargando'
-  if (s.plugged === true) return 'Enchufado'
-  if (s.plugged === false) return 'Desenchufado'
-  return null
 }
 
 /** Clamp to 60..100 on the 5 % grid of the stepper. */

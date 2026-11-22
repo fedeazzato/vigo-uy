@@ -546,7 +546,8 @@ export interface CuratedSearchResult {
   subtitle?: string
 }
 
-// Last known status of the linked car (specs/car-status-e1.md R4). No location column exists.
+// Last known status of the linked car (specs/car-status-e1.md R4; remain_charge_min / limit_pct from 0052, shown only for a
+// fresh live row). No location column exists.
 export type CarStatus = Pick<
   Tables['car_status']['Row'],
   | 'vehicle_id'
@@ -556,6 +557,8 @@ export type CarStatus = Pick<
   | 'charging'
   | 'plugged'
   | 'charge_end_reason'
+  | 'remain_charge_min'
+  | 'limit_pct'
   | 'observed_at'
   | 'received_at'
 >
