@@ -1,8 +1,8 @@
 # Car remote actions E3: "Control remoto" from WikiVigo
 
 **Status:** spec 2026-11-22, built offline on branch `car-remote-e3` (R1-R4 server side, R6 web card; see "Implementation notes").
-**Migration 0052 and the `car-device` deploy NOT applied** (owner OK pending, see "Production steps"). Web card behind
-`VITE_CAR_REMOTE=1` (off in production until the migration is applied). Car side in `vigo-hack` (Mi Vigo + Copiloto + Carga), inert
+**Migration 0052 APPLIED and `car-device` v6 DEPLOYED to production 2026-11-22 (owner OK; types regenerated 45eb34d).** Web card
+behind `VITE_CAR_REMOTE=1` (still off in production: switched on after the car-side test, NEXT_VISIT 4b). Car side in `vigo-hack` (Mi Vigo + Copiloto + Carga), inert
 until Copiloto's "Comandos remotos" switch is on (default off).
 
 ## Context
