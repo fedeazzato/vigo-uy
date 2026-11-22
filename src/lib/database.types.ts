@@ -102,79 +102,6 @@ export type Database = {
           },
         ]
       }
-      car_pairing_attempts: {
-        Row: {
-          attempted_at: string
-          user_id: string
-        }
-        Insert: {
-          attempted_at?: string
-          user_id: string
-        }
-        Update: {
-          attempted_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      car_pairing_requests: {
-        Row: {
-          claimed_at: string | null
-          claimed_by: string | null
-          code: string
-          created_at: string
-          device_id: string | null
-          device_name: string
-          expires_at: string
-          public_key: string
-          vehicle_id: string | null
-        }
-        Insert: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          code: string
-          created_at?: string
-          device_id?: string | null
-          device_name: string
-          expires_at: string
-          public_key: string
-          vehicle_id?: string | null
-        }
-        Update: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          code?: string
-          created_at?: string
-          device_id?: string | null
-          device_name?: string
-          expires_at?: string
-          public_key?: string
-          vehicle_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "car_pairing_requests_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "car_devices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicle_km_leaderboard"
-            referencedColumns: ["vehicle_id"]
-          },
-          {
-            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       car_diagnostic_parts: {
         Row: {
           data: string
@@ -248,6 +175,86 @@ export type Database = {
           },
           {
             foreignKeyName: "car_diagnostics_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_diagnostics_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_pairing_attempts: {
+        Row: {
+          attempted_at: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      car_pairing_requests: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          code: string
+          created_at: string
+          device_id: string | null
+          device_name: string
+          expires_at: string
+          public_key: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          code: string
+          created_at?: string
+          device_id?: string | null
+          device_name: string
+          expires_at: string
+          public_key: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          code?: string
+          created_at?: string
+          device_id?: string | null
+          device_name?: string
+          expires_at?: string
+          public_key?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_pairing_requests_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -1513,6 +1520,10 @@ export type Database = {
         Returns: undefined
       }
       assert_moderator: { Args: never; Returns: undefined }
+      can_read_car_diagnostic: {
+        Args: { p_vehicle_id: string }
+        Returns: boolean
+      }
       car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
       car_device_accept: {
         Args: { p_device_id: string; p_ts: number }
@@ -1521,6 +1532,19 @@ export type Database = {
       car_device_public_key: { Args: { p_device_id: string }; Returns: string }
       car_heartbeat: {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
+        Returns: Json
+      }
+      car_submit_diag_part: {
+        Args: {
+          p_apps: Json
+          p_data: string
+          p_device_id: string
+          p_note: string
+          p_part: number
+          p_parts: number
+          p_ts: number
+          p_upload_id: string
+        }
         Returns: Json
       }
       car_submit_status: {
