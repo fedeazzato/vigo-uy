@@ -42,6 +42,12 @@ describe('describeCarStatus', () => {
     expect(v).toMatchObject({ battery: null, range: null, plug: null })
   })
 
+  it('words a live snapshot (specs/car-remote-e3.md R2)', () => {
+    const v = describeCarStatus(row({ event: 'live', charge_end_reason: null, charging: true }), NOW)
+    expect(v.plug).toBe('Cargando')
+    expect(v.when).toBe('con el auto encendido · hace 2 h')
+  })
+
   it('sin_datos and unknown reasons add no words; a bad timestamp drops the age', () => {
     expect(describeCarStatus(row({ charge_end_reason: 'sin_datos' }), NOW).when).toBe('al terminar una carga · hace 2 h')
     expect(describeCarStatus(row({ observed_at: 'not a date' }), NOW).when).toBe('al terminar una carga: llegó al límite')

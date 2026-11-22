@@ -560,6 +560,37 @@ export type CarStatus = Pick<
   | 'received_at'
 >
 
+// The status row as the "Control remoto" card reads it (specs/car-remote-e3.md R2: live event, time to full, limit).
+export type CarRemoteStatus = Pick<
+  Tables['car_status']['Row'],
+  | 'vehicle_id'
+  | 'event'
+  | 'soc'
+  | 'range_km'
+  | 'charging'
+  | 'plugged'
+  | 'remain_charge_min'
+  | 'limit_pct'
+  | 'observed_at'
+  | 'received_at'
+>
+
+// A remote order (specs/car-remote-e3.md R1), as members read it. Written only through the RPCs.
+export type CarOrder = Pick<
+  Tables['car_orders']['Row'],
+  | 'id'
+  | 'kind'
+  | 'args'
+  | 'state'
+  | 'created_by'
+  | 'created_at'
+  | 'expires_at'
+  | 'taken_at'
+  | 'finished_at'
+  | 'result_code'
+  | 'result_text'
+>
+
 // A trip shared from the linked car, waiting for review (specs/car-trip-drafts.md R3). Route and charges are jsonb.
 export type CarTripDraftRow = Tables['car_trip_drafts']['Row']
 

@@ -39,7 +39,13 @@ export interface CarStatusView {
 /** Spanish wording of a status row: "Batería 80 %", "Autonomía 266 km", "Enchufado", "al terminar una carga: llegó al límite · hace 2 h". */
 export function describeCarStatus(s: CarStatus, now: Date = new Date()): CarStatusView {
   const plug = s.charging === true ? 'Cargando' : s.plugged === true ? 'Enchufado' : s.plugged === false ? 'Desenchufado' : null
-  let event = s.event === 'charge_end' ? 'al terminar una carga' : 'al terminar un viaje'
+  // 'live' (specs/car-remote-e3.md R2): a snapshot the car sent while awake, with its orders poll.
+  let event =
+    s.event === 'charge_end'
+      ? 'al terminar una carga'
+      : s.event === 'live'
+        ? 'con el auto encendido'
+        : 'al terminar un viaje'
   const reason = s.event === 'charge_end' && s.charge_end_reason ? REASON_WORDS[s.charge_end_reason] : undefined
   if (reason) event += `: ${reason}`
   const observed = new Date(s.observed_at)
