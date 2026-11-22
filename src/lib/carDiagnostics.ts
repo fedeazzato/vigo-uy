@@ -246,10 +246,8 @@ export async function fetchVehicleNames(vehicleIds: string[]): Promise<Map<strin
   const out = new Map<string, string>()
   if (!supabase || vehicleIds.length === 0) return out
   try {
-    const { data, error } = await supabase
-      .from('vehicle_km_leaderboard')
-      .select('vehicle_id, member_names')
-      .in('vehicle_id', vehicleIds)
+    // 0053: names of the members of vehicles whose reports the caller may read (moderators: every reporting car)
+    const { data, error } = await supabase.rpc('car_diagnostic_vehicle_labels', { p_ids: vehicleIds })
     if (error || !data) return out
     for (const r of data) {
       if (!r.vehicle_id || !Array.isArray(r.member_names)) continue

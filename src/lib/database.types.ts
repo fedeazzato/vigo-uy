@@ -1602,6 +1602,13 @@ export type Database = {
         Returns: undefined
       }
       assert_moderator: { Args: never; Returns: undefined }
+      car_diagnostic_vehicle_labels: {
+        Args: { p_ids: string[] }
+        Returns: {
+          member_names: string[]
+          vehicle_id: string
+        }[]
+      }
       can_read_car_diagnostic: {
         Args: { p_vehicle_id: string }
         Returns: boolean
