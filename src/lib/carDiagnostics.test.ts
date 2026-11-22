@@ -6,10 +6,12 @@ import {
   appLabel,
   gunzipBase64,
   joinParts,
+  membersLabel,
   parseReport,
   reportCode,
   reportToText,
   summarizeApps,
+  vehicleFallbackLabel,
 } from './carDiagnostics'
 
 // What Mi Vigo 2.4 builds (accounts_proxy core DiagReport.combinedJson), already redacted on the car
@@ -132,5 +134,9 @@ describe('carDiagnostics', () => {
     expect(appLabel('file:vtbox.log')).toBe('Archivo vtbox.log')
     expect(appLabel('com.other')).toBe('com.other')
     expect(reportCode('0b9d6a7e-1c2f-4e3d-8a5b-9c0d1e2f3a4b')).toBe('0b9d6a7e')
+    expect(membersLabel([])).toBe('')
+    expect(membersLabel(['Ana'])).toBe('Ana')
+    expect(membersLabel(['Ana', 'Beto', 'Caro'])).toBe('Ana, Beto y Caro')
+    expect(vehicleFallbackLabel('5f1e2d3c-0000-4000-8000-000000000000')).toBe('Auto 5f1e2d3c')
   })
 })
