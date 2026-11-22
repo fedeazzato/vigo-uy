@@ -223,3 +223,41 @@ export function reportToText(r: DiagReport, id: string): string {
 export function reportCode(id: string): string {
   return id.slice(0, 8)
 }
+
+/** Vehicles have no public name (0015): label them by their members, like the leaderboard does. */
+export function membersLabel(names: string[]): string {
+  if (names.length === 0) return ''
+  if (names.length === 1) return names[0]
+  return `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`
+}
+
+/** What a report shows as "whose car" when nobody's name is readable: "Auto" and the first 8 characters of the vehicle id. */
+export function vehicleFallbackLabel(vehicleId: string): string {
+  return `Auto ${vehicleId.slice(0, 8)}`
+}
+
+/**
+ * Members' display names per vehicle, for the moderators' view of several cars. RLS keeps vehicles, vehicle_members and other
+ * profiles rows to their own members, so the only readable link vehicle -> names is the public leaderboard view (member_names of
+ * non-banned members); it lists only vehicles with public kilometers, so a vehicle can be missing (the caller falls back to the
+ * vehicle id). Empty map on any error.
+ */
+export async function fetchVehicleNames(vehicleIds: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>()
+  if (!supabase || vehicleIds.length === 0) return out
+  try {
+    const { data, error } = await supabase
+      .from('vehicle_km_leaderboard')
+      .select('vehicle_id, member_names')
+      .in('vehicle_id', vehicleIds)
+    if (error || !data) return out
+    for (const r of data) {
+      if (!r.vehicle_id || !Array.isArray(r.member_names)) continue
+      const label = membersLabel(r.member_names)
+      if (label) out.set(r.vehicle_id, label)
+    }
+    return out
+  } catch {
+    return out
+  }
+}

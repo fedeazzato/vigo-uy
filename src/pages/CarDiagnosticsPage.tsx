@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, Alert, Badge, Skeleton } from '../components/UI'
 import {
@@ -7,18 +7,22 @@ import {
   deleteDiagnostic,
   fetchDiagnostics,
   fetchReport,
+  fetchVehicleNames,
   reportCode,
   reportToText,
   summarizeApps,
+  vehicleFallbackLabel,
   type DiagReport,
 } from '../lib/carDiagnostics'
+import { useAuth } from '../context/AuthContext'
 import type { CarDiagnosticRow } from '../types'
 import styles from './CarDiagnosticsPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 
 // "Diagnósticos del auto" (specs/car-diagnostics.md R3): what Mi Vigo sent with "Enviar diagnóstico". RLS lets the vehicle's members
 // and the moderators read them; logs were redacted on the car. Before migration 0051 the fetch fails and the page says there is
-// nothing to read.
+// nothing to read. Moderators see every vehicle's reports: then each one says whose car it is (members' names, else the vehicle
+// id) and the search box also matches that name.
 
 function when(iso: string): string {
   return new Date(iso).toLocaleString('es-UY', { dateStyle: 'medium', timeStyle: 'short' })
@@ -41,6 +45,9 @@ export default function CarDiagnosticsPage() {
   const [open, setOpen] = useState<Record<string, DiagReport | null | 'loading'>>({})
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [names, setNames] = useState<Map<string, string>>(() => new Map())
+  const [query, setQuery] = useState('')
+  const { profile } = useAuth()
 
   useEffect(() => {
     let cancelled = false
@@ -51,6 +58,31 @@ export default function CarDiagnosticsPage() {
       cancelled = true
     }
   }, [])
+
+  const idsKey = useMemo(() => [...new Set((rows ?? []).map((r) => r.vehicle_id))].sort().join(','), [rows])
+  // A member only ever sees their own car: no names. A moderator (or anyone who sees more than one car) gets whose car it is.
+  const showOwner = idsKey !== '' && (idsKey.includes(',') || profile?.is_moderator === true)
+
+  useEffect(() => {
+    if (!showOwner) return
+    let cancelled = false
+    void fetchVehicleNames(idsKey.split(',')).then((m) => {
+      if (!cancelled) setNames(m)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [showOwner, idsKey])
+
+  const ownerOf = (row: CarDiagnosticRow) => {
+    const name = names.get(row.vehicle_id)
+    return name ? `Auto de ${name}` : vehicleFallbackLabel(row.vehicle_id)
+  }
+  const q = query.trim().toLowerCase()
+  const shown = (rows ?? []).filter(
+    (r) => !q || reportCode(r.id).includes(q) || (showOwner && ownerOf(r).toLowerCase().includes(q))
+  )
+  const searchLabel = showOwner ? 'Buscar por código o nombre' : 'Buscar por código'
 
   async function load(row: CarDiagnosticRow): Promise<DiagReport | null> {
     const have = open[row.id]
@@ -111,7 +143,22 @@ export default function CarDiagnosticsPage() {
           </p>
         </Card>
       )}
-      {rows?.map((row) => {
+      {rows && rows.length > 1 && (
+        <input
+          type="search"
+          className={`${formStyles.input} ${styles.search}`}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      )}
+      {rows && rows.length > 0 && shown.length === 0 && (
+        <Card>
+          <p className={styles.empty}>Ningún diagnóstico coincide con «{query.trim()}».</p>
+        </Card>
+      )}
+      {shown.map((row) => {
         const apps = summarizeApps(row.apps)
         const state = open[row.id]
         const crashes = apps.reduce((n, a) => n + a.crashes, 0)
@@ -120,6 +167,7 @@ export default function CarDiagnosticsPage() {
             <CardTitle icon="🩺">
               {when(row.created_at)} · código {reportCode(row.id)}
             </CardTitle>
+            {showOwner && <p className={styles.owner}>🚗 {ownerOf(row)}</p>}
             <div className={styles.badges}>
               {!row.complete && (
                 <Badge color="gray">

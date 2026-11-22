@@ -53,6 +53,12 @@ This spec is the server side.
   - Page `#/mi-vigo/diagnosticos` ("Diagnósticos del auto"): list with date, code, note, per-app state, crash count, "Incompleto"
     badge; "Ver registros", "Descargar .txt", "Borrar" (second tap confirms).
   - A Mi Vigo card shown only when the caller can read at least one diagnostic.
+  - Whose car (moderators): when the caller is a moderator or sees more than one vehicle, each report says "🚗 Auto de <names>"
+    — the members' display names from the public `vehicle_km_leaderboard` view (the only vehicle → names link RLS lets a
+    moderator read: `vehicles`, `vehicle_members` and other `profiles` rows stay members-only), or "🚗 Auto <first 8 of
+    vehicle_id>" for a vehicle not in that view (no public km). Members of a single vehicle see no names. With two or more
+    reports, a search box filters by code (and by that name for moderators). Full coverage of names needs a moderator-only
+    SECURITY DEFINER function (not written; owner approves migrations).
 - R4. Car (vigo-hack):
   - `common/vigolog` (log, redaction, crash records, bundle);
   - Mi Vigo 2.4: `DiagCollector`, core `DiagReport` (second redaction, pack/unpack), `Wire.diagPutBody`, `Client.diagPut`, page,
@@ -82,7 +88,8 @@ Apps that are not apps send a file through Mi Vigo's `diag_in` folder and show a
   car splits it; non-ASCII; bad gzip; report parsing (odd shapes dropped); plain text order (crashes before the log); summary;
   labels; code.
 - `CarDiagnosticsPage.test.tsx`: empty when the table is missing; list (code, note, apps, crash badge); incomplete cannot be opened;
-  "Ver registros" shows the log; delete needs a second tap.
+  "Ver registros" shows the log; delete needs a second tap; a moderator with two cars sees names (fallback: vehicle id); a member
+  sees no names and nothing is looked up; one report shows no search; search by code and by name.
 - vigo-hack:
   - `common/vigolog/run_tests.sh` (redaction cases incl. the SU password, rotation, crash records, bundle, gzip guards, linear time
     on long runs);

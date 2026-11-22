@@ -14,6 +14,16 @@
   color: var(--text-secondary);
 }
 
+.owner {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.search {
+  margin: 0 0 12px;
+}
+
 .note {
   margin-top: 8px;
   color: var(--text-primary);
