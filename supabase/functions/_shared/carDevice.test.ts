@@ -10,6 +10,8 @@ import {
   isP256Spki,
   MAX_BODY_BYTES,
   MAX_ROUTE_POINTS,
+  ORDER_RESULT_CODES,
+  ORDER_TEXT_MAX,
   parseTripDraft,
   parseCarRequest,
   SIGNATURE_HEADER,
@@ -871,5 +873,299 @@ describe('handleCarDevice: diag_put', () => {
     const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki) })
     expect((await call(post(PART1, SIG), rpc)).status).toBe(401)
     expect(calls.map((c) => c.fn)).not.toContain('car_submit_diag_part')
+  })
+})
+
+// ---- remote orders (specs/car-remote-e3.md R4)
+// The exact bodies the car builds (vigo-hack accounts_proxy core Wire pins the same strings).
+const ORDERS_BODY =
+  '{"v":1,"action":"orders","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f","ts":1763640000000,' +
+  '"live":{"event":"live","observed_at":1763639995000,"soc":64,"range_km":212,"charging":true,"plugged":true,' +
+  '"charge_end_reason":null,"remain_charge_min":95,"limit_pct":90}}'
+const ORDER_RESULT_BODY =
+  '{"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f","ts":1763640001000,' +
+  '"id":"0b6c7e2a-1f3d-4a5b-8c9d-e0f1a2b3c4d5","state":"done","code":"ok","text":"Ventanas cerradas (4 de 4)."}'
+const ORDER_ID = '0b6c7e2a-1f3d-4a5b-8c9d-e0f1a2b3c4d5'
+const ordersBody = (live: unknown) =>
+  JSON.stringify({ v: 1, action: 'orders', device_id: DEVICE, ts: VECTOR_NOW, live })
+const resultBody = (o: Record<string, unknown> = {}) =>
+  JSON.stringify({
+    v: 1,
+    action: 'order_result',
+    device_id: DEVICE,
+    ts: VECTOR_NOW,
+    id: ORDER_ID,
+    state: 'failed',
+    code: 'not_parked',
+    text: 'El auto no está en P.',
+    ...o,
+  })
+
+describe('parseCarRequest: orders', () => {
+  it('parses the car-built body exactly', () => {
+    expect(parseCarRequest(ORDERS_BODY)).toEqual({
+      action: 'orders',
+      ts: VECTOR_NOW,
+      deviceId: DEVICE,
+      live: {
+        event: 'live',
+        observed_at: 1763639995000,
+        soc: 64,
+        range_km: 212,
+        charging: true,
+        plugged: true,
+        charge_end_reason: null,
+        remain_charge_min: 95,
+        limit_pct: 90,
+      },
+    })
+  })
+
+  it('live may be null or missing (share_status off); upper-case ids are lower-cased', () => {
+    expect(parseCarRequest(ordersBody(null))).toEqual({
+      action: 'orders',
+      ts: VECTOR_NOW,
+      deviceId: DEVICE,
+      live: null,
+    })
+    expect(
+      parseCarRequest(`{"v":1,"action":"orders","device_id":"${DEVICE.toUpperCase()}","ts":${VECTOR_NOW}}`)
+    ).toEqual({ action: 'orders', ts: VECTOR_NOW, deviceId: DEVICE, live: null })
+  })
+
+  it('a live snapshot without the optional numbers has no such keys', () => {
+    const r = parseCarRequest(ordersBody({ event: 'live', observed_at: VECTOR_NOW, remain_charge_min: null }))
+    expect(r && r.action === 'orders' && r.live).toEqual({
+      event: 'live',
+      observed_at: VECTOR_NOW,
+      soc: null,
+      range_km: null,
+      charging: null,
+      plugged: null,
+      charge_end_reason: null,
+    })
+  })
+
+  const live = { event: 'live', observed_at: VECTOR_NOW - 5000, soc: 64, charging: true }
+  it.each([
+    ['a trip_end event in live', { ...live, event: 'trip_end' }],
+    ['a charge_end event in live', { ...live, event: 'charge_end' }],
+    ['remain_charge_min over 1440', { ...live, remain_charge_min: 1441 }],
+    ['negative remain_charge_min', { ...live, remain_charge_min: -1 }],
+    ['fractional remain_charge_min', { ...live, remain_charge_min: 9.5 }],
+    ['limit_pct under 60', { ...live, limit_pct: 59 }],
+    ['limit_pct over 100', { ...live, limit_pct: 101 }],
+    ['limit_pct as text', { ...live, limit_pct: '90' }],
+    ['a charge end reason in live', { ...live, charge_end_reason: 'completa' }],
+    ['an extra key (no location may slip in)', { ...live, lat: -34.9 }],
+    ['live not an object', 'live'],
+  ])('refuses %s', (_name, l) => {
+    expect(parseCarRequest(ordersBody(l))).toBeNull()
+  })
+
+  it('refuses a bad device id', () => {
+    expect(parseCarRequest('{"v":1,"action":"orders","device_id":"x","ts":1,"live":null}')).toBeNull()
+  })
+})
+
+describe('parseCarRequest: status keeps accepting old bodies and takes the new optional keys', () => {
+  it('status with remain_charge_min and limit_pct', () => {
+    const body = JSON.stringify({
+      v: 1,
+      action: 'status',
+      device_id: DEVICE,
+      ts: VECTOR_NOW,
+      status: { event: 'trip_end', observed_at: VECTOR_NOW, soc: 70, remain_charge_min: 0, limit_pct: 100 },
+    })
+    const r = parseCarRequest(body)
+    expect(r && r.action === 'status' && r.status).toMatchObject({ remain_charge_min: 0, limit_pct: 100 })
+  })
+
+  it('a status call may not carry the live event', () => {
+    const body = JSON.stringify({
+      v: 1,
+      action: 'status',
+      device_id: DEVICE,
+      ts: VECTOR_NOW,
+      status: { event: 'live', observed_at: VECTOR_NOW },
+    })
+    expect(parseCarRequest(body)).toBeNull()
+  })
+
+  it('the E1 body still parses to exactly the same object (no new keys appear)', () => {
+    const r = parseCarRequest(STATUS_BODY)
+    expect(r && r.action === 'status' && Object.keys(r.status)).toEqual([
+      'event',
+      'observed_at',
+      'soc',
+      'range_km',
+      'charging',
+      'plugged',
+      'charge_end_reason',
+    ])
+  })
+})
+
+describe('parseCarRequest: order_result', () => {
+  it('parses the car-built body exactly', () => {
+    expect(parseCarRequest(ORDER_RESULT_BODY)).toEqual({
+      action: 'order_result',
+      ts: 1763640001000,
+      deviceId: DEVICE,
+      id: ORDER_ID,
+      state: 'done',
+      code: 'ok',
+      text: 'Ventanas cerradas (4 de 4).',
+    })
+  })
+
+  it('accepts every car result code, an empty text and 200 characters; lower-cases the order id', () => {
+    for (const code of ORDER_RESULT_CODES) expect(parseCarRequest(resultBody({ code }))).not.toBeNull()
+    expect(parseCarRequest(resultBody({ text: '' }))).not.toBeNull()
+    expect(parseCarRequest(resultBody({ text: 'ñ'.repeat(ORDER_TEXT_MAX) }))).not.toBeNull()
+    const r = parseCarRequest(resultBody({ id: ORDER_ID.toUpperCase() }))
+    expect(r && r.action === 'order_result' ? r.id : null).toBe(ORDER_ID)
+  })
+
+  it.each([
+    ['a server-only code (not_picked_up)', { code: 'not_picked_up' }],
+    ['a server-only code (superseded)', { code: 'superseded' }],
+    ['an unknown code', { code: 'boom' }],
+    ['state queued', { state: 'queued' }],
+    ['state taken', { state: 'taken' }],
+    ['a bad order id', { id: 'nope' }],
+    ['text over 200 characters', { text: 'ñ'.repeat(ORDER_TEXT_MAX + 1) }],
+    ['text missing', { text: undefined }],
+    ['text as number', { text: 5 }],
+    ['code missing', { code: undefined }],
+  ])('refuses %s', (_name, o) => {
+    expect(parseCarRequest(resultBody(o))).toBeNull()
+  })
+})
+
+describe('handleCarDevice: orders', () => {
+  const ORDER = {
+    id: ORDER_ID,
+    kind: 'charge_limit',
+    args: { pct: 80 },
+    created_at: VECTOR_NOW - 4000,
+    expires_at: VECTOR_NOW + 116000,
+  }
+
+  it('verifies, then polls through car_poll_orders with the live snapshot and returns the orders', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_poll_orders: ok({ ok: true, orders: [ORDER] }),
+    })
+    const r = await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, orders: [ORDER], server_time: VECTOR_NOW })
+    expect(calls[1].fn).toBe('car_poll_orders')
+    expect(calls[1].args.p_device_id).toBe(DEVICE)
+    expect(calls[1].args.p_ts).toBe(VECTOR_NOW)
+    expect(calls[1].args.p_live).toMatchObject({ event: 'live', remain_charge_min: 95, limit_pct: 90 })
+  })
+
+  it('no live snapshot sends p_live null; no orders is an empty list', async () => {
+    const body = ordersBody(null)
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_poll_orders: ok({ ok: true, orders: [] }),
+    })
+    const r = await call(post(body, await fresh.sign(body)), rpc)
+    expect(r.body).toEqual({ ok: true, orders: [], server_time: VECTOR_NOW })
+    expect(calls[1].args.p_live).toBeNull()
+  })
+
+  it('only the known order fields reach the car', async () => {
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_poll_orders: ok({ ok: true, orders: [{ ...ORDER, created_by: 'someone', vehicle_id: 'v' }] }),
+    })
+    const r = await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)
+    expect(r.body.orders).toEqual([ORDER])
+  })
+
+  it('a malformed orders result is a 500, not a partial list', async () => {
+    for (const orders of [null, 'x', [{ ...ORDER, args: null }], [{ ...ORDER, expires_at: 'soon' }]]) {
+      const { rpc } = fakeRpc({
+        car_device_public_key: ok(fresh.spki),
+        car_poll_orders: ok({ ok: true, orders }),
+      })
+      expect((await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)).status).toBe(500)
+    }
+  })
+
+  it.each([
+    ['revoked', 410, 'revoked'],
+    ['replay', 409, 'replay'],
+    ['rate_limited', 429, 'rate_limited'],
+    ['clock', 401, 'clock'],
+    ['unknown', 401, 'bad_signature'],
+    ['bad_request', 400, 'bad_request'],
+    ['something_new', 500, 'server'],
+  ])('database answer %s -> HTTP %i (mapped as for heartbeat)', async (answer, status, error) => {
+    const { rpc } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_poll_orders: ok({ error: answer }) })
+    const r = await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)
+    expect(r.status).toBe(status)
+    expect(r.body.error).toBe(error)
+  })
+
+  it('a bad signature never reaches the poll (no order is handed over, no live is stored)', async () => {
+    const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki) })
+    expect((await call(post(ORDERS_BODY, SIG), rpc)).status).toBe(401)
+    expect(calls.map((c) => c.fn)).toEqual(['car_device_public_key'])
+  })
+
+  it('a database failure is a 500 without details', async () => {
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_poll_orders: { data: null, error: '500 secret detail' },
+    })
+    const r = await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)
+    expect(r.status).toBe(500)
+    expect(JSON.stringify(r.body)).not.toContain('secret')
+    expect(r.logs.join()).toContain('secret detail')
+  })
+})
+
+describe('handleCarDevice: order_result', () => {
+  it('verifies, then stores through car_order_result', async () => {
+    const { rpc, calls } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_order_result: ok({ ok: true }),
+    })
+    const r = await call(post(ORDER_RESULT_BODY, await fresh.sign(ORDER_RESULT_BODY)), rpc)
+    expect(r.status).toBe(200)
+    expect(r.body).toEqual({ ok: true, server_time: VECTOR_NOW })
+    expect(calls[1]).toEqual({
+      fn: 'car_order_result',
+      args: {
+        p_device_id: DEVICE,
+        p_ts: 1763640001000,
+        p_id: ORDER_ID,
+        p_state: 'done',
+        p_code: 'ok',
+        p_text: 'Ventanas cerradas (4 de 4).',
+      },
+    })
+  })
+
+  it.each([
+    ['bad_request', 400], // not this device's order, not taken, or already finished differently
+    ['revoked', 410],
+    ['replay', 409],
+    ['rate_limited', 429],
+  ])('database answer %s -> HTTP %i', async (answer, status) => {
+    const { rpc } = fakeRpc({ car_device_public_key: ok(fresh.spki), car_order_result: ok({ error: answer }) })
+    expect((await call(post(ORDER_RESULT_BODY, await fresh.sign(ORDER_RESULT_BODY)), rpc)).status).toBe(
+      status
+    )
+  })
+
+  it('a bad signature never reaches the database function', async () => {
+    const { rpc, calls } = fakeRpc({ car_device_public_key: ok(fresh.spki) })
+    expect((await call(post(ORDER_RESULT_BODY, SIG), rpc)).status).toBe(401)
+    expect(calls.map((c) => c.fn)).not.toContain('car_order_result')
   })
 })

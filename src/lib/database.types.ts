@@ -48,6 +48,8 @@ export type Database = {
           last_request_ts: number
           last_seen_at: string | null
           name: string
+          poll_window_count: number
+          poll_window_started_at: string | null
           public_key: string
           revoked_at: string | null
           revoked_by: string | null
@@ -63,6 +65,8 @@ export type Database = {
           last_request_ts?: number
           last_seen_at?: string | null
           name: string
+          poll_window_count?: number
+          poll_window_started_at?: string | null
           public_key: string
           revoked_at?: string | null
           revoked_by?: string | null
@@ -78,6 +82,8 @@ export type Database = {
           last_request_ts?: number
           last_seen_at?: string | null
           name?: string
+          poll_window_count?: number
+          poll_window_started_at?: string | null
           public_key?: string
           revoked_at?: string | null
           revoked_by?: string | null
@@ -189,6 +195,76 @@ export type Database = {
           },
         ]
       }
+      car_orders: {
+        Row: {
+          args: Json
+          created_at: string
+          created_by: string | null
+          device_id: string | null
+          expires_at: string
+          finished_at: string | null
+          id: string
+          kind: string
+          result_code: string | null
+          result_text: string | null
+          state: string
+          taken_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          args?: Json
+          created_at?: string
+          created_by?: string | null
+          device_id?: string | null
+          expires_at?: string
+          finished_at?: string | null
+          id?: string
+          kind: string
+          result_code?: string | null
+          result_text?: string | null
+          state?: string
+          taken_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          args?: Json
+          created_at?: string
+          created_by?: string | null
+          device_id?: string | null
+          expires_at?: string
+          finished_at?: string | null
+          id?: string
+          kind?: string
+          result_code?: string | null
+          result_text?: string | null
+          state?: string
+          taken_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_orders_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_orders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_orders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_pairing_attempts: {
         Row: {
           attempted_at: string
@@ -268,10 +344,12 @@ export type Database = {
           charging: boolean | null
           device_id: string | null
           event: string
+          limit_pct: number | null
           observed_at: string
           plugged: boolean | null
           range_km: number | null
           received_at: string
+          remain_charge_min: number | null
           soc: number | null
           vehicle_id: string
         }
@@ -280,10 +358,12 @@ export type Database = {
           charging?: boolean | null
           device_id?: string | null
           event: string
+          limit_pct?: number | null
           observed_at: string
           plugged?: boolean | null
           range_km?: number | null
           received_at?: string
+          remain_charge_min?: number | null
           soc?: number | null
           vehicle_id: string
         }
@@ -292,10 +372,12 @@ export type Database = {
           charging?: boolean | null
           device_id?: string | null
           event?: string
+          limit_pct?: number | null
           observed_at?: string
           plugged?: boolean | null
           range_km?: number | null
           received_at?: string
+          remain_charge_min?: number | null
           soc?: number | null
           vehicle_id?: string
         }
@@ -1525,13 +1607,39 @@ export type Database = {
         Returns: boolean
       }
       car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
+      cancel_car_order: { Args: { p_id: string }; Returns: Json }
       car_device_accept: {
-        Args: { p_device_id: string; p_ts: number }
+        Args: { p_device_id: string; p_kind?: string; p_ts: number }
         Returns: Record<string, unknown>
       }
       car_device_public_key: { Args: { p_device_id: string }; Returns: string }
       car_heartbeat: {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
+        Returns: Json
+      }
+      car_order_result: {
+        Args: {
+          p_code: string
+          p_device_id: string
+          p_id: string
+          p_state: string
+          p_text: string
+          p_ts: number
+        }
+        Returns: Json
+      }
+      car_orders_expire: { Args: { p_vehicle_id: string }; Returns: undefined }
+      car_poll_orders: {
+        Args: { p_device_id: string; p_live: Json; p_ts: number }
+        Returns: Json
+      }
+      car_store_status: {
+        Args: {
+          p_device_id: string
+          p_live: boolean
+          p_status: Json
+          p_vehicle_id: string
+        }
         Returns: Json
       }
       car_submit_diag_part: {
@@ -1582,6 +1690,7 @@ export type Database = {
         Returns: Json
       }
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
+      create_car_order: { Args: { p_args: Json; p_kind: string }; Returns: Json }
       current_user_vehicle_id: { Args: never; Returns: string }
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }

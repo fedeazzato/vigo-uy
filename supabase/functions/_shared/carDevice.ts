@@ -86,6 +86,16 @@ export type CarRequest =
   | { action: 'heartbeat'; ts: number; deviceId: string; appVersion: string | null }
   | { action: 'unpair'; ts: number; deviceId: string }
   | { action: 'status'; ts: number; deviceId: string; status: CarStatus }
+  | { action: 'orders'; ts: number; deviceId: string; live: CarStatus | null }
+  | {
+      action: 'order_result'
+      ts: number
+      deviceId: string
+      id: string
+      state: 'done' | 'failed'
+      code: OrderResultCode
+      text: string
+    }
   | { action: 'inbox_key'; ts: number; deviceId: string }
   | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
   | {
@@ -148,15 +158,46 @@ export function parseDiagApps(v: unknown): CarDiagApp[] | null {
   return out
 }
 
-/** Last known status snapshot (specs/car-status-e1.md); no location field exists. */
+/**
+ * Last known status snapshot (specs/car-status-e1.md); no location field exists. 'live' = sent with an orders poll while the
+ * car is awake (specs/car-remote-e3.md R2). remain_charge_min / limit_pct are optional and present only when the car sent a
+ * number (old cars never send them).
+ */
 export interface CarStatus {
-  event: 'trip_end' | 'charge_end'
+  event: 'trip_end' | 'charge_end' | 'live'
   observed_at: number
   soc: number | null
   range_km: number | null
   charging: boolean | null
   plugged: boolean | null
   charge_end_reason: string | null
+  remain_charge_min?: number
+  limit_pct?: number
+}
+
+/** Remote orders (specs/car-remote-e3.md R3): the codes the CAR may report. not_picked_up / superseded are server-only. */
+export const ORDER_RESULT_CODES = [
+  'ok',
+  'remote_off',
+  'not_parked',
+  'not_calibrated',
+  'car_wash',
+  'not_charging',
+  'car_error',
+  'busy',
+  'no_executor',
+  'expired_on_car',
+] as const
+export type OrderResultCode = (typeof ORDER_RESULT_CODES)[number]
+export const ORDER_TEXT_MAX = 200
+
+/** One order handed to the car by an orders poll (what car_poll_orders returns, passed through field by field). */
+export interface CarOrderOut {
+  id: string
+  kind: string
+  args: Record<string, unknown>
+  created_at: number
+  expires_at: number
 }
 
 /** A trip shared from the car as a draft (specs/car-trip-drafts.md); route and charge locations are what the driver chose to share. */
@@ -186,7 +227,17 @@ export interface CarTripDraft {
 }
 
 const CHARGE_END_REASONS = ['completa', 'limite', 'desenchufado', 'fallo', 'detenida', 'sin_datos']
-const STATUS_KEYS = ['event', 'observed_at', 'soc', 'range_km', 'charging', 'plugged', 'charge_end_reason']
+const STATUS_KEYS = [
+  'event',
+  'observed_at',
+  'soc',
+  'range_km',
+  'charging',
+  'plugged',
+  'charge_end_reason',
+  'remain_charge_min',
+  'limit_pct',
+]
 
 function optInt(v: unknown, min: number, max: number): number | null | undefined {
   if (v === undefined || v === null) return null
@@ -198,19 +249,32 @@ function optBool(v: unknown): boolean | null | undefined {
   return typeof v === 'boolean' ? v : undefined
 }
 
-/** Validates the "status" object of a status call; null = bad_request. Unknown keys are refused (nothing extra is stored). */
-export function parseCarStatus(raw: unknown): CarStatus | null {
+/**
+ * Validates the "status" object of a status call (event trip_end / charge_end) or, with `live`, the "live" object of an
+ * orders poll (event live only); null = bad_request. Unknown keys are refused (nothing extra is stored).
+ */
+export function parseCarStatus(raw: unknown, live = false): CarStatus | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
   const o = raw as Record<string, unknown>
   if (Object.keys(o).some((k) => !STATUS_KEYS.includes(k))) return null
-  if (o.event !== 'trip_end' && o.event !== 'charge_end') return null
+  if (live ? o.event !== 'live' : o.event !== 'trip_end' && o.event !== 'charge_end') return null
   const observed = o.observed_at
   if (typeof observed !== 'number' || !Number.isSafeInteger(observed) || observed <= 0) return null
   const soc = optInt(o.soc, 0, 100)
   const range = optInt(o.range_km, 0, 1500)
   const charging = optBool(o.charging)
   const plugged = optBool(o.plugged)
-  if (soc === undefined || range === undefined || charging === undefined || plugged === undefined) return null
+  const remain = optInt(o.remain_charge_min, 0, 1440)
+  const limit = optInt(o.limit_pct, 60, 100)
+  if (
+    soc === undefined ||
+    range === undefined ||
+    charging === undefined ||
+    plugged === undefined ||
+    remain === undefined ||
+    limit === undefined
+  )
+    return null
   let reason: string | null = null
   if (o.charge_end_reason !== undefined && o.charge_end_reason !== null) {
     if (o.event !== 'charge_end' || typeof o.charge_end_reason !== 'string') return null
@@ -218,13 +282,15 @@ export function parseCarStatus(raw: unknown): CarStatus | null {
     reason = o.charge_end_reason
   }
   return {
-    event: o.event,
+    event: o.event as CarStatus['event'],
     observed_at: observed,
     soc,
     range_km: range,
     charging,
     plugged,
     charge_end_reason: reason,
+    ...(remain !== null ? { remain_charge_min: remain } : {}),
+    ...(limit !== null ? { limit_pct: limit } : {}),
   }
 }
 
@@ -431,6 +497,32 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (!status) return null
       return { action: 'status', ts, deviceId: o.device_id.toLowerCase(), status }
     }
+    // Remote orders (specs/car-remote-e3.md R4): the poll (with an optional live snapshot) and the result of one order.
+    case 'orders': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      let live: CarStatus | null = null
+      if (o.live !== undefined && o.live !== null) {
+        live = parseCarStatus(o.live, true)
+        if (!live) return null
+      }
+      return { action: 'orders', ts, deviceId: o.device_id.toLowerCase(), live }
+    }
+    case 'order_result': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      if (typeof o.id !== 'string' || !UUID.test(o.id)) return null
+      if (o.state !== 'done' && o.state !== 'failed') return null
+      if (typeof o.code !== 'string' || !(ORDER_RESULT_CODES as readonly string[]).includes(o.code)) return null
+      if (typeof o.text !== 'string' || [...o.text].length > ORDER_TEXT_MAX) return null
+      return {
+        action: 'order_result',
+        ts,
+        deviceId: o.device_id.toLowerCase(),
+        id: o.id.toLowerCase(),
+        state: o.state,
+        code: o.code as OrderResultCode,
+        text: o.text,
+      }
+    }
     // Car trip drafts (specs/car-trip-drafts.md): a trip the driver chose to share, stored as a draft.
     case 'trip_draft': {
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
@@ -557,6 +649,27 @@ function memberNames(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
 }
 
+/** The orders car_poll_orders handed over, field by field; null when anything is malformed. */
+function ordersOut(v: unknown): CarOrderOut[] | null {
+  if (!Array.isArray(v)) return null
+  const out: CarOrderOut[] = []
+  for (const item of v) {
+    const r = asRecord(item)
+    const args = r ? asRecord(r.args) : null
+    if (
+      !r ||
+      !args ||
+      typeof r.id !== 'string' ||
+      typeof r.kind !== 'string' ||
+      !isMs(r.created_at) ||
+      !isMs(r.expires_at)
+    )
+      return null
+    out.push({ id: r.id, kind: r.kind, args, created_at: r.created_at, expires_at: r.expires_at })
+  }
+  return out
+}
+
 export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<Response> {
   const now = deps.now()
   const log = deps.log ?? (() => undefined)
@@ -609,7 +722,7 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       }
     }
 
-    // heartbeat / unpair / status / inbox: verify with the device's stored key first.
+    // heartbeat / unpair / status / inbox / orders / order_result / ...: verify with the device's stored key first.
     const keyRes = await deps.rpc('car_device_public_key', { p_device_id: parsed.deviceId })
     if (keyRes.error) {
       log(`car_device_public_key failed: ${keyRes.error}`)
@@ -653,6 +766,41 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
         { ok: true, user_id: inboxRow.user_id, key_id: inboxRow.key_id, public_key: inboxRow.public_key },
         now
       )
+    }
+
+    if (parsed.action === 'orders' || parsed.action === 'order_result') {
+      const orderRes =
+        parsed.action === 'orders'
+          ? await deps.rpc('car_poll_orders', {
+              p_device_id: parsed.deviceId,
+              p_ts: parsed.ts,
+              p_live: parsed.live,
+            })
+          : await deps.rpc('car_order_result', {
+              p_device_id: parsed.deviceId,
+              p_ts: parsed.ts,
+              p_id: parsed.id,
+              p_state: parsed.state,
+              p_code: parsed.code,
+              p_text: parsed.text,
+            })
+      if (orderRes.error) {
+        log(`${parsed.action} failed: ${orderRes.error}`)
+        return fail('server', now)
+      }
+      const orderRow = asRecord(orderRes.data)
+      if (!orderRow) {
+        log(`${parsed.action}: unexpected empty result`)
+        return fail('server', now)
+      }
+      if (typeof orderRow.error === 'string') return fail(GUARD_ERRORS[orderRow.error] ?? 'server', now)
+      if (parsed.action === 'order_result') return reply(200, { ok: true }, now)
+      const orders = ordersOut(orderRow.orders)
+      if (!orders) {
+        log('orders: malformed result from car_poll_orders')
+        return fail('server', now)
+      }
+      return reply(200, { ok: true, orders }, now)
     }
 
     const res =
