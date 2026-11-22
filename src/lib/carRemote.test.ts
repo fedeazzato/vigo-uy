@@ -198,8 +198,21 @@ describe('wording', () => {
     })
   })
 
+  it('a taken order without a result for more than 60 s shows "Sin respuesta del auto"', () => {
+    expect(orderPhase(order({ state: 'taken', taken_at: ago(60_000) }), NOW)).toBe('taken')
+    expect(orderPhase(order({ state: 'taken', taken_at: ago(60_001) }), NOW)).toBe('no_response')
+    expect(orderPhase(order({ state: 'taken', taken_at: null }), NOW)).toBe('taken')
+    expect(orderStateView(order({ state: 'taken', taken_at: ago(5 * 60_000) }), NOW)).toEqual({
+      icon: '❔',
+      label: 'Sin respuesta del auto',
+      detail: 'La recibió pero no avisó si la hizo',
+    })
+    // A late result still shows as such (the row is updated server side).
+    expect(orderPhase(order({ state: 'done', taken_at: ago(5 * 60_000) }), NOW)).toBe('done')
+  })
+
   it('states with their reason in words', () => {
-    expect(orderStateView(order({ state: 'taken' }), NOW).label).toBe('Recibida')
+    expect(orderStateView(order({ state: 'taken', taken_at: ago(5_000) }), NOW).label).toBe('Recibida')
     expect(orderStateView(order({ state: 'done', result_code: 'ok' }), NOW)).toMatchObject({
       icon: '✅',
       detail: null,

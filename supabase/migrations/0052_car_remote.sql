@@ -402,8 +402,25 @@ begin
 end;
 $$;
 
+-- The sender's name as the car shows it ("Orden remota de Fede: ..."; owner 2026-11-22): the first word of the display name,
+-- only letters, digits, spaces and .-' (anything else removed), at most 20 characters, trimmed; null when nothing is left
+-- (or there is no profile). The explicit Latin ranges (U+00C0-U+024F minus the two signs) keep accented letters even under a
+-- C ctype, where [:alpha:] is ASCII only. Internal.
+create or replace function public.car_order_sender(p_display_name text)
+returns text
+language sql
+immutable
+set search_path = public
+as $$
+  select nullif(btrim(left(
+           regexp_replace(coalesce(substring(p_display_name from '[^[:space:]]+'), ''),
+                          '[^[:alpha:][:digit:]\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F .''-]', '', 'g'),
+           20)), '');
+$$;
+
 -- Car: the poll. Guard (kind 'poll'), expire, store the live snapshot if given, hand over at most 3 orders.
--- Returns {"ok":true,"orders":[{"id","kind","args","created_at":<ms>,"expires_at":<ms>}]} or {"error": <guard> | bad_request}.
+-- Returns {"ok":true,"orders":[{"id","kind","args","created_at":<ms>,"expires_at":<ms>,"sender":<text|null>}]} or
+-- {"error": <guard> | bad_request}. sender: car_order_sender of the creator's profiles.display_name.
 create or replace function public.car_poll_orders(p_device_id uuid, p_ts bigint, p_live jsonb)
 returns jsonb
 language plpgsql
@@ -442,17 +459,19 @@ begin
        set state = 'taken', taken_at = now(), device_id = p_device_id
       from picked
      where o.id = picked.id
-    returning o.id, o.kind, o.args, o.created_at, o.expires_at
+    returning o.id, o.kind, o.args, o.created_at, o.expires_at, o.created_by
   )
   select coalesce(jsonb_agg(jsonb_build_object(
            'id', t.id,
            'kind', t.kind,
            'args', t.args,
            'created_at', floor(extract(epoch from t.created_at) * 1000)::bigint,
-           'expires_at', floor(extract(epoch from t.expires_at) * 1000)::bigint
+           'expires_at', floor(extract(epoch from t.expires_at) * 1000)::bigint,
+           'sender', public.car_order_sender(p.display_name)
          ) order by t.created_at), '[]'::jsonb)
     into v_orders
-    from taken t;
+    from taken t
+    left join public.profiles p on p.id = t.created_by;
 
   return jsonb_build_object('ok', true, 'orders', v_orders);
 end;
@@ -519,6 +538,7 @@ $$;
 revoke execute on function public.car_device_accept(uuid, bigint, text) from public, anon, authenticated, service_role;
 revoke execute on function public.car_store_status(uuid, uuid, jsonb, boolean) from public, anon, authenticated, service_role;
 revoke execute on function public.car_orders_expire(uuid) from public, anon, authenticated, service_role;
+revoke execute on function public.car_order_sender(text) from public, anon, authenticated, service_role;
 
 -- Web: signed-in members.
 revoke execute on function public.create_car_order(text, jsonb) from public, anon;

@@ -112,6 +112,16 @@ describe('CarRemoteCard', () => {
     expect(screen.getAllByRole('button', { name: 'Cancelar' })).toHaveLength(1)
   })
 
+  it('a taken order shows "Recibida", then "Sin respuesta del auto" after 60 s; never cancellable', async () => {
+    const taken = { ...data().orders[0], id: 'o3', state: 'taken', taken_at: iso(10_000) }
+    const stale = { ...taken, id: 'o4', kind: 'windows_open_all', taken_at: iso(61_000) }
+    mocks.fetchCarRemote.mockResolvedValue(data({ orders: [taken, stale] }))
+    render(<CarRemoteCard />)
+    expect(await screen.findByText(/^Recibida/)).toBeTruthy()
+    expect(screen.getByText(/^Sin respuesta del auto: La recibió pero no avisó si la hizo/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Cancelar' })).toBeNull()
+  })
+
   it('offline: "Sin conexión", no live block, no stop button when not charging', async () => {
     mocks.fetchCarRemote.mockResolvedValue(
       data({

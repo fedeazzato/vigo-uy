@@ -23,6 +23,11 @@ export const POLL_MS = 3000
 export const ONLINE_MS = 30_000
 /** A live snapshot older than this (server receive time) is not shown as live. */
 export const LIVE_FRESH_MS = 2 * 60_000
+/**
+ * A taken order with no result after this long (since taken_at, server clock) shows as "Sin respuesta del auto". Display
+ * only: the row stays `taken` and a late result still updates it.
+ */
+export const NO_RESPONSE_MS = 60_000
 export const LIMIT_MIN = 60
 export const LIMIT_MAX = 100
 export const LIMIT_STEP = 5
@@ -192,11 +197,20 @@ export const RESULT_WORDS: Record<string, string> = {
   superseded: 'la reemplazó una orden más nueva',
 }
 
-export type OrderPhase = 'queued' | 'taken' | 'done' | 'failed' | 'expired' | 'cancelled'
+export type OrderPhase = 'queued' | 'taken' | 'no_response' | 'done' | 'failed' | 'expired' | 'cancelled'
 
-/** The state to show: a queued order past expires_at is already expired (the server marks it on the next order call). */
-export function orderPhase(o: Pick<CarOrder, 'state' | 'expires_at'>, now: Date = new Date()): OrderPhase {
+/**
+ * The state to show: a queued order past expires_at is already expired (the server marks it on the next order call); a taken
+ * order without a result for more than NO_RESPONSE_MS is "no_response" (the server keeps it taken).
+ */
+export function orderPhase(
+  o: Pick<CarOrder, 'state' | 'expires_at' | 'taken_at'>,
+  now: Date = new Date()
+): OrderPhase {
   if (o.state === 'queued' && new Date(o.expires_at).getTime() <= now.getTime()) return 'expired'
+  if (o.state === 'taken' && o.taken_at && now.getTime() - new Date(o.taken_at).getTime() > NO_RESPONSE_MS) {
+    return 'no_response'
+  }
   switch (o.state) {
     case 'queued':
     case 'taken':
@@ -225,6 +239,8 @@ export function orderStateView(o: CarOrder, now: Date = new Date()): OrderStateV
       return { icon: '⏳', label: 'En cola', detail: 'Esperando que el auto la reciba' }
     case 'taken':
       return { icon: '📶', label: 'Recibida', detail: 'El auto la está ejecutando' }
+    case 'no_response':
+      return { icon: '❔', label: 'Sin respuesta del auto', detail: 'La recibió pero no avisó si la hizo' }
     case 'done':
       return { icon: '✅', label: 'Hecha', detail: null }
     case 'failed':

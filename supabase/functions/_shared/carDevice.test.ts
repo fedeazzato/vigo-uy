@@ -1050,6 +1050,7 @@ describe('handleCarDevice: orders', () => {
     args: { pct: 80 },
     created_at: VECTOR_NOW - 4000,
     expires_at: VECTOR_NOW + 116000,
+    sender: 'Fede',
   }
 
   it('verifies, then polls through car_poll_orders with the live snapshot and returns the orders', async () => {
@@ -1086,8 +1087,29 @@ describe('handleCarDevice: orders', () => {
     expect(r.body.orders).toEqual([ORDER])
   })
 
+  it('a null sender passes through; a missing one is sent as null', async () => {
+    const noSender: Partial<typeof ORDER> = { ...ORDER }
+    delete noSender.sender
+    const { rpc } = fakeRpc({
+      car_device_public_key: ok(fresh.spki),
+      car_poll_orders: ok({ ok: true, orders: [{ ...ORDER, sender: null }, noSender] }),
+    })
+    const r = await call(post(ORDERS_BODY, await fresh.sign(ORDERS_BODY)), rpc)
+    expect(r.body.orders).toEqual([
+      { ...ORDER, sender: null },
+      { ...ORDER, sender: null },
+    ])
+  })
+
   it('a malformed orders result is a 500, not a partial list', async () => {
-    for (const orders of [null, 'x', [{ ...ORDER, args: null }], [{ ...ORDER, expires_at: 'soon' }]]) {
+    for (const orders of [
+      null,
+      'x',
+      [{ ...ORDER, args: null }],
+      [{ ...ORDER, expires_at: 'soon' }],
+      [{ ...ORDER, sender: 42 }],
+      [{ ...ORDER, sender: { name: 'Fede' } }],
+    ]) {
       const { rpc } = fakeRpc({
         car_device_public_key: ok(fresh.spki),
         car_poll_orders: ok({ ok: true, orders }),

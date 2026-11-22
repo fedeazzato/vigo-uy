@@ -198,6 +198,8 @@ export interface CarOrderOut {
   args: Record<string, unknown>
   created_at: number
   expires_at: number
+  /** First name of the member who sent it (sanitised by car_poll_orders); null when unknown. Always present on the wire. */
+  sender: string | null
 }
 
 /** A trip shared from the car as a draft (specs/car-trip-drafts.md); route and charge locations are what the driver chose to share. */
@@ -649,23 +651,28 @@ function memberNames(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
 }
 
-/** The orders car_poll_orders handed over, field by field; null when anything is malformed. */
+/**
+ * The orders car_poll_orders handed over, field by field; null when anything is malformed. `sender` is a string or null
+ * (missing = null); the database already sanitised it, the car re-sanitises it before showing it.
+ */
 function ordersOut(v: unknown): CarOrderOut[] | null {
   if (!Array.isArray(v)) return null
   const out: CarOrderOut[] = []
   for (const item of v) {
     const r = asRecord(item)
     const args = r ? asRecord(r.args) : null
+    const sender = r?.sender ?? null
     if (
       !r ||
       !args ||
       typeof r.id !== 'string' ||
       typeof r.kind !== 'string' ||
       !isMs(r.created_at) ||
-      !isMs(r.expires_at)
+      !isMs(r.expires_at) ||
+      (sender !== null && typeof sender !== 'string')
     )
       return null
-    out.push({ id: r.id, kind: r.kind, args, created_at: r.created_at, expires_at: r.expires_at })
+    out.push({ id: r.id, kind: r.kind, args, created_at: r.created_at, expires_at: r.expires_at, sender })
   }
   return out
 }
