@@ -54,11 +54,10 @@ This spec is the server side.
     badge; "Ver registros", "Descargar .txt", "Borrar" (second tap confirms).
   - A Mi Vigo card shown only when the caller can read at least one diagnostic.
   - Whose car (moderators): when the caller is a moderator or sees more than one vehicle, each report says "🚗 Auto de <names>"
-    — the members' display names from the public `vehicle_km_leaderboard` view (the only vehicle → names link RLS lets a
-    moderator read: `vehicles`, `vehicle_members` and other `profiles` rows stay members-only), or "🚗 Auto <first 8 of
-    vehicle_id>" for a vehicle not in that view (no public km). Members of a single vehicle see no names. With two or more
-    reports, a search box filters by code (and by that name for moderators). Full coverage of names needs a moderator-only
-    SECURITY DEFINER function (not written; owner approves migrations).
+    — the display names of the vehicle's non-banned members from `car_diagnostic_vehicle_labels(p_ids)` (migration 0053, applied
+    2026-11-22: SECURITY DEFINER, only for vehicles with a report the caller may read, authenticated only), or "🚗 Auto <first 8 of
+    vehicle_id>" if it returns nothing for that car. Members of a single vehicle see no names. With two or more reports, a search box
+    filters by code (and by that name for moderators).
 - R4. Car (vigo-hack):
   - `common/vigolog` (log, redaction, crash records, bundle);
   - Mi Vigo 2.4: `DiagCollector`, core `DiagReport` (second redaction, pack/unpack), `Wire.diagPutBody`, `Client.diagPut`, page,
