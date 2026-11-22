@@ -45,7 +45,9 @@ Hard constraints (measured on the car, `car-status-e1.md`):
   3. If `p_live` is not null: validates it like `car_submit_status`'s object (same keys, plus R2's new ones, `event` = `live`) and
      upserts `car_status` if newer.
   4. Returns at most 3 oldest `queued`, unexpired orders of the device's vehicle, and marks them `taken` (`taken_at`, `device_id`):
-     `{"ok":true,"orders":[{"id":"…","kind":"…","args":{…},"created_at":<ms>,"expires_at":<ms>}]}`.
+     `{"ok":true,"orders":[{"id":"…","kind":"…","args":{…},"created_at":<ms>,"expires_at":<ms>,"sender":"Fede"|null}]}`.
+     `sender` (owner 2026-11-22): first word of the sender's `profiles.display_name`, trimmed, at most 20 characters, letters /
+     digits / spaces / `.-'` only (anything else removed); null when the profile is gone or the result is empty.
 - **`car_order_result(p_device_id uuid, p_ts bigint, p_id uuid, p_state text, p_code text, p_text text) → jsonb`** (`service_role` only):
   guard first; the order must belong to the device's vehicle and be `taken` → else `{"error":"bad_request"}`; `p_state` in (`done`,`failed`);
   `p_code` in R3's list; stores `finished_at`.
@@ -99,7 +101,7 @@ ORDER_RESULT_BODY = {"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c
     10 pending results). Logs through common/vigolog (order id first 8 chars, kind, code; never args other than pct).
 - **Copiloto** (executor, `voice_es`):
   - Explicit ordered broadcast `com.vigo.copiloto.REMOTE_ORDER` to `com.vigo.copiloto`, guarded by a **new signature permission**
-    `com.vigo.copiloto.permission.REMOTE` (declared by Copiloto, held by Mi Vigo). Extras: `id`, `kind`, `pct` (charge_limit only).
+    `com.vigo.copiloto.permission.REMOTE` (declared by Copiloto, held by Mi Vigo). Extras: `id`, `kind`, `pct` (charge_limit only), `sender` (optional String, as received; Copiloto re-sanitises it).
     Result: `resultCode` 1 = done / 0 = failed, `resultData` = R3 code, extras `text`. Timeout on Mi Vigo's side 20 s → `no_executor`.
   - Query `com.vigo.copiloto.REMOTE_STATE` (same permission): result `remote_on` true/false (Mi Vigo asks at the start of each awake period).
   - Checks, in order: `Remote` switch (D23 item 4) → `remote_off`; `Safety.remoteGate` P + speed 0 read and valid → `not_parked`;
@@ -107,7 +109,7 @@ ORDER_RESULT_BODY = {"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c
     `windows_open_all` / `windows_close_all` (D23, same writes and read-back as voice), `ventilate` (calibration gate → `not_calibrated`),
     `charge_limit` (write `0x21402187 MP5_RESERVED_CHRG_SOCTARGET` = pct, read back `0x214020da PDCU_CHRG_SOCFB`), `charge_stop`
     (only when charge state = 2 → else `not_charging`; write `0x21402185 MP5_RESERVED_CHRG_STOP_REQ` = 1, like the stock "end charge" button).
-  - On screen: a short notice ("Orden remota de <first name or 'WikiVigo'>: ventanas cerradas") — the driver always sees what ran.
+  - On screen: a short notice ("Orden remota de <sender>: ventanas cerradas", or "Orden remota: …" without a sender) — the driver always sees what ran.
 - **Carga** (`charge_app`): adds `remain_charge_min` (`0x214020ab PDCU_BMS_REMAIN_CHRG_TIME`, only while charging) and `limit_pct` to
   its snapshot; sends an `event:"live"` snapshot to Mi Vigo at most every 60 s while awake (only if `share_status=true`).
 
@@ -177,7 +179,8 @@ Interpretations of the spec (owner may revisit):
 - **`car_order_result`**: `p_text` is cleaned with `car_clean_text` (control characters stripped, 200 chars) and stored as null
   when empty; the wire allows an empty `text`. `done` / `failed` are not tied to a code (the car decides). An identical repeat of
   the stored result by the same device answers `{"ok":true}` so a retry after a lost reply is not dropped as `bad_request`.
-- **Taken orders without a result** stay `taken` ("Recibida") forever; no server timeout was specified.
+- **Taken orders without a result** stay `taken` on the server; the page shows them as **"Sin respuesta del auto"** once `taken_at` is
+  more than 60 s old (owner 2026-11-22 follow-up), and a late result still updates the row.
 - **Web card**: "En línea" uses the newest `last_seen_at` of the vehicle's active devices; the live block needs `event = 'live'`
   and `received_at` (server clock) within 2 minutes; "Detener la carga" shows when the newest status row says `charging = true`;
   the stepper starts at the car's `limit_pct` (else 80 %). The card polls devices, status and the last 10 orders every 3 s while
