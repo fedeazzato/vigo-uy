@@ -1606,8 +1606,8 @@ export type Database = {
         Args: { p_vehicle_id: string }
         Returns: boolean
       }
-      car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
       cancel_car_order: { Args: { p_id: string }; Returns: Json }
+      car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
       car_device_accept: {
         Args: { p_device_id: string; p_kind?: string; p_ts: number }
         Returns: Record<string, unknown>
@@ -1628,6 +1628,7 @@ export type Database = {
         }
         Returns: Json
       }
+      car_order_sender: { Args: { p_display_name: string }; Returns: string }
       car_orders_expire: { Args: { p_vehicle_id: string }; Returns: undefined }
       car_poll_orders: {
         Args: { p_device_id: string; p_live: Json; p_ts: number }
@@ -1690,7 +1691,10 @@ export type Database = {
         Returns: Json
       }
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
-      create_car_order: { Args: { p_args: Json; p_kind: string }; Returns: Json }
+      create_car_order: {
+        Args: { p_args: Json; p_kind: string }
+        Returns: Json
+      }
       current_user_vehicle_id: { Args: never; Returns: string }
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
