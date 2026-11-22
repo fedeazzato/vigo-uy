@@ -90,8 +90,7 @@ ORDER_RESULT_BODY = {"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c
 
 - **Mi Vigo** (`accounts_proxy`, holds the device key):
   - **When it polls:** only while the car is awake AND Mi Vigo is linked AND online AND Copiloto answered "remote on" (R5 Copiloto) at
-    the start of the awake period. Every **10 s** for the first 10 minutes after ACC on, ACC off, or plug-in; every **60 s** after that
-    while ACC is on or the car is charging; **stops** at ACC off + 10 min (unless charging). No wake locks, no alarms that wake the car,
+    the start of the awake period. Every **10 s** while ACC is on or the car is charging, and for 10 minutes after ACC off (owner 2026-11-22: the earlier    60 s phase made orders slow and "En línea" flap; 360 polls/hour stays under the 600/hour poll cap); **stops** at ACC off + 10 min (unless charging). No wake locks, no alarms that wake the car,
     nothing while asleep. Driven by the existing ACC / charge events (Carga's T-Box/sampler events or the car power state), hosted in
     a component that only lives during those periods (no all-day service).
   - Each poll sends `live` = Carga's newest snapshot (Carga hands it over on its sampler tick through the existing STATUS broadcast,
