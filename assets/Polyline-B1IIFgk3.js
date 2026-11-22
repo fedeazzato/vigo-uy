@@ -1,1 +1,0 @@
-import{n as e}from"./rolldown-runtime-Bh1tDfsg.js";import{d as t,f as n,m as r,p as i}from"./mapMarkerIcon-DGoubz3g.js";var a=e(r(),1),o=t(function({positions:e,...t},r){let o=new a.Polyline(e,t);return n(o,i(r,{overlayContainer:o}))},function(e,t,n){t.positions!==n.positions&&e.setLatLngs(t.positions)});export{o as t};
