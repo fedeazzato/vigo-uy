@@ -38,7 +38,7 @@ describe('LicencesPage', () => {
     )
     expect(screen.getByText(/Oferta de código fuente/)).toBeTruthy()
     expect(screen.getByText(/restricciones de uso \(Open RAIL-M\)/)).toBeTruthy()
-    expect(screen.getByText(/todavía no\s+está definida/)).toBeTruthy()
+    expect(screen.getByText(/apps para el auto y del instalador también tiene licencia MIT/)).toBeTruthy()
     expect(screen.getAllByText('texto de la licencia')).toHaveLength(all.length)
   })
 })
