@@ -17,6 +17,8 @@ const AccessoriesPage = lazy(() => import('./pages/AccessoriesPage'))
 const TechPage = lazy(() => import('./pages/TechPage'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const MyVigoPage = lazy(() => import('./pages/MyVigoPage'))
+const NovedadesPage = lazy(() => import('./pages/NovedadesPage'))
+const VehicleConfigPage = lazy(() => import('./pages/VehicleConfigPage'))
 const FichaTecnicaPage = lazy(() => import('./pages/FichaTecnicaPage'))
 const MantenimientoPage = lazy(() => import('./pages/MantenimientoPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -56,6 +58,7 @@ export default function App() {
           <Route path="accesorios" element={<AccessoriesPage />} />
           <Route path="tecnologia" element={<TechPage />} />
           <Route path="faq" element={<FaqPage />} />
+          <Route path="novedades" element={<NovedadesPage />} />
           <Route path="licencias" element={<LicencesPage />} />
           <Route path="login" element={<LoginPage />} />
           {/* Publicly readable since Phase 6 (anon RLS policies); submitting still requires auth. */}
@@ -69,6 +72,7 @@ export default function App() {
             <Route path="mi-vigo/vincular" element={<LinkCarPage />} />
             {/* End-to-end encrypted secrets, passkey PRF (specs/secret-vault.md). */}
             <Route path="mi-vigo/boveda" element={<VaultPage />} />
+            <Route path="mi-vigo/configuracion" element={<VehicleConfigPage />} />
             <Route path="mi-vigo/preparar" element={<PrepareCarPage />} />
             {/* Trips shared from the car, as drafts (specs/car-trip-drafts.md). */}
             <Route path="mi-vigo/borradores" element={<CarDraftsPage />} />

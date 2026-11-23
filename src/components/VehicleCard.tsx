@@ -5,12 +5,26 @@ import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import { fetchAuthorNames } from '../lib/communityData'
 import type { Vehicle } from '../types'
+import { ROLE_LABELS, setMemberCarRole, type MemberCarRole } from '../lib/carRole'
 import styles from './accountCards.module.css'
 import formStyles from '../styles/formControls.module.css'
 
 interface Member {
   id: string
   name: string
+  /** E2 (0070); null before the migration is applied */
+  role: MemberCarRole | null
+}
+
+type MemberRow = { user_id: string; car_role?: string | null }
+
+// car_role exists only after migration 0070: fall back to user_id alone so the card keeps working before it is applied.
+async function fetchMemberRows(): Promise<MemberRow[]> {
+  if (!supabase) return []
+  const withRole = await supabase.from('vehicle_members').select('user_id, car_role')
+  if (!withRole.error) return withRole.data ?? []
+  const plain = await supabase.from('vehicle_members').select('user_id')
+  return (plain.data ?? [])
 }
 
 // Shared-vehicle management: members, optional private plate, and the two
@@ -33,14 +47,20 @@ export default function VehicleCard() {
     // RLS returns exactly the caller's vehicle and its member rows.
     const [vehicleRes, membersRes] = await Promise.all([
       supabase.from('vehicles').select('*').maybeSingle(),
-      supabase.from('vehicle_members').select('user_id'),
+      fetchMemberRows(),
     ])
     const v = (vehicleRes.data as Vehicle | null) ?? null
     setVehicle(v)
     setPlate(v?.plate ?? '')
-    const ids = (membersRes.data ?? []).map((m: { user_id: string }) => m.user_id)
+    const ids = membersRes.map((m) => m.user_id)
     const names = await fetchAuthorNames(ids)
-    setMembers(ids.map((id) => ({ id, name: names[id] ?? 'un usuario' })))
+    setMembers(
+      membersRes.map((m) => ({
+        id: m.user_id,
+        name: names[m.user_id] ?? 'un usuario',
+        role: m.car_role === 'control' || m.car_role === 'view' ? m.car_role : null,
+      }))
+    )
   }, [user])
 
   useEffect(() => {
@@ -110,6 +130,13 @@ export default function VehicleCard() {
     )
   }
 
+  function changeRole(member: Member, role: MemberCarRole) {
+    void run(async () => {
+      const r = await setMemberCarRole(member.id, role)
+      return { error: r.error ? { message: r.error } : null }
+    }, `${member.name}: ${ROLE_LABELS[role].toLowerCase()}.`)
+  }
+
   const isCreator = Boolean(user && vehicle && vehicle.created_by === user.id)
 
   return (
@@ -131,6 +158,21 @@ export default function VehicleCard() {
                     {m.id === user?.id && <span className={styles.memberTag}> (vos)</span>}
                     {m.id === vehicle.created_by && <span className={styles.memberTag}> · creador</span>}
                   </span>
+                  {isCreator && m.id !== user?.id && m.role && (
+                    <select
+                      aria-label={`Permiso de ${m.name}`}
+                      className={formStyles.input}
+                      value={m.role}
+                      onChange={(e) => changeRole(m, e.target.value as MemberCarRole)}
+                      disabled={busy}
+                    >
+                      <option value="view">{ROLE_LABELS.view}</option>
+                      <option value="control">{ROLE_LABELS.control}</option>
+                    </select>
+                  )}
+                  {!isCreator && m.id === user?.id && m.role && (
+                    <span className={styles.memberTag}> · {ROLE_LABELS[m.role].toLowerCase()}</span>
+                  )}
                   {isCreator && m.id !== user?.id && (
                     <button
                       type="button"
@@ -177,7 +219,9 @@ export default function VehicleCard() {
             <span className={styles.blockTitle}>Invitá a quienes comparten tu Vigo</span>
             <p className={styles.blockText}>
               ¿Manejan el mismo auto en familia? Pasales este código: al ingresarlo se suman a este vehículo y
-              los kilómetros de todos cuentan juntos en el ranking.
+              los kilómetros de todos cuentan juntos en el ranking. Con el auto vinculado, ven su estado y
+              avisos; para mandarle órdenes (Control remoto, Enviar al auto) dales permiso de control en la
+              lista de arriba.
             </p>
             <div className={styles.inlineRow}>
               <code className={styles.joinCode}>{vehicle.join_code}</code>

@@ -16,6 +16,10 @@ const KNOWN_TRIGGER_MESSAGES = [
   'Para salir del vehículo',
   'Solo quien creó el vehículo',
   'Ese usuario no es integrante',
+  // Family roles (0070)
+  'Tu permiso en este vehículo es solo ver',
+  'Quien creó el vehículo siempre tiene control',
+  'Rol no válido',
   // Car link (0045)
   'Demasiados intentos',
   'Tu vehículo ya tiene',

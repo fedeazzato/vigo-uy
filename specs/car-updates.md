@@ -67,3 +67,13 @@ install anything the maintainer did not sign; it can only withhold.
   without re-signing stops updates).
 - O-U3 Should moderators other than the owner be able to publish? (Today: any active moderator; signatures still
   require the maintainer's key.)
+
+## Novedades (D1 gap, 2026-11-23, wave3-service)
+
+The car learns of a release from the signed manifest and Mi Vigo 2.9 shows it; nothing listed what a release brings for owners.
+Built: migration `0072_car_release_notes.sql` (NOT applied) `car_release_notes(p_limit)` = stable, non-kill releases: serial, date,
+moderator note, `app` lines (package + versionName) and `notice` lines parsed from the signed text; never salt, signature, download
+folder or cars. Page `/novedades` (linked from Mi Vigo). Tests: `src/lib/carReleaseNotes.test.ts`, `src/pages/NovedadesPage.test.tsx`.
+- O-N1 (owner): anon may call it (page works signed out). Revoke anon to make it members-only.
+- Gap left: Mi Vigo on the car does not show the note text (the note is not in the signed manifest; adding it to the `update_check`
+  reply is an Edge Function change). Mi Vigo could link to `/novedades` instead.

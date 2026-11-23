@@ -1836,18 +1836,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_config_snapshots: {
+        Row: {
+          config_head: string
+          config_tail: string
+          created_at: string
+          firmware: string | null
+          id: string
+          items: Json
+          label: string
+          taken_at: string
+          user_id: string
+        }
+        Insert: {
+          config_head: string
+          config_tail: string
+          created_at?: string
+          firmware?: string | null
+          id?: string
+          items?: Json
+          label: string
+          taken_at: string
+          user_id?: string
+        }
+        Update: {
+          config_head?: string
+          config_tail?: string
+          created_at?: string
+          firmware?: string | null
+          id?: string
+          items?: Json
+          label?: string
+          taken_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicle_members: {
         Row: {
+          car_role: string
           joined_at: string
           user_id: string
           vehicle_id: string
         }
         Insert: {
+          car_role?: string
           joined_at?: string
           user_id: string
           vehicle_id: string
         }
         Update: {
+          car_role?: string
           joined_at?: string
           user_id?: string
           vehicle_id?: string
@@ -2129,6 +2168,19 @@ export type Database = {
         Returns: {
           member_names: string[]
           vehicle_id: string
+        }[]
+      }
+      can_control_car: { Args: { p_vehicle_id: string }; Returns: boolean }
+      my_car_role: { Args: never; Returns: string }
+      set_vehicle_member_role: { Args: { p_role: string; p_user: string }; Returns: undefined }
+      car_release_notes: {
+        Args: { p_limit?: number }
+        Returns: {
+          apps: Json
+          note: string | null
+          notices: Json
+          published_at: string
+          serial: number
         }[]
       }
       car_firmware_versions: {
