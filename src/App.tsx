@@ -33,6 +33,7 @@ const ModerationPage = lazy(() => import('./pages/ModerationPage'))
 const LinkCarPage = lazy(() => import('./pages/LinkCarPage'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
 const PrepareCarPage = lazy(() => import('./pages/PrepareCarPage'))
+const GoogleFilesPage = lazy(() => import('./pages/GoogleFilesPage'))
 const CarDraftsPage = lazy(() => import('./pages/CarDraftsPage'))
 const CarDiagnosticsPage = lazy(() => import('./pages/CarDiagnosticsPage'))
 const LicencesPage = lazy(() => import('./pages/LicencesPage'))
@@ -74,6 +75,7 @@ export default function App() {
             <Route path="mi-vigo/boveda" element={<VaultPage />} />
             <Route path="mi-vigo/configuracion" element={<VehicleConfigPage />} />
             <Route path="mi-vigo/preparar" element={<PrepareCarPage />} />
+            <Route path="mi-vigo/preparar/archivos-google" element={<GoogleFilesPage />} />
             {/* Trips shared from the car, as drafts (specs/car-trip-drafts.md). */}
             <Route path="mi-vigo/borradores" element={<CarDraftsPage />} />
             {/* Diagnostics sent from the car's Mi Vigo (specs/car-diagnostics.md). */}

@@ -1,6 +1,6 @@
 # "Preparar mi Vigo": engineering-menu codes and installer download
 
-**Status:** Implemented (2026-11-21). The installer download link is a placeholder until the zip is hosted.
+**Status:** Implemented (2026-11-21); updated 2026-11-23 for the mandatory Waze + Google Play services step (D7, D8). The installer download link is a placeholder until the zip is hosted.
 
 ## Context
 
@@ -24,6 +24,8 @@ shown to the owner. This page guides the owner through the menu and computes the
 | D4 | Disclaimer | The "Bajo tu propio riesgo" text (`vigo-hack/wikivigo/DISCLAIMER_draft.md`) comes first. The steps, the codes and the download only show after the owner ticks "Leí y acepto". The acceptance is not stored. |
 | D5 | Photos | Placeholders (dashed box + caption) until the owner takes the photos. |
 | D6 | Download | Disabled "Próximamente" button until the zip is hosted. The URL is one constant (`INSTALLER_URL`, `null` for now). |
+| D7 | Google files (2026-11-23) | Waze + Google Play services are a mandatory part of the install (vigo-hack `installer/README.md` "Waze y Google Play services"). New page `#/mi-vigo/preparar/archivos-google` ("Archivos de Google para el instalador", `GoogleFilesPage`) tells the owner which APKMirror variants to pick, mirroring the installer checks: Waze 5.28.x `.apkm`, arm64-v8a, minSdk <= Android 10, xxhdpi density split; Google Play services >= 26.45 `.apkm`, "arm64-v8a + arm-v7a", "Android 10+", a dpi range that includes the mdpi split; Google Services Framework, the Android 10 `.apk`. Links are APKMirror search pages only (no file URLs, no exact version numbers we cannot confirm). It says the installer verifies Waze/Google signatures, so a wrong file is refused. |
+| D8 | Current flow on Preparar mi Vigo (2026-11-23) | "Qué necesitás" lists the 3 Google files (link to D7) and the Google account; step 4 says the installer asks for the files; disclaimer gains the installer text "Waze y la cuenta de Google"; step 5 = Google sign-in on the car screen ("Probar otra manera" if asked for a passkey); a card explains "Quitar todo", "Antes del service" (with "¿Ocultar también las apps?" = Sí removing everything incl. Waze and Google) and "Después del service". |
 
 ## Security note
 
@@ -74,3 +76,11 @@ and keeps that code out of every screen and log.
   - An invalid PDSN shows no Factory code.
   - `fetch` is never called, and `localStorage.setItem` never receives the PDSN.
   - The download button is disabled ("Próximamente") while `INSTALLER_URL` is null.
+
+### D7/D8 additions (2026-11-23)
+
+- `src/pages/GoogleFilesPage.tsx` + `GoogleFilesPage.test.tsx` (new), route in `src/App.tsx`.
+- `GoogleFilesPage.test.tsx`: every external link is an APKMirror URL, three are search pages; the 26.45 rule, the signature text and the
+  back link are shown.
+- `PrepareCarPage.test.tsx` (now in a `MemoryRouter`): both links to the Google files page; "Probar otra manera", "Ocultar también las
+  apps" and "Después del service" are shown after accepting.

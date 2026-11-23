@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import { MASTER_CODE, factoryCode, isValidPdsn, normalizePdsn } from '../lib/vigoPass'
 import styles from './PrepareCarPage.module.css'
@@ -100,7 +101,25 @@ export default function PrepareCarPage() {
             <li>
               <strong>Actualizaciones del concesionario:</strong> una actualización oficial puede borrar estas
               mejoras o hacer que dejen de funcionar.{' '}
-              <strong>Antes de llevar el auto al service, usá «Quitar todo»</strong> en el instalador.
+              <strong>Antes de llevar el auto al service, usá «Antes del service»</strong> (o «Quitar todo») en
+              el instalador.
+            </li>
+          </ul>
+          <h3>Waze y la cuenta de Google</h3>
+          <ul>
+            <li>
+              Waze y los servicios de Google Play son de Google y no vienen en el instalador: los bajás vos de
+              APKMirror y el instalador solo verifica que estén firmados por Waze y por Google.
+            </li>
+            <li>
+              La pantalla de la Vigo no está certificada por Google. Iniciar sesión con tu cuenta de Google en ella
+              puede ir en contra de las condiciones de Google, y Google puede pedirte verificaciones extra o no
+              dejarte entrar. Es tu decisión y tu cuenta.
+            </li>
+            <li>
+              «Quitar todo» borra los servicios de Google Play que puso el instalador y con ellos tu cuenta de
+              Google en la pantalla (la cuenta sigue existiendo; solo sale de la pantalla). Si el instalador había
+              actualizado unos que ya tenías, vuelven los anteriores.
             </li>
           </ul>
           <h3>Lo que sí te garantizamos</h3>
@@ -154,6 +173,11 @@ export default function PrepareCarPage() {
                 Un cable USB-C para el puerto <strong>izquierdo</strong> de la consola central (el derecho no
                 sirve para esto).
               </li>
+              <li>
+                Los <strong>3 archivos de Google</strong> (Waze, servicios de Google Play y Google Services
+                Framework), bajados de APKMirror: <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>.
+              </li>
+              <li>Tu cuenta de Google (para iniciar sesión en Waze desde la pantalla).</li>
               <li>Unos 20 minutos.</li>
             </ul>
           </Card>
@@ -241,6 +265,10 @@ export default function PrepareCarPage() {
                 Hacé doble clic en <strong>Iniciar.cmd</strong>, leé el aviso, tocá «Buscar el auto» y después
                 «Instalar».
               </li>
+              <li>
+                El instalador te pide los archivos de Google: elegí juntos los 3 que bajaste (
+                <Link to="/mi-vigo/preparar/archivos-google">Archivos de Google para el instalador</Link>).
+              </li>
               <li>Al terminar, tocá «Reiniciar la pantalla».</li>
             </ol>
             {INSTALLER_URL ? (
@@ -254,9 +282,44 @@ export default function PrepareCarPage() {
             )}
             <p className={styles.text}>
               El instalador calcula solo la contraseña de administrador del auto; no tenés que escribirla ni
-              la va a mostrar. Para volver todo a como vino de fábrica, repetí estos pasos y elegí «Quitar
-              todo».
+              la va a mostrar.
             </p>
+            <p className={styles.text}>
+              <strong>Waze y los servicios de Google Play son parte de la instalación.</strong> No vienen en el
+              instalador (son de Google): los elegís vos y el instalador verifica la firma oficial de Waze y de
+              Google; un archivo equivocado simplemente se rechaza. Si Waze no se puede poner en tu auto, el
+              instalador te dice por qué y el resto de las mejoras se instala igual.
+            </p>
+          </Card>
+
+          <Card>
+            <CardTitle icon="5️⃣">Iniciá sesión en Waze</CardTitle>
+            <p className={styles.text}>
+              Después del reinicio, abrí Waze en la pantalla del auto e iniciá sesión con tu cuenta de Google,
+              directamente en la pantalla. Si Google te pide una llave de acceso («passkey»), tocá{' '}
+              <strong>«Probar otra manera»</strong> y elegí la contraseña u otro método.
+            </p>
+          </Card>
+
+          <Card>
+            <CardTitle icon="🔁">Los otros botones del instalador</CardTitle>
+            <ul className={styles.list}>
+              <li>
+                <strong>«Quitar todo»</strong>: deja la pantalla como vino de fábrica. Saca todas las mejoras,
+                Waze y los servicios de Google Play que puso el instalador (con ellos sale tu cuenta de Google de
+                la pantalla; la cuenta sigue existiendo).
+              </li>
+              <li>
+                <strong>«Antes del service»</strong>: usalo antes de llevar el auto al concesionario. Guarda una
+                copia de tus ajustes y vuelve a fábrica el cambio de sistema y el asistente de voz; las apps
+                quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo que «Quitar
+                todo»: saca todo, incluidos Waze y Google.
+              </li>
+              <li>
+                <strong>«Después del service»</strong>: cuando el auto vuelve, instala todo de nuevo y te ofrece
+                recuperar tus ajustes de antes del service, preguntándote uno por uno los de seguridad.
+              </li>
+            </ul>
             <Alert type="info">
               El ADB se apaga solo la próxima vez que se reinicia la pantalla, igual que de fábrica. Si más
               adelante querés usar el instalador otra vez, repetí los pasos 2 y 3.
