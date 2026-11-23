@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { geocodeCity } from './nominatimGeocoding'
+import { geocodeCity, searchPlaces } from './nominatimGeocoding'
 
 describe('geocodeCity', () => {
   const fetchMock = vi.fn()
@@ -51,5 +51,50 @@ describe('geocodeCity', () => {
     fetchMock.mockRejectedValue(new Error('network down'))
     const result = await geocodeCity('Torres')
     expect(result).toBeNull()
+  })
+})
+
+describe('searchPlaces', () => {
+  const fetchMock = vi.fn()
+  beforeEach(() => {
+    fetchMock.mockReset()
+    vi.stubGlobal('fetch', fetchMock)
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('needs at least 3 characters', async () => {
+    expect(await searchPlaces('ab')).toEqual([])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('maps results to label + detail and skips bad coordinates', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          lat: '-34.906',
+          lon: '-56.199',
+          display_name: 'Plaza Independencia, Ciudad Vieja, Montevideo',
+          name: '',
+        },
+        { lat: 'x', lon: '1', display_name: 'Bad' },
+      ],
+    })
+    expect(await searchPlaces('plaza independencia')).toEqual([
+      {
+        lat: -34.906,
+        lon: -56.199,
+        label: 'Plaza Independencia',
+        detail: 'Plaza Independencia, Ciudad Vieja, Montevideo',
+      },
+    ])
+    expect(fetchMock.mock.calls[0][0]).toContain('limit=5')
+  })
+
+  it('a failure is an empty list', async () => {
+    fetchMock.mockRejectedValue(new Error('offline'))
+    expect(await searchPlaces('montevideo')).toEqual([])
   })
 })

@@ -1,0 +1,44 @@
+/* "Enviar al auto" (specs/car-navigate-b2.md R5): a small secondary button; the confirmation panel follows the remote card's
+   note rhythm (CarRemoteCard.module.css). */
+.wrap {
+  margin-top: 8px;
+}
+
+.button {
+  composes: secondary from '../styles/buttons.module.css';
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.send {
+  composes: primary from '../styles/buttons.module.css';
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.panel {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dest {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

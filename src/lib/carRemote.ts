@@ -11,7 +11,14 @@ import type { CarOrder, CarRemoteStatus } from '../types'
 export { formatRemain, isLiveFresh, LIVE_FRESH_MS } from './carStatus'
 
 export type CarOrderKind =
-  'windows_open_all' | 'windows_close_all' | 'ventilate' | 'charge_limit' | 'charge_stop'
+  'windows_open_all' | 'windows_close_all' | 'ventilate' | 'charge_limit' | 'charge_stop' | 'navigate'
+
+/** A destination for a `navigate` order (specs/car-navigate-b2.md R1): coordinates plus the name the car shows. */
+export interface CarDestination {
+  lat: number
+  lon: number
+  label: string
+}
 
 // Explicit columns only (as every car table): car_devices refuses `*` for clients (0045 column grants).
 const DEVICE_COLUMNS = 'id, last_seen_at, revoked_at'
@@ -99,13 +106,23 @@ function rpcError(data: unknown, table: Record<string, string>): string | null {
   return row.ok === true ? null : UNAVAILABLE
 }
 
-/** Queues an order; a newer order replaces a queued older one (the car only runs the latest intent). */
-export async function createCarOrder(kind: CarOrderKind, pct?: number): Promise<{ error: string | null }> {
+/**
+ * Queues an order; a newer order replaces a queued older one (the car only runs the latest intent). `navigate` takes its
+ * destination through sendDestination (carNavigate.ts), which calls this with `dest`.
+ */
+export async function createCarOrder(
+  kind: CarOrderKind,
+  pct?: number,
+  dest?: CarDestination
+): Promise<{ error: string | null }> {
   if (!supabase) return { error: UNAVAILABLE }
-  const { data, error } = await supabase.rpc('create_car_order', {
-    p_kind: kind,
-    p_args: kind === 'charge_limit' ? { pct: pct ?? 0 } : {},
-  })
+  const p_args =
+    kind === 'charge_limit'
+      ? { pct: pct ?? 0 }
+      : kind === 'navigate'
+        ? { lat: dest?.lat ?? 0, lon: dest?.lon ?? 0, label: dest?.label ?? '' }
+        : {}
+  const { data, error } = await supabase.rpc('create_car_order', { p_kind: kind, p_args })
   if (error) return { error: toFriendlyError(error) }
   return { error: rpcError(data, CREATE_ERRORS) }
 }
@@ -158,6 +175,11 @@ export function orderKindLabel(o: Pick<CarOrder, 'kind' | 'args'>): string {
       const pct = argPct(o.args)
       return pct == null ? 'Límite de carga' : `Límite de carga: ${pct} %`
     }
+    case 'navigate': {
+      const label =
+        typeof o.args === 'object' && o.args !== null ? (o.args as Record<string, unknown>).label : null
+      return typeof label === 'string' && label ? `Navegar a ${label}` : 'Navegar a un destino'
+    }
     default:
       return o.kind
   }
@@ -174,6 +196,7 @@ export const RESULT_WORDS: Record<string, string> = {
   busy: 'demasiadas órdenes seguidas en el auto',
   no_executor: 'Copiloto no respondió (¿está instalado?)',
   expired_on_car: 'le llegó tarde al auto y no la ejecutó',
+  no_app: 'Waze no está instalado en el auto o no abrió el destino',
   not_picked_up: 'el auto no la recibió en 2 minutos',
   superseded: 'la reemplazó una orden más nueva',
 }

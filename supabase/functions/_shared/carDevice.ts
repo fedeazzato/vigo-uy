@@ -173,6 +173,12 @@ export interface CarStatus {
   charge_end_reason: string | null
   remain_charge_min?: number
   limit_pct?: number
+  /** Copiloto's "Comandos remotos" switch as Mi Vigo last heard it (specs/car-navigate-b2.md R2); optional. */
+  remote_on?: boolean
+  /** Head-unit software version, ro.build.version.software (specs/car-firmware-a8.md R1); optional. */
+  fw_version?: string
+  /** Odometer in km, IC_TOTAL_ODMETER (specs/car-service-reminders-a4.md R1); optional. */
+  odometer_km?: number
 }
 
 /** Remote orders (specs/car-remote-e3.md R3): the codes the CAR may report. not_picked_up / superseded are server-only. */
@@ -187,6 +193,8 @@ export const ORDER_RESULT_CODES = [
   'busy',
   'no_executor',
   'expired_on_car',
+  // navigate (specs/car-navigate-b2.md R3): Waze is not installed or did not accept the link.
+  'no_app',
 ] as const
 export type OrderResultCode = (typeof ORDER_RESULT_CODES)[number]
 export const ORDER_TEXT_MAX = 200
@@ -239,7 +247,13 @@ const STATUS_KEYS = [
   'charge_end_reason',
   'remain_charge_min',
   'limit_pct',
+  'remote_on',
+  'fw_version',
+  'odometer_km',
 ]
+/** ro.build.version.software, e.g. DFRD_S32O_MPU_V01811_20250814_128G (specs/car-firmware-a8.md R1). */
+export const FW_VERSION = /^[A-Za-z0-9_.-]{1,64}$/
+export const ODOMETER_MAX = 999_999
 
 function optInt(v: unknown, min: number, max: number): number | null | undefined {
   if (v === undefined || v === null) return null
@@ -268,7 +282,13 @@ export function parseCarStatus(raw: unknown, live = false): CarStatus | null {
   const plugged = optBool(o.plugged)
   const remain = optInt(o.remain_charge_min, 0, 1440)
   const limit = optInt(o.limit_pct, 60, 100)
+  const remoteOn = optBool(o.remote_on)
+  const odometer = optInt(o.odometer_km, 0, ODOMETER_MAX)
+  const fw = o.fw_version
+  if (fw !== undefined && fw !== null && (typeof fw !== 'string' || !FW_VERSION.test(fw))) return null
   if (
+    remoteOn === undefined ||
+    odometer === undefined ||
     soc === undefined ||
     range === undefined ||
     charging === undefined ||
@@ -293,6 +313,9 @@ export function parseCarStatus(raw: unknown, live = false): CarStatus | null {
     charge_end_reason: reason,
     ...(remain !== null ? { remain_charge_min: remain } : {}),
     ...(limit !== null ? { limit_pct: limit } : {}),
+    ...(remoteOn !== null ? { remote_on: remoteOn } : {}),
+    ...(typeof fw === 'string' ? { fw_version: fw } : {}),
+    ...(odometer !== null ? { odometer_km: odometer } : {}),
   }
 }
 

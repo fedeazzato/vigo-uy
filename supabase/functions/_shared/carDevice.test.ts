@@ -1006,6 +1006,59 @@ describe('parseCarRequest: status keeps accepting old bodies and takes the new o
   })
 })
 
+// ---- wave 2 (specs/car-navigate-b2.md R2, car-firmware-a8.md R1, car-service-reminders-a4.md R1): optional status keys.
+// The exact body the car builds with every new key (vigo-hack accounts_proxy core Wire pins the same string).
+const ORDERS_BODY_W2 =
+  '{"v":1,"action":"orders","device_id":"6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f","ts":1763640000000,' +
+  '"live":{"event":"live","observed_at":1763639995000,"soc":64,"range_km":212,"charging":true,"plugged":true,' +
+  '"charge_end_reason":null,"remain_charge_min":95,"limit_pct":90,"odometer_km":12345,"remote_on":true,' +
+  '"fw_version":"DFRD_S32O_MPU_V01811_20250814_128G"}}'
+
+describe('parseCarRequest: wave 2 status keys', () => {
+  const live = (o: Record<string, unknown>) =>
+    parseCarRequest(ordersBody({ event: 'live', observed_at: VECTOR_NOW, ...o }))
+
+  it('parses the car-built body with remote_on, fw_version and odometer_km', () => {
+    const r = parseCarRequest(ORDERS_BODY_W2)
+    expect(r && r.action === 'orders' && r.live).toMatchObject({
+      odometer_km: 12345,
+      remote_on: true,
+      fw_version: 'DFRD_S32O_MPU_V01811_20250814_128G',
+    })
+  })
+
+  it('accepts the keys on a status call too, and null as unknown', () => {
+    const body = JSON.stringify({
+      v: 1,
+      action: 'status',
+      device_id: DEVICE,
+      ts: VECTOR_NOW,
+      status: { event: 'trip_end', observed_at: VECTOR_NOW, odometer_km: 0, remote_on: false, fw_version: null },
+    })
+    const r = parseCarRequest(body)
+    expect(r && r.action === 'status' && r.status).toMatchObject({ odometer_km: 0, remote_on: false })
+    expect(r && r.action === 'status' && 'fw_version' in r.status).toBe(false)
+  })
+
+  it.each([
+    [{ odometer_km: -1 }],
+    [{ odometer_km: 1_000_000 }],
+    [{ odometer_km: 12.5 }],
+    [{ odometer_km: '12345' }],
+    [{ remote_on: 'yes' }],
+    [{ fw_version: '' }],
+    [{ fw_version: 'DFRD S32O' }],
+    [{ fw_version: 'x'.repeat(65) }],
+    [{ fw_version: 1811 }],
+  ])('refuses %j', (o) => {
+    expect(live(o)).toBeNull()
+  })
+
+  it('accepts the navigate result code no_app', () => {
+    expect(parseCarRequest(resultBody({ code: 'no_app' }))).toMatchObject({ code: 'no_app' })
+  })
+})
+
 describe('parseCarRequest: order_result', () => {
   it('parses the car-built body exactly', () => {
     expect(parseCarRequest(ORDER_RESULT_BODY)).toEqual({

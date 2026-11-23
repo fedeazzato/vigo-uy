@@ -14,6 +14,7 @@ import { geocodeCity } from '../lib/nominatimGeocoding'
 import { dotIcon } from '../lib/mapMarkerIcon'
 import MapModal from './MapModal'
 import FittedMapContainer from './FittedMapContainer'
+import SendToCarButton from './SendToCarButton'
 import type { ChargingStation, TripLog } from '../types'
 import styles from './TripMap.module.css'
 
@@ -160,6 +161,7 @@ export default function TripMap({ trip, open, onClose }: TripMapProps) {
               {p.type === 'charge' && p.durationMinutes != null && (
                 <div>⏱️ {p.durationMinutes} min de carga</div>
               )}
+              <SendToCarButton destination={{ lat: p.lat, lon: p.lng, label: p.label }} />
             </Popup>
           </Marker>
         ))}

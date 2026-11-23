@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { FormError } from '../components/UI'
 import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
@@ -19,11 +19,16 @@ export default function NewServiceEntryPage() {
   const isEdit = Boolean(id)
   const { user } = useAuth()
   const navigate = useNavigate()
+  // A service draft from the car's odometer (specs/car-service-reminders-a4.md R3): ?km=15230&tipo=Service%20de%2015.000%20km
+  // prefills a NEW entry only; nothing is saved until the owner submits the form.
+  const [params] = useSearchParams()
+  const draftKm = !isEdit && /^\d{1,6}$/.test(params.get('km') ?? '') ? (params.get('km') as string) : ''
+  const draftType = !isEdit ? (params.get('tipo') ?? '').slice(0, 80) : ''
 
   const [serviceDate, setServiceDate] = useState(todayIsoDate())
-  const [odometerKm, setOdometerKm] = useState('')
+  const [odometerKm, setOdometerKm] = useState(draftKm)
   const [dealer, setDealer] = useState('')
-  const [serviceType, setServiceType] = useState('')
+  const [serviceType, setServiceType] = useState(draftType)
   const [costUyu, setCostUyu] = useState('')
   const [city, setCity] = useState('')
   const [notes, setNotes] = useState('')
