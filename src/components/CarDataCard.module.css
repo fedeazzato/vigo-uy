@@ -1,0 +1,84 @@
+/* Mi Vigo "Datos del auto" (specs/car-data-a3-a9.md). */
+.lead,
+.small {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.h {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.big {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.warn {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--danger-text);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 4px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+.list {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chart {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.dot {
+  fill: var(--accent);
+}
+
+.cold {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}

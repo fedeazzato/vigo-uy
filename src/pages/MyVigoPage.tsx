@@ -16,6 +16,7 @@ import VehicleCard from '../components/VehicleCard'
 import CarDevicesCard from '../components/CarDevicesCard'
 import CarStatusCard from '../components/CarStatusCard'
 import CarDraftsCard from '../components/CarDraftsCard'
+import CarDataCard from '../components/CarDataCard'
 import CarDiagnosticsCard from '../components/CarDiagnosticsCard'
 import CarRemoteCard from '../components/CarRemoteCard'
 import SendPlaceCard from '../components/SendPlaceCard'
@@ -191,6 +192,7 @@ export default function MyVigoPage() {
           {CAR_REMOTE_ENABLED && <CarRemoteCard />}
           {CAR_REMOTE_ENABLED && <SendPlaceCard />}
           <CarDraftsCard />
+          <CarDataCard />
           <CarDiagnosticsCard />
           <FirmwareCard />
           <Card>
