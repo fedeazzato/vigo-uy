@@ -13,6 +13,7 @@ import MapModal from './MapModal'
 import FittedMapContainer from './FittedMapContainer'
 import OcmLayer, { type OcmLayerState } from './OcmLayer'
 import { Badge } from './UI'
+import SendToCarButton from './SendToCarButton'
 import type { ChargingStation } from '../types'
 import styles from './StationsMap.module.css'
 
@@ -94,6 +95,7 @@ export default function StationsMap({ stations, open, onClose, ocm = null }: Sta
                   .filter(Boolean)
                   .join(' · ')}
               </div>
+              <SendToCarButton destination={{ lat: station.lat, lon: station.lng, label: station.name }} />
             </Popup>
           </Marker>
         ))}

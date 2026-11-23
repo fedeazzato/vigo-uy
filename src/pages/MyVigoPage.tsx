@@ -18,6 +18,9 @@ import CarStatusCard from '../components/CarStatusCard'
 import CarDraftsCard from '../components/CarDraftsCard'
 import CarDiagnosticsCard from '../components/CarDiagnosticsCard'
 import CarRemoteCard from '../components/CarRemoteCard'
+import SendPlaceCard from '../components/SendPlaceCard'
+import ServiceReminderCard from '../components/ServiceReminderCard'
+import FirmwareCard from '../components/FirmwareCard'
 import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
@@ -184,9 +187,12 @@ export default function MyVigoPage() {
           <VehicleCard />
           <CarDevicesCard />
           <CarStatusCard />
+          <ServiceReminderCard />
           {CAR_REMOTE_ENABLED && <CarRemoteCard />}
+          {CAR_REMOTE_ENABLED && <SendPlaceCard />}
           <CarDraftsCard />
           <CarDiagnosticsCard />
+          <FirmwareCard />
           <Card>
             <CardTitle icon="🔐">Bóveda</CardTitle>
             <p className={styles.vaultText}>

@@ -45,3 +45,52 @@ export async function geocodeCity(name: string): Promise<GeocodedPoint | null> {
     return null
   }
 }
+
+interface NominatimPlace extends NominatimResult {
+  display_name?: string
+  name?: string
+}
+
+export interface FoundPlace {
+  lat: number
+  lon: number
+  /** Short name for the car (the first part of Nominatim's display name). */
+  label: string
+  /** The full display name, to tell similar results apart. */
+  detail: string
+}
+
+/**
+ * Free-text place / address search for "Enviar al auto" (specs/car-navigate-b2.md R5): up to 5 results, Uruguay first (soft
+ * Southern Cone bias, as geocodeCity). Best-effort: any failure is an empty list.
+ */
+export async function searchPlaces(query: string): Promise<FoundPlace[]> {
+  const trimmed = query.trim()
+  if (trimmed.length < 3) return []
+  const params = new URLSearchParams({
+    q: trimmed,
+    format: 'json',
+    limit: '5',
+    viewbox: SOUTHERN_CONE_VIEWBOX,
+    bounded: '0',
+    'accept-language': 'es',
+  })
+  try {
+    const res = await fetch(`${NOMINATIM_URL}?${params.toString()}`)
+    if (!res.ok) return []
+    const data = (await res.json()) as NominatimPlace[]
+    if (!Array.isArray(data)) return []
+    const out: FoundPlace[] = []
+    for (const r of data) {
+      const lat = Number(r.lat)
+      const lon = Number(r.lon)
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue
+      const detail = (r.display_name ?? '').trim()
+      const label = (r.name && r.name.trim()) || detail.split(',')[0].trim() || trimmed
+      out.push({ lat, lon, label, detail: detail || label })
+    }
+    return out
+  } catch {
+    return []
+  }
+}

@@ -1,0 +1,61 @@
+/* A8 firmware tracker (specs/car-firmware-a8.md R4) and A4 service reminder (specs/car-service-reminders-a4.md R4). */
+.note {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.own {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.mine {
+  background: var(--surface-secondary);
+}
+
+.big {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.link {
+  composes: primary from '../styles/buttons.module.css';
+  display: inline-block;
+  margin-top: 6px;
+  text-decoration: none;
+}

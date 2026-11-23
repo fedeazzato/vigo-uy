@@ -345,6 +345,9 @@ export type Database = {
           device_id: string | null
           event: string
           limit_pct: number | null
+          fw_version: string | null
+          odometer_km: number | null
+          remote_on: boolean | null
           observed_at: string
           plugged: boolean | null
           range_km: number | null
@@ -359,6 +362,9 @@ export type Database = {
           device_id?: string | null
           event: string
           limit_pct?: number | null
+          fw_version?: string | null
+          odometer_km?: number | null
+          remote_on?: boolean | null
           observed_at: string
           plugged?: boolean | null
           range_km?: number | null
@@ -373,6 +379,9 @@ export type Database = {
           device_id?: string | null
           event?: string
           limit_pct?: number | null
+          fw_version?: string | null
+          odometer_km?: number | null
+          remote_on?: boolean | null
           observed_at?: string
           plugged?: boolean | null
           range_km?: number | null
@@ -1613,6 +1622,14 @@ export type Database = {
         Returns: Record<string, unknown>
       }
       car_device_public_key: { Args: { p_device_id: string }; Returns: string }
+      car_firmware_versions: {
+        Args: never
+        Returns: {
+          cars: number
+          fw_version: string
+          last_seen_month: string
+        }[]
+      }
       car_diagnostic_vehicle_labels: {
         Args: { p_ids: string[] }
         Returns: {
