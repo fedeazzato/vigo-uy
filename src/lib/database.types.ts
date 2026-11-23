@@ -39,121 +39,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      // Hand-written until `npm run gen:types` runs after migrations 0057/0058 (NOT applied yet).
-      content_follows: {
-        Row: {
-          created_at: string
-          id: string
-          part_purchase_id: string | null
-          service_entry_id: string | null
-          station_id: string | null
-          trip_log_id: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          part_purchase_id?: string | null
-          service_entry_id?: string | null
-          station_id?: string | null
-          trip_log_id?: string | null
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          part_purchase_id?: string | null
-          service_entry_id?: string | null
-          station_id?: string | null
-          trip_log_id?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          actor_id: string | null
-          created_at: string
-          id: string
-          kind: string
-          part_purchase_id: string | null
-          read_at: string | null
-          service_entry_id: string | null
-          station_id: string | null
-          title: string
-          trip_log_id: string | null
-          user_id: string
-        }
-        Insert: {
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          kind: string
-          part_purchase_id?: string | null
-          read_at?: string | null
-          service_entry_id?: string | null
-          station_id?: string | null
-          title: string
-          trip_log_id?: string | null
-          user_id: string
-        }
-        Update: {
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          kind?: string
-          part_purchase_id?: string | null
-          read_at?: string | null
-          service_entry_id?: string | null
-          station_id?: string | null
-          title?: string
-          trip_log_id?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      route_plans: {
-        Row: {
-          consumption_kwh_100km: number
-          created_at: string
-          destination: string
-          id: string
-          min_arrival_soc: number
-          model: string | null
-          origin: string
-          snapshot: Json
-          start_soc: number
-          title: string
-          user_id: string
-        }
-        Insert: {
-          consumption_kwh_100km: number
-          created_at?: string
-          destination: string
-          id?: string
-          min_arrival_soc: number
-          model?: string | null
-          origin: string
-          snapshot?: Json
-          start_soc: number
-          title: string
-          user_id?: string
-        }
-        Update: {
-          consumption_kwh_100km?: number
-          created_at?: string
-          destination?: string
-          id?: string
-          min_arrival_soc?: number
-          model?: string | null
-          origin?: string
-          snapshot?: Json
-          start_soc?: number
-          title?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       car_devices: {
         Row: {
           app_version: string | null
@@ -459,15 +344,15 @@ export type Database = {
           charging: boolean | null
           device_id: string | null
           event: string
-          limit_pct: number | null
           fw_version: string | null
-          odometer_km: number | null
-          remote_on: boolean | null
+          limit_pct: number | null
           observed_at: string
+          odometer_km: number | null
           plugged: boolean | null
           range_km: number | null
           received_at: string
           remain_charge_min: number | null
+          remote_on: boolean | null
           soc: number | null
           vehicle_id: string
         }
@@ -476,15 +361,15 @@ export type Database = {
           charging?: boolean | null
           device_id?: string | null
           event: string
-          limit_pct?: number | null
           fw_version?: string | null
-          odometer_km?: number | null
-          remote_on?: boolean | null
+          limit_pct?: number | null
           observed_at: string
+          odometer_km?: number | null
           plugged?: boolean | null
           range_km?: number | null
           received_at?: string
           remain_charge_min?: number | null
+          remote_on?: boolean | null
           soc?: number | null
           vehicle_id: string
         }
@@ -493,15 +378,15 @@ export type Database = {
           charging?: boolean | null
           device_id?: string | null
           event?: string
-          limit_pct?: number | null
           fw_version?: string | null
-          odometer_km?: number | null
-          remote_on?: boolean | null
+          limit_pct?: number | null
           observed_at?: string
+          odometer_km?: number | null
           plugged?: boolean | null
           range_km?: number | null
           received_at?: string
           remain_charge_min?: number | null
+          remote_on?: boolean | null
           soc?: number | null
           vehicle_id?: string
         }
@@ -761,6 +646,65 @@ export type Database = {
           },
         ]
       }
+      content_follows: {
+        Row: {
+          created_at: string
+          id: string
+          part_purchase_id: string | null
+          service_entry_id: string | null
+          station_id: string | null
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_follows_part_purchase_id_fkey"
+            columns: ["part_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "part_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_follows_service_entry_id_fkey"
+            columns: ["service_entry_id"]
+            isOneToOne: false
+            referencedRelation: "service_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_follows_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_follows_trip_log_id_fkey"
+            columns: ["trip_log_id"]
+            isOneToOne: false
+            referencedRelation: "trip_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_reactions: {
         Row: {
           created_at: string
@@ -997,6 +941,77 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          part_purchase_id: string | null
+          read_at: string | null
+          service_entry_id: string | null
+          station_id: string | null
+          title: string
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          part_purchase_id?: string | null
+          read_at?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          title: string
+          trip_log_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          part_purchase_id?: string | null
+          read_at?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          title?: string
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_part_purchase_id_fkey"
+            columns: ["part_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "part_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_service_entry_id_fkey"
+            columns: ["service_entry_id"]
+            isOneToOne: false
+            referencedRelation: "service_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_trip_log_id_fkey"
+            columns: ["trip_log_id"]
+            isOneToOne: false
+            referencedRelation: "trip_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocm_rate_counters: {
         Row: {
           bucket: string
@@ -1180,6 +1195,48 @@ export type Database = {
           id?: string
           is_moderator?: boolean
           model?: string | null
+        }
+        Relationships: []
+      }
+      route_plans: {
+        Row: {
+          consumption_kwh_100km: number
+          created_at: string
+          destination: string
+          id: string
+          min_arrival_soc: number
+          model: string | null
+          origin: string
+          snapshot: Json
+          start_soc: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          consumption_kwh_100km: number
+          created_at?: string
+          destination: string
+          id?: string
+          min_arrival_soc: number
+          model?: string | null
+          origin: string
+          snapshot?: Json
+          start_soc: number
+          title: string
+          user_id?: string
+        }
+        Update: {
+          consumption_kwh_100km?: number
+          created_at?: string
+          destination?: string
+          id?: string
+          min_arrival_soc?: number
+          model?: string | null
+          origin?: string
+          snapshot?: Json
+          start_soc?: number
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1737,6 +1794,13 @@ export type Database = {
         Returns: Record<string, unknown>
       }
       car_device_public_key: { Args: { p_device_id: string }; Returns: string }
+      car_diagnostic_vehicle_labels: {
+        Args: { p_ids: string[] }
+        Returns: {
+          member_names: string[]
+          vehicle_id: string
+        }[]
+      }
       car_firmware_versions: {
         Args: never
         Returns: {
@@ -1745,17 +1809,11 @@ export type Database = {
           last_seen_month: string
         }[]
       }
-      car_diagnostic_vehicle_labels: {
-        Args: { p_ids: string[] }
-        Returns: {
-          member_names: string[]
-          vehicle_id: string
-        }[]
-      }
       car_heartbeat: {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
         Returns: Json
       }
+      car_navigate_args_ok: { Args: { p_args: Json }; Returns: boolean }
       car_order_result: {
         Args: {
           p_code: string
@@ -1830,6 +1888,10 @@ export type Database = {
         Returns: Json
       }
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
+      content_target: {
+        Args: { p_purchase: string; p_service: string; p_trip: string }
+        Returns: Record<string, unknown>
+      }
       create_car_order: {
         Args: { p_args: Json; p_kind: string }
         Returns: Json
@@ -1841,7 +1903,10 @@ export type Database = {
       is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
-      mark_notifications_read: { Args: { p_ids?: string[] }; Returns: undefined }
+      mark_notifications_read: {
+        Args: { p_ids?: string[] }
+        Returns: undefined
+      }
       ocm_tiles_begin: {
         Args: { p_can_fetch?: boolean; p_client: string; p_tiles: string[] }
         Returns: Json
