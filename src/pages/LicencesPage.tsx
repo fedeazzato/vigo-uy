@@ -113,10 +113,10 @@ export default function LicencesPage() {
           </ExternalLink>
           .
         </p>
-        <Alert type="warning">
-          <strong>Pendiente:</strong> la licencia del código de las apps para el auto y del instalador todavía no
-          está definida. Hasta que se publique, ese código no tiene una licencia abierta.
-        </Alert>
+        <p className={styles.text}>
+          El código de las apps para el auto y del instalador también tiene licencia MIT. Las partes de terceros que
+          incluyen mantienen sus propias licencias (arriba).
+        </p>
       </Card>
     </div>
   )

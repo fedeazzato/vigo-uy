@@ -30,7 +30,7 @@ describe('LicencesPage', () => {
     }
   })
 
-  it('renders the source offer, the use restrictions and the pending own-code licence', () => {
+  it('renders the source offer, the use restrictions and the MIT own-code licence', () => {
     render(
       <MemoryRouter>
         <LicencesPage />
