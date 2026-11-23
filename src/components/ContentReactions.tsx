@@ -13,6 +13,7 @@ import {
 import { formatDate } from '../lib/format'
 import type { ContentComment, ReactableContent } from '../types'
 import formStyles from '../styles/formControls.module.css'
+import FollowButton from './FollowButton'
 import styles from './ContentReactions.module.css'
 
 const MAX_COMMENT_LENGTH = 280
@@ -125,6 +126,7 @@ export default function ContentReactions({ content }: ContentReactionsProps) {
         <button type="button" className={styles.commentsToggle} onClick={() => setShowComments((v) => !v)}>
           💬 {showComments ? 'Ocultar comentarios' : 'Comentarios'}
         </button>
+        <FollowButton target={{ kind: content.kind, id: content.id }} />
       </div>
 
       {error && <p className={styles.signInHint}>{error}</p>}

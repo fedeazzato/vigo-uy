@@ -39,6 +39,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      // Hand-written until `npm run gen:types` runs after migrations 0057/0058 (NOT applied yet).
+      content_follows: {
+        Row: {
+          created_at: string
+          id: string
+          part_purchase_id: string | null
+          service_entry_id: string | null
+          station_id: string | null
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          part_purchase_id?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          part_purchase_id: string | null
+          read_at: string | null
+          service_entry_id: string | null
+          station_id: string | null
+          title: string
+          trip_log_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          part_purchase_id?: string | null
+          read_at?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          title: string
+          trip_log_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          part_purchase_id?: string | null
+          read_at?: string | null
+          service_entry_id?: string | null
+          station_id?: string | null
+          title?: string
+          trip_log_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      route_plans: {
+        Row: {
+          consumption_kwh_100km: number
+          created_at: string
+          destination: string
+          id: string
+          min_arrival_soc: number
+          model: string | null
+          origin: string
+          snapshot: Json
+          start_soc: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          consumption_kwh_100km: number
+          created_at?: string
+          destination: string
+          id?: string
+          min_arrival_soc: number
+          model?: string | null
+          origin: string
+          snapshot?: Json
+          start_soc: number
+          title: string
+          user_id?: string
+        }
+        Update: {
+          consumption_kwh_100km?: number
+          created_at?: string
+          destination?: string
+          id?: string
+          min_arrival_soc?: number
+          model?: string | null
+          origin?: string
+          snapshot?: Json
+          start_soc?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       car_devices: {
         Row: {
           app_version: string | null
@@ -1726,6 +1841,7 @@ export type Database = {
       is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
+      mark_notifications_read: { Args: { p_ids?: string[] }; Returns: undefined }
       ocm_tiles_begin: {
         Args: { p_can_fetch?: boolean; p_client: string; p_tiles: string[] }
         Returns: Json

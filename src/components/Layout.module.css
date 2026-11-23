@@ -596,3 +596,30 @@
     animation: none;
   }
 }
+
+/* Notifications bell (specs/community-notifications.md) */
+.bellWrap {
+  position: relative;
+  display: inline-flex;
+}
+.bellDot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.bellCount {
+  display: inline-block;
+  margin-left: 6px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}

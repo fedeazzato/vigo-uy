@@ -34,6 +34,8 @@ const PrepareCarPage = lazy(() => import('./pages/PrepareCarPage'))
 const CarDraftsPage = lazy(() => import('./pages/CarDraftsPage'))
 const CarDiagnosticsPage = lazy(() => import('./pages/CarDiagnosticsPage'))
 const LicencesPage = lazy(() => import('./pages/LicencesPage'))
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
+const RoutePlannerPage = lazy(() => import('./pages/RoutePlannerPage'))
 
 export default function App() {
   return (
@@ -47,6 +49,7 @@ export default function App() {
           <Route path="ficha-tecnica" element={<FichaTecnicaPage />} />
           <Route path="carga" element={<ChargingPage />} />
           <Route path="rutas" element={<RoutesPage />} />
+          <Route path="rutas/planificar" element={<RoutePlannerPage />} />
           <Route path="costos" element={<CostsPage />} />
           <Route path="mantenimiento" element={<MantenimientoPage />} />
           <Route path="repuestos" element={<PartsPage />} />
@@ -61,6 +64,7 @@ export default function App() {
           <Route path="perfil" element={<Navigate to="/mi-vigo" replace />} />
           <Route element={<RequireAuth />}>
             <Route path="mi-actividad" element={<DashboardPage />} />
+            <Route path="notificaciones" element={<NotificationsPage />} />
             {/* The car's QR opens #/mi-vigo/vincular?c=CODE (specs/car-link-phase0.md). */}
             <Route path="mi-vigo/vincular" element={<LinkCarPage />} />
             {/* End-to-end encrypted secrets, passkey PRF (specs/secret-vault.md). */}

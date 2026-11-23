@@ -200,6 +200,13 @@ describe('CommunityStations filters', () => {
 // StationsMap itself (which stations get a pin, popups, tiles) is covered
 // by its own test file; here it's stubbed so these tests only assert which
 // stations CommunityStations hands it.
+// Station alerts and follows hit Supabase directly; not under test here (see stationAlerts.test.ts).
+vi.mock('../lib/stationAlerts', () => ({
+  useStationAlerts: () => new Map(),
+  invalidateStationAlerts: () => {},
+}))
+vi.mock('./FollowButton', () => ({ default: () => null }))
+
 vi.mock('./StationsMap', () => ({
   default: ({ stations, open, ocm }: { stations: ChargingStation[]; open: boolean; ocm: unknown }) =>
     open ? (

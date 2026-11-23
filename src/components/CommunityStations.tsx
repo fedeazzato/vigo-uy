@@ -31,6 +31,9 @@ import CityCombobox from './CityCombobox'
 import LocationPicker from './LocationPicker'
 import type { LatLng } from './LocationPicker'
 import StationsMap from './StationsMap'
+import FollowButton from './FollowButton'
+import { invalidateStationAlerts, useStationAlerts } from '../lib/stationAlerts'
+import { formatRelativeTime } from '../lib/format'
 import { ocmFilterFor, type OcmFilter } from '../lib/ocmStations'
 import {
   CONNECTORS_BY_CURRENT,
@@ -85,6 +88,8 @@ export default function CommunityStations() {
   const [reliability, setReliability] = useState<StationReliability[]>([])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [alertsKey, setAlertsKey] = useState(0)
+  const alerts = useStationAlerts(alertsKey)
 
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
@@ -217,6 +222,8 @@ export default function CommunityStations() {
       return
     }
     invalidateCommunityCache()
+    invalidateStationAlerts()
+    setAlertsKey((k) => k + 1)
     setMessage('Reporte registrado. ¡Gracias!')
     void load()
   }
@@ -503,6 +510,7 @@ export default function CommunityStations() {
               const price = pickCostStat(costStats, station.network, station.id)
               const rel = reliability.find((r) => r.station_id === station.id)
               const level = reliabilityLevel(rel)
+              const alert = alerts.get(station.id)
               // Two-column desktop grid: the last row (last 1-2 items) drops
               // its divider instead of just the last DOM item (see the
               // ".lastRow" min-width:700px rule in the CSS module).
@@ -516,7 +524,11 @@ export default function CommunityStations() {
                     <span className={styles.stationName}>
                       {station.name}
                       {station.verified && <Badge color="blue">Oficial</Badge>}
-                      {level === 'flaky' && <Badge color="amber">Fallas reportadas</Badge>}
+                      {alert ? (
+                        <Badge color="red">Falló recientemente</Badge>
+                      ) : (
+                        level === 'flaky' && <Badge color="amber">Fallas reportadas</Badge>
+                      )}
                     </span>
                     {price && (
                       <span className={styles.stationPrice}>
@@ -549,6 +561,12 @@ export default function CommunityStations() {
                       {price.station_id === null ? ' en la red' : ''})
                     </div>
                   )}
+                  {alert && (
+                    <div className={styles.stationNotes}>
+                      ⚠️ Reportada fuera de servicio {formatRelativeTime(new Date(alert.lastFailureAt))}
+                      {alert.failures > 1 ? ` (${alert.failures} reportes)` : ''}
+                    </div>
+                  )}
                   {station.access_notes && (
                     <div className={styles.stationNotes}>💡 {station.access_notes}</div>
                   )}
@@ -576,6 +594,10 @@ export default function CommunityStations() {
                       >
                         ⏳ Ocupado
                       </button>
+                      <FollowButton
+                        target={{ kind: 'station', id: station.id }}
+                        labels={['🔔 Avisarme si falla', '🔕 No avisarme']}
+                      />
                     </div>
                   )}
                 </li>

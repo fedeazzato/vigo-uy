@@ -86,6 +86,12 @@ const GLYPHS = {
     </>
   ),
   shield: <path d="M12 3 20 6v6c0 4.8-3.4 8-8 9-4.6-1-8-4.2-8-9V6z" />,
+  bell: (
+    <>
+      <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </>
+  ),
   search: (
     <>
       <circle cx="11" cy="11" r="6" />
