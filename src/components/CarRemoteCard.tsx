@@ -31,6 +31,12 @@ const CONFIRM: Partial<Record<CarOrderKind, string>> = {
   ventilate: '¿Abrir las 4 ventanas para ventilar el auto?',
 }
 
+/**
+ * "Ventilar" stays off on the web while the car cannot open the windows partly (owner 2026-11-22, option B: research offline,
+ * vigo-hack voice_es/PROPERTIES.md 5b). The car would only answer "falta calibrar". Turn on when Copiloto gets a working ventilar.
+ */
+export const VENTILATE_ON_WEB = false
+
 export default function CarRemoteCard() {
   const [data, setData] = useState<CarRemoteData | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -108,14 +114,16 @@ export default function CarRemoteCard() {
       {error && <Alert type="danger">{error}</Alert>}
 
       <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.action}
-          disabled={busy !== null}
-          onClick={() => void send('ventilate')}
-        >
-          Ventilar
-        </button>
+        {VENTILATE_ON_WEB && (
+          <button
+            type="button"
+            className={styles.action}
+            disabled={busy !== null}
+            onClick={() => void send('ventilate')}
+          >
+            Ventilar
+          </button>
+        )}
         <button
           type="button"
           className={styles.action}

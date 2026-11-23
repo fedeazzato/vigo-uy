@@ -150,18 +150,23 @@ describe('CarRemoteCard', () => {
     expect(screen.queryByText('Últimas órdenes')).toBeNull()
   })
 
-  it('"Abrir" and "Ventilar" ask for one confirmation; "Cerrar" does not', async () => {
+  it('"Ventilar" is hidden while ventilar is off on the car (owner option B)', async () => {
+    mocks.fetchCarRemote.mockResolvedValue(data())
+    render(<CarRemoteCard />)
+    await screen.findByRole('button', { name: 'Abrir todas las ventanas' })
+    expect(screen.queryByRole('button', { name: 'Ventilar' })).toBeNull()
+  })
+
+  it('"Abrir" asks for one confirmation; "Cerrar" does not', async () => {
     mocks.fetchCarRemote.mockResolvedValue(data())
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
     render(<CarRemoteCard />)
     fireEvent.click(await screen.findByRole('button', { name: 'Abrir todas las ventanas' }))
     expect(confirmSpy).toHaveBeenCalledWith('¿Abrir las 4 ventanas?')
     expect(mocks.createCarOrder).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Ventilar' }))
-    expect(mocks.createCarOrder).not.toHaveBeenCalled()
     confirmSpy.mockReturnValue(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Ventilar' }))
-    await waitFor(() => expect(mocks.createCarOrder).toHaveBeenCalledWith('ventilate', undefined))
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir todas las ventanas' }))
+    await waitFor(() => expect(mocks.createCarOrder).toHaveBeenCalledWith('windows_open_all', undefined))
     confirmSpy.mockClear()
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar todas las ventanas' }))
     await waitFor(() => expect(mocks.createCarOrder).toHaveBeenCalledWith('windows_close_all', undefined))
