@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   fetchCarRemote: vi.fn(),
   createCarOrder: vi.fn(),
   cancelCarOrder: vi.fn(),
+  fetchMyCarRole: vi.fn(),
 }))
 
 vi.mock('../lib/carRemote', async (importOriginal) => ({
@@ -14,6 +15,11 @@ vi.mock('../lib/carRemote', async (importOriginal) => ({
   fetchCarRemote: mocks.fetchCarRemote,
   createCarOrder: mocks.createCarOrder,
   cancelCarOrder: mocks.cancelCarOrder,
+}))
+
+vi.mock('../lib/carRole', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/carRole')>()),
+  fetchMyCarRole: mocks.fetchMyCarRole,
 }))
 
 import CarRemoteCard from './CarRemoteCard'
@@ -74,6 +80,7 @@ describe('CarRemoteCard', () => {
     mocks.fetchCarRemote.mockReset()
     mocks.createCarOrder.mockReset().mockResolvedValue({ error: null })
     mocks.cancelCarOrder.mockReset().mockResolvedValue({ error: null })
+    mocks.fetchMyCarRole.mockReset().mockResolvedValue(null)
   })
   afterEach(() => {
     vi.useRealTimers()
@@ -233,5 +240,24 @@ describe('CarRemoteCard', () => {
       await vi.advanceTimersByTimeAsync(9000)
     })
     expect(mocks.fetchCarRemote).toHaveBeenCalledTimes(4)
+  })
+
+  it('E2: a view-only member sees the orders but no buttons and no cancel', async () => {
+    mocks.fetchMyCarRole.mockResolvedValue('view')
+    mocks.fetchCarRemote.mockResolvedValue(data())
+    render(<CarRemoteCard />)
+    expect(await screen.findByText(/Tu permiso en este vehículo es solo ver/)).toBeTruthy()
+    expect(screen.queryByText('Abrir todas las ventanas')).toBeNull()
+    expect(screen.queryByText('Aplicar')).toBeNull()
+    expect(screen.queryByText('Cancelar')).toBeNull()
+    expect(screen.getByText('Últimas órdenes')).toBeTruthy()
+  })
+
+  it('E2: control and owner keep the buttons', async () => {
+    mocks.fetchMyCarRole.mockResolvedValue('control')
+    mocks.fetchCarRemote.mockResolvedValue(data())
+    render(<CarRemoteCard />)
+    expect(await screen.findByText('Abrir todas las ventanas')).toBeTruthy()
+    expect(screen.queryByText(/solo ver/)).toBeNull()
   })
 })

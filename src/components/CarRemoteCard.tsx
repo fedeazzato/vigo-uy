@@ -18,6 +18,7 @@ import {
   type CarOrderKind,
   type CarRemoteData,
 } from '../lib/carRemote'
+import { canControl, fetchMyCarRole, VIEW_ONLY_NOTICE, type CarRole } from '../lib/carRole'
 import styles from './CarRemoteCard.module.css'
 
 // "Control remoto" (specs/car-remote-e3.md R6): orders for the linked car (windows, ventilate, charge limit, stop charging),
@@ -43,6 +44,11 @@ export default function CarRemoteCard() {
   const [error, setError] = useState<string | null>(null)
   const [limit, setLimit] = useState<number | null>(null)
   const [now, setNow] = useState(() => new Date())
+  const [role, setRole] = useState<CarRole | null>(null)
+
+  useEffect(() => {
+    void fetchMyCarRole().then(setRole)
+  }, [])
 
   const load = useCallback(async () => {
     const result = await fetchCarRemote()
@@ -98,6 +104,8 @@ export default function CarRemoteCard() {
   }
 
   const online = isOnline(data.lastSeenAt, now)
+  // E2: a member with the view role sees the car and its orders but gets no buttons (the server refuses them too, 0070).
+  const control = canControl(role)
 
   return (
     <Card>
@@ -112,80 +120,85 @@ export default function CarRemoteCard() {
       </p>
 
       {error && <Alert type="danger">{error}</Alert>}
+      {!control && <Alert type="info">{VIEW_ONLY_NOTICE}</Alert>}
 
-      <div className={styles.actions}>
-        {VENTILATE_ON_WEB && (
-          <button
-            type="button"
-            className={styles.action}
-            disabled={busy !== null}
-            onClick={() => void send('ventilate')}
-          >
-            Ventilar
-          </button>
-        )}
-        <button
-          type="button"
-          className={styles.action}
-          disabled={busy !== null}
-          onClick={() => void send('windows_open_all')}
-        >
-          Abrir todas las ventanas
-        </button>
-        <button
-          type="button"
-          className={styles.action}
-          disabled={busy !== null}
-          onClick={() => void send('windows_close_all')}
-        >
-          Cerrar todas las ventanas
-        </button>
-        {charging && (
-          <button
-            type="button"
-            className={styles.actionDanger}
-            disabled={busy !== null}
-            onClick={() => void send('charge_stop')}
-          >
-            Detener la carga
-          </button>
-        )}
-      </div>
+      {control && (
+        <>
+          <div className={styles.actions}>
+            {VENTILATE_ON_WEB && (
+              <button
+                type="button"
+                className={styles.action}
+                disabled={busy !== null}
+                onClick={() => void send('ventilate')}
+              >
+                Ventilar
+              </button>
+            )}
+            <button
+              type="button"
+              className={styles.action}
+              disabled={busy !== null}
+              onClick={() => void send('windows_open_all')}
+            >
+              Abrir todas las ventanas
+            </button>
+            <button
+              type="button"
+              className={styles.action}
+              disabled={busy !== null}
+              onClick={() => void send('windows_close_all')}
+            >
+              Cerrar todas las ventanas
+            </button>
+            {charging && (
+              <button
+                type="button"
+                className={styles.actionDanger}
+                disabled={busy !== null}
+                onClick={() => void send('charge_stop')}
+              >
+                Detener la carga
+              </button>
+            )}
+          </div>
 
-      <div className={styles.limitRow}>
-        <span className={styles.limitLabel}>Límite de carga</span>
-        <div className={styles.stepper}>
-          <button
-            type="button"
-            className={styles.stepBtn}
-            aria-label="Bajar el límite"
-            disabled={shownLimit <= LIMIT_MIN}
-            onClick={() => setLimit(clampLimit(shownLimit - LIMIT_STEP))}
-          >
-            −
-          </button>
-          <span className={styles.limitValue} aria-live="polite">
-            {shownLimit} %
-          </span>
-          <button
-            type="button"
-            className={styles.stepBtn}
-            aria-label="Subir el límite"
-            disabled={shownLimit >= LIMIT_MAX}
-            onClick={() => setLimit(clampLimit(shownLimit + LIMIT_STEP))}
-          >
-            +
-          </button>
-        </div>
-        <button
-          type="button"
-          className={styles.apply}
-          disabled={busy !== null}
-          onClick={() => void send('charge_limit', shownLimit)}
-        >
-          Aplicar
-        </button>
-      </div>
+          <div className={styles.limitRow}>
+            <span className={styles.limitLabel}>Límite de carga</span>
+            <div className={styles.stepper}>
+              <button
+                type="button"
+                className={styles.stepBtn}
+                aria-label="Bajar el límite"
+                disabled={shownLimit <= LIMIT_MIN}
+                onClick={() => setLimit(clampLimit(shownLimit - LIMIT_STEP))}
+              >
+                −
+              </button>
+              <span className={styles.limitValue} aria-live="polite">
+                {shownLimit} %
+              </span>
+              <button
+                type="button"
+                className={styles.stepBtn}
+                aria-label="Subir el límite"
+                disabled={shownLimit >= LIMIT_MAX}
+                onClick={() => setLimit(clampLimit(shownLimit + LIMIT_STEP))}
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              className={styles.apply}
+              disabled={busy !== null}
+              onClick={() => void send('charge_limit', shownLimit)}
+            >
+              Aplicar
+            </button>
+          </div>
+        </>
+      )}
 
       {data.orders.length > 0 && (
         <>
@@ -207,7 +220,7 @@ export default function CarRemoteCard() {
                     {o.result_text && <span className={styles.meta}>{o.result_text}</span>}
                     <span className={styles.meta}>{orderMeta(o, data.names, now)}</span>
                   </span>
-                  {orderPhase(o, now) === 'queued' && (
+                  {control && orderPhase(o, now) === 'queued' && (
                     <button
                       type="button"
                       className={styles.cancel}

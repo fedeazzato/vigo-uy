@@ -214,6 +214,20 @@ export default function MyVigoPage() {
               Preparar mi Vigo
             </Link>
           </Card>
+          <Card>
+            <CardTitle icon="🧬">Service y configuración del auto</CardTitle>
+            <p className={styles.vaultText}>
+              Antes de ir al taller usá «Antes del service» en el instalador; al volver, «Después del service»
+              reinstala las mejoras y tus ajustes. Compará la configuración de fábrica de antes y de después
+              (solo la ves vos).
+            </p>
+            <Link to="/mi-vigo/configuracion" className={styles.vaultLink}>
+              Configuración del auto
+            </Link>{' '}
+            <Link to="/novedades" className={styles.vaultLink}>
+              Novedades de las mejoras
+            </Link>
+          </Card>
         </>
       )}
 
