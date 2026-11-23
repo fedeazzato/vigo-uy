@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react'
 import { Card, CardTitle, StatGrid } from './UI'
 import { describeCarStatus, fetchCarStatus, STATUS_POLL_MS } from '../lib/carStatus'
 import type { CarStatus } from '../types'
+import CarUpdateInfo from './CarUpdateInfo'
+import { useCarUpdateInfo } from '../lib/useCarUpdateInfo'
 import styles from './CarStatusCard.module.css'
 
 // "Estado del auto" (specs/car-status-e1.md R4): the only place the site shows the linked car's status (owner at the car
 // 2026-11-22: "Control remoto" no longer repeats it). The newest snapshot the car sent (trip end, charge end, or a live row
 // while it is on); for a fresh live row also the time to full (while charging) and the charge limit. Shown only when a row
 // exists for the member's vehicle (RLS); hidden otherwise, including before migration 0048 is applied. Re-read every
-// STATUS_POLL_MS while the page is visible so a live row stays current. Never a location.
+// STATUS_POLL_MS while the page is visible so a live row stays current. Never a location. Below it, the car updater's
+// status and the Google software notices (specs/car-updates.md R8, owner O6; hidden before migration 0059).
 export default function CarStatusCard() {
   const [status, setStatus] = useState<CarStatus | null>(null)
   const [now, setNow] = useState(() => new Date())
+  const updateInfo = useCarUpdateInfo()
 
   useEffect(() => {
     let cancelled = false
@@ -42,7 +46,14 @@ export default function CarStatusCard() {
     }
   }, [])
 
-  if (!status) return null
+  if (!status && !updateInfo.update) return null
+  if (!status)
+    return (
+      <Card>
+        <CardTitle icon="🔋">Estado del auto</CardTitle>
+        <CarUpdateInfo {...updateInfo} />
+      </Card>
+    )
   const v = describeCarStatus(status, now)
   const stats = [
     v.battery && { value: v.battery, label: 'Batería' },
@@ -66,6 +77,7 @@ export default function CarStatusCard() {
           ? 'El auto lo envía mientras está encendido y con internet.'
           : 'Último dato que el auto envió con conexión; no es en vivo.'}
       </p>
+      <CarUpdateInfo {...updateInfo} />
     </Card>
   )
 }

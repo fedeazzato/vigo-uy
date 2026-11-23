@@ -4,6 +4,7 @@ import { Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, CardTitle, Alert, StatGrid, Skeleton } from '../components/UI'
 import MapModal from '../components/MapModal'
+import CarChargeDrafts from '../components/CarChargeDrafts'
 import FittedMapContainer from '../components/FittedMapContainer'
 import { useUserPrefs } from '../context/UserPrefsContext'
 import { fetchChargingStations } from '../lib/communityData'
@@ -123,12 +124,13 @@ export default function CarDraftsPage() {
     <div>
       <PageHeader
         title="🚗 Borradores del auto"
-        subtitle="Viajes que compartiste desde el auto. Solo los ves vos; nada se publica hasta que lo registres."
+        subtitle="Viajes y cargas que el auto envió. Solo los ves vos; nada se publica hasta que lo confirmes."
       />
       <Link to="/mi-vigo" className={styles.back}>
         ← Mi Vigo
       </Link>
       {error && <Alert type="danger">{error}</Alert>}
+      <CarChargeDrafts />
       {drafts === undefined && <Skeleton lines={4} />}
       {drafts !== undefined && (drafts === null || drafts.length === 0) && (
         <Card>

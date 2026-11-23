@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader, Card, Alert, Badge, Skeleton } from '../components/UI'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'
@@ -9,6 +10,7 @@ import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import ChargingNetworksAdmin from '../components/ChargingNetworksAdmin'
 import InsuranceProvidersAdmin from '../components/InsuranceProvidersAdmin'
 import InsuranceAddonsAdmin from '../components/InsuranceAddonsAdmin'
+import CarReleasesAdmin from '../components/CarReleasesAdmin'
 import { INSURANCE_COVERAGE_LABELS } from '../types'
 import type {
   AdminUserRow,
@@ -22,12 +24,14 @@ import type {
 import styles from './ModerationPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
-type Tab = 'contenido' | 'catalogos' | 'usuarios'
-type ContentTable = 'service_entries' | 'trip_logs' | 'part_purchases' | 'charging_stations' | 'insurance_quotes'
+type Tab = 'contenido' | 'catalogos' | 'usuarios' | 'versiones'
+type ContentTable =
+  'service_entries' | 'trip_logs' | 'part_purchases' | 'charging_stations' | 'insurance_quotes'
 
 export default function ModerationPage() {
   const { user } = useAuth()
-  const [tab, setTab] = useState<Tab>('contenido')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'versiones' ? 'versiones' : 'contenido')
   const [entries, setEntries] = useState<ServiceEntry[]>([])
   const [trips, setTrips] = useState<TripLog[]>([])
   const [purchases, setPurchases] = useState<PartPurchase[]>([])
@@ -47,31 +51,36 @@ export default function ModerationPage() {
     if (!supabase) return
     setLoading(true)
 
-    const [entriesRes, tripsRes, purchasesRes, stationsRes, quotesRes, commentsRes, usersRes] = await Promise.all([
-      supabase
-        .from('service_entries')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false }),
-      supabase.from('trip_logs').select('*').eq('is_public', true).order('created_at', { ascending: false }),
-      supabase
-        .from('part_purchases')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false }),
-      // No is_public column -- charging_stations is public data by nature
-      // (D4 spec), so every row is in scope for moderation.
-      supabase.from('charging_stations').select('*').order('created_at', { ascending: false }),
-      supabase
-        .from('insurance_quotes')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false }),
-      // RLS already restricts this to comments on public content (plus the
-      // moderator's own) -- no extra filter needed.
-      supabase.from('content_comments').select('*').order('created_at', { ascending: false }),
-      supabase.rpc('admin_list_users'),
-    ])
+    const [entriesRes, tripsRes, purchasesRes, stationsRes, quotesRes, commentsRes, usersRes] =
+      await Promise.all([
+        supabase
+          .from('service_entries')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('trip_logs')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('part_purchases')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false }),
+        // No is_public column -- charging_stations is public data by nature
+        // (D4 spec), so every row is in scope for moderation.
+        supabase.from('charging_stations').select('*').order('created_at', { ascending: false }),
+        supabase
+          .from('insurance_quotes')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false }),
+        // RLS already restricts this to comments on public content (plus the
+        // moderator's own) -- no extra filter needed.
+        supabase.from('content_comments').select('*').order('created_at', { ascending: false }),
+        supabase.rpc('admin_list_users'),
+      ])
 
     if (
       entriesRes.error ||
@@ -246,7 +255,15 @@ export default function ModerationPage() {
         >
           Usuarios ({users.length})
         </button>
+        <button
+          className={`${styles.tabBtn} ${tab === 'versiones' ? styles.tabActive : ''}`}
+          onClick={() => setTab('versiones')}
+        >
+          Versiones del auto
+        </button>
       </div>
+
+      {tab === 'versiones' && <CarReleasesAdmin />}
 
       {tab === 'contenido' &&
         (loading ? (
@@ -330,7 +347,11 @@ export default function ModerationPage() {
                             </>
                           )}
                         </div>
-                        <PurchaseThumbnail src={purchase.image_url} alt={purchase.item} link={purchase.link} />
+                        <PurchaseThumbnail
+                          src={purchase.image_url}
+                          alt={purchase.item}
+                          link={purchase.link}
+                        />
                       </div>
                       <div className={listStyles.itemActions}>
                         <button
@@ -412,7 +433,10 @@ export default function ModerationPage() {
               ) : (
                 <ul className={listStyles.list}>
                   {stations.map((station) => (
-                    <li key={station.id} className={`${listStyles.item} ${station.hidden ? styles.hidden : ''}`}>
+                    <li
+                      key={station.id}
+                      className={`${listStyles.item} ${station.hidden ? styles.hidden : ''}`}
+                    >
                       <div>
                         <div className={`${listStyles.itemTitle} ${styles.itemTitleBadges}`}>
                           {station.name}
@@ -421,19 +445,24 @@ export default function ModerationPage() {
                         </div>
                         <div className={listStyles.itemMeta}>
                           {station.network}
-                          {station.city && ` · ${station.city}`} · por {names[station.user_id] ?? 'un usuario'}
+                          {station.city && ` · ${station.city}`} · por{' '}
+                          {names[station.user_id] ?? 'un usuario'}
                         </div>
                       </div>
                       <div className={listStyles.itemActions}>
                         <button
                           className={listStyles.actionLink}
-                          onClick={() => toggleFlag('charging_stations', station.id, 'verified', station.verified)}
+                          onClick={() =>
+                            toggleFlag('charging_stations', station.id, 'verified', station.verified)
+                          }
                         >
                           {station.verified ? 'Quitar verificación' : 'Verificar'}
                         </button>
                         <button
                           className={listStyles.actionLink}
-                          onClick={() => toggleFlag('charging_stations', station.id, 'hidden', station.hidden)}
+                          onClick={() =>
+                            toggleFlag('charging_stations', station.id, 'hidden', station.hidden)
+                          }
                         >
                           {station.hidden ? 'Mostrar' : 'Ocultar'}
                         </button>
@@ -528,8 +557,8 @@ export default function ModerationPage() {
       {tab === 'catalogos' && (
         <>
           <p className={listStyles.empty}>
-            Los adicionales sin límite ("granizo") no piden un valor extra al tildarlos; los de límite en $ o de
-            usos por año revelan un campo opcional al tildarlos, igual que en el formulario de seguros.
+            Los adicionales sin límite ("granizo") no piden un valor extra al tildarlos; los de límite en $ o
+            de usos por año revelan un campo opcional al tildarlos, igual que en el formulario de seguros.
           </p>
           <InsuranceProvidersAdmin />
           <InsuranceAddonsAdmin />

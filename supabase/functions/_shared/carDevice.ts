@@ -98,6 +98,22 @@ export type CarRequest =
     }
   | { action: 'inbox_key'; ts: number; deviceId: string }
   | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
+  | { action: 'charge_draft'; ts: number; deviceId: string; draft: CarChargeDraft }
+  | {
+      action: 'update_check'
+      ts: number
+      deviceId: string
+      report: CarUpdateReport
+      haveSerial: number | null
+    }
+  | {
+      action: 'update_report'
+      ts: number
+      deviceId: string
+      serial: number | null
+      phase: UpdatePhase
+      last: string | null
+    }
   | {
       action: 'diag_put'
       ts: number
@@ -442,6 +458,212 @@ export function parseTripDraft(raw: unknown): CarTripDraft | null {
   }
 }
 
+// ---- Charging check-in drafts (specs/car-charge-checkins.md, PLAN A2): trip_draft with draft.kind = "charge"
+
+export interface CarChargeDraft {
+  kind: 'charge'
+  client_id: string
+  started_at: number
+  ended_at: number
+  status: 'funciono' | 'fallo'
+  lat: number
+  lon: number
+  energy_kwh?: number
+  max_kw?: number
+  avg_kw?: number
+  charging_min?: number
+  start_soc?: number
+  end_soc?: number
+  end_reason?: string
+}
+
+const CHARGE_DRAFT_KEYS = [
+  'kind',
+  'client_id',
+  'started_at',
+  'ended_at',
+  'status',
+  'lat',
+  'lon',
+  'energy_kwh',
+  'max_kw',
+  'avg_kw',
+  'charging_min',
+  'start_soc',
+  'end_soc',
+  'end_reason',
+]
+
+const CHARGE_DRAFT_NUMBERS: [string, number, number, boolean][] = [
+  ['energy_kwh', 0, 200, false],
+  ['max_kw', 0, 400, false],
+  ['avg_kw', 0, 400, false],
+  ['charging_min', 0, 1440, true],
+  ['start_soc', 0, 100, true],
+  ['end_soc', 0, 100, true],
+]
+
+/** Validates a charge check-in draft; null = bad_request. Unknown keys are refused. */
+export function parseChargeDraft(raw: unknown): CarChargeDraft | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+  const o = raw as Record<string, unknown>
+  if (o.kind !== 'charge') return null
+  if (Object.keys(o).some((k) => !CHARGE_DRAFT_KEYS.includes(k))) return null
+  if (typeof o.client_id !== 'string' || !UUID.test(o.client_id)) return null
+  if (!isMs(o.started_at) || !isMs(o.ended_at) || o.ended_at < o.started_at) return null
+  if (o.status !== 'funciono' && o.status !== 'fallo') return null
+  if (!isLat(o.lat) || !isLon(o.lon)) return null
+  const out: Record<string, unknown> = {
+    kind: 'charge',
+    client_id: o.client_id.toLowerCase(),
+    started_at: o.started_at,
+    ended_at: o.ended_at,
+    status: o.status,
+    lat: o.lat,
+    lon: o.lon,
+  }
+  for (const [k, min, max, int] of CHARGE_DRAFT_NUMBERS) {
+    if (o[k] === undefined) continue
+    const v = int ? optInt(o[k], min, max) : optNum(o[k], min, max)
+    if (v == null) return null
+    out[k] = v
+  }
+  if (o.end_reason !== undefined) {
+    if (typeof o.end_reason !== 'string' || !CHARGE_END_REASONS.includes(o.end_reason)) return null
+    out.end_reason = o.end_reason
+  }
+  return out as unknown as CarChargeDraft
+}
+
+// ---- Car updates (specs/car-updates.md): update_check / update_report
+
+export const UPDATE_PHASES = ['IDLE', 'STAGING', 'STAGED', 'APPLYING', 'TRIAL', 'ROLLING_BACK'] as const
+export type UpdatePhase = (typeof UPDATE_PHASES)[number]
+export const UPDATE_LAST_MAX = 300
+export const UPDATE_MAX_PACKAGES = 32
+const PACKAGE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/
+
+export interface CarUpdateReport {
+  channel: 'stable' | 'beta' | null
+  firmware: string | null
+  installed: Record<string, number>
+  phase: UpdatePhase | null
+  last: string | null
+  serial: number | null
+}
+
+function optSerial(v: unknown): number | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v : undefined
+}
+
+function optLast(v: unknown): string | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'string' && [...v].length <= UPDATE_LAST_MAX ? v : undefined
+}
+
+function optPhase(v: unknown): UpdatePhase | null | undefined {
+  if (v === undefined || v === null) return null
+  return typeof v === 'string' && (UPDATE_PHASES as readonly string[]).includes(v)
+    ? (v as UpdatePhase)
+    : undefined
+}
+
+/** The car's side of update_check: what it runs (D7). null = bad_request. */
+export function parseUpdateReport(o: Record<string, unknown>): CarUpdateReport | null {
+  const channel = o.channel ?? null
+  if (channel !== null && channel !== 'stable' && channel !== 'beta') return null
+  const firmware = o.firmware ?? null
+  if (firmware !== null && (typeof firmware !== 'string' || !FW_VERSION.test(firmware))) return null
+  const installedRaw = o.installed ?? {}
+  if (typeof installedRaw !== 'object' || installedRaw === null || Array.isArray(installedRaw)) return null
+  const entries = Object.entries(installedRaw as Record<string, unknown>)
+  if (entries.length > UPDATE_MAX_PACKAGES) return null
+  const installed: Record<string, number> = {}
+  for (const [k, v] of entries) {
+    if (!PACKAGE.test(k) || k.length > 128 || typeof v !== 'number' || !Number.isSafeInteger(v) || v < 0)
+      return null
+    installed[k] = v
+  }
+  const phase = optPhase(o.phase)
+  const last = optLast(o.last)
+  const serial = optSerial(o.serial)
+  if (phase === undefined || last === undefined || serial === undefined) return null
+  return { channel, firmware, installed, phase, last, serial }
+}
+
+/** A release candidate as car_update_check returns it. */
+export interface ReleaseCandidate {
+  serial: number
+  channel: string
+  manifest: string
+  signature: string
+  download_base: string
+  is_kill: boolean
+  percent: number
+  salt: string
+}
+
+function releaseCandidates(v: unknown): ReleaseCandidate[] | null {
+  if (!Array.isArray(v)) return null
+  const out: ReleaseCandidate[] = []
+  for (const item of v) {
+    const r = asRecord(item)
+    if (
+      !r ||
+      typeof r.serial !== 'number' ||
+      typeof r.channel !== 'string' ||
+      typeof r.manifest !== 'string' ||
+      typeof r.signature !== 'string' ||
+      typeof r.download_base !== 'string' ||
+      typeof r.is_kill !== 'boolean' ||
+      typeof r.percent !== 'number' ||
+      typeof r.salt !== 'string'
+    )
+      return null
+    out.push(r as unknown as ReleaseCandidate)
+  }
+  return out
+}
+
+/** Bucket 0..99 of a car for a rollout salt: first two bytes of sha256(salt + ":" + deviceId) mod 100 (updater core Policy.bucket). */
+export async function rolloutBucket(salt: string, deviceId: string): Promise<number> {
+  const h = new Uint8Array(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${deviceId}`))
+  )
+  return ((h[0] << 8) | h[1]) % 100
+}
+
+/**
+ * The release this car should see: candidates come newest first; a kill manifest always applies; a beta car takes any
+ * percent (owner O4); otherwise the first release whose rollout includes the car. null = none.
+ */
+export async function pickRelease(
+  candidates: ReleaseCandidate[],
+  deviceId: string,
+  beta: boolean
+): Promise<ReleaseCandidate | null> {
+  for (const c of candidates) {
+    if (c.is_kill || beta || c.percent >= 100) return c
+    if (c.percent > 0 && (await rolloutBucket(c.salt, deviceId)) < c.percent) return c
+  }
+  return null
+}
+
+const UPDATE_CHECK_KEYS = [
+  'v',
+  'action',
+  'device_id',
+  'ts',
+  'channel',
+  'firmware',
+  'installed',
+  'phase',
+  'last',
+  'serial',
+  'have_serial',
+]
+
 export function isP256Spki(key: unknown): key is string {
   return typeof key === 'string' && P256_SPKI.test(key)
 }
@@ -536,7 +758,8 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
       if (typeof o.id !== 'string' || !UUID.test(o.id)) return null
       if (o.state !== 'done' && o.state !== 'failed') return null
-      if (typeof o.code !== 'string' || !(ORDER_RESULT_CODES as readonly string[]).includes(o.code)) return null
+      if (typeof o.code !== 'string' || !(ORDER_RESULT_CODES as readonly string[]).includes(o.code))
+        return null
       if (typeof o.text !== 'string' || [...o.text].length > ORDER_TEXT_MAX) return null
       return {
         action: 'order_result',
@@ -551,6 +774,12 @@ export function parseCarRequest(text: string): CarRequest | null {
     // Car trip drafts (specs/car-trip-drafts.md): a trip the driver chose to share, stored as a draft.
     case 'trip_draft': {
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      // Charging check-in (specs/car-charge-checkins.md): same outbox and action, a draft of kind "charge".
+      if (asRecord(o.draft)?.kind !== undefined) {
+        const charge = parseChargeDraft(o.draft)
+        if (!charge) return null
+        return { action: 'charge_draft', ts, deviceId: o.device_id.toLowerCase(), draft: charge }
+      }
       const draft = parseTripDraft(o.draft)
       if (!draft) return null
       return { action: 'trip_draft', ts, deviceId: o.device_id.toLowerCase(), draft }
@@ -594,6 +823,23 @@ export function parseCarRequest(text: string): CarRequest | null {
       }
     }
     // Bóveda inbox (specs/vault-onboarding.md Phase C): the owner's inbox public key / ECIES ciphertext upload.
+    // Car updates (specs/car-updates.md R4/R6).
+    case 'update_check': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      if (Object.keys(o).some((k) => !UPDATE_CHECK_KEYS.includes(k))) return null
+      const report = parseUpdateReport(o)
+      const have = optSerial(o.have_serial)
+      if (!report || have === undefined) return null
+      return { action: 'update_check', ts, deviceId: o.device_id.toLowerCase(), report, haveSerial: have }
+    }
+    case 'update_report': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      const serial = optSerial(o.serial)
+      const phase = optPhase(o.phase)
+      const last = optLast(o.last)
+      if (serial === undefined || !phase || last === undefined) return null
+      return { action: 'update_report', ts, deviceId: o.device_id.toLowerCase(), serial, phase, last }
+    }
     case 'inbox_key':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
       return { action: 'inbox_key', ts, deviceId: o.device_id.toLowerCase() }
@@ -798,6 +1044,47 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       )
     }
 
+    if (parsed.action === 'update_check') {
+      const res = await deps.rpc('car_update_check', {
+        p_device_id: parsed.deviceId,
+        p_ts: parsed.ts,
+        p_report: parsed.report,
+      })
+      if (res.error) {
+        log(`update_check failed: ${res.error}`)
+        return fail('server', now)
+      }
+      const row = asRecord(res.data)
+      if (!row) return fail('server', now)
+      if (typeof row.error === 'string') return fail(GUARD_ERRORS[row.error] ?? 'server', now)
+      const candidates = releaseCandidates(row.releases)
+      if (!candidates) {
+        log('update_check: malformed releases')
+        return fail('server', now)
+      }
+      const pick = await pickRelease(candidates, parsed.deviceId, row.beta === true)
+      if (!pick) return reply(200, { ok: true, none: true }, now)
+      const offered = await deps.rpc('car_update_offered', {
+        p_device_id: parsed.deviceId,
+        p_serial: pick.serial,
+      })
+      if (offered.error) log(`car_update_offered failed: ${offered.error}`) // bookkeeping only
+      if (parsed.haveSerial === pick.serial)
+        return reply(200, { ok: true, same: true, serial: pick.serial }, now)
+      return reply(
+        200,
+        {
+          ok: true,
+          serial: pick.serial,
+          channel: pick.channel,
+          manifest: pick.manifest,
+          signature: pick.signature,
+          download_base: pick.download_base,
+        },
+        now
+      )
+    }
+
     if (parsed.action === 'orders' || parsed.action === 'order_result') {
       const orderRes =
         parsed.action === 'orders'
@@ -852,18 +1139,32 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
                 p_ts: parsed.ts,
                 p_draft: parsed.draft,
               })
-            : parsed.action === 'diag_put'
-              ? await deps.rpc('car_submit_diag_part', {
+            : parsed.action === 'charge_draft'
+              ? await deps.rpc('car_submit_charge_draft', {
                   p_device_id: parsed.deviceId,
                   p_ts: parsed.ts,
-                  p_upload_id: parsed.uploadId,
-                  p_part: parsed.part,
-                  p_parts: parsed.parts,
-                  p_note: parsed.note,
-                  p_apps: parsed.apps,
-                  p_data: parsed.data,
+                  p_draft: parsed.draft,
                 })
-              : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+              : parsed.action === 'update_report'
+                ? await deps.rpc('car_update_report', {
+                    p_device_id: parsed.deviceId,
+                    p_ts: parsed.ts,
+                    p_serial: parsed.serial,
+                    p_phase: parsed.phase,
+                    p_last: parsed.last,
+                  })
+                : parsed.action === 'diag_put'
+                  ? await deps.rpc('car_submit_diag_part', {
+                      p_device_id: parsed.deviceId,
+                      p_ts: parsed.ts,
+                      p_upload_id: parsed.uploadId,
+                      p_part: parsed.part,
+                      p_parts: parsed.parts,
+                      p_note: parsed.note,
+                      p_apps: parsed.apps,
+                      p_data: parsed.data,
+                    })
+                  : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
     if (res.error) {
       log(`${parsed.action} failed: ${res.error}`)
       return fail('server', now)
@@ -874,8 +1175,8 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       return fail('server', now)
     }
     if (typeof row.error === 'string') return fail(GUARD_ERRORS[row.error] ?? 'server', now)
-    if (parsed.action === 'unpair') return reply(200, { ok: true }, now)
-    if (parsed.action === 'status' || parsed.action === 'trip_draft')
+    if (parsed.action === 'unpair' || parsed.action === 'update_report') return reply(200, { ok: true }, now)
+    if (parsed.action === 'status' || parsed.action === 'trip_draft' || parsed.action === 'charge_draft')
       return reply(200, { ok: true, stored: row.stored === true }, now)
     if (parsed.action === 'diag_put')
       return reply(

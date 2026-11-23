@@ -8,7 +8,14 @@ import { toFriendlyError } from './errors'
 import type { Tables, TablesInsert } from './database.types'
 
 export type NotificationRow = Tables<'notifications'>
-export type NotificationKind = 'station_failure' | 'comment' | 'reaction' | 'vehicle_trip' | 'vehicle_service'
+export type NotificationKind =
+  | 'station_failure'
+  | 'comment'
+  | 'reaction'
+  | 'vehicle_trip'
+  | 'vehicle_service'
+  | 'car_rollback'
+  | 'car_charge_draft'
 
 export type FollowKind = 'station' | 'trip_log' | 'service_entry' | 'part_purchase'
 export interface FollowTarget {
@@ -29,17 +36,25 @@ export const NOTIFICATION_ICON: Record<NotificationKind, string> = {
   reaction: '👍',
   vehicle_trip: '🚗',
   vehicle_service: '🔧',
+  car_rollback: '↩️',
+  car_charge_draft: '🔌',
 }
 
 // Where tapping a notification goes. Content has no per-item page yet, so
 // it opens the list the item lives in.
-export function notificationLink(n: Pick<NotificationRow, 'kind' | 'part_purchase_id' | 'service_entry_id'>): string {
+export function notificationLink(
+  n: Pick<NotificationRow, 'kind' | 'part_purchase_id' | 'service_entry_id'>
+): string {
   switch (n.kind) {
     case 'station_failure':
       return '/carga'
     case 'vehicle_trip':
     case 'vehicle_service':
       return '/mi-actividad'
+    case 'car_rollback':
+      return '/moderacion?tab=versiones'
+    case 'car_charge_draft':
+      return '/mi-vigo/borradores'
     default:
       if (n.part_purchase_id) return '/repuestos'
       if (n.service_entry_id) return '/costos'
@@ -51,7 +66,9 @@ export function countUnread(rows: Pick<NotificationRow, 'read_at'>[]): number {
   return rows.filter((r) => r.read_at === null).length
 }
 
-export async function fetchNotifications(limit = 50): Promise<{ rows: NotificationRow[]; error: string | null }> {
+export async function fetchNotifications(
+  limit = 50
+): Promise<{ rows: NotificationRow[]; error: string | null }> {
   const client = supabase
   if (!client) return { rows: [], error: null }
   const { data, error } = await client
@@ -171,7 +188,11 @@ function followRow(target: FollowTarget, userId: string): TablesInsert<'content_
   }
 }
 
-export async function setFollow(target: FollowTarget, follow: boolean, userId: string): Promise<{ error: string | null }> {
+export async function setFollow(
+  target: FollowTarget,
+  follow: boolean,
+  userId: string
+): Promise<{ error: string | null }> {
   const client = supabase
   if (!client) return { error: null }
   const column = FOLLOW_COLUMN[target.kind]
