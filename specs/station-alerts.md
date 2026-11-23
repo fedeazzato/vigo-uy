@@ -21,7 +21,7 @@ reportada fuera de servicio hoy" before they drive there.
 - R4 Optional per-user alert: signed-in users tap "🔔 Avisarme si falla" on a
   station (a `content_follows` row); every later "falló" check-in by someone
   else creates an in-site notification "Reportaron una falla en <estación>"
-  (trigger `notify_station_failure`, migration 0055). At most one unread
+  (trigger `notify_station_failure`, migration 0058). At most one unread
   alert per station per 24 h. Delivery and reading: specs/community-notifications.md.
 - R5 No email: the site sends no email of its own (only Supabase's auth OTP).
 
@@ -29,7 +29,7 @@ reportada fuera de servicio hoy" before they drive there.
 
 - `src/lib/stationAlerts.ts`, `src/components/CommunityStations.tsx`,
   `src/components/FollowButton.tsx`
-- `supabase/migrations/0055_notifications.sql` (NOT applied)
+- `supabase/migrations/0058_notifications.sql` (NOT applied)
 
 ## Test plan
 

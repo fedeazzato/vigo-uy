@@ -39,7 +39,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      // Hand-written until `npm run gen:types` runs after migrations 0054/0055 (NOT applied yet).
+      // Hand-written until `npm run gen:types` runs after migrations 0057/0058 (NOT applied yet).
       content_follows: {
         Row: {
           created_at: string

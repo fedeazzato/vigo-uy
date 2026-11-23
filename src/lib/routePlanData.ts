@@ -1,6 +1,6 @@
 // Network side of the route planner (specs/route-plans.md): community trips
 // for the consumption estimate, and the signed-in user's saved plans
-// (route_plans, migration 0054).
+// (route_plans, migration 0057).
 import { supabase } from './supabaseClient'
 import { toFriendlyError } from './errors'
 import type { Json, Tables } from './database.types'

@@ -36,12 +36,12 @@ energy. No paid API is added.
 - R7 Share: "Copiar enlace" copies `#/rutas/planificar?o&d&m&soc&min[&c]`;
   opening it re-plans with current data. Values are clamped on parse.
 - R8 Save: signed-in users can "Guardar plan" into `route_plans` (migration
-  0054, own rows only, 20/day, snapshot jsonb <= 16 KB) and see/delete "Mis
+  0057, own rows only, 20/day, snapshot jsonb <= 16 KB) and see/delete "Mis
   planes", each a share link.
 
 ## Files
 
-- `supabase/migrations/0054_route_plans.sql` (NOT applied)
+- `supabase/migrations/0057_route_plans.sql` (NOT applied)
 - `src/lib/routePlan.ts` (pure), `src/lib/routePlanData.ts` (network)
 - `src/pages/RoutePlannerPage.tsx` + `.module.css`, route in `src/App.tsx`,
   link in `src/pages/RoutesPage.tsx`

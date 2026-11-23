@@ -32,7 +32,7 @@ step and is out of scope here.)
 
 ## Files
 
-- `supabase/migrations/0055_notifications.sql` (NOT applied)
+- `supabase/migrations/0058_notifications.sql` (NOT applied)
 - `src/lib/notifications.ts`, `src/components/FollowButton.tsx`,
   `src/components/ContentReactions.tsx`, `src/components/Layout.tsx` (+ css),
   `src/components/Icon.tsx` (bell), `src/pages/NotificationsPage.tsx` (+ css),
@@ -45,7 +45,7 @@ step and is out of scope here.)
 - `src/lib/notifications.test.ts`: link per kind, unread count, follow keys.
 - `src/pages/NotificationsPage.test.tsx`: empty state, list + link + mark all
   read, delete.
-- After applying 0055 (manual, SQL editor as two users): comment on B's trip as
+- After applying 0058 (manual, SQL editor as two users): comment on B's trip as
   A -> B gets one row; A gets none; like twice -> one unread row; follow a
   station as B, report "fallo" as A -> B notified once in 24 h.
 

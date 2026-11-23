@@ -1,6 +1,6 @@
 // In-site notifications and follows (specs/community-notifications.md,
 // PLAN.md B6; station failure alerts from specs/station-alerts.md, B4).
-// Rows are written only by database triggers (migration 0055); the client
+// Rows are written only by database triggers (migration 0058); the client
 // reads its own, marks them read and deletes them, and manages follows.
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
