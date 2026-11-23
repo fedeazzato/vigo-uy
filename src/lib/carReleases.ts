@@ -217,7 +217,7 @@ export async function fetchReleases(): Promise<{ rows: CarReleaseRow[]; error: s
 export async function fetchCarUpdates(): Promise<{ rows: CarUpdateAdminRow[]; error: string | null }> {
   if (!supabase) return { rows: [], error: null }
   const { data, error } = await supabase.rpc('admin_list_car_updates')
-  return { rows: data ?? [], error: error ? toFriendlyError(error) : null }
+  return { rows: (data ?? []), error: error ? toFriendlyError(error) : null }
 }
 
 export async function publishRelease(args: {
