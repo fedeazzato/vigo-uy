@@ -40,7 +40,7 @@ E3's R3 plus `no_app`. On the page: "Waze no está instalado en el auto o no abr
 - **Mi Vigo** (`accounts_proxy`): `RemoteOrder` parses `navigate` (lat/lon JSON numbers, label re-cleaned to ≤ 80; anything else = kept
   with a problem and answered `car_error`); passes extras `lat`, `lon` (double) and `label` to Copiloto. The log says `navigate`, never
   the destination. `OrderResult` accepts `no_app`.
-- **Copiloto** (`voice_es`, DECISIONS D25): `navigate` checks the "Comandos remotos" switch (`remote_off`) and the shared rate limit
+- **Copiloto** (`voice_es`, DECISIONS D27): `navigate` checks the "Comandos remotos" switch (`remote_off`) and the shared rate limit
   (`busy`), **not** P / speed 0: it only sets a destination, the driver sees the on-screen notice ("Orden remota de Fede: navegando a
   Tata Rivera con Waze") and the bell entry (E3 sender display), and Waze's own screen. It opens `waze://?ll=LAT,LON&navigate=yes`
   (6 decimals, `Locale.ROOT`) with `setPackage("com.waze")` and `NEW_TASK | CLEAR_TOP`, like the voice navigation and Cargadores. Not
