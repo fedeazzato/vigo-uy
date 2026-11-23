@@ -223,6 +223,9 @@ export default function Layout() {
               >
                 Código en GitHub
               </a>
+              <NavLink to="/licencias" className={styles.footerLink}>
+                Licencias
+              </NavLink>
             </div>
             <div className={styles.footerText}>
               Basado en el grupo de WhatsApp

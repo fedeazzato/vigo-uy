@@ -131,6 +131,11 @@ export default function PrepareCarPage() {
               github.com/fedeazzato/vigo-uy/issues
             </a>
           </p>
+          <p>
+            <strong>Licencias:</strong> las apps usan programas y datos de otros proyectos, cada uno con su
+            licencia. Están todos, con su código fuente, en{' '}
+            <a href="#/licencias">Licencias y código fuente</a>.
+          </p>
         </div>
         <label className={styles.accept}>
           <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />

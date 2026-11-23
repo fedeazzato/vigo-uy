@@ -33,6 +33,7 @@ const VaultPage = lazy(() => import('./pages/VaultPage'))
 const PrepareCarPage = lazy(() => import('./pages/PrepareCarPage'))
 const CarDraftsPage = lazy(() => import('./pages/CarDraftsPage'))
 const CarDiagnosticsPage = lazy(() => import('./pages/CarDiagnosticsPage'))
+const LicencesPage = lazy(() => import('./pages/LicencesPage'))
 
 export default function App() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="accesorios" element={<AccessoriesPage />} />
           <Route path="tecnologia" element={<TechPage />} />
           <Route path="faq" element={<FaqPage />} />
+          <Route path="licencias" element={<LicencesPage />} />
           <Route path="login" element={<LoginPage />} />
           {/* Publicly readable since Phase 6 (anon RLS policies); submitting still requires auth. */}
           <Route path="comunidad" element={<CommunityFeedPage />} />

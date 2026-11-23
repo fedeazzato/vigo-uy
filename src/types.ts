@@ -600,3 +600,30 @@ export type CarTripDraftRow = Tables['car_trip_drafts']['Row']
 // A diagnostic sent from the linked car (specs/car-diagnostics.md R3); apps is the jsonb per-app summary of part 0.
 export type CarDiagnosticRow = Tables['car_diagnostics']['Row']
 export type CarDiagnosticPartRow = Tables['car_diagnostic_parts']['Row']
+
+// Licences page (specs/licences-and-sources.md): third-party parts of the car apps and the installer.
+export interface LicenceComponent {
+  name: string
+  version: string
+  licence: string
+  licenceUrl: string
+  sourceUrl: string
+  changes: string
+  /** GPL code: the page must offer the corresponding source. */
+  gpl?: boolean
+  /** Open RAIL-M weights: the use restrictions must travel with the voice. */
+  restrictions?: boolean
+}
+
+export interface LicenceGroup {
+  id: string
+  title: string
+  icon: string
+  intro: string
+  components: LicenceComponent[]
+}
+
+export interface LicencesData {
+  updated: string
+  groups: LicenceGroup[]
+}
