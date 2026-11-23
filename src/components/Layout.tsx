@@ -13,6 +13,7 @@ import styles from './Layout.module.css'
 import { useUserPrefs, COLOR_HEX, COLOR_BORDER, COLOR_DARK_TEXT } from '../context/UserPrefsContext'
 import type { EffectiveTheme } from '../context/UserPrefsContext'
 import { useAuth } from '../context/AuthContext'
+import { useUnreadNotifications } from '../lib/notifications'
 import { RegisterSheetContext } from '../context/RegisterSheetContext'
 
 // The car launcher-tile brand mark (public/favicon.svg, made by scripts/make-brand-icon.cjs).
@@ -91,6 +92,9 @@ function SheetLink({
 export default function Layout() {
   const { model, color, effectiveTheme, setTheme } = useUserPrefs()
   const { user, profile, status, signOut } = useAuth()
+  const unreadNotifications = useUnreadNotifications(status === 'signedIn' ? (user?.id ?? null) : null)
+  const bellLabel =
+    unreadNotifications > 0 ? `Notificaciones (${unreadNotifications} sin leer)` : 'Notificaciones'
   const [sheetOpen, setSheetOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -180,6 +184,12 @@ export default function Layout() {
           </nav>
 
           <div className={styles.sidebarFooter}>
+            {status === 'signedIn' && (
+              <NavLink to="/notificaciones" className={styles.footerLink} aria-label={bellLabel}>
+                🔔 Notificaciones
+                {unreadNotifications > 0 && <span className={styles.bellCount}>{unreadNotifications}</span>}
+              </NavLink>
+            )}
             {status === 'signedIn' ? (
               <div className={styles.accountRow}>
                 <span className={styles.accountEmail} title={user?.email}>
@@ -250,6 +260,14 @@ export default function Layout() {
               >
                 <Icon name="search" size={22} />
               </button>
+              {status === 'signedIn' && (
+                <Link to="/notificaciones" className={styles.headerButton} title="Notificaciones" aria-label={bellLabel}>
+                  <span className={styles.bellWrap}>
+                    <Icon name="bell" size={22} />
+                    {unreadNotifications > 0 && <span className={styles.bellDot} aria-hidden="true" />}
+                  </span>
+                </Link>
+              )}
               <a
                 href="https://forms.gle/SiNjQ77d71bUHvJ96"
                 target="_blank"

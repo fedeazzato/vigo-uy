@@ -1,0 +1,79 @@
+.back {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.legs {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+}
+.legs li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.legs li:last-child {
+  border-bottom: none;
+}
+
+.legPlace {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.legMeta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.map {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.routeLine {
+  stroke: var(--text-secondary);
+}
+
+.note {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.plans {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.plans li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+}

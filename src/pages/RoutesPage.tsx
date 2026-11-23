@@ -98,6 +98,11 @@ export default function RoutesPage() {
     <div>
       <PageHeader title="🗺️ Rutas" subtitle="Guía de viajes con paradas de carga verificadas por el grupo." />
 
+      <Alert type="info">
+        🧭 <Link to="/rutas/planificar">Planificá tu viaje</Link>: te sugerimos dónde cargar según el consumo real de
+        la comunidad.
+      </Alert>
+
       {communityFirst ? (
         <>
           {communityBlock}

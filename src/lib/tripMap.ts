@@ -80,3 +80,9 @@ export function resolveTripMapPoints(trip: TripLog, stations: ChargingStation[])
     unresolvedDestination: destination ? null : trip.destination,
   }
 }
+
+// [lat, lng] of a curated city (accent/case-insensitive), or null. Shared
+// with the route planner (src/lib/routePlan.ts).
+export function lookupCityCoords(cityName: string): [number, number] | null {
+  return foldedCityCoordinates.get(foldAccents(cityName.trim())) ?? null
+}
