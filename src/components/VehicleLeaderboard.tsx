@@ -14,11 +14,13 @@ function memberLabel(names: string[]): string {
 interface VehicleLeaderboardProps {
   rows: VehicleLeaderboardEntry[]
   compact?: boolean
+  /** A3: vehicles whose km the car verified (opted in), vehicle_id -> odometer km. */
+  verified?: Map<string, number>
 }
 
 // CSS-only horizontal bar ranking of vehicles by total public km.
 // Rows arrive already ordered by total_km desc (vehicle_km_leaderboard view).
-export default function VehicleLeaderboard({ rows, compact = false }: VehicleLeaderboardProps) {
+export default function VehicleLeaderboard({ rows, compact = false, verified }: VehicleLeaderboardProps) {
   const withKm = rows.filter((r) => r.total_km > 0)
   const shown = compact ? withKm : [...withKm, ...rows.filter((r) => r.total_km === 0)]
   const maxKm = withKm[0]?.total_km ?? 0
@@ -38,6 +40,14 @@ export default function VehicleLeaderboard({ rows, compact = false }: VehicleLea
           <div className={styles.info}>
             <div className={styles.nameRow}>
               <span className={styles.name}>{memberLabel(row.member_names)}</span>
+              {verified?.has(row.vehicle_id) && (
+                <span
+                  className={styles.verified}
+                  title={`Odómetro informado por el auto: ${verified.get(row.vehicle_id)?.toLocaleString('es-UY')} km`}
+                >
+                  ✓ km verificados por el auto
+                </span>
+              )}
             </div>
             <div className={styles.barTrack} aria-hidden="true">
               <div

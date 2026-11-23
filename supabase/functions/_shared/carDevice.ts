@@ -99,6 +99,7 @@ export type CarRequest =
   | { action: 'inbox_key'; ts: number; deviceId: string }
   | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
   | { action: 'charge_draft'; ts: number; deviceId: string; draft: CarChargeDraft }
+  | { action: 'car_data'; ts: number; deviceId: string; draft: CarData }
   | {
       action: 'update_check'
       ts: number
@@ -535,6 +536,81 @@ export function parseChargeDraft(raw: unknown): CarChargeDraft | null {
   return out as unknown as CarChargeDraft
 }
 
+// ---- Car data (specs/car-data-a3-a9.md, PLAN A5/A6/A7/A9): trip_draft with draft.kind = battery | drive | fault
+
+export const DATA_KINDS = ['battery', 'drive', 'fault'] as const
+export type CarDataKind = (typeof DATA_KINDS)[number]
+export const FAULT_SOURCES = ['cluster', 'tpms', 'charge', 'traction'] as const
+const FAULT_CODE = /^[a-z0-9_]{1,40}$/
+const INT32_MIN = -2147483648
+const INT32_MAX = 2147483647
+
+/** Validated car data sample; the shape is the wire object itself (kind + the keys below). */
+export type CarData = { kind: CarDataKind; client_id: string } & Record<string, string | number>
+
+// [key, min, max, integer]
+const DATA_NUMBERS: Record<CarDataKind, [string, number, number, boolean][]> = {
+  battery: [
+    ['energy_kwh', 0.5, 200, false],
+    ['start_soc', 0, 100, true],
+    ['end_soc', 0, 100, true],
+    ['temp_c', -40, 70, true],
+    ['odometer_km', 0, ODOMETER_MAX, true],
+  ],
+  drive: [
+    ['distance_km', 0.5, 2000, false],
+    ['energy_kwh', 0, 200, false],
+    ['avg_speed_kmh', 0, 200, false],
+    ['temp_c', -40, 70, true],
+    ['regen_kwh', 0, 200, false],
+    ['brake_events', 0, 10000, true],
+    ['regen_pct', 0, 100, false],
+  ],
+  fault: [
+    ['value', INT32_MIN, INT32_MAX, true],
+    ['odometer_km', 0, ODOMETER_MAX, true],
+  ],
+}
+const DATA_REQUIRED: Record<CarDataKind, string[]> = {
+  battery: ['energy_kwh', 'start_soc', 'end_soc'],
+  drive: ['distance_km'],
+  fault: ['value'],
+}
+
+/** Validates a battery / drive / fault sample; null = bad_request. Unknown keys are refused. */
+export function parseCarData(raw: unknown): CarData | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+  const o = raw as Record<string, unknown>
+  const kind = o.kind as CarDataKind
+  if (!DATA_KINDS.includes(kind)) return null
+  const times = kind === 'fault' ? ['observed_at'] : ['started_at', 'ended_at']
+  const strings = kind === 'fault' ? ['source', 'code'] : []
+  const allowed = ['kind', 'client_id', ...times, ...strings, ...DATA_NUMBERS[kind].map((n) => n[0])]
+  if (Object.keys(o).some((k) => !allowed.includes(k))) return null
+  if (typeof o.client_id !== 'string' || !UUID.test(o.client_id)) return null
+  const out: Record<string, string | number> = { kind, client_id: o.client_id.toLowerCase() }
+  for (const t of times) {
+    if (!isMs(o[t])) return null
+    out[t] = o[t]
+  }
+  if (kind !== 'fault' && (out.ended_at as number) < (out.started_at as number)) return null
+  if (kind === 'fault') {
+    if (typeof o.source !== 'string' || !(FAULT_SOURCES as readonly string[]).includes(o.source)) return null
+    if (typeof o.code !== 'string' || !FAULT_CODE.test(o.code)) return null
+    out.source = o.source
+    out.code = o.code
+  }
+  for (const [k, min, max, int] of DATA_NUMBERS[kind]) {
+    if (o[k] === undefined) continue
+    const v = int ? optInt(o[k], min, max) : optNum(o[k], min, max)
+    if (v == null) return null
+    out[k] = v
+  }
+  if (DATA_REQUIRED[kind].some((k) => out[k] === undefined)) return null
+  if (kind === 'battery' && (out.end_soc as number) <= (out.start_soc as number)) return null
+  if (kind === 'drive' && out.energy_kwh === undefined && out.regen_kwh === undefined) return null
+  return out as CarData
+}
 // ---- Car updates (specs/car-updates.md): update_check / update_report
 
 export const UPDATE_PHASES = ['IDLE', 'STAGING', 'STAGED', 'APPLYING', 'TRIAL', 'ROLLING_BACK'] as const
@@ -775,6 +851,13 @@ export function parseCarRequest(text: string): CarRequest | null {
     case 'trip_draft': {
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
       // Charging check-in (specs/car-charge-checkins.md): same outbox and action, a draft of kind "charge".
+      // Car data samples (specs/car-data-a3-a9.md): kinds battery / drive / fault, same outbox and action.
+      const dataKind = asRecord(o.draft)?.kind
+      if (typeof dataKind === 'string' && (DATA_KINDS as readonly string[]).includes(dataKind)) {
+        const data = parseCarData(o.draft)
+        if (!data) return null
+        return { action: 'car_data', ts, deviceId: o.device_id.toLowerCase(), draft: data }
+      }
       if (asRecord(o.draft)?.kind !== undefined) {
         const charge = parseChargeDraft(o.draft)
         if (!charge) return null
@@ -1139,32 +1222,38 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
                 p_ts: parsed.ts,
                 p_draft: parsed.draft,
               })
-            : parsed.action === 'charge_draft'
-              ? await deps.rpc('car_submit_charge_draft', {
+            : parsed.action === 'car_data'
+              ? await deps.rpc('car_submit_data', {
                   p_device_id: parsed.deviceId,
                   p_ts: parsed.ts,
                   p_draft: parsed.draft,
                 })
-              : parsed.action === 'update_report'
-                ? await deps.rpc('car_update_report', {
+              : parsed.action === 'charge_draft'
+                ? await deps.rpc('car_submit_charge_draft', {
                     p_device_id: parsed.deviceId,
                     p_ts: parsed.ts,
-                    p_serial: parsed.serial,
-                    p_phase: parsed.phase,
-                    p_last: parsed.last,
+                    p_draft: parsed.draft,
                   })
-                : parsed.action === 'diag_put'
-                  ? await deps.rpc('car_submit_diag_part', {
+                : parsed.action === 'update_report'
+                  ? await deps.rpc('car_update_report', {
                       p_device_id: parsed.deviceId,
                       p_ts: parsed.ts,
-                      p_upload_id: parsed.uploadId,
-                      p_part: parsed.part,
-                      p_parts: parsed.parts,
-                      p_note: parsed.note,
-                      p_apps: parsed.apps,
-                      p_data: parsed.data,
+                      p_serial: parsed.serial,
+                      p_phase: parsed.phase,
+                      p_last: parsed.last,
                     })
-                  : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
+                  : parsed.action === 'diag_put'
+                    ? await deps.rpc('car_submit_diag_part', {
+                        p_device_id: parsed.deviceId,
+                        p_ts: parsed.ts,
+                        p_upload_id: parsed.uploadId,
+                        p_part: parsed.part,
+                        p_parts: parsed.parts,
+                        p_note: parsed.note,
+                        p_apps: parsed.apps,
+                        p_data: parsed.data,
+                      })
+                    : await deps.rpc('car_unpair', { p_device_id: parsed.deviceId, p_ts: parsed.ts })
     if (res.error) {
       log(`${parsed.action} failed: ${res.error}`)
       return fail('server', now)
@@ -1176,7 +1265,12 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
     }
     if (typeof row.error === 'string') return fail(GUARD_ERRORS[row.error] ?? 'server', now)
     if (parsed.action === 'unpair' || parsed.action === 'update_report') return reply(200, { ok: true }, now)
-    if (parsed.action === 'status' || parsed.action === 'trip_draft' || parsed.action === 'charge_draft')
+    if (
+      parsed.action === 'status' ||
+      parsed.action === 'trip_draft' ||
+      parsed.action === 'charge_draft' ||
+      parsed.action === 'car_data'
+    )
       return reply(200, { ok: true, stored: row.stored === true }, now)
     if (parsed.action === 'diag_put')
       return reply(

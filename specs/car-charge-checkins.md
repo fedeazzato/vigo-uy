@@ -45,9 +45,8 @@ current) become "falló" drafts and, once confirmed, feed B4 station alerts.
 
 ## Owner decisions (open)
 
-- O-A1 Carga's switch "Proponer check-ins en estaciones de WikiVigo" is ON by default: every charge with a GPS fix (home
-  charges too) sends its position to the server for the 100 m match; the server keeps only a matched station. Default
-  on, or opt-in?
+- O-A1 DECIDED 2026-11-23 by the owner: Carga's switch "Proponer check-ins en estaciones de WikiVigo" is OFF by default (opt-in). When on, every charge with a GPS fix (home
+  charges too) sends its position to the server for the 100 m match; the server keeps only a matched station.
 - O-A2 Thresholds: "funcionó" when ≥ 0.5 kWh or ≥ 5 min charging; "falló" when the cable was in 3–60 min with no current.
 - O-A3 100 m match radius (stations with imprecise coordinates may need more).
 - O-A4 Notify members of each new draft (D5), or only show the Mi Vigo card?

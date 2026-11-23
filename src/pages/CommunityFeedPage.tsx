@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, Alert, Badge, StatGrid, SectionDivider, Skeleton, Segmented } from '../components/UI'
+import {
+  PageHeader,
+  Card,
+  Alert,
+  Badge,
+  StatGrid,
+  SectionDivider,
+  Skeleton,
+  Segmented,
+} from '../components/UI'
 import { TripDetail, TripSummaryButton } from '../components/TripCard'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'
+import CommunityCarData from '../components/CommunityCarData'
+import { fetchVerifiedKm } from '../lib/carData'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
@@ -78,6 +89,7 @@ export default function CommunityFeedPage() {
   })
   const [stats, setStats] = useState<StatItem[]>([])
   const [leaderboard, setLeaderboard] = useState<VehicleLeaderboardEntry[]>([])
+  const [verifiedKm, setVerifiedKm] = useState<Map<string, number>>(new Map())
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('todos')
   const [modelFilter, setModelFilter] = useState<ModelFilter>('todos')
@@ -103,13 +115,21 @@ export default function CommunityFeedPage() {
     })
 
     void fetchLeaderboard().then(({ rows }) => setLeaderboard(rows))
+    void fetchVerifiedKm().then((rows) =>
+      setVerifiedKm(new Map(rows.map((r) => [r.vehicle_id, r.odometer_km])))
+    )
   }, [])
 
   const filteredTrips = useMemo(() => {
     const q = query.trim().toLowerCase()
     const result = trips.filter((trip) => {
       if (modelFilter !== 'todos' && trip.model !== modelFilter) return false
-      if (q && ![...TRIP_KEYWORDS, trip.title, trip.origin, trip.destination].some((f) => f.toLowerCase().includes(q)))
+      if (
+        q &&
+        ![...TRIP_KEYWORDS, trip.title, trip.origin, trip.destination].some((f) =>
+          f.toLowerCase().includes(q)
+        )
+      )
         return false
       return true
     })
@@ -229,10 +249,12 @@ export default function CommunityFeedPage() {
           <SectionDivider label="Ranking de kilómetros" />
           <Card>
             <h2 className={listStyles.sectionTitle}>🏁 Vehículos con más km compartidos</h2>
-            <VehicleLeaderboard rows={leaderboard} />
+            <VehicleLeaderboard rows={leaderboard} verified={verifiedKm} />
           </Card>
         </>
       )}
+
+      <CommunityCarData />
 
       <SectionDivider label="Aportes de la comunidad" />
 
