@@ -56,7 +56,7 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
-          capacity_kwh?: never
+          capacity_kwh?: number | null
           client_id: string
           device_id?: string | null
           end_soc: number
@@ -71,7 +71,7 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
-          capacity_kwh?: never
+          capacity_kwh?: number | null
           client_id?: string
           device_id?: string | null
           end_soc?: number
@@ -85,151 +85,29 @@ export type Database = {
           temp_c?: number | null
           vehicle_id?: string
         }
-        Relationships: []
-      }
-      car_drive_samples: {
-        Row: {
-          avg_speed_kmh: number | null
-          brake_events: number | null
-          client_id: string
-          device_id: string | null
-          distance_km: number
-          ended_at: string
-          energy_kwh: number | null
-          id: string
-          received_at: string
-          regen_kwh: number | null
-          regen_pct: number | null
-          started_at: string
-          temp_c: number | null
-          vehicle_id: string
-        }
-        Insert: {
-          avg_speed_kmh?: number | null
-          brake_events?: number | null
-          client_id: string
-          device_id?: string | null
-          distance_km: number
-          ended_at: string
-          energy_kwh?: number | null
-          id?: string
-          received_at?: string
-          regen_kwh?: number | null
-          regen_pct?: number | null
-          started_at: string
-          temp_c?: number | null
-          vehicle_id: string
-        }
-        Update: {
-          avg_speed_kmh?: number | null
-          brake_events?: number | null
-          client_id?: string
-          device_id?: string | null
-          distance_km?: number
-          ended_at?: string
-          energy_kwh?: number | null
-          id?: string
-          received_at?: string
-          regen_kwh?: number | null
-          regen_pct?: number | null
-          started_at?: string
-          temp_c?: number | null
-          vehicle_id?: string
-        }
-        Relationships: []
-      }
-      car_fault_events: {
-        Row: {
-          client_id: string
-          code: string
-          device_id: string | null
-          id: string
-          observed_at: string
-          odometer_km: number | null
-          received_at: string
-          source: string
-          value: number
-          vehicle_id: string
-        }
-        Insert: {
-          client_id: string
-          code: string
-          device_id?: string | null
-          id?: string
-          observed_at: string
-          odometer_km?: number | null
-          received_at?: string
-          source: string
-          value: number
-          vehicle_id: string
-        }
-        Update: {
-          client_id?: string
-          code?: string
-          device_id?: string | null
-          id?: string
-          observed_at?: string
-          odometer_km?: number | null
-          received_at?: string
-          source?: string
-          value?: number
-          vehicle_id?: string
-        }
-        Relationships: []
-      }
-      car_odometer_log: {
-        Row: {
-          anomaly: boolean
-          day: string
-          odometer_km: number
-          vehicle_id: string
-        }
-        Insert: {
-          anomaly?: boolean
-          day: string
-          odometer_km: number
-          vehicle_id: string
-        }
-        Update: {
-          anomaly?: boolean
-          day?: string
-          odometer_km?: number
-          vehicle_id?: string
-        }
-        Relationships: []
-      }
-      vehicle_data_sharing: {
-        Row: {
-          battery_community: boolean
-          consumption_atlas: boolean
-          eco_league: boolean
-          fault_matching: boolean
-          updated_at: string
-          updated_by: string | null
-          vehicle_id: string
-          verified_km_public: boolean
-        }
-        Insert: {
-          battery_community?: boolean
-          consumption_atlas?: boolean
-          eco_league?: boolean
-          fault_matching?: boolean
-          updated_at?: string
-          updated_by?: string | null
-          vehicle_id: string
-          verified_km_public?: boolean
-        }
-        Update: {
-          battery_community?: boolean
-          consumption_atlas?: boolean
-          eco_league?: boolean
-          fault_matching?: boolean
-          updated_at?: string
-          updated_by?: string | null
-          vehicle_id?: string
-          verified_km_public?: boolean
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "car_battery_samples_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_battery_samples_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_battery_samples_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       car_charge_drafts: {
         Row: {
@@ -482,6 +360,176 @@ export type Database = {
           },
           {
             foreignKeyName: "car_diagnostics_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_drive_samples: {
+        Row: {
+          avg_speed_kmh: number | null
+          brake_events: number | null
+          client_id: string
+          device_id: string | null
+          distance_km: number
+          ended_at: string
+          energy_kwh: number | null
+          id: string
+          received_at: string
+          regen_kwh: number | null
+          regen_pct: number | null
+          started_at: string
+          temp_c: number | null
+          vehicle_id: string
+        }
+        Insert: {
+          avg_speed_kmh?: number | null
+          brake_events?: number | null
+          client_id: string
+          device_id?: string | null
+          distance_km: number
+          ended_at: string
+          energy_kwh?: number | null
+          id?: string
+          received_at?: string
+          regen_kwh?: number | null
+          regen_pct?: number | null
+          started_at: string
+          temp_c?: number | null
+          vehicle_id: string
+        }
+        Update: {
+          avg_speed_kmh?: number | null
+          brake_events?: number | null
+          client_id?: string
+          device_id?: string | null
+          distance_km?: number
+          ended_at?: string
+          energy_kwh?: number | null
+          id?: string
+          received_at?: string
+          regen_kwh?: number | null
+          regen_pct?: number | null
+          started_at?: string
+          temp_c?: number | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_drive_samples_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_drive_samples_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_drive_samples_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_fault_events: {
+        Row: {
+          client_id: string
+          code: string
+          device_id: string | null
+          id: string
+          observed_at: string
+          odometer_km: number | null
+          received_at: string
+          source: string
+          value: number
+          vehicle_id: string
+        }
+        Insert: {
+          client_id: string
+          code: string
+          device_id?: string | null
+          id?: string
+          observed_at: string
+          odometer_km?: number | null
+          received_at?: string
+          source: string
+          value: number
+          vehicle_id: string
+        }
+        Update: {
+          client_id?: string
+          code?: string
+          device_id?: string | null
+          id?: string
+          observed_at?: string
+          odometer_km?: number | null
+          received_at?: string
+          source?: string
+          value?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_fault_events_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_fault_events_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_fault_events_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_odometer_log: {
+        Row: {
+          anomaly: boolean
+          day: string
+          odometer_km: number
+          vehicle_id: string
+        }
+        Insert: {
+          anomaly?: boolean
+          day: string
+          odometer_km: number
+          vehicle_id: string
+        }
+        Update: {
+          anomaly?: boolean
+          day?: string
+          odometer_km?: number
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_odometer_log_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_odometer_log_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2064,6 +2112,54 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_data_sharing: {
+        Row: {
+          battery_community: boolean
+          consumption_atlas: boolean
+          eco_league: boolean
+          fault_matching: boolean
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string
+          verified_km_public: boolean
+        }
+        Insert: {
+          battery_community?: boolean
+          consumption_atlas?: boolean
+          eco_league?: boolean
+          fault_matching?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id: string
+          verified_km_public?: boolean
+        }
+        Update: {
+          battery_community?: boolean
+          consumption_atlas?: boolean
+          eco_league?: boolean
+          fault_matching?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string
+          verified_km_public?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_data_sharing_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "vehicle_data_sharing_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_members: {
         Row: {
           car_role: string
@@ -2344,6 +2440,16 @@ export type Database = {
         Returns: undefined
       }
       assert_moderator: { Args: never; Returns: undefined }
+      battery_health_community: {
+        Args: never
+        Returns: {
+          km_band: number
+          median_capacity_kwh: number
+          model: string
+          vehicles: number
+        }[]
+      }
+      can_control_car: { Args: { p_vehicle_id: string }; Returns: boolean }
       can_read_car_diagnostic: {
         Args: { p_vehicle_id: string }
         Returns: boolean
@@ -2360,19 +2466,6 @@ export type Database = {
         Returns: {
           member_names: string[]
           vehicle_id: string
-        }[]
-      }
-      can_control_car: { Args: { p_vehicle_id: string }; Returns: boolean }
-      my_car_role: { Args: never; Returns: string }
-      set_vehicle_member_role: { Args: { p_role: string; p_user: string }; Returns: undefined }
-      car_release_notes: {
-        Args: { p_limit?: number }
-        Returns: {
-          apps: Json
-          note: string | null
-          notices: Json
-          published_at: string
-          serial: number
         }[]
       }
       car_firmware_versions: {
@@ -2415,6 +2508,16 @@ export type Database = {
         Args: { p_device_id: string; p_live: Json; p_ts: number }
         Returns: Json
       }
+      car_release_notes: {
+        Args: { p_limit?: number }
+        Returns: {
+          apps: Json
+          note: string
+          notices: Json
+          published_at: string
+          serial: number
+        }[]
+      }
       car_store_status: {
         Args: {
           p_device_id: string
@@ -2425,6 +2528,10 @@ export type Database = {
         Returns: Json
       }
       car_submit_charge_draft: {
+        Args: { p_device_id: string; p_draft: Json; p_ts: number }
+        Returns: Json
+      }
+      car_submit_data: {
         Args: { p_device_id: string; p_draft: Json; p_ts: number }
         Returns: Json
       }
@@ -2497,14 +2604,36 @@ export type Database = {
         Args: { p_vehicle_id: string }
         Returns: Json
       }
-      battery_health_community: {
-        Args: never
-        Returns: { km_band: number; median_capacity_kwh: number; model: string; vehicles: number }[]
+      claim_car_pairing: {
+        Args: { p_code: string; p_name?: string }
+        Returns: Json
+      }
+      cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
+      confirm_car_charge_draft: {
+        Args: { p_id: string; p_note?: string; p_status?: string }
+        Returns: string
       }
       consumption_atlas: {
         Args: never
-        Returns: { bucket: string; dimension: string; km: number; kwh_per_100km: number; trips: number; vehicles: number }[]
+        Returns: {
+          bucket: string
+          dimension: string
+          km: number
+          kwh_per_100km: number
+          trips: number
+          vehicles: number
+        }[]
       }
+      content_target: {
+        Args: { p_purchase: string; p_service: string; p_trip: string }
+        Returns: Record<string, unknown>
+      }
+      create_car_order: {
+        Args: { p_args: Json; p_kind: string }
+        Returns: Json
+      }
+      current_user_vehicle_id: { Args: never; Returns: string }
+      delete_my_car_data: { Args: { p_kind: string }; Returns: number }
       eco_league: {
         Args: { p_month?: string }
         Returns: {
@@ -2518,38 +2647,12 @@ export type Database = {
       }
       fault_code_counts: {
         Args: never
-        Returns: { code: string; source: string; vehicles: number }[]
-      }
-      delete_my_car_data: { Args: { p_kind: string }; Returns: number }
-      set_vehicle_data_sharing: { Args: { p_key: string; p_on: boolean }; Returns: undefined }
-      verified_km_leaderboard: {
-        Args: never
         Returns: {
-          km_verified: number
-          member_names: string[]
-          odometer_km: number
-          vehicle_id: string
-          verified_since: string
+          code: string
+          source: string
+          vehicles: number
         }[]
       }
-      claim_car_pairing: {
-        Args: { p_code: string; p_name?: string }
-        Returns: Json
-      }
-      cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
-      confirm_car_charge_draft: {
-        Args: { p_id: string; p_note?: string; p_status?: string }
-        Returns: string
-      }
-      content_target: {
-        Args: { p_purchase: string; p_service: string; p_trip: string }
-        Returns: Record<string, unknown>
-      }
-      create_car_order: {
-        Args: { p_args: Json; p_kind: string }
-        Returns: Json
-      }
-      current_user_vehicle_id: { Args: never; Returns: string }
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
@@ -2561,6 +2664,7 @@ export type Database = {
         Args: { p_ids?: string[] }
         Returns: undefined
       }
+      my_car_role: { Args: never; Returns: string }
       ocm_tiles_begin: {
         Args: { p_can_fetch?: boolean; p_client: string; p_tiles: string[] }
         Returns: Json
@@ -2593,7 +2697,30 @@ export type Database = {
           title: string
         }[]
       }
+      set_vehicle_data_sharing: {
+        Args: { p_key: string; p_on: boolean }
+        Returns: undefined
+      }
+      set_vehicle_member_role: {
+        Args: { p_role: string; p_user: string }
+        Returns: undefined
+      }
       unaccent: { Args: { "": string }; Returns: string }
+      vehicle_member_names: { Args: { p_vehicle: string }; Returns: string[] }
+      vehicle_shares: {
+        Args: { p_key: string; p_vehicle: string }
+        Returns: boolean
+      }
+      verified_km_leaderboard: {
+        Args: never
+        Returns: {
+          km_verified: number
+          member_names: string[]
+          odometer_km: number
+          vehicle_id: string
+          verified_since: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
