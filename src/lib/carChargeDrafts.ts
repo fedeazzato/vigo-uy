@@ -40,7 +40,7 @@ export async function confirmChargeDraft(
   const { error } = await supabase.rpc('confirm_car_charge_draft', {
     p_id: id,
     p_status: status,
-    p_note: note.trim() || null,
+    p_note: note.trim() || undefined, // omitted = SQL default null
   })
   return error ? toFriendlyError(error) : null
 }

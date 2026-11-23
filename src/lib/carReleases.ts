@@ -240,7 +240,8 @@ export async function publishRelease(args: {
 
 export async function setReleaseCap(id: string, cap: number | null): Promise<string | null> {
   if (!supabase) return 'Sin conexión con el servidor.'
-  const { error } = await supabase.rpc('admin_set_car_release_cap', { p_release: id, p_cap: cap })
+  // null = no cap; the generated RPC arg type omits null
+  const { error } = await supabase.rpc('admin_set_car_release_cap', { p_release: id, p_cap: cap as number })
   return error ? toFriendlyError(error) : null
 }
 

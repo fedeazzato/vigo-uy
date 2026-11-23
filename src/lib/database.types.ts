@@ -39,6 +39,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      car_charge_drafts: {
+        Row: {
+          avg_kw: number | null
+          charging_min: number | null
+          client_id: string
+          device_id: string | null
+          distance_m: number
+          end_reason: string | null
+          end_soc: number | null
+          ended_at: string
+          energy_kwh: number | null
+          id: string
+          max_kw: number | null
+          received_at: string
+          report_id: string | null
+          result: string
+          start_soc: number | null
+          started_at: string
+          station_id: string
+          status: string
+          vehicle_id: string
+        }
+        Insert: {
+          avg_kw?: number | null
+          charging_min?: number | null
+          client_id: string
+          device_id?: string | null
+          distance_m: number
+          end_reason?: string | null
+          end_soc?: number | null
+          ended_at: string
+          energy_kwh?: number | null
+          id?: string
+          max_kw?: number | null
+          received_at?: string
+          report_id?: string | null
+          result: string
+          start_soc?: number | null
+          started_at: string
+          station_id: string
+          status?: string
+          vehicle_id: string
+        }
+        Update: {
+          avg_kw?: number | null
+          charging_min?: number | null
+          client_id?: string
+          device_id?: string | null
+          distance_m?: number
+          end_reason?: string | null
+          end_soc?: number | null
+          ended_at?: string
+          energy_kwh?: number | null
+          id?: string
+          max_kw?: number | null
+          received_at?: string
+          report_id?: string | null
+          result?: string
+          start_soc?: number | null
+          started_at?: string
+          station_id?: string
+          status?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_charge_drafts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_charge_drafts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "station_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_charge_drafts_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_charge_drafts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_charge_drafts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_devices: {
         Row: {
           app_version: string | null
@@ -338,6 +440,57 @@ export type Database = {
           },
         ]
       }
+      car_releases: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          download_base: string
+          expires_at: string
+          id: string
+          is_kill: boolean
+          manifest: string
+          note: string | null
+          rollout_cap: number | null
+          rollout_percent: number
+          rollout_salt: string
+          serial: number
+          signature: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          download_base: string
+          expires_at: string
+          id?: string
+          is_kill: boolean
+          manifest: string
+          note?: string | null
+          rollout_cap?: number | null
+          rollout_percent: number
+          rollout_salt: string
+          serial: number
+          signature: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          download_base?: string
+          expires_at?: string
+          id?: string
+          is_kill?: boolean
+          manifest?: string
+          note?: string | null
+          rollout_cap?: number | null
+          rollout_percent?: number
+          rollout_salt?: string
+          serial?: number
+          signature?: string
+        }
+        Relationships: []
+      }
       car_status: {
         Row: {
           charge_end_reason: string | null
@@ -413,186 +566,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      car_charge_drafts: {
-        Row: {
-          avg_kw: number | null
-          charging_min: number | null
-          client_id: string
-          device_id: string | null
-          distance_m: number
-          end_reason: string | null
-          end_soc: number | null
-          ended_at: string
-          energy_kwh: number | null
-          id: string
-          max_kw: number | null
-          received_at: string
-          report_id: string | null
-          result: string
-          start_soc: number | null
-          started_at: string
-          station_id: string
-          status: string
-          vehicle_id: string
-        }
-        Insert: {
-          avg_kw?: number | null
-          charging_min?: number | null
-          client_id: string
-          device_id?: string | null
-          distance_m: number
-          end_reason?: string | null
-          end_soc?: number | null
-          ended_at: string
-          energy_kwh?: number | null
-          id?: string
-          max_kw?: number | null
-          received_at?: string
-          report_id?: string | null
-          result: string
-          start_soc?: number | null
-          started_at: string
-          station_id: string
-          status?: string
-          vehicle_id: string
-        }
-        Update: {
-          avg_kw?: number | null
-          charging_min?: number | null
-          client_id?: string
-          device_id?: string | null
-          distance_m?: number
-          end_reason?: string | null
-          end_soc?: number | null
-          ended_at?: string
-          energy_kwh?: number | null
-          id?: string
-          max_kw?: number | null
-          received_at?: string
-          report_id?: string | null
-          result?: string
-          start_soc?: number | null
-          started_at?: string
-          station_id?: string
-          status?: string
-          vehicle_id?: string
-        }
-        Relationships: []
-      }
-      car_releases: {
-        Row: {
-          channel: string
-          created_at: string
-          created_by: string | null
-          download_base: string
-          expires_at: string
-          id: string
-          is_kill: boolean
-          manifest: string
-          note: string | null
-          rollout_cap: number | null
-          rollout_percent: number
-          rollout_salt: string
-          serial: number
-          signature: string
-        }
-        Insert: {
-          channel: string
-          created_at?: string
-          created_by?: string | null
-          download_base: string
-          expires_at: string
-          id?: string
-          is_kill: boolean
-          manifest: string
-          note?: string | null
-          rollout_cap?: number | null
-          rollout_percent: number
-          rollout_salt: string
-          serial: number
-          signature: string
-        }
-        Update: {
-          channel?: string
-          created_at?: string
-          created_by?: string | null
-          download_base?: string
-          expires_at?: string
-          id?: string
-          is_kill?: boolean
-          manifest?: string
-          note?: string | null
-          rollout_cap?: number | null
-          rollout_percent?: number
-          rollout_salt?: string
-          serial?: number
-          signature?: string
-        }
-        Relationships: []
-      }
-      car_update_beta: {
-        Row: {
-          set_at: string
-          set_by: string | null
-          vehicle_id: string
-        }
-        Insert: {
-          set_at?: string
-          set_by?: string | null
-          vehicle_id: string
-        }
-        Update: {
-          set_at?: string
-          set_by?: string | null
-          vehicle_id?: string
-        }
-        Relationships: []
-      }
-      car_update_status: {
-        Row: {
-          channel: string
-          checked_at: string | null
-          device_id: string | null
-          firmware: string | null
-          installed: Json
-          last_line: string | null
-          offered_serial: number | null
-          phase: string | null
-          reported_at: string | null
-          serial: number | null
-          updated_at: string
-          vehicle_id: string
-        }
-        Insert: {
-          channel?: string
-          checked_at?: string | null
-          device_id?: string | null
-          firmware?: string | null
-          installed?: Json
-          last_line?: string | null
-          offered_serial?: number | null
-          phase?: string | null
-          reported_at?: string | null
-          serial?: number | null
-          updated_at?: string
-          vehicle_id: string
-        }
-        Update: {
-          channel?: string
-          checked_at?: string | null
-          device_id?: string | null
-          firmware?: string | null
-          installed?: Json
-          last_line?: string | null
-          offered_serial?: number | null
-          phase?: string | null
-          reported_at?: string | null
-          serial?: number | null
-          updated_at?: string
-          vehicle_id?: string
-        }
-        Relationships: []
       }
       car_trip_drafts: {
         Row: {
@@ -671,6 +644,106 @@ export type Database = {
             foreignKeyName: "car_trip_drafts_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_update_beta: {
+        Row: {
+          set_at: string
+          set_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          set_at?: string
+          set_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          set_at?: string
+          set_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_update_beta_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_update_beta_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_update_status: {
+        Row: {
+          channel: string
+          checked_at: string | null
+          device_id: string | null
+          firmware: string | null
+          installed: Json
+          last_line: string | null
+          offered_serial: number | null
+          phase: string | null
+          reported_at: string | null
+          serial: number | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          channel?: string
+          checked_at?: string | null
+          device_id?: string | null
+          firmware?: string | null
+          installed?: Json
+          last_line?: string | null
+          offered_serial?: number | null
+          phase?: string | null
+          reported_at?: string | null
+          serial?: number | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          channel?: string
+          checked_at?: string | null
+          device_id?: string | null
+          firmware?: string | null
+          installed?: Json
+          last_line?: string | null
+          offered_serial?: number | null
+          phase?: string | null
+          reported_at?: string | null
+          serial?: number | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_update_status_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_update_status_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_update_status_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
@@ -1489,10 +1562,10 @@ export type Database = {
       station_reports: {
         Row: {
           achieved_kw: number | null
+          created_at: string
           duration_min: number | null
           energy_kwh: number | null
           from_car: boolean
-          created_at: string
           id: string
           note: string | null
           station_id: string
@@ -1501,10 +1574,10 @@ export type Database = {
         }
         Insert: {
           achieved_kw?: number | null
+          created_at?: string
           duration_min?: number | null
           energy_kwh?: number | null
           from_car?: boolean
-          created_at?: string
           id?: string
           note?: string | null
           station_id: string
@@ -1513,10 +1586,10 @@ export type Database = {
         }
         Update: {
           achieved_kw?: number | null
+          created_at?: string
           duration_min?: number | null
           energy_kwh?: number | null
           from_car?: boolean
-          created_at?: string
           id?: string
           note?: string | null
           station_id?: string
@@ -1947,34 +2020,6 @@ export type Database = {
       }
     }
     Functions: {
-      car_update_notices: {
-        Args: never
-        Returns: {
-          label: string
-          package: string
-          version_code: number
-        }[]
-      }
-      confirm_car_charge_draft: {
-        Args: { p_id: string; p_note?: string | null; p_status?: string | null }
-        Returns: string
-      }
-      admin_list_users: {
-        Args: never
-        Returns: {
-          banned_at: string
-          city: string
-          created_at: string
-          display_name: string
-          id: string
-          is_moderator: boolean
-          model: string
-          purchase_count: number
-          service_count: number
-          trip_count: number
-          vehicle_member_count: number
-        }[]
-      }
       admin_list_car_updates: {
         Args: never
         Returns: {
@@ -1992,6 +2037,22 @@ export type Database = {
           vehicle_id: string
         }[]
       }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          banned_at: string
+          city: string
+          created_at: string
+          display_name: string
+          id: string
+          is_moderator: boolean
+          model: string
+          purchase_count: number
+          service_count: number
+          trip_count: number
+          vehicle_member_count: number
+        }[]
+      }
       admin_publish_car_release: {
         Args: {
           p_channel: string
@@ -2007,7 +2068,7 @@ export type Database = {
         Returns: undefined
       }
       admin_set_car_release_cap: {
-        Args: { p_cap: number | null; p_release: string }
+        Args: { p_cap: number; p_release: string }
         Returns: undefined
       }
       admin_set_user_banned: {
@@ -2049,6 +2110,16 @@ export type Database = {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
         Returns: Json
       }
+      car_manifest_header: {
+        Args: { p_manifest: string }
+        Returns: {
+          expires: number
+          is_kill: boolean
+          rollout_percent: number
+          rollout_salt: string
+          serial: number
+        }[]
+      }
       car_navigate_args_ok: { Args: { p_args: Json }; Returns: boolean }
       car_order_result: {
         Args: {
@@ -2076,6 +2147,10 @@ export type Database = {
         }
         Returns: Json
       }
+      car_submit_charge_draft: {
+        Args: { p_device_id: string; p_draft: Json; p_ts: number }
+        Returns: Json
+      }
       car_submit_diag_part: {
         Args: {
           p_apps: Json
@@ -2098,6 +2173,32 @@ export type Database = {
         Returns: Json
       }
       car_unpair: { Args: { p_device_id: string; p_ts: number }; Returns: Json }
+      car_update_check: {
+        Args: { p_device_id: string; p_report: Json; p_ts: number }
+        Returns: Json
+      }
+      car_update_notices: {
+        Args: never
+        Returns: {
+          label: string
+          package: string
+          version_code: number
+        }[]
+      }
+      car_update_offered: {
+        Args: { p_device_id: string; p_serial: number }
+        Returns: undefined
+      }
+      car_update_report: {
+        Args: {
+          p_device_id: string
+          p_last: string
+          p_phase: string
+          p_serial: number
+          p_ts: number
+        }
+        Returns: Json
+      }
       car_vault_inbox_key: {
         Args: { p_device_id: string; p_ts: number }
         Returns: Json
@@ -2124,6 +2225,10 @@ export type Database = {
         Returns: Json
       }
       cleanup_orphan_vehicle: { Args: { v_id: string }; Returns: undefined }
+      confirm_car_charge_draft: {
+        Args: { p_id: string; p_note?: string; p_status?: string }
+        Returns: string
+      }
       content_target: {
         Args: { p_purchase: string; p_service: string; p_trip: string }
         Returns: Record<string, unknown>
