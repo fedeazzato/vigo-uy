@@ -440,6 +440,21 @@ export type Database = {
           },
         ]
       }
+      car_release_publishers: {
+        Row: {
+          added_at: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       car_releases: {
         Row: {
           channel: string
@@ -2079,6 +2094,24 @@ export type Database = {
         Args: { make_moderator: boolean; target_user: string }
         Returns: undefined
       }
+      admin0059_publish_car_release: {
+        Args: {
+          p_channel: string
+          p_download_base: string
+          p_manifest: string
+          p_note?: string
+          p_signature: string
+        }
+        Returns: string
+      }
+      admin0059_set_car_beta: {
+        Args: { p_beta: boolean; p_vehicle: string }
+        Returns: undefined
+      }
+      admin0059_set_car_release_cap: {
+        Args: { p_cap: number; p_release: string }
+        Returns: undefined
+      }
       assert_moderator: { Args: never; Returns: undefined }
       can_read_car_diagnostic: {
         Args: { p_vehicle_id: string }
@@ -2241,6 +2274,7 @@ export type Database = {
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
+      is_car_release_publisher: { Args: { uid: string }; Returns: boolean }
       is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }

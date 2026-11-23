@@ -45,7 +45,7 @@ function PublishForm({ onDone }: { onDone: () => void }) {
     if (!summary) return setMessage(parsed && 'error' in parsed ? parsed.error : 'Pegá el manifiesto.')
     if (!GITHUB_DOWNLOAD_BASE.test(downloadBase.trim()))
       return setMessage(
-        'La carpeta de descarga debe ser https://github.com/<dueño>/<repo>/releases/download/<tag>/ (con la barra final).'
+        'La carpeta de descarga debe ser https://github.com/fedeazzato/vigo-releases/releases/download/<tag>/ (con la barra final).'
       )
     // the car downloads from the SIGNED "source" line (Mi Vigo 2.9, updater Manifest.blobUrl), not from this copy: they must agree
     const signedSource = /^source\s+(\S+)\s*$/m.exec(text)?.[1]
@@ -96,7 +96,7 @@ function PublishForm({ onDone }: { onDone: () => void }) {
             id="rel-base"
             className={formStyles.input}
             value={downloadBase}
-            placeholder="https://github.com/usuario/vigo-releases/releases/download/r42/"
+            placeholder="https://github.com/fedeazzato/vigo-releases/releases/download/r42/"
             onChange={(e) => setDownloadBase(e.target.value)}
           />
         </div>

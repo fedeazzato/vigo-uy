@@ -17,7 +17,8 @@ export const TRUSTED_RELEASE_KEYS = [
 
 export const MANIFEST_HEADER = 'vigo-update 1'
 export const GITHUB_DOWNLOAD_BASE =
-  /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/releases\/download\/[A-Za-z0-9_.+-]+\/$/
+  // owner 2026-11-23: release files live only in the public fedeazzato/vigo-releases repo
+  /^https:\/\/github\.com\/fedeazzato\/vigo-releases\/releases\/download\/[A-Za-z0-9_.+-]+\/$/
 
 export interface ManifestApp {
   pkg: string
