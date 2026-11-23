@@ -22,7 +22,7 @@ export async function fetchPendingChargeDrafts(): Promise<CarChargeDraftRow[] | 
       .order('received_at', { ascending: false })
       .limit(50)
     if (error || !data) return null
-    return data as unknown as CarChargeDraftRow[]
+    return data
   } catch {
     return null
   }

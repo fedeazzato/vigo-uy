@@ -47,6 +47,12 @@ function PublishForm({ onDone }: { onDone: () => void }) {
       return setMessage(
         'La carpeta de descarga debe ser https://github.com/<dueño>/<repo>/releases/download/<tag>/ (con la barra final).'
       )
+    // the car downloads from the SIGNED "source" line (Mi Vigo 2.9, updater Manifest.blobUrl), not from this copy: they must agree
+    const signedSource = /^source\s+(\S+)\s*$/m.exec(text)?.[1]
+    if (signedSource !== downloadBase.trim())
+      return setMessage(
+        'El manifiesto firmado debe tener la línea "source <carpeta de descarga>" igual a la carpeta de arriba: el auto descarga desde esa línea firmada.'
+      )
     setBusy(true)
     const ok = await verifyManifestSignature(text, signature)
     if (!ok) {
