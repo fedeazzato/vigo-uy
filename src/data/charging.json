@@ -76,7 +76,7 @@
     "tips": [
       {
         "bold": "Triple horario de UTE (lo más barato):",
-        "text": "Tiene tres períodos. Valle, de 00:00 a 07:00: el más barato, $2,443/kWh + IVA ($2,98 con IVA). Llano: el resto del día fuera de la punta, $5,172/kWh + IVA ($6,31 con IVA). Punta: $12,034/kWh + IVA ($14,68 con IVA). Precios de UTE leídos en noviembre de 2026. Evitá la punta. La punta son 4 horas seguidas que elegís vos, entre las 17:00 y las 00:00, siempre empezando en hora en punto (por ejemplo 17–21 o 20–00)."
+        "text": "Tiene tres períodos. Valle, de 00:00 a 07:00: el más barato, $2,443/kWh + IVA ($2,98 con IVA). Llano: el resto del día fuera de la punta, $5,172/kWh + IVA ($6,31 con IVA). Punta: $12,034/kWh + IVA ($14,68 con IVA). Precios de UTE leídos en noviembre de 2026. Evitá la punta. La punta son 4 horas seguidas que elegís vos, entre las 17:00 y las 23:00 (por ejemplo 17–21 o 19–23), solo de lunes a viernes hábiles: los fines de semana y feriados no hay punta."
       },
       {
         "bold": "Cargador que viene con el auto:",
