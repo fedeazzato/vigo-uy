@@ -189,8 +189,9 @@ export default function MyVigoPage() {
           <Card>
             <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
             <p className={styles.vaultText}>
-              Sumale a tu pantalla Carga, Cargadores, Mi Vigo, Copiloto y la voz en español. Se instalan una
-              vez, desde una computadora con Windows.
+              Sumale a tu Vigo las aplicaciones de la comunidad: Waze en la pantalla, un copiloto que te
+              entiende en español, tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque y
+              tu auto en WikiVigo. Se instalan una vez, desde una computadora con Windows.
             </p>
             <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
               Preparar mi Vigo
