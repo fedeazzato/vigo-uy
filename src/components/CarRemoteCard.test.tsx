@@ -1,4 +1,4 @@
-// specs/car-remote-e3.md R6: the "Control remoto" card.
+// specs/car-remote-e3.md R6: the "Control remoto" buttons (inside "Tu auto ahora" since owner decision 2026-11-24 #2).
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import type { CarRemoteData } from '../lib/carRemote'
@@ -105,7 +105,10 @@ describe('CarRemoteCard', () => {
   it('shows the buttons and the orders, but not the status or connection ("Tu auto ahora" shows them)', async () => {
     mocks.fetchCarRemote.mockResolvedValue(data())
     render(<CarRemoteCard />)
-    expect(await screen.findByText('Control remoto')).toBeTruthy()
+    expect(await screen.findByRole('region', { name: 'Control remoto' })).toBeTruthy()
+    // buttons only: no card title of its own, it lives inside "Tu auto ahora" (owner decision 2026-11-24 #2)
+    expect(screen.queryByText('Control remoto')).toBeNull()
+    expect(screen.queryByRole('heading', { name: /Control remoto/ })).toBeNull()
     // online/offline moved to "Tu auto ahora" (owner decision 2026-11-24 #2)
     expect(screen.queryByText('En línea')).toBeNull()
     expect(screen.getByText(/si no la recibe en 2 minutos, se cancela/)).toBeTruthy()
@@ -145,7 +148,7 @@ describe('CarRemoteCard', () => {
       })
     )
     render(<CarRemoteCard />)
-    expect(await screen.findByText('Control remoto')).toBeTruthy()
+    expect(await screen.findByRole('region', { name: 'Control remoto' })).toBeTruthy()
     expect(screen.queryByText(/Sin conexión/)).toBeNull()
     expect(screen.queryByText(/Carga completa en/)).toBeNull()
     expect(screen.queryByRole('button', { name: 'Detener la carga' })).toBeNull()

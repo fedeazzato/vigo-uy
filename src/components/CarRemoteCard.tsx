@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardTitle, Alert } from './UI'
+import { Alert } from './UI'
 import {
   cancelCarOrder,
   clampLimit,
@@ -21,7 +21,8 @@ import styles from './CarRemoteCard.module.css'
 import { confirmDialog } from '../lib/confirmDialog'
 
 // "Control remoto" (specs/car-remote-e3.md R6): orders for the linked car (windows, ventilate, charge limit, stop charging)
-// and the last orders with their result. The car's status (battery, range, cable, time to full,
+// and the last orders with their result. Owner decision 2026-11-24 #2: buttons only, rendered inside the one "Tu auto ahora"
+// card (CarStatusCard), with no card or title of its own. The car's status (battery, range, cable, time to full,
 // limit) and whether it is online are shown only by "Tu auto ahora" (owner decision 2026-11-24 #2); this card reads it just to offer "Detener la carga" and to start the limit
 // stepper at the car's limit (owner at the car 2026-11-22: no repeated status). Mounted only with
 // VITE_CAR_REMOTE=1 (after migration 0052); hidden when the fetch fails or the vehicle has no linked car. Polls every 3 s
@@ -106,13 +107,7 @@ export default function CarRemoteCard() {
   const control = canControl(role)
 
   return (
-    <Card>
-      <CardTitle icon="📡">Control remoto</CardTitle>
-      <p className={styles.note}>
-        El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se
-        cancela.
-      </p>
-
+    <section className={styles.remote} aria-label="Control remoto">
       {error && <Alert type="danger">{error}</Alert>}
       {!control && <Alert type="info">{VIEW_ONLY_NOTICE}</Alert>}
 
@@ -194,6 +189,11 @@ export default function CarRemoteCard() {
         </>
       )}
 
+      <p className={styles.note}>
+        El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se
+        cancela.
+      </p>
+
       {data.orders.length > 0 && (
         <>
           <h3 className={styles.listTitle}>Últimas órdenes</h3>
@@ -230,6 +230,6 @@ export default function CarRemoteCard() {
           </ul>
         </>
       )}
-    </Card>
+    </section>
   )
 }

@@ -1,7 +1,13 @@
 /* "Control remoto" (specs/car-remote-e3.md R6). Buttons are the car's dialog buttons (buttons.module.css, stock look),
-   made large; rows follow the linked-devices list rhythm (CarDevicesCard.module.css). */
+   made large; rows follow the linked-devices list rhythm (CarDevicesCard.module.css). Rendered inside "Tu auto ahora"
+   (owner decision 2026-11-24 #2), separated from the status by a rule. */
+.remote {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 .note {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-secondary);

@@ -18,7 +18,6 @@ import CarStatusCard from '../components/CarStatusCard'
 import CarDraftsCard from '../components/CarDraftsCard'
 import CarDataCard from '../components/CarDataCard'
 import CarDiagnosticsCard from '../components/CarDiagnosticsCard'
-import CarRemoteCard from '../components/CarRemoteCard'
 import SendPlaceCard from '../components/SendPlaceCard'
 import ServiceReminderCard from '../components/ServiceReminderCard'
 import OwnFirmwareLine from '../components/OwnFirmwareLine'
@@ -168,17 +167,11 @@ export default function MyVigoPage() {
             Lo que tu auto manda es privado: lo ven solo quienes comparten tu Vigo, y nada se publica sin que
             lo confirmes.
           </p>
+          {/* One "Tu auto ahora" card: status, online/offline and the Control remoto buttons (owner decision 2026-11-24 #2). */}
           <CarStatusCard />
+          {CAR_REMOTE_ENABLED && <SendPlaceCard />}
           <ServiceReminderCard />
           <CarDraftsCard />
-
-          {CAR_REMOTE_ENABLED && (
-            <>
-              <SectionDivider label="📡 Control remoto" />
-              <CarRemoteCard />
-              <SendPlaceCard />
-            </>
-          )}
 
           <SectionDivider label="📊 Datos y estadísticas" />
           <CarDataCard />

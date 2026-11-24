@@ -103,7 +103,7 @@ function SendToCar({ destination }: { destination: CarDestination }) {
         <div className={styles.panel} role="status">
           <p className={styles.note}>
             Destino enviado. Seguí si el auto lo recibió en{' '}
-            <Link to="/mi-vigo">Mi Vigo › Control remoto</Link>.
+            <Link to="/mi-vigo">Mi Vigo › Tu auto ahora</Link>.
           </p>
         </div>
       )}

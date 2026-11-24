@@ -114,6 +114,10 @@ ORDER_RESULT_BODY = {"v":1,"action":"order_result","device_id":"6f1c2b4e-8d3a-4c
 
 ## R6. Web card "Control remoto" (Mi Vigo page, signed in, `VITE_CAR_REMOTE=1`)
 
+> **Update 2026-11-24 (owner decision #2):** "Control remoto" is no longer a card. Its buttons, the limit stepper, the note and
+> the order list render without a title inside the one "Tu auto ahora" card (`CarStatusCard`), which also owns the
+> online/offline line. Still gated by `VITE_CAR_REMOTE=1`; "Ventilar" stays hidden (`VENTILATE_ON_WEB = false`).
+
 - Shown to members of a vehicle with a linked car. Top line: **"En línea"** (device `last_seen` < 35 s: the car polls every 10 s while on or
   charging, so one late poll does not flip it) / **"Sin conexión — visto hace X"**
   with the muted explanation "El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se cancela."

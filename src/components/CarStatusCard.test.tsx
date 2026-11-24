@@ -16,6 +16,15 @@ vi.mock('../lib/carStatus', async (importOriginal) => ({
   fetchCarStatus: mocks.fetchCarStatus,
 }))
 
+// The Control remoto buttons are their own component (CarRemoteCard.test.tsx); here only where they mount.
+const flag = vi.hoisted(() => ({ on: false }))
+vi.mock('../lib/carRemoteFlag', () => ({
+  get CAR_REMOTE_ENABLED() {
+    return flag.on
+  },
+}))
+vi.mock('./CarRemoteCard', () => ({ default: () => <div data-testid="remote-buttons" /> }))
+
 import CarStatusCard from './CarStatusCard'
 
 const iso = (msAgo: number) => new Date(Date.now() - msAgo).toISOString()
@@ -143,5 +152,26 @@ describe('CarStatusCard', () => {
     render(<CarStatusCard />)
     expect(await screen.findByText('Tu auto ahora')).toBeTruthy()
     expect(screen.getByText('Sin conexión — todavía no se conectó')).toBeTruthy()
+  })
+
+  // owner decision 2026-11-24 #2: Control remoto is only buttons inside this card, still behind VITE_CAR_REMOTE.
+  it('renders the Control remoto buttons inside the card only when VITE_CAR_REMOTE is on', async () => {
+    mocks.fetchCarStatus.mockResolvedValue(LIVE)
+    mocks.fetchCarLastSeen.mockResolvedValue({ lastSeenAt: iso(5_000) })
+    flag.on = false
+    const off = render(<CarStatusCard />)
+    expect(await screen.findByText('Tu auto ahora')).toBeTruthy()
+    expect(screen.queryByTestId('remote-buttons')).toBeNull()
+    off.unmount()
+    flag.on = true
+    try {
+      const { container } = render(<CarStatusCard />)
+      await screen.findByText('Tu auto ahora')
+      // one card (the component's single root element) holds the status and the buttons
+      expect(container.children).toHaveLength(1)
+      expect(container.firstElementChild!.contains(screen.getByTestId('remote-buttons'))).toBe(true)
+    } finally {
+      flag.on = false
+    }
   })
 })

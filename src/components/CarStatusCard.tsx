@@ -4,6 +4,8 @@ import { describeCarStatus, fetchCarStatus, STATUS_POLL_MS } from '../lib/carSta
 import { connectionLabel, fetchCarLastSeen, isOnline } from '../lib/carRemote'
 import type { CarStatus } from '../types'
 import CarUpdateInfo from './CarUpdateInfo'
+import CarRemoteCard from './CarRemoteCard'
+import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
 import { useCarUpdateInfo } from '../lib/useCarUpdateInfo'
 import styles from './CarStatusCard.module.css'
 
@@ -16,7 +18,7 @@ import styles from './CarStatusCard.module.css'
 // status and the Google software notices (specs/car-updates.md R8, owner O6; hidden before migration 0059).
 export default function CarStatusCard() {
   const [status, setStatus] = useState<CarStatus | null>(null)
-  // null = no linked car (or not loaded yet). Control remoto keeps only its buttons.
+  // null = no linked car (or not loaded yet). Control remoto is only its buttons, rendered below the status.
   const [link, setLink] = useState<{ lastSeenAt: string | null } | null>(null)
   const [now, setNow] = useState(() => new Date())
   const updateInfo = useCarUpdateInfo()
@@ -59,12 +61,16 @@ export default function CarStatusCard() {
     </p>
   )
 
+  // Control remoto: buttons only, inside this card (owner decision 2026-11-24 #2); VITE_CAR_REMOTE gate unchanged.
+  const remote = CAR_REMOTE_ENABLED && <CarRemoteCard />
+
   if (!status && !updateInfo.update && !link) return null
   if (!status)
     return (
       <Card>
         <CardTitle icon="🔋">Tu auto ahora</CardTitle>
         {connection}
+        {remote}
         <CarUpdateInfo {...updateInfo} />
       </Card>
     )
@@ -92,6 +98,7 @@ export default function CarStatusCard() {
           ? 'El auto lo envía mientras está encendido y con internet.'
           : 'Último dato que el auto envió con conexión; no es en vivo.'}
       </p>
+      {remote}
       <CarUpdateInfo {...updateInfo} />
     </Card>
   )
