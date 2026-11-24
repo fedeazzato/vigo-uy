@@ -2160,6 +2160,54 @@ export type Database = {
           },
         ]
       }
+      vehicle_invites: {
+        Row: {
+          code_hash: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          used_at: string | null
+          used_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_invites_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "vehicle_invites_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_members: {
         Row: {
           car_role: string
@@ -2652,6 +2700,7 @@ export type Database = {
           vehicle_id: string
         }[]
       }
+      family_invite_hash: { Args: { p_code: string }; Returns: string }
       fault_code_counts: {
         Args: never
         Returns: {
@@ -2661,6 +2710,7 @@ export type Database = {
         }[]
       }
       generate_car_pairing_code: { Args: never; Returns: string }
+      generate_family_invite_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
       is_car_release_publisher: { Args: { uid: string }; Returns: boolean }
