@@ -75,8 +75,8 @@
     "title": "Carga en casa",
     "tips": [
       {
-        "bold": "Triple horario (lo más barato):",
-        "text": "De 00:00 a 07:00 el kWh sale ~$2,44 + IVA. De 23:00 a 00:00, ~$5,17/kWh. Evitá de 18:00 a 22:00: es la hora más cara."
+        "bold": "Triple horario de UTE (lo más barato):",
+        "text": "Tiene tres períodos. Valle, de 00:00 a 07:00: el más barato, ~$2,44/kWh + IVA. Llano: el resto del día fuera de la punta (por ejemplo, de 23:00 a 00:00 sale ~$5,17/kWh). Punta: el más caro, evitalo. La punta son 4 horas seguidas que elegís vos, entre las 17:00 y las 00:00, siempre empezando en hora en punto (por ejemplo 17–21 o 20–00)."
       },
       {
         "bold": "Cargador que viene con el auto:",
@@ -88,7 +88,7 @@
       },
       {
         "bold": "Instalación rápida (32A):",
-        "text": "Cable de cobre de 6mm, protector de rayos, térmica, diferencial y toma industrial bifásico de 32A. Carga completa en ~5-6 horas."
+        "text": "Cable de cobre de 6mm, térmica, diferencial y toma industrial bifásico de 32A. El protector de rayos es recomendado, no obligatorio. Carga completa en ~5-6 horas."
       },
       {
         "bold": "Potencia contratada en UTE:",
@@ -125,7 +125,7 @@
         "badge": "Variable",
         "badgeColor": "amber",
         "source": "comunidad",
-        "details": "$11,8/kWh + cargo base $132,9. Carga de 0 a 100%: E2 ≈ $663 / E2+ ≈ $744. El manual no dice la potencia máxima en DC. La comunidad reporta hasta 60 kW, según el equipo.",
+        "details": "$11,8/kWh + cargo base $132,9. Carga de 0 a 100%: E2 ≈ $663 / E2+ ≈ $744. Aunque el cargador dé más, la Vigo carga como mucho a ~60 kW (dato de la comunidad). El manual no dice la potencia máxima en DC.",
         "tips": "Los equipos de 30 kW (Ecotap) son los que más fallan: se desconectan solos o marcan «completado» sin cargar. Si podés, elegí uno de 60 kW o más. Después del 80% la carga se pone mucho más lenta: es la batería protegiéndose del calor, no una falla.",
         "network": "ute"
       },
@@ -133,7 +133,7 @@
         "name": "EONE",
         "badge": "Recomendado",
         "badgeColor": "green",
-        "details": "Sin cargo base. Algunos cargadores llegan a 120 kW. El precio por kWh varía.",
+        "details": "Sin cargo base. Algunos cargadores dan hasta 120 kW, pero la Vigo carga como mucho a ~60 kW (dato de la comunidad). El precio por kWh varía.",
         "tips": "El grupo los recomienda mucho. Usá la app EONE. Si la Vigo no aparece, elegí «Dongfeng Forthing» o «Yuan Pro».",
         "network": "eone"
       },

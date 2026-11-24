@@ -23,20 +23,34 @@ cambio de contenido).
 Tests: no hubo que cambiar ninguno (`serviceReminder.test.ts` y `siteSearch.test.ts` siguen encontrando sus
 textos: «15.000 km o 1 año», «5.000 km», «corte automático», «android auto», «pastillas y discos de freno»).
 
-## Hechos dudosos (marcados, no cambiados)
+## Hechos dudosos: resueltos (respuestas del dueño, 2026-11-24)
 
-1. **Medida de llanta de la rueda de auxilio**: `accessories.json` dice Panam «rodado 17» mientras que la
-   compatible es «rodado 16»; ¿el de Panam es de verdad 17?
-2. **Wallbox 32A y protector de rayos**: `charging.json` lo lista como parte de la instalación; el texto viejo de
-   `accessories.json` decía «opcional». Ahora Accesorios manda a Carga, así que queda la versión de Carga.
-   Confirmar si es opcional.
-3. **Fuente de «ADAS solo en E2+»**: Mantenimiento dice «ficha técnica del importador»; la FAQ decía «página
-   oficial del modelo». La FAQ ya no nombra la fuente.
-4. **Autonomía/«E2+» en Colonia**: el tip dice que ida y vuelta sin cargar es viable con la E2+ (~185 km cada
-   tramo); no dice nada de la E2.
-5. **Potencia DC**: «hasta 60 kW» es dato de la comunidad, pero EONE dice que «algunos cargadores llegan a 120
-   kW» (potencia del cargador, no del auto). Puede confundir.
-6. **Cargador incluido**: carga en ~24–26 h a 2 kW (FAQ). Con 44,94/51,87 kWh a 2 kW da ~22–26 h; coherente,
-   pero no hay fuente.
-7. **Cuota triple horario en `costs.json`**: «Casa — horario intermedio (07–18 hs)» no aparece en `charging.json`
-   (que habla de 23–00 a ~$5,17/kWh). No se tocó.
+1. **Rueda de auxilio**: lo que tiene que coincidir es la rueda entera (llanta + cubierta). E2 trae llanta 17″, E2+ 18″,
+   con cubiertas distintas y el mismo diámetro total. Una llanta 16″ sirve con cubierta más alta. Panam «rodado 17» no
+   está mal; ahora se explica qué mirar (5x108 + medida de cubierta / diámetro total). `accessories.json`, `tech-faq.json`.
+2. **Protector de rayos (wallbox 32A)**: «recomendado, no obligatorio», igual en Carga y Accesorios.
+3. **ADAS**: solo la E2+, sin citar fuente. Nuevo ítem en Mantenimiento (seguridad): al cambiar el parabrisas de una
+   E2+ hay que recalibrar la cámara delantera (pedírselo a la vidriería o al concesionario).
+4. **Viajes estimados**: se sacaron (no son datos reales registrados):
+   - Colonia: nota de parada «A 110 km/h con aire se llega con ~190 km de autonomía…» y tip «Con la E2+ se puede ir y
+     volver sin cargar». Se agregó: «Los viajes reales a Colonia van a aparecer acá a medida que los dueños los
+     registren» (la página ya enlaza a /viajes/nuevo).
+   - Salto: tips «A 90 km/h se puede llegar de Trinidad directo a Salto…» y «Desde Atlántida, Trinidad ~200 km y Young
+     ~330 km. Con la E2+, llegar a Young es justo».
+   - Chuy: tip «Barra del Chuy a Parque del Plata: saliendo con 100%, se llega con ~20%…».
+   - Brasil: «~14 kWh/100km» (queda el consejo general sin número); Pelotas: «con menos de 90% es arriesgado» →
+     «Salí con la batería llena».
+   - Costos: caso «Viaje Montevideo–Paysandú» (~$1.000, ~$2,60/km, estimado).
+5. **Potencia DC**: el cargador puede dar hasta 120 kW, la Vigo carga como mucho ~60 kW (comunidad). Carga (UTE DC,
+   EONE) y FAQ.
+6. **Cargador incluido ~24–26 h**: se mantiene, marcado «cálculo aproximado, hasta que haya datos reales».
+7. **Triple horario UTE**: valle 00–07 (más barato, resaltado), llano (resto del día fuera de punta), punta = 4 h
+   seguidas que elige el cliente entre 17:00 y 00:00, empezando en hora en punto (17–21, 20–00). Se sacó
+   «intermedio 07–18»; los valores de `costs.json` ($0,48 / ~$0,80 / ~$1,10 por km, $2,44/kWh) no cambiaron.
+
+### Sigue pendiente
+
+- Caso real «Uso intensivo diario» (3.000 km/mes, $1.420) en `costs.json`: se dejó; confirmar que es un dato real.
+- Los ~$/km de llano (~$0,80) y punta (~$1,10) son aproximados; antes estaban atados a «07–18» y «18–22».
+- Tips de ruta no numéricos (cargadores por ciudad, frontera, apps) se mantienen; las distancias de ruta (~500 km,
+  etc.) son distancias de mapa, no estimaciones de autonomía.

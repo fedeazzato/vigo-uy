@@ -53,8 +53,17 @@
       "price": "$7.400–7.650",
       "note": "Incluye alineación, balanceo, rotación y filtro de aire acondicionado"
     },
-    { "dealer": "Fidocar", "service": "5.000 km", "price": "Sin cargo", "note": "Service de garantía" },
-    { "dealer": "Fidocar", "service": "15.000 km", "price": "$9.400–9.500" },
+    {
+      "dealer": "Fidocar",
+      "service": "5.000 km",
+      "price": "Sin cargo",
+      "note": "Service de garantía"
+    },
+    {
+      "dealer": "Fidocar",
+      "service": "15.000 km",
+      "price": "$9.400–9.500"
+    },
     {
       "dealer": "Las Torres",
       "service": "15.000 km",
@@ -123,7 +132,11 @@
   "safety": [
     {
       "bold": "ADAS, solo en la E2+:",
-      "text": "Los ADAS son las ayudas al manejo: frenado automático, aviso y asistente de carril. Según la ficha técnica del importador, vienen solo en la E2+; la E2 no los trae."
+      "text": "Los ADAS son las ayudas al manejo: frenado automático, aviso y asistente de carril. Vienen solo en la E2+; la E2 no los trae."
+    },
+    {
+      "bold": "Cambio de parabrisas en la E2+:",
+      "text": "Si cambiás el parabrisas, hay que volver a calibrar la cámara de adelante para que los ADAS funcionen bien. Pedíselo a la vidriería o al concesionario."
     },
     {
       "bold": "ADAS con lluvia o en rotondas:",

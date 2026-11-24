@@ -1,19 +1,19 @@
 {
   "perKm": [
     {
-      "label": "Casa — triple horario (00–07 hs)",
+      "label": "Casa — valle (00–07 hs)",
       "value": "$0,48",
       "badge": "Más barato",
       "badgeColor": "green"
     },
     {
-      "label": "Casa — horario intermedio (07–18 hs)",
+      "label": "Casa — llano (fuera de valle y punta)",
       "value": "~$0,80",
       "badge": null,
       "badgeColor": null
     },
     {
-      "label": "Casa — hora pico (18–22 hs)",
+      "label": "Casa — punta (4 h que elegís, entre 17 y 00 hs)",
       "value": "~$1,10",
       "badge": "Evitar",
       "badgeColor": "red"
@@ -36,7 +36,7 @@
       "battery": 44.94,
       "options": [
         {
-          "label": "Casa — triple horario",
+          "label": "Casa — valle (triple horario)",
           "energy": 128,
           "base": 0,
           "total": 128,
@@ -62,7 +62,7 @@
       "battery": 51.87,
       "options": [
         {
-          "label": "Casa — triple horario",
+          "label": "Casa — valle (triple horario)",
           "energy": 148,
           "base": 0,
           "total": 148,
@@ -92,17 +92,8 @@
       "period": "mes",
       "cost": "$1.420",
       "costPerKm": "$0,47",
-      "conditions": "Siempre cargando en casa en triple horario (00–07 hs)",
+      "conditions": "Siempre cargando en casa en valle (00–07 hs, triple horario)",
       "comparison": "Una camioneta a nafta haciendo el mismo recorrido costaría ~$15.000–20.000/mes"
-    },
-    {
-      "title": "Viaje Montevideo–Paysandú",
-      "km": 380,
-      "period": "viaje",
-      "cost": "~$1.000",
-      "costPerKm": "~$2,60",
-      "conditions": "Cargando en Trinidad y Paysandú (UTE DC)",
-      "comparison": "En camioneta a nafta: ~$5.000 por el mismo viaje"
     }
   ],
   "patent": {

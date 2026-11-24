@@ -56,11 +56,7 @@
           "note": "Cargá en Salto para planear la vuelta."
         }
       ],
-      "tips": [
-        "A 90 km/h se puede llegar de Trinidad directo a Salto sin parar en Young.",
-        "En la semana de la cerveza u otros eventos, Trinidad se puede llenar. Pasá por Durazno.",
-        "Desde Atlántida, Trinidad queda a ~200 km y Young a ~330 km. Con la E2+, llegar a Young es justo."
-      ]
+      "tips": ["En la semana de la cerveza u otros eventos, Trinidad se puede llenar. Pasá por Durazno."]
     },
     {
       "id": "chuy",
@@ -88,7 +84,6 @@
         }
       ],
       "tips": [
-        "Barra del Chuy a Parque del Plata: saliendo con 100%, se llega con ~20% a 90-100 km/h con aire. Sin problemas.",
         "En Punta del Diablo hay cargadores, pero el conector no sirve para la Vigo. Cargá siempre en Rocha."
       ]
     },
@@ -104,13 +99,12 @@
         },
         {
           "name": "Colonia del Sacramento",
-          "type": "destination",
-          "note": "A 110 km/h con aire se llega con ~190 km de autonomía. No hace falta cargar en el camino."
+          "type": "destination"
         }
       ],
       "tips": [
-        "Con la E2+ se puede ir y volver sin cargar.",
-        "Si querés cargar en Colonia, hay cargadores en la ciudad."
+        "Si querés cargar en Colonia, hay cargadores en la ciudad.",
+        "Los viajes reales a Colonia van a aparecer acá a medida que los dueños los registren."
       ]
     },
     {
@@ -140,7 +134,7 @@
         {
           "name": "Pelotas / Porto Alegre (Brasil)",
           "type": "warning",
-          "note": "Entre Pelotas y Porto Alegre (BR-116) hay ~260 km sin opciones. Salí con 100%: con menos de 90% es arriesgado. El cargador rápido gratis antes de Porto Alegre suele estar ocupado, así que tené un plan B en la app Tupi."
+          "note": "Entre Pelotas y Porto Alegre (BR-116) hay ~260 km sin opciones. Salí con la batería llena. El cargador rápido gratis antes de Porto Alegre suele estar ocupado, así que tené un plan B en la app Tupi."
         },
         {
           "name": "Florianópolis",
@@ -151,7 +145,7 @@
         "Varios del grupo hicieron este viaje. Se puede, pero hay que planificar.",
         "Bajate la app Tupi y cargale reales antes de cruzar. Sale ~1,89 reales/kWh y podés reservar por 3 reales cada 15 minutos.",
         "Llegá de madrugada al Chuy para cargar y hacer migraciones sin esperar.",
-        "De Porto Alegre hacia el sur el consumo sube a ~14 kWh/100km por el viento y el terreno. Recalculá con ese dato, no con el promedio del viaje."
+        "De Porto Alegre hacia el sur el consumo sube por el viento y el terreno. Recalculá con el consumo del último tramo, no con el promedio del viaje."
       ]
     },
     {

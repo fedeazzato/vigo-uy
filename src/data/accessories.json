@@ -7,11 +7,11 @@
       "items": [
         {
           "bold": "Cuál sirve:",
-          "text": "Llanta 5x108, rodado 16 (por ejemplo, de Peugeot). Cubierta 215/65 R16, o 205/70 R16 (queda un pelo más baja pero anda). La Vigo no trae rueda de auxilio de fábrica."
+          "text": "Lo que tiene que coincidir es la rueda entera (llanta + cubierta), no solo el rodado. El rodado es la medida de la llanta. La E2 trae llanta 17″ y la E2+ llanta 18″, cada una con su cubierta, y las dos quedan del mismo tamaño total. Sirve una llanta 5x108 de otro rodado, por ejemplo 16″ (de Peugeot), si la cubierta es más alta para llegar al mismo diámetro: por ejemplo 215/65 R16. La Vigo no trae rueda de auxilio de fábrica."
         },
         {
           "bold": "Dónde conseguirla:",
-          "text": "Panam (rodado 17, ~$8.500 con cubierta). Ruedas El Gaucho (rodado 16). MercadoLibre (buscá «pase 5x108»). También venden algunos del grupo."
+          "text": "Panam (rodado 17, ~$8.500 con cubierta). Ruedas El Gaucho (rodado 16). MercadoLibre (buscá «pase 5x108»). También venden algunos del grupo. Sea del rodado que sea, fijate que sea 5x108 y preguntá la medida de la cubierta: el diámetro total tiene que ser igual al de tus ruedas."
         },
         {
           "bold": "Consejo:",
@@ -93,7 +93,10 @@
           "bold": "Impresión 3D:",
           "text": "Rodrigo, del grupo, imprime llaveros con diseño de la Vigo."
         },
-        { "bold": "AliExpress:", "text": "Hay fundas para la llave con tapa de cuero." }
+        {
+          "bold": "AliExpress:",
+          "text": "Hay fundas para la llave con tapa de cuero."
+        }
       ]
     },
     {
@@ -107,7 +110,7 @@
         },
         {
           "bold": "Wallbox 32A:",
-          "text": "Los materiales y el tiempo de carga están en Carga, en «Carga en casa»."
+          "text": "El protector de rayos es recomendado, no obligatorio. Los materiales y el tiempo de carga están en Carga, en «Carga en casa»."
         },
         {
           "bold": "Trámite en UTE:",

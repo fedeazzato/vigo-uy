@@ -82,7 +82,7 @@
         },
         {
           "bold": "Límites de carga AC/DC:",
-          "text": "Hasta 6,6 kW en AC y hasta 60 kW en DC (dato de la comunidad). Más detalle en Carga."
+          "text": "Hasta 6,6 kW en AC. En DC, aunque el cargador dé hasta 120 kW, la Vigo carga como mucho a ~60 kW (dato de la comunidad). Más detalle en Carga."
         }
       ]
     },
@@ -131,7 +131,7 @@
       "id": "tiempo-carga",
       "icon": "⏱️",
       "q": "¿Cuánto tarda en cargarse de 0 a 100%?",
-      "a": "Con el cargador que viene (12A, 2kW): ~24–26 hs. Con instalación de 16A en casa: ~10 hs. Con wallbox de 32A: ~5–6 hs. En un cargador rápido DC: mucho menos, pero después del 80% va más lento para cuidar la batería del calor. No es una falla."
+      "a": "Con el cargador que viene (12A, 2kW): ~24–26 hs (cálculo aproximado, hasta que haya datos reales). Con instalación de 16A en casa: ~10 hs. Con wallbox de 32A: ~5–6 hs. En un cargador rápido DC: mucho menos, pero después del 80% va más lento para cuidar la batería del calor. No es una falla."
     },
     {
       "id": "corte-automatico",
@@ -167,7 +167,7 @@
       "id": "rueda-auxilio",
       "icon": "🛞",
       "q": "¿Hay rueda de auxilio?",
-      "a": "No viene de fábrica. Sirve una llanta 5x108 rodado 16 (por ejemplo, de Peugeot) con cubierta 215/65 R16. Algunos del grupo venden, y también hay en Panam y Ruedas El Gaucho. Más en Accesorios."
+      "a": "No viene de fábrica. Lo que tiene que coincidir es la rueda entera (llanta + cubierta). La E2 trae llanta 17″ y la E2+ 18″, con cubiertas distintas, y las dos quedan del mismo tamaño total. Sirve una llanta 5x108 de 16″ (por ejemplo, de Peugeot) con una cubierta más alta, como 215/65 R16. Algunos del grupo venden, y también hay en Panam y Ruedas El Gaucho. Más en Accesorios."
     },
     {
       "id": "matricula",
@@ -239,7 +239,7 @@
       "id": "adas-lluvia",
       "icon": "🤖",
       "q": "¿El frenado automático y los asistentes de carril funcionan bien con lluvia?",
-      "a": "Estas ayudas (ADAS) vienen solo en la E2+. Varios dueños dicen que responden peor con lluvia fuerte o en rotondas, así que no te confíes solo en ellas. Más en Mantenimiento, en «Seguridad y emergencias»."
+      "a": "Estas ayudas (ADAS) vienen solo en la E2+; la E2 no las trae. Varios dueños dicen que responden peor con lluvia fuerte o en rotondas, así que no te confíes solo en ellas. Más en Mantenimiento, en «Seguridad y emergencias»."
     }
   ]
 }
