@@ -1,26 +1,5 @@
 /* "Control remoto" (specs/car-remote-e3.md R6). Buttons are the car's dialog buttons (buttons.module.css, stock look),
    made large; rows follow the linked-devices list rhythm (CarDevicesCard.module.css). */
-.connection {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 4px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  flex-shrink: 0;
-}
-.dotOn {
-  background: var(--success);
-}
-
 .note {
   margin: 0 0 14px;
   font-size: 12px;

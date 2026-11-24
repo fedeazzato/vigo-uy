@@ -58,6 +58,9 @@ vi.mock('../components/QrScanner', () => ({ default: () => <div /> }))
 import VaultPage from './VaultPage'
 import { encryptForInbox } from '../lib/vault/inbox'
 
+// The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
+vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
+
 function renderPage() {
   return render(
     <MemoryRouter>

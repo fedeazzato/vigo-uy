@@ -59,22 +59,22 @@ export default function LinkCarPage() {
   return (
     <div>
       <PageHeader
-        title="🔗 Vincular auto"
+        title="🔗 Conectar la pantalla"
         subtitle="Conectá la pantalla de tu Vigo con tu vehículo en WikiVigo, sin escribir tu email en el auto."
       />
 
       <Card>
         <CardTitle>Código del auto</CardTitle>
-        {!supabase && <Alert type="warning">La vinculación no está disponible en este momento.</Alert>}
+        {!supabase && <Alert type="warning">Conectar la pantalla no está disponible en este momento.</Alert>}
 
         {linked ? (
           <div className={styles.done}>
             <Alert type="success">
-              ¡Listo! <strong>{linked.name}</strong> quedó vinculado a tu vehículo. En unos segundos la
+              ¡Listo! <strong>{linked.name}</strong> quedó conectado a tu vehículo. En unos segundos la
               pantalla del auto lo va a confirmar.
             </Alert>
             <Link to="/mi-vigo" className={styles.primaryLink}>
-              Ver dispositivos vinculados
+              Ver pantallas conectadas
             </Link>
             {/* specs/vault-onboarding.md Phase B: the next steps instead of a dead end. */}
             <VaultChecklist />
@@ -82,7 +82,7 @@ export default function LinkCarPage() {
         ) : (
           <form className={formStyles.form} onSubmit={submit}>
             <p className={styles.steps}>
-              En el auto, abrí <strong>Mi Vigo</strong> y tocá <strong>Vincular con WikiVigo</strong>. Escaneá
+              En el auto, abrí <strong>Mi Vigo</strong> y tocá el botón de <strong>WikiVigo</strong>. Escaneá
               el código QR con el teléfono o escribí acá el código de {PAIRING_CODE_LENGTH} caracteres que
               aparece en la pantalla. Vence a los 10 minutos.
             </p>
@@ -129,23 +129,23 @@ export default function LinkCarPage() {
                 maxLength={MAX_DEVICE_NAME_LENGTH}
               />
               <span className={formStyles.hint}>
-                Así lo vas a ver en la lista de dispositivos vinculados.
+                Así lo vas a ver en la lista de pantallas conectadas.
               </span>
             </div>
 
             {members.length > 0 && (
               <p className={styles.target}>
-                Se va a vincular al vehículo de: <strong>{members.join(', ')}</strong>
+                Se va a conectar al vehículo de: <strong>{members.join(', ')}</strong>
               </p>
             )}
 
             <button type="submit" className={styles.submitBtn} disabled={!valid || busy || !supabase}>
-              {busy ? 'Vinculando…' : 'Vincular este auto'}
+              {busy ? 'Conectando…' : 'Conectar la pantalla'}
             </button>
 
             <p className={formStyles.hint}>
               El auto solo podrá enviar datos a este vehículo y nada se publica en la comunidad sin que lo
-              confirmes desde tu teléfono. Podés desvincularlo cuando quieras en{' '}
+              confirmes desde tu teléfono. Podés desconectarlo cuando quieras en{' '}
               <Link to="/mi-vigo">Mi Vigo</Link>.
             </p>
           </form>

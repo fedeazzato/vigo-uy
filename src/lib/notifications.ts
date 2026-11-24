@@ -50,13 +50,13 @@ export function notificationLink(
       return '/carga'
     case 'vehicle_trip':
     case 'vehicle_service':
-      return '/mi-actividad'
+      return '/mi-vigo/registros'
     case 'car_rollback':
       return '/moderacion?tab=versiones'
     case 'car_charge_draft':
       return '/mi-vigo/borradores'
     default:
-      if (n.part_purchase_id) return '/repuestos'
+      if (n.part_purchase_id) return '/cuidar/repuestos'
       if (n.service_entry_id) return '/costos'
       return '/comunidad'
   }

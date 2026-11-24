@@ -11,7 +11,7 @@ export default function NotFoundPage() {
       />
       <Card>
         <p>
-          Volvé al <Link to="/">inicio</Link> o buscá lo que necesitás en la <Link to="/guia">Guía</Link>.
+          Volvé al <Link to="/">inicio</Link> o buscá lo que necesitás en la <Link to="/aprender">Aprender</Link>.
         </p>
       </Card>
     </div>

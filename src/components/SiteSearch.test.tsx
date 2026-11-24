@@ -83,7 +83,7 @@ describe('SiteSearch', () => {
     expect(searchCommunityContentMock).toHaveBeenCalledWith('carga')
   })
 
-  it('shows grouped Guía and Comunidad results', async () => {
+  it('shows grouped Aprender and Comunidad results', async () => {
     const curated: CuratedSearchResult[] = [{ path: '/carga', title: 'Carga en casa' }]
     const community: CommunitySearchResult[] = [
       {
@@ -102,7 +102,7 @@ describe('SiteSearch', () => {
     renderSearch(true)
     await typeAndDebounce('rocha')
 
-    expect(screen.getByText('Guía')).toBeTruthy()
+    expect(screen.getByText('Aprender')).toBeTruthy()
     expect(screen.getByText('Carga en casa')).toBeTruthy()
     // "Comunidad" appears twice: the group label and the result's badge.
     expect(screen.getAllByText('Comunidad').length).toBe(2)
@@ -157,7 +157,7 @@ describe('SiteSearch', () => {
     await typeAndDebounce('rueda')
 
     fireEvent.click(screen.getByText('Rueda auxiliar'))
-    expect(screen.getByTestId('location').textContent).toBe('/accesorios')
+    expect(screen.getByTestId('location').textContent).toBe('/cuidar/accesorios')
   })
 
   it('closes on Escape', () => {

@@ -57,6 +57,9 @@ vi.mock('../components/QrScanner', () => ({
 
 import VaultPage from './VaultPage'
 
+// The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
+vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
+
 let fake: FakeAuthenticator
 let confirmSpy: MockInstance<(message?: string) => boolean>
 let writeText: ReturnType<typeof vi.fn>

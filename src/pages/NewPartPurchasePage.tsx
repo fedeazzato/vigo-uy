@@ -16,6 +16,7 @@ import {
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import formStyles from '../styles/formControls.module.css'
 import CityCombobox from '../components/CityCombobox'
+import { confirmDialog } from '../lib/confirmDialog'
 
 export default function NewPartPurchasePage() {
   const { id } = useParams()
@@ -165,9 +166,9 @@ export default function NewPartPurchasePage() {
     )
   }
 
-  function handleCancel() {
-    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
-    navigate('/mi-actividad')
+  async function handleCancel() {
+    if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
+    navigate('/mi-vigo/registros')
   }
 
   return (

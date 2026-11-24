@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import { preferCommunity, useCommunityContent, verifiedFirst } from '../lib/communityData'
 import styles from '../components/TripCard.module.css'
 import type { BadgeColor, RoutesData } from '../types'
+import GlossaryLink from '../components/GlossaryLink'
 
 const data = rawData as RoutesData
 
@@ -125,7 +126,7 @@ export default function RoutesPage() {
 
       <Card>
         <p className={styles.routeStopNote}>
-          Las rutas «Oficial» las revisó el grupo. ¿Querés ver más? Todos los viajes con sus paradas están en{' '}
+          Las rutas <GlossaryLink term="oficial">«Oficial»</GlossaryLink> las revisó el grupo. ¿Querés ver más? Todos los viajes con sus paradas están en{' '}
           <Link to="/comunidad">Comunidad</Link>.
         </p>
       </Card>

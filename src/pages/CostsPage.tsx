@@ -36,6 +36,7 @@ import type {
   StatItem,
   TripLog,
 } from '../types'
+import GlossaryLink from '../components/GlossaryLink'
 
 // A provider-averages row (name + optional badge + price + sample note),
 // shared by the per-provider and per-provider-per-coverage tables below.
@@ -218,9 +219,15 @@ export default function CostsPage() {
       <Card>
         <p className={styles.realCaseConditions}>
           {communityFirst ? (
-            <>Services reales de otros dueños. «Oficial» quiere decir que lo revisó un moderador. </>
+            <>
+              Services reales de otros dueños. <GlossaryLink term="oficial">«Oficial»</GlossaryLink>: lo revisó un
+              moderador.{' '}
+            </>
           ) : (
-            <>«Oficial» quiere decir que lo revisó el grupo; «Comunidad», que lo cargó otro dueño. </>
+            <>
+              <GlossaryLink term="oficial">«Oficial» y «Comunidad»</GlossaryLink>: revisado por el grupo o cargado
+              por otro dueño.{' '}
+            </>
           )}
           Mirá todos en <Link to="/comunidad">Comunidad</Link>.
           {supabase && communityEntries.length === 0 && (
@@ -273,7 +280,9 @@ export default function CostsPage() {
           {(!model || model === 'E2') && (
             <div className={styles.patentRow}>
               <span className={styles.patentModel}>Vigo E2</span>
-              <span className={styles.patentVal}>Aforo (valor oficial del auto): {patent.e2.valuation}</span>
+              <span className={styles.patentVal}>
+                <GlossaryLink term="aforo">Aforo</GlossaryLink> (valor oficial): {patent.e2.valuation}
+              </span>
               <span className={styles.patentCost}>{patent.e2.patent}</span>
             </div>
           )}
@@ -281,7 +290,8 @@ export default function CostsPage() {
             <div className={styles.patentRow}>
               <span className={styles.patentModel}>Vigo E2+</span>
               <span className={styles.patentVal}>
-                {model === 'E2+' ? 'Aforo (valor oficial del auto)' : 'Aforo'}: {patent.e2plus.valuation}
+                <GlossaryLink term="aforo">Aforo</GlossaryLink>
+                {model === 'E2+' ? ' (valor oficial)' : ''}: {patent.e2plus.valuation}
               </span>
               <span className={styles.patentCost}>{patent.e2plus.patent}</span>
             </div>

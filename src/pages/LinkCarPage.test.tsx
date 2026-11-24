@@ -32,7 +32,7 @@ function renderAt(path: string) {
 }
 
 const codeInput = () => screen.getByLabelText<HTMLInputElement>('Código')
-const submit = () => screen.getByRole<HTMLButtonElement>('button', { name: 'Vincular este auto' })
+const submit = () => screen.getByRole<HTMLButtonElement>('button', { name: 'Conectar la pantalla' })
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -82,9 +82,9 @@ describe('LinkCarPage', () => {
     renderAt('/mi-vigo/vincular?c=K7Q2M9')
     fireEvent.change(screen.getByLabelText('Nombre del auto (opcional)'), { target: { value: 'Mi Vigo' } })
     fireEvent.click(submit())
-    await screen.findByText(/quedó vinculado a tu vehículo/)
+    await screen.findByText(/quedó conectado a tu vehículo/)
     expect(mocks.claimCarPairing).toHaveBeenCalledWith('K7Q2M9', 'Mi Vigo')
-    expect(screen.getByRole('link', { name: 'Ver dispositivos vinculados' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Ver pantallas conectadas' })).toBeTruthy()
     expect(screen.getByText('Checklist de la bóveda')).toBeTruthy() // vault-onboarding.md Phase B
   })
 

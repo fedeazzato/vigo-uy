@@ -10,6 +10,7 @@ import rawMantenimiento from '../data/mantenimiento.json'
 import type { MantenimientoData } from '../types'
 import formStyles from '../styles/formControls.module.css'
 import CityCombobox from '../components/CityCombobox'
+import { confirmDialog } from '../lib/confirmDialog'
 
 const mantenimiento = rawMantenimiento as MantenimientoData
 const KNOWN_DEALERS = [...new Set(mantenimiento.dealerPrices.map((d) => d.dealer))]
@@ -108,9 +109,9 @@ export default function NewServiceEntryPage() {
     )
   }
 
-  function handleCancel() {
-    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
-    navigate('/mi-actividad')
+  async function handleCancel() {
+    if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
+    navigate('/mi-vigo/registros')
   }
 
   return (

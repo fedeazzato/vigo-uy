@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { PageHeader, Card, Alert } from '../components/UI'
+import { Card, Alert } from '../components/UI'
 import TripCard, { TripSummaryButton } from '../components/TripCard'
 import { useAuth } from '../context/AuthContext'
 import { useRegisterSheet } from '../context/RegisterSheetContext'
@@ -32,10 +32,7 @@ import type {
 } from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
-
-// Once the user registers a passkey (or says "not now"), stop showing the
-// prompt card on every visit.
-const PASSKEY_PROMPT_KEY = 'vigo-passkey-prompt-dismissed'
+import { confirmDialog } from '../lib/confirmDialog'
 
 // What the forms put in location.state.saved → the toast text.
 const SAVED_MESSAGES: Record<string, string> = {
@@ -48,7 +45,7 @@ const SAVED_MESSAGES: Record<string, string> = {
 const SAVED_TOAST_MS = 2200
 
 export default function DashboardPage() {
-  const { user, passkeysSupported, registerPasskey } = useAuth()
+  const { user } = useAuth()
   const { openRegisterSheet } = useRegisterSheet()
   const location = useLocation()
   const navigate = useNavigate()
@@ -84,11 +81,6 @@ export default function DashboardPage() {
   const [loadingPurchases, setLoadingPurchases] = useState(true)
   const [loadingInsurance, setLoadingInsurance] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null)
-  const [registeringPasskey, setRegisteringPasskey] = useState(false)
-  const [passkeyDismissed, setPasskeyDismissed] = useState(
-    () => localStorage.getItem(PASSKEY_PROMPT_KEY) === '1'
-  )
 
   // Trip rows expand in place to the full TripCard (stops, battery, costs),
   // same pattern as the Comunidad feed.
@@ -158,7 +150,7 @@ export default function DashboardPage() {
 
   async function handleDeleteEntry(entryId: string) {
     if (!supabase) return
-    if (!confirm('¿Borrar este service? No se puede deshacer.')) return
+    if (!(await confirmDialog('¿Borrar este service? No se puede deshacer.'))) return
 
     const { error } = await supabase.from('service_entries').delete().eq('id', entryId)
     if (error) {
@@ -171,7 +163,7 @@ export default function DashboardPage() {
 
   async function handleDeleteTrip(tripId: string) {
     if (!supabase) return
-    if (!confirm('¿Borrar este viaje? No se puede deshacer.')) return
+    if (!(await confirmDialog('¿Borrar este viaje? No se puede deshacer.'))) return
 
     const { error } = await supabase.from('trip_logs').delete().eq('id', tripId)
     if (error) {
@@ -184,7 +176,7 @@ export default function DashboardPage() {
 
   async function handleDeletePurchase(purchaseId: string) {
     if (!supabase) return
-    if (!confirm('¿Borrar esta compra? No se puede deshacer.')) return
+    if (!(await confirmDialog('¿Borrar esta compra? No se puede deshacer.'))) return
 
     const { error } = await supabase.from('part_purchases').delete().eq('id', purchaseId)
     if (error) {
@@ -197,7 +189,7 @@ export default function DashboardPage() {
 
   async function handleDeleteInsurance(quoteId: string) {
     if (!supabase) return
-    if (!confirm('¿Borrar este seguro? No se puede deshacer.')) return
+    if (!(await confirmDialog('¿Borrar este seguro? No se puede deshacer.'))) return
 
     const { error } = await supabase.from('insurance_quotes').delete().eq('id', quoteId)
     if (error) {
@@ -206,25 +198,6 @@ export default function DashboardPage() {
     }
     invalidateCommunityCache()
     setInsuranceQuotes((prev) => prev.filter((q) => q.id !== quoteId))
-  }
-
-  async function handleRegisterPasskey() {
-    setRegisteringPasskey(true)
-    setPasskeyMessage(null)
-    const { error } = await registerPasskey()
-    setRegisteringPasskey(false)
-    setPasskeyMessage(
-      error
-        ? 'No pudimos crear la llave de acceso. Probá de nuevo; mientras tanto, entrás con el código por email.'
-        : 'Llave de acceso registrada. La próxima vez podés entrar sin código.'
-    )
-    // Registered: the prompt did its job, don't show it on future visits.
-    if (!error) localStorage.setItem(PASSKEY_PROMPT_KEY, '1')
-  }
-
-  function dismissPasskeyPrompt() {
-    localStorage.setItem(PASSKEY_PROMPT_KEY, '1')
-    setPasskeyDismissed(true)
   }
 
   function exportEntriesCsv() {
@@ -368,44 +341,12 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader
-        title="🗒️ Mi actividad"
-        subtitle={
-          <>
-            Tus costos, repuestos y viajes registrados. Tu perfil y vehículo están en{' '}
-            <Link to="/mi-vigo">Mi Vigo</Link>.
-          </>
-        }
-      />
-
       {savedMessage && (
         <div className={styles.saveToast} role="status">
           {savedMessage}
         </div>
       )}
       {error && <Alert type="danger">{error}</Alert>}
-
-      {passkeysSupported && (!passkeyDismissed || passkeyMessage) && (
-        <Card>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionHeaderTitle}>Acceso rápido</h2>
-            {!passkeyMessage && (
-              <button className={styles.addLink} onClick={dismissPasskeyPrompt}>
-                Ahora no
-              </button>
-            )}
-          </div>
-          {!passkeyMessage && (
-            <p className={listStyles.empty}>
-              Entrá sin esperar el código por email: usá la huella, la cara o el PIN de este dispositivo.
-            </p>
-          )}
-          {passkeyMessage && <p className={listStyles.empty}>{passkeyMessage}</p>}
-          <button className={styles.addLink} onClick={handleRegisterPasskey} disabled={registeringPasskey}>
-            {registeringPasskey ? 'Registrando…' : '🔑 Entrar con tu huella o tu cara (llave de acceso)'}
-          </button>
-        </Card>
-      )}
 
       {nothingYet && (
         <Card className={styles.emptyState}>

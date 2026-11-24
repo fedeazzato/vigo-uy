@@ -7,6 +7,9 @@ import { createChargingStation } from '../lib/communityData'
 import { loadDraft, saveDraft } from '../lib/tripDraftStore'
 import type { ChargingStation } from '../types'
 
+// The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
+vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
+
 // A minimal always-succeeds stand-in for the real client (which is null in
 // this test env -- no VITE_SUPABASE_* -- and would otherwise no-op every
 // submit). Only the draft-autosave tests below actually reach a submit or
@@ -530,6 +533,7 @@ describe('NewTripLogPage draft autosave (specs/trip-draft-autosave.md)', () => {
     await advanceDebounce()
 
     fireEvent.click(screen.getByText('Descartar viaje'))
+    await act(async () => {})
     expect(screen.getByLabelText<HTMLInputElement>('📍 Origen').value).toBe('')
     expect(loadDraft()).toBeNull()
   })

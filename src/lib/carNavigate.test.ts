@@ -64,7 +64,7 @@ describe('sendDestination', () => {
 
   it('words the server errors', async () => {
     rpcMock.mockResolvedValue({ data: { error: 'no_car' }, error: null })
-    expect((await sendDestination({ lat: -34.9, lon: -56.1, label: 'x' })).error).toMatch(/No hay un auto/)
+    expect((await sendDestination({ lat: -34.9, lon: -56.1, label: 'x' })).error).toMatch(/todavía no tiene la pantalla del auto conectada/)
   })
 })
 

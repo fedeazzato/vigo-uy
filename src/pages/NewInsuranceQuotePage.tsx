@@ -21,6 +21,7 @@ import {
   type InsuranceProvider,
   type InsuranceZone,
 } from '../types'
+import { confirmDialog } from '../lib/confirmDialog'
 
 const PERIOD_YEARS_OPTIONS = [1, 2, 3, 4, 5] as const
 
@@ -242,9 +243,9 @@ export default function NewInsuranceQuotePage() {
     })
   }
 
-  function handleCancel() {
-    if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return
-    navigate('/mi-actividad')
+  async function handleCancel() {
+    if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
+    navigate('/mi-vigo/registros')
   }
 
   return (

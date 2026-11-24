@@ -1,0 +1,32 @@
+.list {
+  margin: 0;
+}
+
+.item {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.item:last-child {
+  border-bottom: none;
+}
+.item:focus {
+  outline: none;
+}
+
+.target {
+  border-left: 4px solid var(--accent);
+}
+
+.word {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-title);
+}
+
+.definition {
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}

@@ -155,3 +155,37 @@ Preguntas frecuentes (contenido en `src/data/*.json`, ya en tono), Vincular auto
   CarChargeDrafts, CommunityStations, StationPickerModal, StationsMap, ErrorBoundary, errors, carLink, ocmStations.
 - Nuevo `NotFoundPage.test.tsx`.
 - `npm test`, `npm run type-check`, `npm run lint`, `npm run build` en verde.
+
+## 7. Decisiones del dueño (2026-11-24) — implementadas en la rama `site-structure`
+
+Todas «SÍ». Propuestas 5.1–5.6 más 7 (versiones), 8–11 de la segunda pasada. **No** se tocó `src/data/*.json`
+(propuesta 7 de contenido curado la hace otro trabajo en paralelo).
+
+| # | Decisión | Implementación |
+|---|---|---|
+| 1 | «Mi actividad» pasa a Mi Vigo › «Mis registros» | `MyVigoLayout` con pestañas `PageTabs` «Mi auto» (`/mi-vigo`) / «Mis registros» (`/mi-vigo/registros`, requiere sesión). `/mi-actividad` redirige conservando el `state` del aviso «guardado» (`RedirectKeepState`). Formularios, login, notificaciones y moderación vuelven a `/mi-vigo/registros`. |
+| 2 | Una sola tarjeta «Tu auto ahora» | `CarStatusCard` muestra batería, autonomía, cable, tiempo a carga completa, límite, **en línea / sin conexión** (`fetchCarLastSeen`) y último dato. «Control remoto» queda solo con botones, límite y últimas órdenes. |
+| 3 | Palabras: «Conectar la pantalla» y «Sumar a tu familia» | Sin «vincular» en textos visibles (rutas como `/mi-vigo/vincular` quedan: el QR del auto las usa). Mensaje del servidor «no está vinculado» se reescribe en `errors.ts`. **Pendiente fuera del sitio**: el botón del auto todavía dice «Vincular con WikiVigo» (repo vigo-hack); el sitio dice «tocá el botón de WikiVigo». |
+| 4 | Códigos de familia de un solo uso | Migración `0082_family_invite_codes.sql` (**sin aplicar**): tabla `vehicle_invites` (hash SHA-256, vehículo, creador, vence, usado por/cuándo; RLS sin políticas ni permisos), `create_family_invite()` (solo creador o permiso de control, 10 por hora por persona, máx. 5 vivos por vehículo, 8 letras, vence a las 24 h), `join_vehicle_by_code` acepta solo códigos válidos y los consume en la misma transacción (bloqueo de fila); el código fijo `vehicles.join_code` queda en NULL y ya no sirve. UI: ningún código visible por defecto; «Sumar a tu familia» crea uno nuevo cada vez, grande, con «Copiar» / «Compartir» y «Vence en 24 h, sirve para una persona». |
+| 5 | Mantenimiento + Repuestos + Accesorios | Página «🧰 Cuidar tu Vigo» (`/cuidar/…`) con tres pestañas; `/mantenimiento`, `/repuestos`, `/accesorios` redirigen. Búsqueda y notificaciones apuntan a las pestañas. |
+| 6 | «Guía» → «Aprender» en tres grupos | `/aprender` (y `/guia` redirige) con *Cargar y viajar* (Carga, Rutas, Planificá tu viaje), *Costos y mantenimiento* (Costos, Cuidar tu Vigo), *Conocé tu Vigo* (Ficha técnica, Tecnología, Preguntas frecuentes, Glosario). Barra inferior: Inicio, Aprender, ＋ Registrar, Comunidad, Mi Vigo. Barra lateral: Inicio, Aprender, Comunidad, Mi Vigo y los tres grupos. |
+| 7 | Versiones de software a Novedades | `FirmwareCard` (tabla) en `/novedades`; Mi Vigo muestra una línea «Tu pantalla: versión X — ¿hay una más nueva?» (`OwnFirmwareLine`). |
+| 8 | Glosario | `/aprender/glosario` (`src/lib/glossary.ts`, 17 palabras); `GlossaryLink` en Carga/Costos (Oficial, Aforo), Rutas, Preparar (ADB), Login (llave de acceso), datos del auto (kWh/100 km). |
+| 9 | Diálogo propio en vez de `confirm()` | `confirmDialog()` (`src/lib/confirmDialog.tsx` + `ConfirmDialog`): `alertdialog`, foco atrapado, Esc cancela, foco inicial en «Cancelar», botón con el verbo («Borrar», «Quitar», «Descartar»…). Los 30 usos reemplazados. |
+| 10 | Llave de acceso a «Tu cuenta» | `PasskeyCard` en Mi Vigo › Tu cuenta; se quitó de Mis registros. |
+| 11 | Planificador desde Carga | Aviso «🧭 Planificá tu viaje» arriba de `/carga`. |
+
+### Chequeos SQL después de aplicar 0082 (como dueño en el SQL Editor / con dos cuentas de prueba)
+
+1. `select join_code from vehicles where join_code is not null;` → 0 filas.
+2. Cuenta A (creador): `select * from create_family_invite();` → un código de 8 letras y `expires_at` ≈ ahora + 24 h; en
+   `vehicle_invites` solo aparece `code_hash` (64 hex), nunca el código.
+3. Cuenta B: `select join_vehicle_by_code('<código>');` → id del vehículo de A; B queda con `car_role = 'view'`;
+   la fila tiene `used_at`/`used_by`.
+4. Cuenta C con el mismo código → `null` (ya usado) y una fila en `join_code_attempts`.
+5. Un código con `expires_at` vencido (`update vehicle_invites set expires_at = now() - interval '1 minute'` como
+   service role) → `null`.
+6. Miembro con `car_role = 'view'` llamando a `create_family_invite()` → error «Solo quien creó el vehículo…».
+7. 11 llamadas seguidas → error «Creaste muchos códigos seguidos…»; con 5 vivos → «Ya hay 5 códigos sin usar…».
+8. Como `authenticated`: `select * from vehicle_invites;` → error de permiso (sin grants).
+9. Después: `npm run gen:types` (el tipo `join_code` ya figura como `string | null` y la RPC está agregada a mano).

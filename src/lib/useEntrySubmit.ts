@@ -35,7 +35,7 @@ export function useEntrySubmit(saved: SavedFlag) {
       return false
     }
     invalidateCommunityCache()
-    navigate('/mi-actividad', { state: { saved } })
+    navigate('/mi-vigo/registros', { state: { saved } })
     return true
   }
 

@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import ProfilePrefsSync from './components/ProfilePrefsSync'
 import RequireAuth from './components/RequireAuth'
 import RequireModerator from './components/RequireModerator'
+import RedirectKeepState from './components/RedirectKeepState'
 // Eager: the index route, so `/` never shows a loading flash on first paint.
 import HomePage from './pages/HomePage'
 // Lazy: every other page becomes its own chunk, fetched on navigation
@@ -17,6 +18,9 @@ const AccessoriesPage = lazy(() => import('./pages/AccessoriesPage'))
 const TechPage = lazy(() => import('./pages/TechPage'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const MyVigoPage = lazy(() => import('./pages/MyVigoPage'))
+const MyVigoLayout = lazy(() => import('./pages/MyVigoLayout'))
+const CarePage = lazy(() => import('./pages/CarePage'))
+const GlossaryPage = lazy(() => import('./pages/GlossaryPage'))
 const NovedadesPage = lazy(() => import('./pages/NovedadesPage'))
 const VehicleConfigPage = lazy(() => import('./pages/VehicleConfigPage'))
 const FichaTecnicaPage = lazy(() => import('./pages/FichaTecnicaPage'))
@@ -48,16 +52,31 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route path="guia" element={<GuidePage />} />
-          <Route path="mi-vigo" element={<MyVigoPage />} />
+          <Route path="aprender" element={<GuidePage />} />
+          <Route path="aprender/glosario" element={<GlossaryPage />} />
+          <Route path="guia" element={<Navigate to="/aprender" replace />} />
+          {/* Mi Vigo tabs: Mi auto / Mis registros (owner decision 2026-11-24 #1). */}
+          <Route path="mi-vigo" element={<MyVigoLayout />}>
+            <Route index element={<MyVigoPage />} />
+            <Route element={<RequireAuth />}>
+              <Route path="registros" element={<DashboardPage />} />
+            </Route>
+          </Route>
           <Route path="ficha-tecnica" element={<FichaTecnicaPage />} />
           <Route path="carga" element={<ChargingPage />} />
           <Route path="rutas" element={<RoutesPage />} />
           <Route path="rutas/planificar" element={<RoutePlannerPage />} />
           <Route path="costos" element={<CostsPage />} />
-          <Route path="mantenimiento" element={<MantenimientoPage />} />
-          <Route path="repuestos" element={<PartsPage />} />
-          <Route path="accesorios" element={<AccessoriesPage />} />
+          {/* Cuidar tu Vigo: one page, three tabs (owner decision 2026-11-24 #5); old routes redirect to the tabs. */}
+          <Route path="cuidar" element={<CarePage />}>
+            <Route index element={<Navigate to="mantenimiento" replace />} />
+            <Route path="mantenimiento" element={<MantenimientoPage />} />
+            <Route path="repuestos" element={<PartsPage />} />
+            <Route path="accesorios" element={<AccessoriesPage />} />
+          </Route>
+          <Route path="mantenimiento" element={<Navigate to="/cuidar/mantenimiento" replace />} />
+          <Route path="repuestos" element={<Navigate to="/cuidar/repuestos" replace />} />
+          <Route path="accesorios" element={<Navigate to="/cuidar/accesorios" replace />} />
           <Route path="tecnologia" element={<TechPage />} />
           <Route path="faq" element={<FaqPage />} />
           <Route path="novedades" element={<NovedadesPage />} />
@@ -67,8 +86,9 @@ export default function App() {
           <Route path="comunidad" element={<CommunityFeedPage />} />
           {/* Account settings live on Mi Vigo now; keep old links working. */}
           <Route path="perfil" element={<Navigate to="/mi-vigo" replace />} />
+          <Route path="mi-actividad" element={<RedirectKeepState to="/mi-vigo/registros" />} />
           <Route element={<RequireAuth />}>
-            <Route path="mi-actividad" element={<DashboardPage />} />
+
             <Route path="notificaciones" element={<NotificationsPage />} />
             {/* The car's QR opens #/mi-vigo/vincular?c=CODE (specs/car-link-phase0.md). */}
             <Route path="mi-vigo/vincular" element={<LinkCarPage />} />

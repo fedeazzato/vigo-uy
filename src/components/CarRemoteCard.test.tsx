@@ -24,6 +24,9 @@ vi.mock('../lib/carRole', async (importOriginal) => ({
 
 import CarRemoteCard from './CarRemoteCard'
 
+// The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
+vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
+
 const iso = (msAgo: number) => new Date(Date.now() - msAgo).toISOString()
 
 function data(over: Partial<CarRemoteData> = {}): CarRemoteData {
@@ -99,11 +102,12 @@ describe('CarRemoteCard', () => {
     expect(second.container.innerHTML).toBe('')
   })
 
-  it('shows online, the buttons and the orders, but not the status ("Estado del auto" shows it)', async () => {
+  it('shows the buttons and the orders, but not the status or connection ("Tu auto ahora" shows them)', async () => {
     mocks.fetchCarRemote.mockResolvedValue(data())
     render(<CarRemoteCard />)
     expect(await screen.findByText('Control remoto')).toBeTruthy()
-    expect(screen.getByText('En línea')).toBeTruthy()
+    // online/offline moved to "Tu auto ahora" (owner decision 2026-11-24 #2)
+    expect(screen.queryByText('En línea')).toBeNull()
     expect(screen.getByText(/si no la recibe en 2 minutos, se cancela/)).toBeTruthy()
     // owner at the car 2026-11-22: no repeated battery / range / cable / time to full
     expect(screen.queryByText('64 %')).toBeNull()
@@ -132,17 +136,7 @@ describe('CarRemoteCard', () => {
     expect(screen.queryByRole('button', { name: 'Cancelar' })).toBeNull()
   })
 
-  it('"En línea" tolerates one late 10 s poll (seen 34 s ago), not more', async () => {
-    mocks.fetchCarRemote.mockResolvedValue(data({ lastSeenAt: iso(34_000) }))
-    const first = render(<CarRemoteCard />)
-    expect(await screen.findByText('En línea')).toBeTruthy()
-    first.unmount()
-    mocks.fetchCarRemote.mockResolvedValue(data({ lastSeenAt: iso(40_000) }))
-    render(<CarRemoteCard />)
-    expect(await screen.findByText(/^Sin conexión — visto/)).toBeTruthy()
-  })
-
-  it('offline: "Sin conexión", no stop button when not charging', async () => {
+  it('offline: no connection line here, no stop button when not charging', async () => {
     mocks.fetchCarRemote.mockResolvedValue(
       data({
         lastSeenAt: iso(2 * 3600_000),
@@ -151,7 +145,8 @@ describe('CarRemoteCard', () => {
       })
     )
     render(<CarRemoteCard />)
-    expect(await screen.findByText('Sin conexión — visto hace 2 h')).toBeTruthy()
+    expect(await screen.findByText('Control remoto')).toBeTruthy()
+    expect(screen.queryByText(/Sin conexión/)).toBeNull()
     expect(screen.queryByText(/Carga completa en/)).toBeNull()
     expect(screen.queryByRole('button', { name: 'Detener la carga' })).toBeNull()
     expect(screen.queryByText('Últimas órdenes')).toBeNull()

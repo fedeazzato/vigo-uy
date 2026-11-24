@@ -15,6 +15,7 @@ import type { ContentComment, ReactableContent } from '../types'
 import formStyles from '../styles/formControls.module.css'
 import FollowButton from './FollowButton'
 import styles from './ContentReactions.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 const MAX_COMMENT_LENGTH = 280
 
@@ -99,7 +100,7 @@ export default function ContentReactions({ content }: ContentReactionsProps) {
 
   async function handleDeleteComment(id: string) {
     if (!supabase) return
-    if (!confirm('¿Borrar este comentario? No se puede deshacer.')) return
+    if (!(await confirmDialog('¿Borrar este comentario? No se puede deshacer.'))) return
     const { error } = await deleteComment(id)
     if (error) {
       setError(error)

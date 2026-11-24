@@ -23,6 +23,7 @@ import type {
 } from '../types'
 import styles from './ModerationPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 type Tab = 'contenido' | 'catalogos' | 'usuarios' | 'versiones'
 type ContentTable =
@@ -139,7 +140,7 @@ export default function ModerationPage() {
   }
 
   async function handleDeleteComment(id: string) {
-    if (!confirm('¿Eliminar este comentario?')) return
+    if (!(await confirmDialog('¿Eliminar este comentario?'))) return
     const { error } = await deleteComment(id)
     if (error) {
       setError(error)
@@ -178,7 +179,7 @@ export default function ModerationPage() {
 
   async function deleteItem(table: ContentTable, id: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar definitivamente esta entrada?')) return
+    if (!(await confirmDialog('¿Eliminar definitivamente esta entrada?'))) return
     const { error } = await supabase.from(table).delete().eq('id', id)
     if (error) {
       setError(toFriendlyError(error))
@@ -195,7 +196,7 @@ export default function ModerationPage() {
   async function setModerator(target: AdminUserRow, makeModerator: boolean) {
     if (!supabase) return
     const action = makeModerator ? 'dar moderación a' : 'quitar la moderación a'
-    if (!confirm(`¿Seguro que querés ${action} ${target.display_name}?`)) return
+    if (!(await confirmDialog(`¿Seguro que querés ${action} ${target.display_name}?`))) return
     setError(null)
     const { error } = await supabase.rpc('admin_set_user_moderator', {
       target_user: target.id,
@@ -211,7 +212,7 @@ export default function ModerationPage() {
   async function setBanned(target: AdminUserRow, banned: boolean) {
     if (!supabase) return
     const action = banned ? 'banear a' : 'desbanear a'
-    if (!confirm(`¿Seguro que querés ${action} ${target.display_name}?`)) return
+    if (!(await confirmDialog(`¿Seguro que querés ${action} ${target.display_name}?`))) return
     setError(null)
     const { error } = await supabase.rpc('admin_set_user_banned', {
       target_user: target.id,

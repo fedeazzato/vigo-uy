@@ -4,6 +4,7 @@ import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import { MASTER_CODE, factoryCode, isValidPdsn, normalizePdsn } from '../lib/vigoPass'
 import styles from './PrepareCarPage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import GlossaryLink from '../components/GlossaryLink'
 
 // "Preparar mi Vigo" (specs/prepare-my-vigo.md): guides the owner through the engineering menu (Factory + Master codes) and links
 // the Windows installer. The PDSN stays in component state: never sent, never stored (D2).
@@ -248,7 +249,7 @@ export default function PrepareCarPage() {
           <Card>
             <CardTitle icon="3️⃣">Activá el ADB</CardTitle>
             <p className={styles.text}>
-              El ADB es la puerta por cable que usa el instalador para hablar con la pantalla. Se abre un menú
+              El <GlossaryLink term="adb">ADB</GlossaryLink> es la puerta por cable del instalador. Se abre un menú
               en chino (工程调试模式). Buscá el interruptor <strong className={styles.mono}>adb开启</strong> y
               activalo. Pide una segunda contraseña: escribí el <strong>código maestro</strong>, que es el
               mismo para todas las Vigo.

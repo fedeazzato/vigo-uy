@@ -25,7 +25,7 @@ export default function AccessoriesPage() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader as="h2"
         title="🔧 Accesorios"
         subtitle="Mejoras, adaptaciones y compras recomendadas por la comunidad."
       />

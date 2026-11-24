@@ -88,3 +88,21 @@
 .dangerBtn {
   composes: danger from '../styles/buttons.module.css';
 }
+
+/* One-time family invite (0082): the code big, then copy/share. */
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.invite .joinCode {
+  font-size: 28px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

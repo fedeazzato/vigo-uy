@@ -16,6 +16,9 @@ vi.mock('../lib/carLink', async (importOriginal) => ({
 
 import CarDevicesCard from './CarDevicesCard'
 
+// The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
+vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
+
 function device(over: Partial<CarDevice>): CarDevice {
   return {
     id: 'd1',
@@ -65,15 +68,15 @@ describe('CarDevicesCard', () => {
     expect(screen.getByText('Última conexión: hace 5 min')).toBeTruthy()
     expect(screen.getByText(/Mi Vigo 2\.0/)).toBeTruthy()
     expect(screen.getByText('Todavía no se conectó')).toBeTruthy()
-    expect(screen.getByText('Desvinculado el 15 nov')).toBeTruthy()
+    expect(screen.getByText('Desconectado el 15 nov')).toBeTruthy()
     // revoked rows have no action
-    expect(screen.getAllByRole('button', { name: 'Desvincular' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Desconectar' })).toHaveLength(2)
   })
 
   it('shows the empty state with a link to the pairing page', async () => {
     mocks.fetchCarDevices.mockResolvedValue({ devices: [], error: null })
     renderCard()
-    const link = await screen.findByRole('link', { name: 'Vincular auto' })
+    const link = await screen.findByRole('link', { name: 'Conectar la pantalla' })
     expect(link.getAttribute('href')).toBe('/mi-vigo/vincular')
   })
 
@@ -81,7 +84,7 @@ describe('CarDevicesCard', () => {
     mocks.fetchCarDevices.mockResolvedValue({ devices: [device({ name: 'Vigo de Ana' })], error: null })
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
     renderCard()
-    fireEvent.click(await screen.findByRole('button', { name: 'Desvincular' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Desconectar' }))
     expect(confirmSpy).toHaveBeenCalled()
     expect(mocks.revokeCarDevice).not.toHaveBeenCalled()
   })
@@ -96,18 +99,18 @@ describe('CarDevicesCard', () => {
     mocks.revokeCarDevice.mockResolvedValue({ error: null })
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderCard()
-    fireEvent.click(await screen.findByRole('button', { name: 'Desvincular' }))
-    await screen.findByText('«Vigo de Ana» quedó desvinculado.')
+    fireEvent.click(await screen.findByRole('button', { name: 'Desconectar' }))
+    await screen.findByText('«Vigo de Ana» quedó desconectado.')
     expect(mocks.revokeCarDevice).toHaveBeenCalledWith('d1')
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Desvincular' })).toBeNull())
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Desconectar' })).toBeNull())
   })
 
   it('shows a revoke error', async () => {
     mocks.fetchCarDevices.mockResolvedValue({ devices: [device({})], error: null })
-    mocks.revokeCarDevice.mockResolvedValue({ error: 'Ese dispositivo no está vinculado a tu vehículo.' })
+    mocks.revokeCarDevice.mockResolvedValue({ error: 'Esa pantalla no está conectada a tu vehículo.' })
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderCard()
-    fireEvent.click(await screen.findByRole('button', { name: 'Desvincular' }))
-    await screen.findByText('Ese dispositivo no está vinculado a tu vehículo.')
+    fireEvent.click(await screen.findByRole('button', { name: 'Desconectar' }))
+    await screen.findByText('Esa pantalla no está conectada a tu vehículo.')
   })
 })

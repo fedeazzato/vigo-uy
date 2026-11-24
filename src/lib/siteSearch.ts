@@ -108,10 +108,10 @@ function buildIndex(): IndexEntry[] {
   })
 
   // /repuestos
-  entries.push({ path: '/repuestos', title: 'Repuestos', text: parts.intro })
+  entries.push({ path: '/cuidar/repuestos', title: 'Repuestos', text: parts.intro })
   for (const cat of parts.categories) {
     entries.push({
-      path: '/repuestos',
+      path: '/cuidar/repuestos',
       title: cat.title,
       subtitle: cat.spec,
       text: `${cat.title} ${cat.spec ?? ''} ${tipText(cat.tips ?? [])}`,
@@ -120,7 +120,7 @@ function buildIndex(): IndexEntry[] {
 
   // /accesorios
   for (const cat of accessories.categories) {
-    entries.push({ path: '/accesorios', title: cat.title, text: `${cat.title} ${tipText(cat.items)}` })
+    entries.push({ path: '/cuidar/accesorios', title: cat.title, text: `${cat.title} ${tipText(cat.items)}` })
   }
 
   // /tecnologia
@@ -152,20 +152,20 @@ function buildIndex(): IndexEntry[] {
   entries.push({ path: '/ficha-tecnica', title: 'Garantía', text: tipText(fichaTecnica.warranty) })
 
   // /mantenimiento
-  entries.push({ path: '/mantenimiento', title: 'Service oficial', text: mantenimiento.officialNote })
+  entries.push({ path: '/cuidar/mantenimiento', title: 'Service oficial', text: mantenimiento.officialNote })
   for (const item of mantenimiento.schedule) {
-    entries.push({ path: '/mantenimiento', title: item.interval, text: `${item.interval} ${item.tasks.join(' ')}` })
+    entries.push({ path: '/cuidar/mantenimiento', title: item.interval, text: `${item.interval} ${item.tasks.join(' ')}` })
   }
   for (const row of mantenimiento.dealerPrices) {
     entries.push({
-      path: '/mantenimiento',
+      path: '/cuidar/mantenimiento',
       title: row.service,
       subtitle: row.dealer,
       text: `${row.dealer} ${row.service} ${row.price} ${row.note ?? ''}`,
     })
   }
   for (const cat of mantenimiento.knownIssues) {
-    entries.push({ path: '/mantenimiento', title: cat.title, text: `${cat.title} ${tipText(cat.items)}` })
+    entries.push({ path: '/cuidar/mantenimiento', title: cat.title, text: `${cat.title} ${tipText(cat.items)}` })
   }
 
   return entries

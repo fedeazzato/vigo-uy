@@ -18,7 +18,7 @@ describe('searchCuratedContent', () => {
 
   it('matches a guide page label and description', () => {
     const results = searchCuratedContent('repuestos')
-    expect(results.some((r) => r.path === '/repuestos')).toBe(true)
+    expect(results.some((r) => r.path === '/cuidar/repuestos')).toBe(true)
   })
 
   it('matches curated body text in charging.json (not just the page label)', () => {
@@ -38,7 +38,7 @@ describe('searchCuratedContent', () => {
 
   it('matches mantenimiento.json schedule text', () => {
     const results = searchCuratedContent('pastillas y discos de freno')
-    expect(results.some((r) => r.path === '/mantenimiento')).toBe(true)
+    expect(results.some((r) => r.path === '/cuidar/mantenimiento')).toBe(true)
   })
 
   it('is case- and accent-insensitive', () => {

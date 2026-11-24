@@ -20,7 +20,7 @@ export const CAR_DEVICE_COLUMNS =
 
 export const INVALID_PAIRING_CODE_MESSAGE =
   'Código no válido o vencido. Pedí uno nuevo en la pantalla del auto.'
-const UNAVAILABLE_MESSAGE = 'La vinculación no está disponible en este momento.'
+const UNAVAILABLE_MESSAGE = 'Conectar la pantalla no está disponible en este momento.'
 
 /**
  * Accepts what people paste or type: "k7q2m9", "K7Q-2M9", " K7Q 2M9 ", or the

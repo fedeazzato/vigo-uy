@@ -29,7 +29,7 @@ export default function MantenimientoPage() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader as="h2"
         title="🛠️ Mantenimiento"
         subtitle="Service oficial, precios por concesionario y problemas conocidos."
       />

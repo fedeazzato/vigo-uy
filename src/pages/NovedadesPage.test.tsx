@@ -8,6 +8,8 @@ vi.mock('../lib/carReleaseNotes', async (importOriginal) => ({
   fetchReleaseNotes: () => fetchReleaseNotes() as unknown,
 }))
 
+vi.mock('../components/FirmwareCard', () => ({ default: () => null }))
+
 import NovedadesPage from './NovedadesPage'
 
 describe('NovedadesPage', () => {

@@ -4,7 +4,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import type { CarStatus } from '../types'
 
-const mocks = vi.hoisted(() => ({ fetchCarStatus: vi.fn() }))
+const mocks = vi.hoisted(() => ({ fetchCarStatus: vi.fn(), fetchCarLastSeen: vi.fn() }))
+
+vi.mock('../lib/carRemote', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/carRemote')>()),
+  fetchCarLastSeen: mocks.fetchCarLastSeen,
+}))
 
 vi.mock('../lib/carStatus', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../lib/carStatus')>()),
@@ -43,7 +48,11 @@ const LIVE: CarStatus = {
 }
 
 describe('CarStatusCard', () => {
-  beforeEach(() => mocks.fetchCarStatus.mockReset())
+  beforeEach(() => {
+    mocks.fetchCarStatus.mockReset()
+    mocks.fetchCarLastSeen.mockReset()
+    mocks.fetchCarLastSeen.mockResolvedValue(null)
+  })
   afterEach(() => {
     vi.useRealTimers()
     vi.restoreAllMocks()
@@ -59,7 +68,7 @@ describe('CarStatusCard', () => {
   it('shows battery, range, cable state, when, and the not-live note', async () => {
     mocks.fetchCarStatus.mockResolvedValue({ ...ROW, limit_pct: 90 })
     render(<CarStatusCard />)
-    expect(await screen.findByText('Estado del auto')).toBeTruthy()
+    expect(await screen.findByText('Tu auto ahora')).toBeTruthy()
     expect(screen.getByText('80 %')).toBeTruthy()
     expect(screen.getByText('266 km')).toBeTruthy()
     expect(screen.getByText('Enchufado')).toBeTruthy()
@@ -114,5 +123,25 @@ describe('CarStatusCard', () => {
     })
     expect(mocks.fetchCarStatus).toHaveBeenCalledTimes(3)
     unmount()
+  })
+
+  // owner decision 2026-11-24 #2: one card with status + online/offline (moved from Control remoto)
+  it('shows "En línea" with a car seen 34 s ago and "Sin conexión" after that', async () => {
+    mocks.fetchCarStatus.mockResolvedValue(LIVE)
+    mocks.fetchCarLastSeen.mockResolvedValue({ lastSeenAt: iso(34_000) })
+    const first = render(<CarStatusCard />)
+    expect(await screen.findByText('En línea')).toBeTruthy()
+    first.unmount()
+    mocks.fetchCarLastSeen.mockResolvedValue({ lastSeenAt: iso(2 * 3600_000) })
+    render(<CarStatusCard />)
+    expect(await screen.findByText('Sin conexión — visto hace 2 h')).toBeTruthy()
+  })
+
+  it('a linked car with no status yet still shows the card with its connection', async () => {
+    mocks.fetchCarStatus.mockResolvedValue(null)
+    mocks.fetchCarLastSeen.mockResolvedValue({ lastSeenAt: null })
+    render(<CarStatusCard />)
+    expect(await screen.findByText('Tu auto ahora')).toBeTruthy()
+    expect(screen.getByText('Sin conexión — todavía no se conectó')).toBeTruthy()
   })
 })

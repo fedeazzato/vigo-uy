@@ -25,6 +25,7 @@ import StationPickerModal from '../components/StationPickerModal'
 import { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import styles from './NewTripLogPage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 // The form is a 3-step wizard (mobile redesign): short screens beat one long
 // scroll. Step 1 holds the required basics, everything after is optional.
@@ -771,8 +772,8 @@ export default function NewTripLogPage() {
 
   // Explicit "Descartar viaje" mid-edit: this one does destroy in-progress
   // work, unlike declining the resume prompt, so it confirms first.
-  function handleDiscardDraft() {
-    if (!confirm('¿Descartar este viaje? Se va a borrar todo lo que registraste.')) return
+  async function handleDiscardDraft() {
+    if (!(await confirmDialog('¿Descartar este viaje? Se va a borrar todo lo que registraste.'))) return
     clearDraft()
     resetForm()
   }
@@ -791,11 +792,11 @@ export default function NewTripLogPage() {
     setDirty(true)
   }
 
-  function handleCancel() {
+  async function handleCancel() {
     // New trips are autosaved as a draft, so leaving no longer discards
     // anything -- only edits (never drafted) still need the confirmation.
-    if (isEdit && dirty && !confirm('¿Descartar los cambios sin guardar?')) return
-    navigate('/mi-actividad')
+    if (isEdit && dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
+    navigate('/mi-vigo/registros')
   }
 
   // "← Atrás": previous step, or leave the form from step 1.
@@ -805,7 +806,7 @@ export default function NewTripLogPage() {
       setError(null)
       return
     }
-    handleCancel()
+    void handleCancel()
   }
 
   // Step 1 fields are validated when leaving the step, so later steps never

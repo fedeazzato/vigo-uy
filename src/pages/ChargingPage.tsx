@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import rawData from '../data/charging.json'
 import {
   PageHeader,
@@ -68,6 +69,11 @@ export default function ChargingPage() {
         title="⚡ Carga"
         subtitle="Todo lo que necesitás saber sobre cargar la Vigo — en casa y en la calle."
       />
+
+      {/* Proposal 11 (owner 2026-11-24): the planner also from Carga, not only from Rutas. */}
+      <Alert type="info">
+        🧭 <Link to="/rutas/planificar">Planificá tu viaje</Link>: te decimos dónde cargar en el camino.
+      </Alert>
 
       <StatGrid stats={visibleStats} />
 

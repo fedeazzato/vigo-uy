@@ -1,0 +1,48 @@
+/* WikiVigo confirm dialog (owner decision 2026-11-24, proposal 9): the car's dialog look (surface card, 4 px, scrim, the
+   car's confirm/cancel buttons), replacing the browser's confirm(). */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialog {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancel {
+  composes: secondary from '../styles/buttons.module.css';
+}
+
+.confirm {
+  composes: primary from '../styles/buttons.module.css';
+}
+
+.danger {
+  composes: danger from '../styles/buttons.module.css';
+}
