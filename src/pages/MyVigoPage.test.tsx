@@ -91,15 +91,14 @@ describe('MyVigoPage "Preparar mi Vigo" card (specs/prepare-my-vigo.md R5)', () 
 })
 
 describe('MyVigoPage grouping (specs/site-audit-2026-11.md)', () => {
-  it('shows the car sections in order, with technical details collapsed', () => {
+  it('shows the car sections in order, and no empty "Más detalles" when there is nothing to show', () => {
     const { container } = renderSignedIn('Ana')
     const text = container.textContent ?? ''
     const order = ['Tu auto', 'Datos y estadísticas', 'Configuración y service', 'Tu cuenta']
     const positions = order.map((label) => text.indexOf(label))
     positions.forEach((p) => expect(p).toBeGreaterThan(-1))
     expect([...positions].sort((a, b) => a - b)).toEqual(positions)
-    const details = container.querySelector('details')
-    expect(details?.open).toBe(false)
-    expect(details?.querySelector('summary')?.textContent).toMatch(/Más detalles/)
+    // no diagnostics for this user: the collapsible "Más detalles" section must not appear at all (owner 2026-11-24)
+    expect(text).not.toMatch(/Más detalles/)
   })
 })

@@ -238,10 +238,7 @@ export default function MyVigoPage() {
           <PasskeyCard />
           <VehicleCard />
 
-          <details className={styles.more}>
-            <summary>Más detalles (para curiosos)</summary>
-            <CarDiagnosticsCard />
-          </details>
+          <CarDiagnosticsCard collapsible="Más detalles (para curiosos)" className={styles.more} />
         </>
       )}
 
