@@ -54,3 +54,21 @@ textos: «15.000 km o 1 año», «5.000 km», «corte automático», «android a
 - Los ~$/km de llano (~$0,80) y punta (~$1,10) son aproximados; antes estaban atados a «07–18» y «18–22».
 - Tips de ruta no numéricos (cargadores por ciudad, frontera, apps) se mantienen; las distancias de ruta (~500 km,
   etc.) son distancias de mapa, no estimaciones de autonomía.
+
+## Decisiones del dueño 2026-11-24 (costos UTE)
+
+1. Se sacó el caso «Uso intensivo diario» (3.000 km/mes, ~$1.420) de `costs.json`: era una estimación. `realCases` queda vacío.
+2. Costo por km en casa recalculado con la tarifa residencial triple horario de UTE.
+   - Fuente: https://ute.com.uy/clientes/soluciones-para-el-hogar/planes-hogar/plan-inteligente-hogares
+     («Precio 2026», «Precios sin IVA»), leída el 2026-11-24. Coincide con el pliego vigente desde 01/01/2026:
+     https://www.ute.com.uy/sites/default/files/docs/Pliego%20Tarifario%20Enero%202026.pdf
+   - Sin IVA: valle $2,443/kWh, llano $5,172/kWh, punta $12,034/kWh. Con IVA (22%): $2,98 / $6,31 / $14,68.
+   - Consumo: 15 kWh/100 km = punto medio del rango «Ruta con aire 14–16 kWh» de `charging.json` (el sitio no
+     expone una mediana de comunidad estática; la mediana de Costos se calcula en vivo desde la base).
+   - Fórmula: $/km = precio con IVA × 0,15 kWh/km; $/100 km = precio con IVA × 15.
+     Valle 2,98 × 0,15 = $0,45/km ($45/100 km); llano 6,31 × 0,15 = $0,95/km ($95/100 km);
+     punta 14,68 × 0,15 = $2,20/km ($220/100 km). Etiquetas: «estimación con precios de UTE de noviembre 2026».
+   - Carga completa en valle: batería × $2,98 → E2 44,94 kWh ≈ $134, E2+ 51,87 kWh ≈ $155 (sin pérdidas de carga).
+   - Carga (`charging.json`): valle $2,443 + IVA ya coincidía; se agregaron llano y punta con y sin IVA.
+   - Ojo: la página de UTE dice punta «dentro de 17:00 a 23:00» en días hábiles (fines de semana y feriados sin punta);
+     el dueño confirmó 17:00–00:00, que es lo que muestra el sitio. A revisar.

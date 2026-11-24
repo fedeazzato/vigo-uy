@@ -1,20 +1,20 @@
 {
   "perKm": [
     {
-      "label": "Casa — valle (00–07 hs)",
-      "value": "$0,48",
+      "label": "Casa — valle (00–07 hs) — estimación con precios de UTE de noviembre 2026",
+      "value": "$0,45/km · $45/100 km",
       "badge": "Más barato",
       "badgeColor": "green"
     },
     {
-      "label": "Casa — llano (fuera de valle y punta)",
-      "value": "~$0,80",
+      "label": "Casa — llano (fuera de valle y punta) — estimación con precios de UTE de noviembre 2026",
+      "value": "$0,95/km · $95/100 km",
       "badge": null,
       "badgeColor": null
     },
     {
-      "label": "Casa — punta (4 h que elegís, entre 17 y 00 hs)",
-      "value": "~$1,10",
+      "label": "Casa — punta (4 h que elegís, entre 17 y 00 hs) — estimación con precios de UTE de noviembre 2026",
+      "value": "$2,20/km · $220/100 km",
       "badge": "Evitar",
       "badgeColor": "red"
     },
@@ -37,10 +37,10 @@
       "options": [
         {
           "label": "Casa — valle (triple horario)",
-          "energy": 128,
+          "energy": 134,
           "base": 0,
-          "total": 128,
-          "note": "~$2,44/kWh + IVA"
+          "total": 134,
+          "note": "$2,443/kWh + IVA = $2,98/kWh (UTE, noviembre 2026)"
         },
         {
           "label": "UTE AC (alterna)",
@@ -63,10 +63,10 @@
       "options": [
         {
           "label": "Casa — valle (triple horario)",
-          "energy": 148,
+          "energy": 155,
           "base": 0,
-          "total": 148,
-          "note": "~$2,44/kWh + IVA"
+          "total": 155,
+          "note": "$2,443/kWh + IVA = $2,98/kWh (UTE, noviembre 2026)"
         },
         {
           "label": "UTE AC (alterna)",
@@ -85,17 +85,7 @@
       ]
     }
   },
-  "realCases": [
-    {
-      "title": "Uso intensivo diario",
-      "km": 3000,
-      "period": "mes",
-      "cost": "$1.420",
-      "costPerKm": "$0,47",
-      "conditions": "Siempre cargando en casa en valle (00–07 hs, triple horario)",
-      "comparison": "Una camioneta a nafta haciendo el mismo recorrido costaría ~$15.000–20.000/mes"
-    }
-  ],
+  "realCases": [],
   "patent": {
     "e2": {
       "valuation": "$25.990 USD",
@@ -114,6 +104,10 @@
   "insurance": {
     "range": "$27.000 – $69.000+ por año",
     "disclaimer": "El precio cambia mucho según la zona, tu edad, los años que tenés de libreta y la aseguradora. En el grupo se reportan desde $27.000/año en planes básicos hasta más de $69.000/año en coberturas completas en zonas de más riesgo. Cotizá en varias aseguradoras antes de elegir.",
-    "insurers": ["ACAU", "MAPFRE", "Aseguradora Basan"]
+    "insurers": [
+      "ACAU",
+      "MAPFRE",
+      "Aseguradora Basan"
+    ]
   }
 }
