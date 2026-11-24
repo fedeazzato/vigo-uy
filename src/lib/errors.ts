@@ -22,7 +22,6 @@ const KNOWN_TRIGGER_MESSAGES = [
   'Rol no válido',
   // Family invites (0082)
   'Creaste muchos códigos',
-  'Ya hay 5 códigos',
   // Car link (0045)
   'Demasiados intentos',
   'Tu vehículo ya tiene',

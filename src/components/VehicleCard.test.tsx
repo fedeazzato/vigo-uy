@@ -49,11 +49,11 @@ describe('VehicleCard family invite', () => {
 
     fireEvent.click(button)
     expect(await screen.findByText('ABCD EFGH')).toBeTruthy()
-    expect(screen.getByText('Vence en 24 h, sirve para una persona.')).toBeTruthy()
+    expect(screen.getByText('Vence en 24 h, sirve para una persona. Si creás otro, este deja de servir.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Copiar' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Compartir' })).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Crear otro código' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Crear otro código (el anterior deja de servir)' }))
     expect(await screen.findByText('JKMN PQRS')).toBeTruthy()
     expect(screen.queryByText('ABCD EFGH')).toBeNull()
     expect(mocks.createFamilyInvite).toHaveBeenCalledTimes(2)

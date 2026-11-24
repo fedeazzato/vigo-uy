@@ -264,7 +264,7 @@ export default function VehicleCard() {
                       {formatInviteCode(invite.code)}
                     </code>
                     <p className={styles.blockText}>
-                      Vence en {INVITE_TTL_HOURS} h, sirve para una persona.
+                      Vence en {INVITE_TTL_HOURS} h, sirve para una persona. Si creás otro, este deja de servir.
                     </p>
                     <div className={styles.buttonRow}>
                       <button type="button" className={styles.secondaryBtn} onClick={() => void copyInvite()}>
@@ -282,7 +282,7 @@ export default function VehicleCard() {
                   onClick={() => void newInvite()}
                   disabled={busy}
                 >
-                  {invite ? 'Crear otro código' : 'Sumar a tu familia'}
+                  {invite ? 'Crear otro código (el anterior deja de servir)' : 'Sumar a tu familia'}
                 </button>
               </>
             ) : (

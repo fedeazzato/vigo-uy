@@ -10,11 +10,13 @@
 --     consumes it atomically (row lock + used_at/used_by in the same transaction as the membership change).
 --   * The static join_code is retired: the join RPC no longer reads it, existing values are nulled and new vehicles get none.
 --     Existing members stay where they are.
+--   * Only the LATEST code of a vehicle works (owner decision 2026-11-24): creating a code expires every earlier unused code of
+--     that vehicle in the same transaction.
 --   * Rate limits: 10 failed join attempts per hour per user (unchanged, join_code_attempts from 0021); 10 invites per hour per
---     user; at most 5 live (unused, unexpired) invites per vehicle.
+--     user.
 --   * vehicle_invites: RLS on, no policies, no grants = unreachable from any client session (only the SECURITY DEFINER RPCs).
 --
--- NOT APPLIED (owner OK required). Apply with `npx supabase db push`, then `npm run gen:types`.
+-- Owner approved 2026-11-24 (applied by the lead). Apply with `npx supabase db push`, then `npm run gen:types`.
 
 -- 1. Table -----------------------------------------------------------------------------------------------------------------------
 create table if not exists public.vehicle_invites (
@@ -89,7 +91,6 @@ as $$
 declare
   invite_ttl constant interval := interval '24 hours';   -- owner may change
   max_per_hour constant int := 10;
-  max_live constant int := 5;
   v_vehicle uuid := public.current_user_vehicle_id();
   v_code text;
   v_expires timestamptz := now() + invite_ttl;
@@ -112,10 +113,10 @@ begin
       where i.created_by = auth.uid() and i.created_at >= now() - interval '1 hour') >= max_per_hour then
     raise exception 'Creaste muchos códigos seguidos. Esperá una hora y probá de nuevo.';
   end if;
-  if (select count(*) from public.vehicle_invites i
-      where i.vehicle_id = v_vehicle and i.used_at is null and i.expires_at > now()) >= max_live then
-    raise exception 'Ya hay 5 códigos sin usar. Esperá a que los usen o venzan.';
-  end if;
+  -- Only the latest code works: expire the vehicle's earlier unused codes (same transaction as the insert below). Rows are
+  -- locked so a join racing with this either consumed the old code first or finds it expired.
+  update public.vehicle_invites i set expires_at = now()
+  where i.vehicle_id = v_vehicle and i.used_at is null and i.expires_at > now();
 
   loop
     v_code := public.generate_family_invite_code();
