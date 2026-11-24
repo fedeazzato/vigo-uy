@@ -152,7 +152,7 @@ describe('CarRemoteCard', () => {
     expect(screen.queryByText(/Sin conexión/)).toBeNull()
     expect(screen.queryByText(/Carga completa en/)).toBeNull()
     expect(screen.queryByRole('button', { name: 'Detener la carga' })).toBeNull()
-    expect(screen.queryByText('Últimas órdenes')).toBeNull()
+    expect(screen.queryByText('Ver últimas órdenes')).toBeNull()
   })
 
   it('"Ventilar" is hidden while ventilar is off on the car (owner option B)', async () => {
@@ -248,7 +248,8 @@ describe('CarRemoteCard', () => {
     expect(screen.queryByText('Abrir todas las ventanas')).toBeNull()
     expect(screen.queryByText('Aplicar')).toBeNull()
     expect(screen.queryByText('Cancelar')).toBeNull()
-    expect(screen.getByText('Últimas órdenes')).toBeTruthy()
+    // owner decision 2026-11-24 #6: the list is folded under "Ver últimas órdenes"
+    expect(screen.getByText('Ver últimas órdenes').closest('details')!.open).toBe(false)
   })
 
   it('E2: control and owner keep the buttons', async () => {

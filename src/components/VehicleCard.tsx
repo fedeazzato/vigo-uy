@@ -305,7 +305,7 @@ export default function VehicleCard() {
                 className={formStyles.input}
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
-                placeholder="Código de 8 letras"
+                placeholder="Código de 8 caracteres"
                 aria-label="Código para sumarte"
                 autoComplete="off"
               />

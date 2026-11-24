@@ -45,6 +45,8 @@ export default function CarRemoteCard() {
   const [limit, setLimit] = useState<number | null>(null)
   const [now, setNow] = useState(() => new Date())
   const [role, setRole] = useState<CarRole | null>(null)
+  // "Últimas órdenes" is folded (owner decision 2026-11-24 #6); it opens by itself after sending, to follow the result.
+  const [ordersOpen, setOrdersOpen] = useState(false)
 
   useEffect(() => {
     void fetchMyCarRole().then(setRole)
@@ -91,6 +93,7 @@ export default function CarRemoteCard() {
     const result = await createCarOrder(kind, pct)
     setBusy(null)
     if (result.error) setError(result.error)
+    else setOrdersOpen(true)
     void load()
   }
 
@@ -195,8 +198,12 @@ export default function CarRemoteCard() {
       </p>
 
       {data.orders.length > 0 && (
-        <>
-          <h3 className={styles.listTitle}>Últimas órdenes</h3>
+        <details
+          className={styles.orders}
+          open={ordersOpen}
+          onToggle={(e) => setOrdersOpen(e.currentTarget.open)}
+        >
+          <summary className={styles.listTitle}>Ver últimas órdenes</summary>
           <ul className={styles.list}>
             {data.orders.map((o) => {
               const view = orderStateView(o, now)
@@ -228,7 +235,7 @@ export default function CarRemoteCard() {
               )
             })}
           </ul>
-        </>
+        </details>
       )}
     </section>
   )

@@ -1,6 +1,5 @@
 import rawData from '../data/tech-faq.json'
 import { PageHeader, Card, CardTitle, TipList } from '../components/UI'
-import FirmwareCard from '../components/FirmwareCard'
 import type { TechFaqData } from '../types'
 
 const data = rawData as TechFaqData
@@ -19,8 +18,6 @@ export default function TechPage() {
           <TipList items={section.items} />
         </Card>
       ))}
-
-      <FirmwareCard />
     </div>
   )
 }
