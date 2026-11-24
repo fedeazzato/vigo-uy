@@ -1,5 +1,5 @@
 {
-  "officialNote": "El importador oficial comunica el service cada 15.000 km o 1 año (lo que ocurra primero), con el primer service a los 5.000 km sin costo. El detalle de tareas a 30.000 km del manual del usuario se reparte entre estas visitas — no es una visita aparte.",
+  "officialNote": "El importador oficial pide service cada 15.000 km o 1 año (lo que pase primero). El primero es a los 5.000 km y no se paga. Las tareas de 30.000 km del manual se reparten entre esas visitas: no es una visita aparte.",
   "schedule": [
     {
       "interval": "Cada 30.000 km o 24 meses — service general",
@@ -28,16 +28,16 @@
   ],
   "severeConditions": [
     {
-      "bold": "Polvo, calor extremo o zonas montañosas:",
-      "text": "Frenos, dirección, suspensión y semiejes — inspeccionar cada 5.000 km o 3 meses en vez de cada 30.000 km."
+      "bold": "Polvo, calor extremo o zonas de montaña:",
+      "text": "Frenos, dirección, suspensión y semiejes: revisalos cada 5.000 km o 3 meses, en vez de cada 30.000 km."
     },
     {
-      "bold": "Exposición a sal o caminos de tierra/barro:",
-      "text": "Líquido de frenos cada 20.000 km o 12 meses; filtro de aire acondicionado cada 10.000 km o 6 meses."
+      "bold": "Sal o caminos de tierra o barro:",
+      "text": "Líquido de frenos cada 20.000 km o 12 meses. Filtro del aire acondicionado cada 10.000 km o 6 meses."
     },
     {
-      "bold": "Cualquiera de las condiciones anteriores:",
-      "text": "Lubricación de puertas y traba del capot cada 5.000 km o 3 meses, en vez de cada 30.000 km."
+      "bold": "En cualquiera de esos casos:",
+      "text": "Lubricá puertas y traba del capot cada 5.000 km o 3 meses, en vez de cada 30.000 km."
     }
   ],
   "dealerPrices": [
@@ -59,7 +59,7 @@
       "dealer": "Las Torres",
       "service": "15.000 km",
       "price": "$7.500–9.350",
-      "note": "Precio variable según sucursal"
+      "note": "El precio cambia según la sucursal"
     }
   ],
   "knownIssues": [
@@ -70,15 +70,15 @@
       "items": [
         {
           "bold": "Bornes de la batería de 12V flojos:",
-          "text": "Reportado en autos de entrega reciente. Conviene revisar y ajustar a mano los bornes (positivo y negativo) apenas se retira el auto — si queda flojo puede causar una falla eléctrica total."
+          "text": "Pasó en autos recién entregados. Apenas retires el auto, revisá y ajustá a mano los dos bornes (positivo y negativo). Si quedan flojos, el auto se puede quedar sin nada de electricidad."
         },
         {
-          "bold": "Vidrio delantero que se traba a mitad de camino:",
-          "text": "El cierre automático del vidrio delantero (lado conductor) a veces se traba y vuelve a bajar solo. Mientras se resuelve en el service, cerrarlo sostenido manualmente sin usar la función automática."
+          "bold": "Vidrio del conductor que se traba a mitad de camino:",
+          "text": "A veces el cierre automático del vidrio delantero del conductor se traba y el vidrio vuelve a bajar solo. Hasta que lo arreglen en el service, cerralo manteniendo el botón apretado, sin la función automática."
         },
         {
-          "bold": "Desempañador trasero parcial:",
-          "text": "En varias unidades, las últimas 3 líneas horizontales del desempañador trasero no calientan. Es un problema conocido — reclamar en el service (requiere turno con electricista, demoras de varias semanas reportadas)."
+          "bold": "Desempañador trasero que calienta a medias:",
+          "text": "En varios autos, las últimas 3 líneas del desempañador trasero no calientan. Es un problema conocido: reclamalo en el service. Necesita turno con electricista y hay reportes de varias semanas de espera."
         }
       ]
     },
@@ -89,7 +89,7 @@
       "items": [
         {
           "bold": "Óxido bajo los asientos:",
-          "text": "Varios miembros encontraron óxido o manchas de oxidación bajo los asientos delanteros, atribuido a un recubrimiento anticorrosivo insuficiente de fábrica. Conviene revisar al recibir el auto."
+          "text": "Varios dueños encontraron óxido bajo los asientos delanteros. Se cree que la protección contra el óxido de fábrica es poca. Revisá cuando te entreguen el auto y, si aparece, reclamalo en garantía."
         }
       ]
     },
@@ -99,8 +99,8 @@
       "title": "Climatización",
       "items": [
         {
-          "bold": "Aire acondicionado con poco frío:",
-          "text": "Algunas unidades enfrían poco (1–2°C de diferencia, casi como un ventilador). No afecta a todos los autos por igual — si pasa, reclamar en garantía."
+          "bold": "Aire acondicionado que enfría poco:",
+          "text": "Algunos autos enfrían muy poco (1–2°C de diferencia, casi como un ventilador). No les pasa a todos. Si es tu caso, reclamalo en garantía."
         }
       ]
     },
@@ -111,40 +111,40 @@
       "items": [
         {
           "bold": "Pantalla caliente al tacto:",
-          "text": "En días de mucho calor, la pantalla central puede llegar a ~50°C. Reportado por varios miembros, sin solución oficial conocida."
+          "text": "En días de mucho calor, la pantalla central puede llegar a ~50°C. Lo reportaron varios dueños y no hay solución oficial."
         },
         {
-          "bold": "Congelamiento ocasional:",
-          "text": "El cluster o la pantalla central pueden congelarse por segundos o minutos mientras se maneja y recuperarse solos. Si persiste, mantener presionado el botón MODE para resetear."
+          "bold": "Se congela un rato:",
+          "text": "El tablero o la pantalla central se pueden congelar unos segundos o minutos mientras manejás, y después vuelven solos. Si sigue, mantené apretado el botón MODE para reiniciar."
         }
       ]
     }
   ],
   "safety": [
     {
-      "bold": "ADAS solo en E2+:",
-      "text": "Según la ficha técnica del importador oficial, los sistemas avanzados de asistencia al conductor (ADAS) — frenado automático, asistente de carril, etc. — son exclusivos de la versión E2+. La E2 no los trae de fábrica."
+      "bold": "ADAS, solo en la E2+:",
+      "text": "Los ADAS son las ayudas al manejo: frenado automático, aviso y asistente de carril. Según la ficha técnica del importador, vienen solo en la E2+; la E2 no los trae."
     },
     {
-      "bold": "ADAS (frenado automático, aviso y asistente de carril):",
-      "text": "Funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas — no siempre están calibrados para el tránsito local. No depender de ellos como única medida de seguridad en esas condiciones."
+      "bold": "ADAS con lluvia o en rotondas:",
+      "text": "Funcionan según lo homologado, pero varios dueños dicen que responden peor con lluvia fuerte o en rotondas. No están siempre ajustados al tránsito de acá. En esas situaciones, no te confíes solo en ellos."
     },
     {
-      "bold": "AVAS (sonido de aviso a peatones):",
-      "text": "Suena obligatoriamente por debajo de ~30 km/h. Es un requisito de seguridad para peatones y ciclistas con baja visión — no se puede desactivar desde el menú, y no se recomienda desconectarlo físicamente."
+      "bold": "AVAS (sonido para peatones):",
+      "text": "Suena siempre por debajo de ~30 km/h, para que te escuchen peatones y ciclistas con baja visión. No se apaga desde el menú y no se recomienda desconectarlo."
     },
     {
-      "bold": "Apagado de emergencia del sistema de alto voltaje:",
-      "text": "En caso de choque o necesidad de manipular el auto, el sistema de alta tensión se aísla desconectando ambos cables de la batería de 12V (positivo y negativo)."
+      "bold": "Apagado de emergencia del alto voltaje:",
+      "text": "Si hay un choque o hay que mover el auto con cuidado, el sistema de alto voltaje se aísla desconectando los dos cables (positivo y negativo) de la batería de 12V."
     },
     {
       "bold": "Arranque de emergencia:",
-      "text": "El manual incluye el procedimiento de arranque con puente igual que en un auto a combustión — la que se descarga es la batería de 12V, no la de tracción."
+      "text": "Se arranca con cables, como un auto a nafta. La que se descarga es la batería de 12V, no la de tracción."
     },
     {
-      "bold": "Incendio o inmersión en agua:",
-      "text": "Si hay fuego, usar matafuego para incendios eléctricos (no agua) y no abrir el capot. Si el auto queda sumergido, remolcarlo sin tocar el sistema de alto voltaje hasta que sea revisado por el service."
+      "bold": "Incendio o auto bajo el agua:",
+      "text": "Si hay fuego, usá un matafuego para fuego eléctrico (no agua) y no abras el capot. Si el auto quedó bajo el agua, remolcalo sin tocar el sistema de alto voltaje hasta que lo revise el service."
     }
   ],
-  "warrantyNote": "Los términos completos de garantía están en la página Ficha técnica — los plazos de cobertura del vehículo y la batería varían según si sos el primer o el segundo dueño. En cualquier caso, no completar el mantenimiento programado en fecha hace perder el derecho a garantía."
+  "warrantyNote": "La garantía completa está en Ficha técnica: los plazos del auto y de la batería cambian si sos primer o segundo dueño. En todos los casos, si no hacés el service en fecha, perdés la garantía."
 }

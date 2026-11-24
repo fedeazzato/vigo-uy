@@ -5,15 +5,15 @@
       "id": "cubiertas",
       "icon": "🛞",
       "title": "Cubiertas",
-      "spec": "205/55 R16 según el manual (ambas versiones). Reportado por el grupo: E2 con rin 17″ (215/60 R17) y E2+ con rin 18″ (215/55 R18) — verificar la medida física antes de comprar.",
+      "spec": "El manual dice 205/55 R16 para las dos versiones. El grupo reporta otra cosa: E2 con llanta 17″ (215/60 R17) y E2+ con llanta 18″ (215/55 R18). Mirá la medida en tu cubierta antes de comprar.",
       "tips": [
         {
           "bold": "Presión:",
-          "text": "2,25 bar con 2 ocupantes, 2,6 bar a carga completa. En ruta la comunidad recomienda 2,76 bar (40 PSI)."
+          "text": "2,25 bar con 2 personas, 2,6 bar con el auto cargado. Para ruta, la comunidad recomienda 2,76 bar (40 PSI)."
         },
         {
           "bold": "Rotación:",
-          "text": "Al ser tracción delantera y con el par instantáneo del motor eléctrico, las delanteras se gastan más rápido — conviene rotar en cada service."
+          "text": "La tracción es delantera y el motor eléctrico empuja fuerte desde cero, así que las de adelante se gastan más rápido. Conviene rotarlas en cada service."
         }
       ]
     },
@@ -21,10 +21,10 @@
       "id": "filtro-cabina",
       "icon": "🌬️",
       "title": "Filtro de cabina",
-      "spec": "Filtro de aire de cabina (polen). Al ser 100% eléctrico, la Vigo no lleva filtro de aire de motor ni filtro de aceite: este es el único filtro de reposición periódica.",
+      "spec": "Filtro del aire que entra al habitáculo (polen). Como la Vigo es 100% eléctrica, no tiene filtro de aire del motor ni de aceite: este es el único filtro que se cambia seguido.",
       "tips": [
         {
-          "text": "Se cambia en los services programados, pero es de los pocos repuestos que se pueden cambiar en casa sin afectar la garantía del resto del vehículo."
+          "text": "Se cambia en los services, pero lo podés cambiar en casa sin perder la garantía del resto del auto."
         }
       ]
     },
@@ -34,7 +34,7 @@
       "title": "Escobillas limpiaparabrisas",
       "tips": [
         {
-          "text": "Consumible estándar: verificá el largo de las tuyas antes de comprar y registrá la medida acá para ayudar al resto."
+          "text": "Son las comunes. Medí el largo de las tuyas antes de comprar y anotá la medida acá para ayudar a los demás."
         }
       ]
     },
@@ -42,10 +42,10 @@
       "id": "bateria-12v",
       "icon": "🔋",
       "title": "Batería de 12V",
-      "spec": "Batería auxiliar convencional que alimenta la electrónica. El testigo amarillo \"Batería de 12V\" del tablero avisa si está baja o si falla el conversor DC-DC.",
+      "spec": "Batería chica que alimenta la electrónica. Si el testigo amarillo «Batería de 12V» se prende en el tablero, está baja o falla el conversor DC-DC (la pieza que la carga desde la batería grande).",
       "tips": [
         {
-          "text": "Es una batería común de plomo-ácido, no la batería de tracción — se consigue y cambia como en cualquier auto."
+          "text": "Es una batería común de plomo-ácido, no la batería de tracción. Se consigue y se cambia como en cualquier auto."
         }
       ]
     },
@@ -56,7 +56,7 @@
       "tips": [
         {
           "bold": "Duran más que en un auto a combustión:",
-          "text": "el frenado regenerativo hace la mayor parte del trabajo. Igual conviene revisarlas en cada service porque el poco uso puede oxidar los discos."
+          "text": "La regeneración (el auto frenando solo al soltar el acelerador) hace casi todo el trabajo. Igual revisalas en cada service: si se usan poco, los discos se pueden oxidar."
         }
       ]
     },
@@ -66,7 +66,7 @@
       "title": "Parabrisas",
       "tips": [
         {
-          "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía propia (del concesionario, no de fábrica)."
+          "text": "Algunos concesionarios ofrecen un tratamiento cerámico con 5 años de garantía. La garantía es del concesionario, no de fábrica."
         },
         {
           "text": "Si tenés seguro, revisá si tu póliza cubre rotura de cristales antes de pagar de tu bolsillo."
@@ -79,7 +79,7 @@
       "title": "Vidrios laterales",
       "tips": [
         {
-          "text": "Repuesto de importación: registrá dónde lo conseguiste y el plazo de entrega, es de los datos más útiles para la comunidad."
+          "text": "Vienen de afuera. Anotá dónde lo conseguiste y cuánto tardó: es de lo que más le sirve al resto."
         }
       ]
     },
@@ -89,7 +89,7 @@
       "title": "Espejos retrovisores",
       "tips": [
         {
-          "text": "Anotá si conseguiste el espejo completo o solo el cristal/carcasa — cambia mucho el precio."
+          "text": "Anotá si compraste el espejo entero o solo el vidrio o la carcasa: el precio cambia mucho."
         }
       ]
     },
@@ -99,7 +99,7 @@
       "title": "Carrocería (guardabarros, paragolpes)",
       "tips": [
         {
-          "text": "Piezas de chapa y plástico: suelen pedirse al importador. Compartí plazos y precios para que otros sepan qué esperar."
+          "text": "Las piezas de chapa y plástico se suelen pedir al importador. Compartí cuánto tardaron y cuánto salieron, así otros saben qué esperar."
         }
       ]
     },
@@ -109,7 +109,7 @@
       "title": "Luces y ópticas",
       "tips": [
         {
-          "text": "Las ópticas son LED integradas: ante una falla conviene consultar primero si cubre la garantía (7 años / 300.000 km para el primer dueño)."
+          "text": "Las ópticas son LED integradas. Si fallan, preguntá primero si las cubre la garantía (7 años / 300.000 km para el primer dueño)."
         }
       ]
     },
@@ -117,7 +117,11 @@
       "id": "otros",
       "icon": "📦",
       "title": "Otros repuestos",
-      "tips": [{ "text": "¿Compraste algo que no está en la lista? Registralo igual en esta categoría." }]
+      "tips": [
+        {
+          "text": "¿Compraste algo que no está en la lista? Registralo igual en esta categoría."
+        }
+      ]
     }
   ]
 }

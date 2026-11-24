@@ -25,29 +25,29 @@
       "E2": {
         "CLTC": {
           "km": 401,
-          "note": "Ciclo chino — el único que figura en el manual oficial"
+          "note": "Medición china. Es la única que trae el manual oficial."
         },
         "NEDC": {
           "km": 361,
-          "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador"
+          "note": "Medición europea. La confirma la ficha técnica del importador."
         },
         "WLTP": {
           "km": 306,
-          "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador"
+          "note": "La más parecida al uso real. Es una estimación: no está en el manual ni en la ficha del importador."
         }
       },
       "E2+": {
         "CLTC": {
           "km": 471,
-          "note": "Ciclo chino — el único que figura en el manual oficial"
+          "note": "Medición china. Es la única que trae el manual oficial."
         },
         "NEDC": {
           "km": 411,
-          "note": "Ciclo europeo nuevo — confirmado en la ficha técnica oficial del importador"
+          "note": "Medición europea. La confirma la ficha técnica del importador."
         },
         "WLTP": {
           "km": 349,
-          "note": "Ciclo más representativo — estimación, no figura en el manual ni en la ficha técnica del importador"
+          "note": "La más parecida al uso real. Es una estimación: no está en el manual ni en la ficha del importador."
         }
       }
     },
@@ -69,55 +69,55 @@
         "label": "Frío / invierno (por 100 km)"
       }
     ],
-    "disclaimer": "La autonomía real varía según velocidad, temperatura y uso del aire acondicionado. Para estimar cuánto falta en un viaje, conviene usar el consumo del último tramo recorrido en vez del promedio histórico del auto."
+    "disclaimer": "La autonomía real cambia con la velocidad, la temperatura y el aire acondicionado. En un viaje, calculá lo que te queda con el consumo del último tramo, no con el promedio histórico del auto."
   },
   "homeCharging": {
     "title": "Carga en casa",
     "tips": [
       {
-        "bold": "Triple horario (la opción más barata):",
-        "text": "Cargar de 00:00 a 07:00 hs sale ~$2,44 + IVA el kWh. De 23:00 a 00:00 sale ~$5,17/kWh. De 18:00 a 22:00 es la hora más cara — evitarla."
+        "bold": "Triple horario (lo más barato):",
+        "text": "De 00:00 a 07:00 el kWh sale ~$2,44 + IVA. De 23:00 a 00:00, ~$5,17/kWh. Evitá de 18:00 a 22:00: es la hora más cara."
       },
       {
-        "bold": "Cargador incluido con el auto:",
-        "text": "2 kW a 12A. Muy lento para carga completa — conviene hacer una instalación propia."
+        "bold": "Cargador que viene con el auto:",
+        "text": "Carga a 2 kW (12A). Para cargar completo es muy lento, así que conviene hacer una instalación propia."
       },
       {
         "bold": "Instalación básica (16A):",
-        "text": "Cable bajo goma 3x2mm con conectores Schuko aguanta hasta 16A. Carga completa en ~10 horas."
+        "text": "Un cable bajo goma 3x2mm con conectores Schuko aguanta hasta 16A. Carga completa en ~10 horas."
       },
       {
         "bold": "Instalación rápida (32A):",
-        "text": "Cable de 6mm de cobre, protector de rayos, térmica, diferencial y toma industrial bifásico 32A. Carga completa en ~5-6 horas."
+        "text": "Cable de cobre de 6mm, protector de rayos, térmica, diferencial y toma industrial bifásico de 32A. Carga completa en ~5-6 horas."
       },
       {
         "bold": "Potencia contratada en UTE:",
-        "text": "4,5–5 kW es el mínimo viable si no se usan otros consumos altos (calefón, etc.) al mismo tiempo que se carga. Con 7–9 kW contratados hay margen para cargar y usar el resto de la casa sin que salte la térmica. Lo más seguro sigue siendo cargar de madrugada."
+        "text": "El mínimo es 4,5–5 kW, si no usás otras cosas que gastan mucho (calefón, etc.) mientras cargás. Con 7–9 kW podés cargar y usar la casa sin que salte la térmica. Igual, lo más seguro es cargar de madrugada."
       },
       {
         "bold": "Corte automático:",
-        "text": "Se configura el límite de carga en el auto (80%, 90%, 100%). Cuando llega, corta sola — no hace falta desenchufar."
+        "text": "Elegí el límite de carga en el auto (80%, 90% o 100%). Cuando llega, corta solo: no tenés que desenchufar."
       },
       {
-        "bold": "Límite de carga atascado en 94%:",
-        "text": "Algunos autos no superan el 94% aunque el límite esté puesto en 100% — es un bug de software reportado por varios miembros. Se soluciona restableciendo de fábrica el sistema multimedia (Centro del vehículo → Configuración → Restablecer)."
+        "bold": "Límite de carga trabado en 94%:",
+        "text": "Algunos autos no pasan del 94% aunque el límite esté en 100%. Es una falla del software que reportaron varios dueños. Se arregla restableciendo de fábrica el sistema multimedia: Centro del vehículo → Configuración → Restablecer."
       },
       {
-        "bold": "Contador independiente:",
-        "text": "Algunos miembros pusieron un contador separado solo para el cargador, para no mezclar el consumo con el de la casa."
+        "bold": "Contador aparte:",
+        "text": "Algunos dueños pusieron un contador solo para el cargador, para no mezclar ese consumo con el de la casa."
       }
     ]
   },
   "publicCharging": {
     "title": "Cargadores públicos",
-    "alert": "La Vigo usa conector Tipo 2. Verificar compatibilidad antes de llegar a un cargador. Usar PlugShare o la app del operador.",
+    "alert": "La Vigo usa conector Tipo 2. Antes de ir a un cargador, fijate que sea compatible en PlugShare o en la app del operador.",
     "chargers": [
       {
         "name": "UTE AC (alterna)",
         "badge": "Lento",
         "badgeColor": "amber",
-        "details": "$10,4/kWh + cargo base $54,8. Carga 0-100%: E2 ≈ $522 / E2+ ≈ $594. Velocidad máxima limitada por el auto: 6,6 kW.",
-        "tips": "Disponibles en muchas ciudades. Usar tarjeta UTE (sacarla en sucursal) — los QR suelen estar dañados o robados.",
+        "details": "$10,4/kWh + cargo base $54,8. Carga de 0 a 100%: E2 ≈ $522 / E2+ ≈ $594. Velocidad máxima: 6,6 kW (el límite lo pone el auto).",
+        "tips": "Hay en muchas ciudades. Usá la tarjeta UTE (se saca en una sucursal): los QR suelen estar rotos o robados.",
         "network": "ute"
       },
       {
@@ -125,24 +125,24 @@
         "badge": "Variable",
         "badgeColor": "amber",
         "source": "comunidad",
-        "details": "$11,8/kWh + cargo base $132,9. Carga 0-100%: E2 ≈ $663 / E2+ ≈ $744. El manual no especifica una potencia máxima de carga DC — la comunidad reporta hasta 60 kW según el equipo.",
-        "tips": "Los equipos de 30 kW (Ecotap) son los más reportados con fallas (se desconectan solos o marcan 'completado' sin cargar) — preferir un equipo de 60 kW o más si hay opción. Es normal que la velocidad baje notoriamente después del 80% — es protección térmica de la batería, no una falla.",
+        "details": "$11,8/kWh + cargo base $132,9. Carga de 0 a 100%: E2 ≈ $663 / E2+ ≈ $744. El manual no dice la potencia máxima en DC. La comunidad reporta hasta 60 kW, según el equipo.",
+        "tips": "Los equipos de 30 kW (Ecotap) son los que más fallan: se desconectan solos o marcan «completado» sin cargar. Si podés, elegí uno de 60 kW o más. Después del 80% la carga se pone mucho más lenta: es la batería protegiéndose del calor, no una falla.",
         "network": "ute"
       },
       {
         "name": "EONE",
         "badge": "Recomendado",
         "badgeColor": "green",
-        "details": "Sin cargo base. Algunos cargadores llegan a 120 kW. Precio variable por kWh.",
-        "tips": "Muy recomendados por el grupo. Usar la app EONE — seleccionar 'Dongfeng Forthing' o 'Yuan Pro' si la Vigo no aparece.",
+        "details": "Sin cargo base. Algunos cargadores llegan a 120 kW. El precio por kWh varía.",
+        "tips": "El grupo los recomienda mucho. Usá la app EONE. Si la Vigo no aparece, elegí «Dongfeng Forthing» o «Yuan Pro».",
         "network": "eone"
       },
       {
         "name": "DMC",
         "badge": "Recomendado",
         "badgeColor": "green",
-        "details": "Red privada en expansión (Skate Park de Carrasco, Plaza Paul Harris, entre otros puntos nuevos en 2026).",
-        "tips": "Considerada más confiable que UTE por el grupo, especialmente como alternativa cuando los equipos de UTE fallan.",
+        "details": "Red privada que está creciendo: Skate Park de Carrasco, Plaza Paul Harris y otros puntos nuevos en 2026.",
+        "tips": "Para el grupo es más confiable que UTE. Buena opción cuando fallan los equipos de UTE.",
         "network": "dmc"
       },
       {
@@ -150,84 +150,84 @@
         "badge": "Recomendado",
         "badgeColor": "green",
         "details": "Red privada de carga rápida.",
-        "tips": "Recomendada como alternativa en zonas donde UTE da problemas (Rocha, Maldonado).",
+        "tips": "Buena opción donde UTE da problemas (Rocha, Maldonado).",
         "network": "evergo"
       },
       {
         "name": "EOSVOLT",
         "badge": "Barato",
         "badgeColor": "green",
-        "details": "~$18/kWh, sin cargo fijo de inicio. Ubicados en Reserva Talice.",
-        "tips": "Casi siempre vacíos. Bajar la app EOSVOLT para usarlos.",
+        "details": "~$18/kWh, sin cargo fijo de inicio. Están en Reserva Talice.",
+        "tips": "Casi siempre están libres. Para usarlos, bajate la app EOSVOLT.",
         "network": "eosvolt"
       },
       {
         "name": "Devoto / Privados",
         "badge": "Variable",
         "badgeColor": "blue",
-        "details": "Sin cargo base. En 15 min carga ~25%. Para cargas cortas suele ser más barato que UTE.",
-        "tips": "Precios varían por operador. Algunos aceptan débito/crédito o app.",
+        "details": "Sin cargo base. En 15 minutos carga ~25%. Para cargas cortas suele salir más barato que UTE.",
+        "tips": "Los precios cambian según el operador. Algunos aceptan débito, crédito o app.",
         "network": "otro"
       }
     ],
     "alerts": [
-      "Punta del Diablo: algunos cargadores tienen conector incompatible con la Vigo — cargar mejor en Rocha.",
-      "Cargadores UTE de 30 kW (Ecotap) son los menos confiables de la red — fallan más en Rocha, Maldonado y San José. Si hay opción, preferir EONE, DMC o EverGo en esas zonas.",
-      "UTE a veces retira el descuento del 30% pero cobra cargo fijo — comparar precio total antes de elegir.",
-      "Si la pistola queda trabada: hay una linga de emergencia dentro del capot. Tirar suavemente para liberar."
+      "Punta del Diablo: algunos cargadores tienen un conector que no sirve para la Vigo. Mejor cargá en Rocha.",
+      "Los cargadores UTE de 30 kW (Ecotap) son los que más fallan, sobre todo en Rocha, Maldonado y San José. En esas zonas, si podés, elegí EONE, DMC o EverGo.",
+      "A veces UTE saca el descuento del 30% pero cobra el cargo fijo. Compará el precio total antes de elegir.",
+      "Si la pistola queda trabada: dentro del capot hay una linga (un cable) de emergencia. Tirá suave y se libera."
     ]
   },
   "v2l": {
-    "title": "V2L — carga inversa (Vehicle-to-Load)",
+    "title": "V2L — usar la batería del auto como enchufe",
     "tips": [
       {
         "bold": "Qué es:",
-        "text": "Permite usar la batería del auto para alimentar dispositivos externos (heladera, herramientas, parlantes, etc.) a través de un adaptador en el puerto de carga."
+        "text": "V2L (Vehicle-to-Load) te deja usar la batería del auto para enchufar cosas: heladera, herramientas, parlantes. Se conecta con un adaptador en el puerto de carga."
       },
       {
         "bold": "Potencia máxima:",
-        "text": "3 kW de salida, según el manual oficial. No conectar equipos que superen esa potencia — los de arranque pesado (como compresores de aire) pueden activar la protección por sobrecarga."
+        "text": "3 kW, según el manual oficial. No enchufes equipos que pidan más. Los que arrancan con mucha fuerza (como un compresor de aire) pueden hacer saltar la protección."
       },
       {
         "bold": "Adaptador:",
-        "text": "No viene incluido — es un accesorio que se compra por separado."
+        "text": "No viene con el auto. Se compra aparte."
       },
       {
         "bold": "Límite de descarga:",
-        "text": "Configurable entre 20% y 100% de batería, para no quedarse sin carga para volver a casa."
+        "text": "Lo elegís entre 20% y 100% de batería, para que te quede carga para volver a casa."
       }
     ]
   },
   "troubleshooting": {
-    "title": "Solución de problemas al cargar",
+    "title": "Si algo falla al cargar",
     "tips": [
       {
-        "bold": "No empieza a cargar — \"hora programada\":",
-        "text": "Hay una carga programada activa que todavía no llegó a su horario. Desactivarla o ajustar el límite desde el menú de energía."
+        "bold": "No empieza a cargar y dice \"hora programada\":",
+        "text": "Tenés una carga programada que todavía no llegó a su hora. Desactivala o cambiá el límite en el menú de energía."
       },
       {
-        "bold": "Corta antes de llegar al 100%:",
-        "text": "El límite de carga (SOC) configurado ya se alcanzó — es esperado, no es una falla."
+        "bold": "Corta antes del 100%:",
+        "text": "Llegó al límite de carga que elegiste (SOC, el porcentaje de batería). Es normal, no es una falla."
       },
       {
-        "bold": "Corta y dice \"completado\" de golpe:",
-        "text": "Puede ser la batería ya llena, o el cargador/estación con falla — probar otro equipo antes de descartar el auto."
+        "bold": "Corta de golpe y dice \"completado\":",
+        "text": "Puede que la batería ya esté llena o que falle el cargador. Probá otro equipo antes de pensar que es el auto."
       },
       {
-        "bold": "No carga por temperatura:",
-        "text": "La batería está fuera del rango -20°C a 45°C. Esperar a que se regule la temperatura (a la sombra en verano, en un garage en invierno)."
+        "bold": "No carga por la temperatura:",
+        "text": "La batería está fuera del rango de -20°C a 45°C. Esperá a que se regule: a la sombra en verano, en un garaje en invierno."
       },
       {
-        "bold": "No arranca el auto después de cargar:",
-        "text": "La batería de 12V puede estar descargada. Necesita arranque con puente, igual que un auto a combustión — no afecta a la batería de tracción."
+        "bold": "El auto no arranca después de cargar:",
+        "text": "Puede estar descargada la batería chica de 12V. Arrancalo con cables, como un auto a nafta. La batería grande (la de tracción) no tiene nada que ver."
       },
       {
         "bold": "El cargador de pared no reconoce el enchufe:",
-        "text": "Verificar que el tomacorriente tenga tierra — sin conexión a tierra el auto no inicia la carga."
+        "text": "Fijate que el tomacorriente tenga tierra. Sin tierra, el auto no empieza a cargar."
       },
       {
-        "bold": "Nada de lo anterior funciona:",
-        "text": "Falla del auto o del cargador AC — contactar al service oficial."
+        "bold": "Nada de esto funciona:",
+        "text": "Puede ser una falla del auto o del cargador AC. Consultá en el service oficial."
       }
     ]
   }

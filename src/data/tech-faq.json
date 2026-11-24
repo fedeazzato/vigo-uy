@@ -7,35 +7,35 @@
       "items": [
         {
           "bold": "Sistema operativo:",
-          "text": "Tablet Android con sistema propietario. Android Auto no está habilitado de fábrica."
+          "text": "Es una tablet Android con un sistema propio de la marca. Android Auto no viene activado de fábrica."
         },
         {
           "bold": "Idioma:",
-          "text": "Comandos de voz disponibles solo en inglés (\"Open windows\", \"Close windows\", etc.) — no hay opción en español. El menú en pantalla se puede poner en español, pero algunos botones quedan en inglés."
+          "text": "Los comandos de voz son solo en inglés («Open windows», «Close windows», etc.). El menú se puede poner en español, pero algunos botones quedan en inglés."
         },
         {
-          "bold": "Wallpaper:",
-          "text": "Solo 5 imágenes preinstaladas — deslizar con touch para cambiar. No se puede poner foto personalizada."
+          "bold": "Fondo de pantalla:",
+          "text": "Trae solo 5 imágenes. Deslizá con el dedo para cambiarla. No se puede poner una foto tuya."
         },
         {
           "bold": "Pantalla dividida:",
-          "text": "El ícono de 4 cuadrados en la esquina inferior izquierda alterna entre una app, todos los íconos, o dos apps en paralelo (ej. Waze + Spotify)."
+          "text": "El ícono de 4 cuadrados, abajo a la izquierda, cambia entre una app, todos los íconos o dos apps juntas (por ejemplo, Waze + Spotify)."
         },
         {
           "bold": "Cámara 360 en rotondas:",
-          "text": "Se activa sola a baja velocidad e interrumpe la navegación — se puede desactivar en Configuración → Cámaras → activación automática."
+          "text": "Se prende sola a baja velocidad y tapa la navegación. Para apagarla: Configuración → Cámaras → activación automática."
         },
         {
           "bold": "Radio FM:",
-          "text": "Funciona en modo automático. Algunas frecuencias uruguayas no aparecen en modo manual."
+          "text": "Funciona en modo automático. Algunas radios uruguayas no aparecen en modo manual."
         },
         {
-          "bold": "Reset de pantalla:",
-          "text": "Mantener presionado el botón MODE unos segundos resetea el sistema."
+          "bold": "Reiniciar la pantalla:",
+          "text": "Mantené apretado el botón MODE unos segundos."
         },
         {
           "bold": "Música por USB:",
-          "text": "Conectar pendrive USB-C con archivos mp3 sueltos en la raíz (no en carpetas). Ir a Multimedia en el menú."
+          "text": "Usá un pendrive USB-C con los mp3 sueltos, no en carpetas. Después entrá a Multimedia en el menú."
         }
       ]
     },
@@ -46,43 +46,43 @@
       "items": [
         {
           "bold": "Modo siesta:",
-          "text": "Permite dejar el auto ventilado o climatizado sin motor en movimiento. Muy usado en verano."
+          "text": "Deja el auto ventilado o con aire mientras está parado. Muy usado en verano."
         },
         {
           "bold": "Regeneración de freno:",
-          "text": "Configurable. En ciudad: nivel máximo para recuperar energía. En ruta: nivel bajo o cero para aprovechar la inercia."
+          "text": "Es cuando el auto frena solo al soltar el acelerador y recupera energía. Se ajusta: en ciudad, al máximo; en ruta, baja o en cero para aprovechar el envión."
         },
         {
           "bold": "Control de crucero:",
-          "text": "Se activa empujando la palanca derecha hacia abajo a la velocidad deseada; los botones +/- del volante ajustan el objetivo (máximo 130 km/h). Desactiva la regeneración mientras está encendido."
+          "text": "Empujá la palanca derecha hacia abajo a la velocidad que quieras. Con los botones +/- del volante la ajustás (máximo 130 km/h). Mientras está prendido, no hay regeneración."
         },
         {
           "bold": "AUTO HOLD (freno de mano electrónico):",
-          "text": "Se activa solo al detenerse del todo, para evitar que el auto se mueva. Se libera al acelerar."
+          "text": "Cuando parás del todo, frena el auto para que no se mueva. Se suelta al acelerar."
         },
         {
-          "bold": "Plegado de espejos:",
-          "text": "Girar la rueda de control de espejos hasta el final en el sentido contrario pliega ambos espejos — funciona incluso en movimiento."
+          "bold": "Plegar los espejos:",
+          "text": "Girá la ruedita de los espejos hasta el final para el otro lado y se pliegan los dos. Funciona incluso andando."
         },
         {
-          "bold": "Apertura del baúl:",
-          "text": "Botón en el control remoto, abre solo el baúl sin destrabar las puertas. Presionar dos veces para volver a trabarlo."
+          "bold": "Abrir el baúl:",
+          "text": "Hay un botón en la llave que abre solo el baúl, sin destrabar las puertas. Apretalo dos veces para volver a trabarlo."
         },
         {
           "bold": "Altura de las luces:",
-          "text": "Rueda en el lado inferior izquierdo del volante ajusta la altura del haz de luz."
+          "text": "Se ajusta con una ruedita abajo a la izquierda del volante."
         },
         {
           "bold": "Marchas:",
-          "text": "La posición de las marchas está al revés respecto al estándar occidental — es una queja común al principio, pero se acostumbra."
+          "text": "Están al revés de lo que se usa acá. Al principio cuesta, pero te acostumbrás."
         },
         {
-          "bold": "Sonido de aviso a peatones (AVAS):",
-          "text": "Suena obligatoriamente por debajo de ~30 km/h, por regulación de seguridad para peatones y ciclistas con baja visión. No se puede desactivar desde el menú."
+          "bold": "Sonido para peatones (AVAS):",
+          "text": "Suena siempre por debajo de ~30 km/h y no se apaga desde el menú. Más detalle en Mantenimiento, en «Seguridad y emergencias»."
         },
         {
           "bold": "Límites de carga AC/DC:",
-          "text": "El auto acepta hasta 60 kW en DC (dato reportado por la comunidad, no figura en el manual). En AC el máximo es 6,6 kW (limitante es el auto, no el cargador)."
+          "text": "Hasta 6,6 kW en AC y hasta 60 kW en DC (dato de la comunidad). Más detalle en Carga."
         }
       ]
     },
@@ -93,19 +93,19 @@
       "items": [
         {
           "bold": "Fidocar (importador, locales oficiales):",
-          "text": "Ruta Interbalnearia km 22.500 (tel. 2683 6251) · Punta del Este, Av. Roosevelt esq. Martiniano Chiossi (tel. 4226 8434) · Cuareim 2012 (tel. 095 030 437) · Av. Italia 5046 esq. A. Gallinal (tel. 094 370 985) · Luis Alberto de Herrera 1145 (tel. 2623 54 93). Service de 5.000 km gratuito y demora 3-4 horas."
+          "text": "Ruta Interbalnearia km 22.500 (tel. 2683 6251) · Punta del Este, Av. Roosevelt esq. Martiniano Chiossi (tel. 4226 8434) · Cuareim 2012 (tel. 095 030 437) · Av. Italia 5046 esq. A. Gallinal (tel. 094 370 985) · Luis Alberto de Herrera 1145 (tel. 2623 54 93). El service de 5.000 km es gratis y demora 3-4 horas."
         },
         {
           "bold": "Dongfeng Las Torres:",
-          "text": "Concesionario oficial alternativo a Fidocar para conocer y comprar los modelos Dongfeng, confirmado en el sitio oficial del importador."
+          "text": "Otro concesionario oficial, además de Fidocar, para ver y comprar los Dongfeng. Figura en el sitio oficial del importador."
         },
         {
-          "bold": "Otros lugares de service reportados:",
-          "text": "Sole y Lorenzo también hace el service oficial según el grupo — ver precios y plazos comparados en la página de Mantenimiento."
+          "bold": "Otros lugares de service:",
+          "text": "Según el grupo, Sole y Lorenzo también hace el service oficial. Los precios comparados están en Mantenimiento."
         },
         {
           "bold": "Dongfeng China:",
-          "text": "Se pueden enviar consultas con fotos de fallas a dongfengsouth.com/After_Sales.html — responden en inglés/chino."
+          "text": "Podés mandar consultas con fotos de la falla en dongfengsouth.com/After_Sales.html. Responden en inglés o chino."
         },
         {
           "bold": "Telegram:",
@@ -113,15 +113,15 @@
         },
         {
           "bold": "PlugShare:",
-          "text": "App para ver cargadores disponibles en tiempo real con estado actualizado por la comunidad."
+          "text": "App para ver qué cargadores están libres ahora, con el estado que actualiza la comunidad."
         },
         {
           "bold": "EONE App:",
-          "text": "Para cargadores EONE. Si la Vigo no aparece en la lista, seleccionar 'Dongfeng Forthing' o 'Yuan Pro'."
+          "text": "Para los cargadores EONE. Si la Vigo no aparece, elegí «Dongfeng Forthing» o «Yuan Pro»."
         },
         {
-          "bold": "Apps para viajar al exterior:",
-          "text": "Tupi para cargadores en Brasil (cargar reales antes de cruzar). Shell Recharge para Argentina (requiere DNI argentino y cuenta local — la app de YPF está bloqueada para extranjeros)."
+          "bold": "Apps para viajar afuera:",
+          "text": "Brasil: Tupi (cargá reales antes de cruzar). Argentina: Shell Recharge (pide DNI argentino y cuenta local; la app de YPF está bloqueada para extranjeros)."
         }
       ]
     }
@@ -131,115 +131,115 @@
       "id": "tiempo-carga",
       "icon": "⏱️",
       "q": "¿Cuánto tarda en cargarse de 0 a 100%?",
-      "a": "Cargador incluido (12A, 2kW): ~24–26 hs. Instalación 16A en casa: ~10 hs. Wallbox 32A: ~5–6 hs. Cargador DC rápido público: mucho menos, depende del nivel de carga y se hace notoriamente más lento después del 80% (protección térmica de la batería, no es una falla)."
+      "a": "Con el cargador que viene (12A, 2kW): ~24–26 hs. Con instalación de 16A en casa: ~10 hs. Con wallbox de 32A: ~5–6 hs. En un cargador rápido DC: mucho menos, pero después del 80% va más lento para cuidar la batería del calor. No es una falla."
     },
     {
       "id": "corte-automatico",
       "icon": "🔋",
       "q": "¿La carga se corta sola al llegar al límite?",
-      "a": "Sí. Se configura el límite desde el auto (80%, 90%, 100%). Cuando llega, corta automáticamente — no hace falta estar presente. Algunos autos se quedan trabados en 94% por un bug de software; se soluciona restableciendo de fábrica el sistema multimedia."
+      "a": "Sí. Elegís el límite en el auto (80%, 90% o 100%) y corta solo. Si tu auto se queda trabado en 94%, mirá la solución en Carga, en «Carga en casa»."
     },
     {
       "id": "carga-lluvia",
       "icon": "🌧️",
       "q": "¿Puedo cargar bajo la lluvia?",
-      "a": "Sí, es seguro. Los conectores están diseñados para uso exterior. Varios miembros lo hacen habitualmente sin problemas."
+      "a": "Sí, es seguro. Los conectores están hechos para usar afuera. Muchos dueños lo hacen siempre sin problemas."
     },
     {
       "id": "pistola-trabada",
       "icon": "🔒",
       "q": "¿Qué hago si la pistola queda trabada?",
-      "a": "Hay una linga de emergencia dentro del capot que libera el seguro mecánicamente. Encontrarla y jalar suavemente — la pistola sale."
+      "a": "Dentro del capot hay una linga (un cable) de emergencia que suelta el seguro. Tirá suave y la pistola sale."
     },
     {
       "id": "android-auto",
       "icon": "📱",
       "q": "¿La Vigo tiene Android Auto?",
-      "a": "No de fábrica. Con Android solo funciona Bluetooth (música y llamadas). Para navegación en pantalla hace falta un adaptador Carlinkit (~$4.000–5.000 o más barato en Temu/AliExpress). Con iPhone, el CarPlay inalámbrico funciona de forma nativa."
+      "a": "No de fábrica. Con Android solo tenés Bluetooth (música y llamadas). Para ver el mapa en la pantalla necesitás un adaptador Carlinkit (~$4.000–5.000, más barato en Temu o AliExpress). Con iPhone, CarPlay inalámbrico funciona sin nada extra. Más en Accesorios."
     },
     {
       "id": "autonomia",
       "icon": "🛣️",
       "q": "¿La autonomía que muestra el auto es real?",
-      "a": "El manual oficial solo homologa el ciclo CLTC: E2 401 km / E2+ 471 km. En la práctica, a 90 km/h sin aire se acerca mucho a eso; con aire en ruta a 110-120 km/h baja considerablemente (consumo real reportado: ~14-16 kWh/100km en ruta con aire, ~22 kWh/100km en invierno). En ciudad, con ~9-10 kWh/100km, puede superar la cifra homologada."
+      "a": "El manual oficial solo da la medición CLTC: E2 401 km / E2+ 471 km. A 90 km/h sin aire te acercás bastante. Con aire en ruta a 110-120 km/h baja bastante (~14-16 kWh/100km; ~22 kWh/100km en invierno). En ciudad (~9-10 kWh/100km) podés pasarla. Más en Carga."
     },
     {
       "id": "rueda-auxilio",
       "icon": "🛞",
       "q": "¿Hay rueda de auxilio?",
-      "a": "No viene de fábrica. Se puede conseguir una llanta 5x108 rodado 16 (ej. Peugeot) con cubierta 215/65 R16. Hay miembros del grupo que venden. También en Panam y Ruedas El Gaucho."
+      "a": "No viene de fábrica. Sirve una llanta 5x108 rodado 16 (por ejemplo, de Peugeot) con cubierta 215/65 R16. Algunos del grupo venden, y también hay en Panam y Ruedas El Gaucho. Más en Accesorios."
     },
     {
       "id": "matricula",
       "icon": "🔖",
       "q": "¿Cómo se pone la matrícula?",
-      "a": "Los agujeros del auto no coinciden con la posición estándar uruguaya. Hay que hacer agujeros nuevos con tornillos 6x1 de 20 mm. Es algo que le pasó a casi todos — es normal."
+      "a": "Los agujeros del auto no coinciden con la medida uruguaya. Hay que hacer agujeros nuevos y usar tornillos 6x1 de 20 mm. Le pasó a casi todos: es normal."
     },
     {
       "id": "aire-acondicionado",
       "icon": "❄️",
       "q": "¿El aire acondicionado consume mucha batería?",
-      "a": "Sí, afecta la autonomía, especialmente en ruta a velocidades altas. A 110 km/h con aire, la autonomía baja notablemente. Se recomienda usarlo con criterio en viajes largos. En algunas unidades el AC enfría poco — si pasa, conviene reclamarlo en garantía."
+      "a": "Sí, baja la autonomía, sobre todo en ruta a alta velocidad. A 110 km/h con aire se nota bastante. En viajes largos, usalo con cuidado. Si tu aire enfría poco, reclamalo en garantía."
     },
     {
       "id": "uso-intensivo",
       "icon": "🚕",
       "q": "¿La Vigo sirve para trabajar con muchos kilómetros?",
-      "a": "Sí. Varios miembros hacen 3.000 km/mes con un costo de ~$1.420 cargando en casa en triple horario. La clave es cargar de madrugada y tener instalación adecuada."
+      "a": "Sí. Varios dueños hacen 3.000 km por mes y gastan ~$1.420 cargando en casa con triple horario. La clave: cargar de madrugada y tener una buena instalación."
     },
     {
       "id": "garantia",
       "icon": "🛡️",
       "q": "¿La Vigo tiene garantía en Uruguay?",
-      "a": "Sí, a través de Fidocar (importador oficial). Para el primer dueño, desde mayo de 2026: 7 años o 300.000 km en el vehículo y 10 años sin límite de kilometraje en la batería de alto voltaje. Para el segundo dueño: 5 años o 150.000 km en el vehículo y 8 años o 200.000 km en la batería. Si se compra por importación paralela (ej. Maiasa), la garantía es directamente con los fabricantes chinos, lo que complica el servicio técnico local."
+      "a": "Sí, con Fidocar (el importador oficial). Primer dueño, desde mayo de 2026: 7 años o 300.000 km el auto, y 10 años sin límite de km la batería de alto voltaje. Segundo dueño: 5 años o 150.000 km el auto, y 8 años o 200.000 km la batería. Si lo compraste por importación paralela (por ejemplo, Maiasa), la garantía es con los fabricantes chinos y el service acá se complica."
     },
     {
       "id": "viaje-exterior",
       "icon": "🌎",
       "q": "¿Se puede llevar a Brasil o Argentina?",
-      "a": "Sí. Hay miembros que hicieron Montevideo–Florianópolis sin problemas usando la app Tupi para cargar. Argentina es más limitada — Shell Recharge requiere DNI argentino y la red de cargadores es escasa fuera de las ciudades grandes; planificar bien."
+      "a": "Sí. Algunos dueños fueron de Montevideo a Florianópolis sin problemas, cargando con la app Tupi. Argentina es más difícil: Shell Recharge pide DNI argentino y hay pocos cargadores fuera de las ciudades grandes. Planificá bien. Más en Rutas."
     },
     {
       "id": "carga-80-vs-100",
       "icon": "💯",
       "q": "¿Hay que cargar solo hasta 80% para no dañar la batería?",
-      "a": "El manual no pide ese límite — indica que se puede cargar a 100% para el uso diario sin problema. Algunos electricistas del grupo recomiendan preferir la carga AC (más lenta) sobre la carga rápida DC repetida, ya que esta última genera más calor en la batería con el uso frecuente."
+      "a": "El manual no lo pide: dice que podés cargar al 100% todos los días. Algunos electricistas del grupo recomiendan usar más la carga AC (lenta) que la rápida DC, porque la DC seguida calienta más la batería."
     },
     {
       "id": "motor-potencia",
       "icon": "🐎",
       "q": "¿Qué motor y potencia tiene la Vigo?",
-      "a": "Motor síncrono de imanes permanentes de 120 kW y 230 N·m de torque, con refrigeración líquida. Velocidad máxima 150 km/h en ambas versiones (E2 y E2+)."
+      "a": "Motor síncrono de imanes permanentes de 120 kW y 230 N·m de torque, con refrigeración líquida. Velocidad máxima: 150 km/h en las dos versiones (E2 y E2+)."
     },
     {
       "id": "v2l",
       "icon": "🔌",
       "q": "¿Qué es la función V2L?",
-      "a": "Vehicle-to-Load: permite usar la batería del auto para alimentar dispositivos externos (hasta 3 kW) a través de un adaptador que se compra por separado. Útil para herramientas, heladeras portátiles o camping."
+      "a": "Te deja usar la batería del auto como enchufe (hasta 3 kW), con un adaptador que se compra aparte. Sirve para herramientas, heladeras portátiles o camping. Más en Carga."
     },
     {
       "id": "intervalos-service",
       "icon": "🗓️",
       "q": "¿Cuáles son los intervalos de mantenimiento oficiales?",
-      "a": "El importador comunica el primer chequeo a los 5.000 km (sin costo) y luego cada 15.000 km o 1 año, lo que ocurra primero. El manual del usuario detalla además qué tareas se hacen en cada una de esas visitas según el múltiplo de 15.000 km (algunas, como el cambio de refrigerante del motor, son cada 30.000 km). En condiciones severas (polvo, calor extremo, sal, caminos de tierra) varios ítems se revisan con más frecuencia — ver el detalle en la página de Mantenimiento."
+      "a": "Primer service a los 5.000 km (gratis) y después cada 15.000 km o 1 año, lo que pase primero. Algunas tareas, como cambiar el refrigerante del motor, son cada 30.000 km. Con polvo, calor extremo, sal o caminos de tierra, algunas cosas se revisan más seguido. El detalle está en Mantenimiento."
     },
     {
       "id": "perder-garantia",
       "icon": "⚠️",
       "q": "¿Si no hago el service en fecha pierdo la garantía?",
-      "a": "Sí. El manual oficial indica que no cumplir con el mantenimiento programado en los intervalos indicados hace perder el derecho a garantía."
+      "a": "Sí. El manual oficial dice que si no hacés el mantenimiento en fecha, perdés la garantía."
     },
     {
       "id": "oxido-asientos",
       "icon": "🪑",
       "q": "¿Es normal encontrar óxido debajo de los asientos?",
-      "a": "Es un problema de calidad reportado por varios miembros, atribuido a un recubrimiento anticorrosivo insuficiente de fábrica. Conviene revisar debajo de los asientos delanteros al recibir el auto y reclamar en garantía si aparece."
+      "a": "Es un problema que reportaron varios dueños. Revisá debajo de los asientos delanteros cuando te entreguen el auto y, si aparece, reclamalo en garantía. Más en Mantenimiento, en «Problemas conocidos»."
     },
     {
       "id": "adas-lluvia",
       "icon": "🤖",
       "q": "¿El frenado automático y los asistentes de carril funcionan bien con lluvia?",
-      "a": "Estos sistemas (ADAS) son exclusivos de la versión E2+ — la E2 no los trae, según la página oficial del modelo. En la E2+ funcionan según lo homologado, pero varios miembros reportan que responden peor con lluvia fuerte o en rotondas. No conviene depender de ellos como única medida de seguridad en esas condiciones."
+      "a": "Estas ayudas (ADAS) vienen solo en la E2+. Varios dueños dicen que responden peor con lluvia fuerte o en rotondas, así que no te confíes solo en ellas. Más en Mantenimiento, en «Seguridad y emergencias»."
     }
   ]
 }
