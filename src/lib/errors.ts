@@ -35,6 +35,16 @@ const KNOWN_TRIGGER_MESSAGES = [
 const SERVER_WORDING: Record<string, string> = {
   'Ese dispositivo no está vinculado a tu vehículo.': 'Esa pantalla no está conectada a tu vehículo.',
 }
+// claim_car_pairing's device cap (0045) carries the number, so it can't be an exact key.
+const DEVICE_CAP = /^Tu vehículo ya tiene (\d+) dispositivos vinculados\./
+
+function rewordServerMessage(message: string): string {
+  const exact = SERVER_WORDING[message]
+  if (exact) return exact
+  const cap = DEVICE_CAP.exec(message)
+  if (cap) return `Tu vehículo ya tiene ${cap[1]} pantallas conectadas. Desconectá una antes de conectar otra.`
+  return message
+}
 
 export function toFriendlyError(error: unknown): string {
   const err = (typeof error === 'object' && error !== null ? error : {}) as {
@@ -48,7 +58,7 @@ export function toFriendlyError(error: unknown): string {
 
   // Our own `raise exception` messages are already user-facing Spanish.
   if (message && (code === 'P0001' || KNOWN_TRIGGER_MESSAGES.some((m) => message.startsWith(m)))) {
-    return SERVER_WORDING[message] ?? message
+    return rewordServerMessage(message)
   }
 
   if (/failed to fetch|networkerror|load failed/i.test(message)) {

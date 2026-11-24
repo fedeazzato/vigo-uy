@@ -17,6 +17,19 @@ describe('toFriendlyError', () => {
     expect(toFriendlyError({ message: 'Código no válido.' })).toBe('Código no válido.')
   })
 
+  // owner decision 2026-11-24 #3: never "vincular" on screen, even in older server messages (0045).
+  it('rewrites car-link server messages that still say "vincular"', () => {
+    expect(
+      toFriendlyError({ code: 'P0001', message: 'Ese dispositivo no está vinculado a tu vehículo.' })
+    ).toBe('Esa pantalla no está conectada a tu vehículo.')
+    const cap = toFriendlyError({
+      code: 'P0001',
+      message: 'Tu vehículo ya tiene 3 dispositivos vinculados. Desvinculá uno antes de agregar otro.',
+    })
+    expect(cap).toBe('Tu vehículo ya tiene 3 pantallas conectadas. Desconectá una antes de conectar otra.')
+    expect(cap).not.toMatch(/vincul/i)
+  })
+
   it('maps network failures to the Spanish offline message', () => {
     expect(toFriendlyError(new TypeError('Failed to fetch'))).toBe(
       'Sin conexión. Revisá tu internet e intentá de nuevo.'
