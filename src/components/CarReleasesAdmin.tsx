@@ -219,7 +219,7 @@ export default function CarReleasesAdmin() {
                 Autos:{' '}
                 {Object.entries(phases)
                   .map(([k, n]) => `${k} ${n}`)
-                  .join(' · ') || 'ninguno vinculado'}
+                  .join(' · ') || 'ninguno conectado'}
               </div>
             </div>
             <ul className={listStyles.list}>
@@ -281,9 +281,9 @@ export default function CarReleasesAdmin() {
       </Card>
 
       <Card>
-        <h2 className={listStyles.sectionTitle}>🚗 Autos vinculados</h2>
+        <h2 className={listStyles.sectionTitle}>🚗 Autos conectados</h2>
         {cars.length === 0 ? (
-          <p className={listStyles.empty}>Ningún auto vinculado todavía.</p>
+          <p className={listStyles.empty}>Ningún auto conectado todavía.</p>
         ) : (
           <ul className={listStyles.list}>
             {cars.map((c) => (

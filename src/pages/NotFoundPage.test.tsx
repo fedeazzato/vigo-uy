@@ -12,6 +12,6 @@ describe('NotFoundPage', () => {
     )
     expect(screen.getByText(/No encontramos esa página/)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'inicio' }).getAttribute('href')).toBe('/')
-    expect(screen.getByRole('link', { name: 'Guía' }).getAttribute('href')).toBe('/guia')
+    expect(screen.getByRole('link', { name: 'Aprender' }).getAttribute('href')).toBe('/aprender')
   })
 })

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { toFriendlyError } from '../lib/errors'
 import styles from './LoginPage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import GlossaryLink from '../components/GlossaryLink'
 
 const RESEND_COOLDOWN_SECONDS = 60
 
@@ -32,7 +33,7 @@ export default function LoginPage() {
   const [turnstileKey, setTurnstileKey] = useState(0)
 
   useEffect(() => {
-    if (status === 'signedIn') navigate(from ?? '/mi-actividad', { replace: true })
+    if (status === 'signedIn') navigate(from ?? '/mi-vigo/registros', { replace: true })
   }, [status, navigate, from])
 
   useEffect(() => {
@@ -132,7 +133,8 @@ export default function LoginPage() {
               {passkeyPending ? 'Verificando…' : '🔑 Iniciar sesión con llave de acceso'}
             </button>
             <p className={styles.loginHint}>
-              La llave de acceso es tu huella, tu cara o el PIN del teléfono. Se crea desde Mi actividad.
+              La <GlossaryLink term="llave-de-acceso">llave de acceso</GlossaryLink> es tu huella, tu cara o el PIN
+              del teléfono.
             </p>
             <p className={styles.divider}>o con tu email</p>
           </>

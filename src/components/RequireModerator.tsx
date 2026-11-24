@@ -7,7 +7,7 @@ export default function RequireModerator() {
   if (status === 'loading') return null
   if (status !== 'signedIn') return <Navigate to="/login" replace />
   if (!profile) return null
-  if (!profile.is_moderator) return <Navigate to="/mi-actividad" replace />
+  if (!profile.is_moderator) return <Navigate to="/mi-vigo/registros" replace />
 
   return <Outlet />
 }

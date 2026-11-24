@@ -39,6 +39,7 @@ import { formatTimestampDate } from '../lib/carLink'
 import type { VaultInboxRow, VaultItemKind, VaultItemRow, VaultKeyRow } from '../types'
 import styles from './VaultPage.module.css'
 import formStyles from '../styles/formControls.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 // "Bóveda" (specs/secret-vault.md R6): the dashcam's 24 recovery words and
 // the settings-backup passphrase, end-to-end encrypted with a key that only
@@ -159,7 +160,7 @@ function KeysCard({ shared }: { shared: Shared }) {
     const question = last
       ? `¿Quitar «${key.label}», tu única llave? Sin llaves nadie puede abrir la bóveda, así que también se borra lo guardado (la frase de la dashcam y la clave de respaldo). La frase sigue en el auto y en tu papel.`
       : `¿Quitar «${key.label}»? Ese dispositivo ya no va a poder abrir la bóveda; tus otras llaves siguen funcionando.`
-    if (!confirm(question)) return
+    if (!(await confirmDialog(question))) return
     fb.reset()
     shared.setBusy(true)
     const result = await removePasskey(key, keys, items)
@@ -173,7 +174,7 @@ function KeysCard({ shared }: { shared: Shared }) {
   }
 
   async function wipe() {
-    if (!confirm('¿Borrar lo guardado? Sin una llave no se puede abrir y no hay forma de recuperarlo.'))
+    if (!(await confirmDialog('¿Borrar lo guardado? Sin una llave no se puede abrir y no hay forma de recuperarlo.')))
       return
     fb.reset()
     shared.setBusy(true)
@@ -334,7 +335,7 @@ function DashcamCard({ shared }: { shared: Shared }) {
       fb.setError(recoveryErrorMessage(error))
       return false
     }
-    if (item && !confirm('Ya hay una frase guardada. ¿Reemplazarla por esta?')) return false
+    if (item && !(await confirmDialog('Ya hay una frase guardada. ¿Reemplazarla por esta?'))) return false
     shared.setBusy(true)
     const result = await saveSecret(shared.user, shared.keys, 'dashcam_recovery', canonical, source)
     shared.setBusy(false)
@@ -377,7 +378,7 @@ function DashcamCard({ shared }: { shared: Shared }) {
   }
 
   async function remove() {
-    if (!confirm('¿Borrar la frase de la bóveda? Sigue en el auto (Ajustes, con el PIN) y en tu papel.'))
+    if (!(await confirmDialog('¿Borrar la frase de la bóveda? Sigue en el auto (Ajustes, con el PIN) y en tu papel.')))
       return
     fb.reset()
     hide()
@@ -540,9 +541,9 @@ function InboxCard({ shared }: { shared: Shared }) {
   async function enable() {
     if (
       inbox?.key &&
-      !confirm(
+      !(await confirmDialog(
         'Ya está activado. Si generás una llave nueva, lo que el auto haya enviado con la anterior ya no se puede abrir. ¿Seguir?'
-      )
+      ))
     )
       return
     fb.reset()
@@ -567,7 +568,7 @@ function InboxCard({ shared }: { shared: Shared }) {
     }
     if (
       itemOf(shared.items, 'dashcam_recovery') &&
-      !confirm('Ya hay una frase guardada. ¿Reemplazarla por la que envió el auto?')
+      !(await confirmDialog('Ya hay una frase guardada. ¿Reemplazarla por la que envió el auto?'))
     )
       return
     fb.reset()
@@ -669,9 +670,9 @@ function PassphraseCard({ shared }: { shared: Shared }) {
   async function generate() {
     if (
       item &&
-      !confirm(
+      !(await confirmDialog(
         'Ya tenés una clave guardada. Si generás otra, la anterior se reemplaza y los respaldos cifrados con ella solo se abren con la anterior. ¿Generar una nueva?'
-      )
+      ))
     )
       return
     fb.reset()
@@ -691,7 +692,7 @@ function PassphraseCard({ shared }: { shared: Shared }) {
       fb.setError(problem)
       return
     }
-    if (item && !confirm('Ya tenés una clave guardada. ¿Reemplazarla por esta?')) return
+    if (item && !(await confirmDialog('Ya tenés una clave guardada. ¿Reemplazarla por esta?'))) return
     if (await store(draft, 'typed')) {
       setDraft('')
       setEditing(false)
@@ -718,9 +719,9 @@ function PassphraseCard({ shared }: { shared: Shared }) {
 
   async function remove() {
     if (
-      !confirm(
+      !(await confirmDialog(
         '¿Borrar la clave de la bóveda? Si no la tenés anotada, los respaldos cifrados con ella no se van a poder abrir.'
-      )
+      ))
     )
       return
     fb.reset()

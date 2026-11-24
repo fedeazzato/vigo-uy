@@ -20,6 +20,8 @@ const KNOWN_TRIGGER_MESSAGES = [
   'Tu permiso en este vehículo es solo ver',
   'Quien creó el vehículo siempre tiene control',
   'Rol no válido',
+  // Family invites (0082)
+  'Creaste muchos códigos',
   // Car link (0045)
   'Demasiados intentos',
   'Tu vehículo ya tiene',
@@ -27,6 +29,12 @@ const KNOWN_TRIGGER_MESSAGES = [
   // Bóveda (0046); its daily limit starts with 'Límite diario' too
   'Ya tenés 10 llaves',
 ]
+
+// Older server messages that still use retired words ("vincular", owner decision 2026-11-24 #3). Rewritten here so no
+// migration is needed just for wording.
+const SERVER_WORDING: Record<string, string> = {
+  'Ese dispositivo no está vinculado a tu vehículo.': 'Esa pantalla no está conectada a tu vehículo.',
+}
 
 export function toFriendlyError(error: unknown): string {
   const err = (typeof error === 'object' && error !== null ? error : {}) as {
@@ -40,7 +48,7 @@ export function toFriendlyError(error: unknown): string {
 
   // Our own `raise exception` messages are already user-facing Spanish.
   if (message && (code === 'P0001' || KNOWN_TRIGGER_MESSAGES.some((m) => message.startsWith(m)))) {
-    return message
+    return SERVER_WORDING[message] ?? message
   }
 
   if (/failed to fetch|networkerror|load failed/i.test(message)) {

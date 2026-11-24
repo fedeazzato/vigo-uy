@@ -1,4 +1,5 @@
 import { CSSProperties, KeyboardEvent, ReactNode, useEffect, useRef } from 'react'
+import { NavLink } from 'react-router-dom'
 import styles from './UI.module.css'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
@@ -7,6 +8,8 @@ import type { TipItem, StatItem, BadgeColor } from '../types'
 interface PageHeaderProps {
   title: string
   subtitle?: ReactNode
+  /** h2 when the page sits under a parent page title (tabbed pages). */
+  as?: 'h1' | 'h2'
 }
 
 // Page titles start with a decorative emoji ("🚗 Mi Vigo"). Split it out so
@@ -14,11 +17,11 @@ interface PageHeaderProps {
 // VS16 (️) and ZWJ (‍) keep multi-codepoint emoji sequences together.
 const LEADING_EMOJI = /^(\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s+/u
 
-export function PageHeader({ title, subtitle }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, as: Heading = 'h1' }: PageHeaderProps) {
   const match = LEADING_EMOJI.exec(title)
   return (
     <div className={styles.pageHeader}>
-      <h1 className={styles.pageTitle}>
+      <Heading className={styles.pageTitle}>
         {match ? (
           <>
             <span aria-hidden="true">{match[1]} </span>
@@ -27,7 +30,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
         ) : (
           title
         )}
-      </h1>
+      </Heading>
       {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
     </div>
   )
@@ -327,5 +330,30 @@ export function SectionDivider({ label }: SectionDividerProps) {
     <div className={styles.divider}>
       <span>{label}</span>
     </div>
+  )
+}
+
+interface PageTabsProps {
+  label: string
+  tabs: { to: string; label: string; end?: boolean }[]
+}
+
+// Route-backed tabs (Mi Vigo, Cuidar tu Vigo): plain links, so the browser's back button, deep links and screen readers
+// (aria-current="page") just work. The selected tab uses the car's amber "selected" underline.
+export function PageTabs({ label, tabs }: PageTabsProps) {
+  return (
+    <nav aria-label={label} className={styles.pageTabs}>
+      {tabs.map((t) => (
+        <NavLink
+          key={t.to}
+          to={t.to}
+          end={t.end}
+          replace
+          className={({ isActive }) => `${styles.pageTab} ${isActive ? styles.pageTabActive : ''}`}
+        >
+          {t.label}
+        </NavLink>
+      ))}
+    </nav>
   )
 }

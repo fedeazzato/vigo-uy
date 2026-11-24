@@ -24,7 +24,7 @@ export default function PartsPage() {
 
   return (
     <div>
-      <PageHeader title="🔩 Repuestos y consumibles" subtitle={partsCatalog.intro} />
+      <PageHeader as="h2" title="🔩 Repuestos y consumibles" subtitle={partsCatalog.intro} />
 
       {error && <Alert type="danger">{error}</Alert>}
 

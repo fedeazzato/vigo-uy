@@ -27,7 +27,7 @@ function communityResultPath(result: CommunitySearchResult): string {
     case 'trip_log':
       return '/rutas'
     case 'part_purchase':
-      return isAccessoryCategory(result.category ?? '') ? '/accesorios' : '/repuestos'
+      return isAccessoryCategory(result.category ?? '') ? '/cuidar/accesorios' : '/cuidar/repuestos'
   }
 }
 
@@ -115,7 +115,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
         <div className={styles.results}>
           {curatedResults.length > 0 && (
             <div className={styles.group}>
-              <div className={styles.groupLabel}>Guía</div>
+              <div className={styles.groupLabel}>Aprender</div>
               {curatedResults.map((r, i) => (
                 <button key={`${r.path}-${i}`} type="button" className={styles.resultRow} onClick={() => goTo(r.path)}>
                   <span className={styles.resultTitle}>{r.title}</span>

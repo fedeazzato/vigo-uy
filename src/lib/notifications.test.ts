@@ -6,10 +6,10 @@ describe('notifications helpers', () => {
   it('links each kind to the page where its content lives', () => {
     const n = { part_purchase_id: null, service_entry_id: null }
     expect(notificationLink({ ...n, kind: 'station_failure' })).toBe('/carga')
-    expect(notificationLink({ ...n, kind: 'vehicle_trip' })).toBe('/mi-actividad')
-    expect(notificationLink({ ...n, kind: 'vehicle_service' })).toBe('/mi-actividad')
+    expect(notificationLink({ ...n, kind: 'vehicle_trip' })).toBe('/mi-vigo/registros')
+    expect(notificationLink({ ...n, kind: 'vehicle_service' })).toBe('/mi-vigo/registros')
     expect(notificationLink({ ...n, kind: 'comment' })).toBe('/comunidad')
-    expect(notificationLink({ ...n, kind: 'reaction', part_purchase_id: 'p' })).toBe('/repuestos')
+    expect(notificationLink({ ...n, kind: 'reaction', part_purchase_id: 'p' })).toBe('/cuidar/repuestos')
     expect(notificationLink({ ...n, kind: 'comment', service_entry_id: 's' })).toBe('/costos')
   })
 

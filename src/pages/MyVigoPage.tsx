@@ -9,7 +9,7 @@ import {
   COLOR_BORDER,
 } from '../context/UserPrefsContext'
 import type { Model, TripLog } from '../types'
-import { PageHeader, Card, CardTitle, Alert, SectionDivider } from '../components/UI'
+import { Card, CardTitle, Alert, SectionDivider } from '../components/UI'
 import { CarPreview } from '../components/CarPreview'
 import ProfileCard from '../components/ProfileCard'
 import VehicleCard from '../components/VehicleCard'
@@ -21,7 +21,8 @@ import CarDiagnosticsCard from '../components/CarDiagnosticsCard'
 import CarRemoteCard from '../components/CarRemoteCard'
 import SendPlaceCard from '../components/SendPlaceCard'
 import ServiceReminderCard from '../components/ServiceReminderCard'
-import FirmwareCard from '../components/FirmwareCard'
+import OwnFirmwareLine from '../components/OwnFirmwareLine'
+import PasskeyCard from '../components/PasskeyCard'
 import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
@@ -76,15 +77,6 @@ export default function MyVigoPage() {
 
   return (
     <div>
-      <PageHeader
-        title="🚗 Mi Vigo"
-        subtitle={
-          <>
-            Tu auto, tu cuenta y tus mejoras, todo en un lugar. Tus viajes y gastos están en{' '}
-            <Link to="/mi-actividad">Mi actividad</Link>.
-          </>
-        }
-      />
 
       {(model || color) && (
         <div className={styles.currentSelection}>
@@ -171,7 +163,7 @@ export default function MyVigoPage() {
 
       {status === 'signedIn' && (
         <>
-          <SectionDivider label="🔋 Tu auto ahora" />
+          <SectionDivider label="🚗 Tu auto" />
           <p className={styles.sectionHint}>
             Lo que tu auto manda es privado: lo ven solo quienes comparten tu Vigo, y nada se publica sin que
             lo confirmes.
@@ -193,6 +185,7 @@ export default function MyVigoPage() {
 
           <SectionDivider label="🔧 Configuración y service" />
           <CarDevicesCard />
+          <OwnFirmwareLine />
           <Card>
             <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
             <p className={styles.vaultText}>
@@ -241,12 +234,12 @@ export default function MyVigoPage() {
             </Alert>
           )}
           <ProfileCard />
+          <PasskeyCard />
           <VehicleCard />
 
           <details className={styles.more}>
             <summary>Más detalles (para curiosos)</summary>
             <CarDiagnosticsCard />
-            <FirmwareCard />
           </details>
         </>
       )}

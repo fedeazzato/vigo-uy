@@ -5,6 +5,7 @@ import { fetchCarDevices, formatTimestampDate, lastSeenLabel, revokeCarDevice } 
 import type { CarDevice } from '../types'
 import styles from './CarDevicesCard.module.css'
 import formStyles from '../styles/formControls.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 // "Dispositivos vinculados" (specs/car-link-phase0.md R4): the car head
 // units linked to the member's vehicle. RLS returns only this vehicle's
@@ -27,9 +28,9 @@ export default function CarDevicesCard() {
 
   async function revoke(device: CarDevice) {
     if (
-      !confirm(
-        `¿Desvincular «${device.name}»? El auto deja de poder enviar datos a tu vehículo. Para volver a usarlo hay que vincularlo de nuevo.`
-      )
+      !(await confirmDialog(
+        `¿Desconectar «${device.name}»? El auto deja de poder enviar datos a tu vehículo. Para volver a usarlo hay que conectar la pantalla de nuevo.`
+      ))
     )
       return
     setBusyId(device.id)
@@ -41,7 +42,7 @@ export default function CarDevicesCard() {
       setError(result.error)
       return
     }
-    setMessage(`«${device.name}» quedó desvinculado.`)
+    setMessage(`«${device.name}» quedó desconectado.`)
     void load()
   }
 
@@ -57,11 +58,11 @@ export default function CarDevicesCard() {
       ) : devices.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyText}>
-            Todavía no vinculaste la pantalla de tu Vigo. En el auto, abrí <strong>Mi Vigo</strong> y tocá{' '}
-            <strong>Vincular con WikiVigo</strong>: vas a ver un código y un QR.
+            Todavía no conectaste la pantalla de tu Vigo. En el auto, abrí <strong>Mi Vigo</strong> y tocá el botón
+            de <strong>WikiVigo</strong>: vas a ver un código y un QR.
           </p>
           <Link to="/mi-vigo/vincular" className={styles.linkBtn}>
-            Vincular auto
+            Conectar la pantalla
           </Link>
         </div>
       ) : (
@@ -72,12 +73,12 @@ export default function CarDevicesCard() {
                 <span className={styles.info}>
                   <span className={styles.name}>{d.name}</span>
                   <span className={styles.meta}>
-                    Vinculado el {formatTimestampDate(d.created_at, now)}
+                    Conectado el {formatTimestampDate(d.created_at, now)}
                     {d.app_version && ` · Mi Vigo ${d.app_version}`}
                   </span>
                   <span className={styles.meta}>
                     {d.revoked_at
-                      ? `Desvinculado el ${formatTimestampDate(d.revoked_at, now)}`
+                      ? `Desconectado el ${formatTimestampDate(d.revoked_at, now)}`
                       : lastSeenLabel(d.last_seen_at, now)}
                   </span>
                 </span>
@@ -88,14 +89,14 @@ export default function CarDevicesCard() {
                     onClick={() => void revoke(d)}
                     disabled={busyId !== null}
                   >
-                    {busyId === d.id ? 'Desvinculando…' : 'Desvincular'}
+                    {busyId === d.id ? 'Desconectando…' : 'Desconectar'}
                   </button>
                 )}
               </li>
             ))}
           </ul>
           <p className={formStyles.hint}>
-            ¿Otro auto? <Link to="/mi-vigo/vincular">Vincular auto</Link>
+            ¿Otro auto? <Link to="/mi-vigo/vincular">Conectar la pantalla</Link>
           </p>
         </>
       )}

@@ -136,7 +136,7 @@ describe('createCarOrder / cancelCarOrder', () => {
   })
 
   it.each([
-    ['no_car', /No hay un auto vinculado/],
+    ['no_car', /todavía no tiene la pantalla del auto conectada/],
     ['rate_limited', /muchas órdenes seguidas/],
     ['bad_request', /no es válida/],
     ['something_new', /no está disponible/],

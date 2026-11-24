@@ -35,7 +35,7 @@ function renderSignedIn(displayName: string) {
     status: 'signedIn',
     refreshProfile: vi.fn(),
   }
-  // MemoryRouter because the page header links to /mi-actividad.
+  // MemoryRouter because the page links to other routes.
   return render(
     <MemoryRouter>
       <UserPrefsProvider>
@@ -94,7 +94,7 @@ describe('MyVigoPage grouping (specs/site-audit-2026-11.md)', () => {
   it('shows the car sections in order, with technical details collapsed', () => {
     const { container } = renderSignedIn('Ana')
     const text = container.textContent ?? ''
-    const order = ['Tu auto ahora', 'Datos y estadísticas', 'Configuración y service', 'Tu cuenta']
+    const order = ['Tu auto', 'Datos y estadísticas', 'Configuración y service', 'Tu cuenta']
     const positions = order.map((label) => text.indexOf(label))
     positions.forEach((p) => expect(p).toBeGreaterThan(-1))
     expect([...positions].sort((a, b) => a - b)).toEqual(positions)

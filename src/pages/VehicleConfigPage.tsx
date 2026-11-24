@@ -10,6 +10,7 @@ import {
   type ConfigSnapshot,
 } from '../lib/vehicleConfig'
 import formStyles from '../styles/formControls.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 // C4 "Configuración del auto" (specs/vehicle-config-fingerprint.md): private copies of the car's factory configuration, uploaded from
 // the installer's file, and the difference between two of them (before / after a dealer visit). Only this account sees them.
@@ -82,7 +83,7 @@ export default function VehicleConfigPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm('¿Borrar esta copia de la configuración?')) return
+    if (!(await confirmDialog('¿Borrar esta copia de la configuración?'))) return
     const r = await deleteSnapshot(id)
     if (r.error) setError(r.error)
     void load()

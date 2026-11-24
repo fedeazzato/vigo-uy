@@ -11,8 +11,8 @@ import type { CommunityTotals, VehicleLeaderboardEntry } from '../types'
 import styles from './HomePage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
-// Just the most-consulted pages; the full index lives on /guia. Keeping this
-// short is what makes Inicio and Guía different pages.
+// Just the most-consulted pages; the full index lives on /aprender. Keeping this
+// short is what makes Inicio and Aprender different pages.
 const QUICK_GUIDE_ROUTES = ['/carga', '/rutas', '/costos', '/faq']
 const QUICK_GUIDE = GUIDE_LINKS.filter(({ to }) => QUICK_GUIDE_ROUTES.includes(to))
 
@@ -81,11 +81,11 @@ export default function HomePage() {
         </Card>
       )}
 
-      <SectionDivider label="Guía rápida" />
+      <SectionDivider label="Para aprender" />
       <GuideLinks links={QUICK_GUIDE} />
       <div className={styles.guideMore}>
-        <Link to="/guia" className={styles.communityLink}>
-          Ver toda la guía →
+        <Link to="/aprender" className={styles.communityLink}>
+          Ver todo en Aprender →
         </Link>
       </div>
     </div>

@@ -88,8 +88,32 @@ export async function fetchCarRemote(): Promise<CarRemoteData | null> {
   }
 }
 
+/**
+ * Whether the vehicle has a linked car and when it was last seen ("Tu auto ahora" online line). Null on any error or with no
+ * active device.
+ */
+export async function fetchCarLastSeen(): Promise<{ lastSeenAt: string | null } | null> {
+  const client = supabase
+  if (!client) return null
+  try {
+    const { data, error } = await client.from('car_devices').select(DEVICE_COLUMNS)
+    if (error) return null
+    const active = (data ?? []).filter((d) => !d.revoked_at)
+    if (active.length === 0) return null
+    const lastSeenAt =
+      active
+        .map((d) => d.last_seen_at)
+        .filter((t): t is string => Boolean(t))
+        .sort()
+        .pop() ?? null
+    return { lastSeenAt }
+  } catch {
+    return null
+  }
+}
+
 const CREATE_ERRORS: Record<string, string> = {
-  no_car: 'No hay un auto vinculado a tu vehículo.',
+  no_car: 'Tu vehículo todavía no tiene la pantalla del auto conectada.',
   rate_limited: 'Mandaste muchas órdenes seguidas. Esperá un minuto y probá de nuevo.',
   bad_request: 'Esa orden no es válida.',
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, CardTitle, Alert, Skeleton } from '../components/UI'
 import { appName, fetchReleaseNotes, type ReleaseNote } from '../lib/carReleaseNotes'
+import FirmwareCard from '../components/FirmwareCard'
 import formStyles from '../styles/formControls.module.css'
 
 // D1 "Novedades" (specs/car-updates.md): what each stable release of the community apps brings. The car shows the same release as
@@ -30,6 +31,8 @@ export default function NovedadesPage() {
         title="🆕 Novedades de las mejoras"
         subtitle="Lo nuevo en las apps de la comunidad. Tu auto se actualiza solo cuando tiene Wi-Fi."
       />
+      {/* Head-unit software versions seen in the community (moved from Mi Vigo, owner decision 2026-11-24 #7). */}
+      <FirmwareCard />
       {notes === undefined && <Skeleton lines={4} />}
       {(notes === null || notes?.length === 0) && (
         <Alert type="info">

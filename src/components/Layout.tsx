@@ -6,7 +6,7 @@ import SiteSearch from './SiteSearch'
 import { Segmented, Skeleton } from './UI'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
-import { GUIDE_LINKS } from './GuideLinks'
+import { GUIDE_GROUPS, GUIDE_LINKS } from './GuideLinks'
 import { PRIMARY_NAV } from '../lib/primaryNav'
 import type { NavItem } from '../lib/primaryNav'
 import styles from './Layout.module.css'
@@ -177,8 +177,12 @@ export default function Layout() {
           <nav className={styles.nav}>
             {PRIMARY_NAV.map((item) => renderNavLink(item))}
 
-            <div className={styles.navGroupLabel}>Guía</div>
-            {GUIDE_LINKS.map((item) => renderNavLink(item, styles.navLinkGuide))}
+            {GUIDE_GROUPS.map((g) => (
+              <div key={g.id} role="group" aria-label={g.label}>
+                <div className={styles.navGroupLabel}>{g.label}</div>
+                {GUIDE_LINKS.filter((l) => l.group === g.id).map((item) => renderNavLink(item, styles.navLinkGuide))}
+              </div>
+            ))}
 
             {profile?.is_moderator && renderNavLink(MODERATION_ITEM)}
           </nav>
@@ -377,7 +381,7 @@ export default function Layout() {
         )}
         <nav className={styles.tabBar}>
           <TabLink to="/" end icon="home" label="Inicio" onClick={closeSheet} />
-          <TabLink to="/comunidad" icon="community" label="Comunidad" onClick={closeSheet} />
+          <TabLink to="/aprender" icon="guide" label="Aprender" onClick={closeSheet} />
           <button
             type="button"
             className={styles.tabLink}
@@ -389,8 +393,8 @@ export default function Layout() {
             </span>
             <span className={styles.tabLabel}>Registrar</span>
           </button>
-          <TabLink to="/mi-actividad" icon="activity" label="Mi actividad" onClick={closeSheet} />
-          <TabLink to="/guia" icon="guide" label="Guía" onClick={closeSheet} />
+          <TabLink to="/comunidad" icon="community" label="Comunidad" onClick={closeSheet} />
+          <TabLink to="/mi-vigo" icon="car" label="Mi Vigo" onClick={closeSheet} />
         </nav>
 
         <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />

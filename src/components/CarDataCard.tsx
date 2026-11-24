@@ -21,6 +21,8 @@ import {
   type SharingKey,
 } from '../lib/carData'
 import styles from './CarDataCard.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
+import GlossaryLink from './GlossaryLink'
 
 // Mi Vigo "Datos del auto" (specs/car-data-a3-a9.md): the member's private view of what Carga sent (verified km, battery
 // health, monthly consumption and regeneration, dashboard warnings) plus the sharing switches (all off by default) and the
@@ -53,7 +55,7 @@ export default function CarDataCard() {
     load()
   }
   const remove = async (kind: DataKind, what: string) => {
-    if (!window.confirm(`¿Eliminar ${what}? No se puede deshacer.`)) return
+    if (!(await confirmDialog(`¿Eliminar ${what}? No se puede deshacer.`))) return
     setBusy(true)
     if (!(await deleteMyCarData(kind))) setError('No se pudo eliminar. Probá de nuevo.')
     setBusy(false)
@@ -129,7 +131,7 @@ export default function CarDataCard() {
             </tbody>
           </table>
           <p className={styles.small}>
-            kWh/100 km = cuánta energía gasta el auto cada 100 km. Cuanto más bajo, mejor.
+            <GlossaryLink term="kwh-100">kWh/100 km</GlossaryLink>: el consumo, más bajo es mejor.
           </p>
         </section>
       )}

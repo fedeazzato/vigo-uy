@@ -2202,7 +2202,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
-          join_code: string
+          join_code: string | null
           model: string | null
           plate: string | null
         }
@@ -2211,7 +2211,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          join_code: string
+          join_code?: string | null
           model?: string | null
           plate?: string | null
         }
@@ -2220,7 +2220,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          join_code?: string
+          join_code?: string | null
           model?: string | null
           plate?: string | null
         }
@@ -2631,6 +2631,13 @@ export type Database = {
       create_car_order: {
         Args: { p_args: Json; p_kind: string }
         Returns: Json
+      }
+      create_family_invite: {
+        Args: never
+        Returns: {
+          code: string
+          expires_at: string
+        }[]
       }
       current_user_vehicle_id: { Args: never; Returns: string }
       delete_my_car_data: { Args: { p_kind: string }; Returns: number }

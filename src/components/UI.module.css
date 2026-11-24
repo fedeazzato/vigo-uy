@@ -491,3 +491,35 @@
 .clearRating:hover {
   color: var(--text-primary);
 }
+
+/* Route-backed page tabs (PageTabs). */
+.pageTabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin: 0 0 16px;
+  overflow-x: auto;
+}
+
+.pageTab {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.pageTab:hover {
+  color: var(--text-primary);
+}
+.pageTab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.pageTabActive {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}

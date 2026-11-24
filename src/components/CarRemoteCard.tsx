@@ -3,10 +3,8 @@ import { Card, CardTitle, Alert } from './UI'
 import {
   cancelCarOrder,
   clampLimit,
-  connectionLabel,
   createCarOrder,
   fetchCarRemote,
-  isOnline,
   LIMIT_MAX,
   LIMIT_MIN,
   LIMIT_STEP,
@@ -20,10 +18,11 @@ import {
 } from '../lib/carRemote'
 import { canControl, fetchMyCarRole, VIEW_ONLY_NOTICE, type CarRole } from '../lib/carRole'
 import styles from './CarRemoteCard.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
-// "Control remoto" (specs/car-remote-e3.md R6): orders for the linked car (windows, ventilate, charge limit, stop charging),
-// whether the car is online, and the last orders with their result. The car's status (battery, range, cable, time to full,
-// limit) is shown only by "Estado del auto"; this card reads it just to offer "Detener la carga" and to start the limit
+// "Control remoto" (specs/car-remote-e3.md R6): orders for the linked car (windows, ventilate, charge limit, stop charging)
+// and the last orders with their result. The car's status (battery, range, cable, time to full,
+// limit) and whether it is online are shown only by "Tu auto ahora" (owner decision 2026-11-24 #2); this card reads it just to offer "Detener la carga" and to start the limit
 // stepper at the car's limit (owner at the car 2026-11-22: no repeated status). Mounted only with
 // VITE_CAR_REMOTE=1 (after migration 0052); hidden when the fetch fails or the vehicle has no linked car. Polls every 3 s
 // while the page is visible (no Realtime) and stops when it is hidden.
@@ -85,7 +84,7 @@ export default function CarRemoteCard() {
 
   async function send(kind: CarOrderKind, pct?: number) {
     const question = CONFIRM[kind]
-    if (question && !confirm(question)) return
+    if (question && !(await confirmDialog(question))) return
     setBusy(kind)
     setError(null)
     const result = await createCarOrder(kind, pct)
@@ -103,17 +102,12 @@ export default function CarRemoteCard() {
     void load()
   }
 
-  const online = isOnline(data.lastSeenAt, now)
   // E2: a member with the view role sees the car and its orders but gets no buttons (the server refuses them too, 0070).
   const control = canControl(role)
 
   return (
     <Card>
       <CardTitle icon="📡">Control remoto</CardTitle>
-      <p className={styles.connection}>
-        <span className={`${styles.dot} ${online ? styles.dotOn : ''}`} aria-hidden="true" />
-        {connectionLabel(data.lastSeenAt, now)}
-      </p>
       <p className={styles.note}>
         El auto solo recibe órdenes mientras está encendido y con internet; si no la recibe en 2 minutos, se
         cancela.

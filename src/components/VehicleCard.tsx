@@ -5,9 +5,11 @@ import { toFriendlyError } from '../lib/errors'
 import { useAuth } from '../context/AuthContext'
 import { fetchAuthorNames } from '../lib/communityData'
 import type { Vehicle } from '../types'
-import { ROLE_LABELS, setMemberCarRole, type MemberCarRole } from '../lib/carRole'
+import { canControl, fetchMyCarRole, ROLE_LABELS, setMemberCarRole, type CarRole, type MemberCarRole } from '../lib/carRole'
+import { createFamilyInvite, formatInviteCode, INVITE_TTL_HOURS, inviteShareText, type FamilyInvite } from '../lib/familyInvite'
 import styles from './accountCards.module.css'
 import formStyles from '../styles/formControls.module.css'
+import { confirmDialog } from '../lib/confirmDialog'
 
 interface Member {
   id: string
@@ -41,6 +43,13 @@ export default function VehicleCard() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  // One-time invite (0082): never shown by default; each tap on "Sumar a tu familia" makes a new one.
+  const [invite, setInvite] = useState<FamilyInvite | null>(null)
+  const [myRole, setMyRole] = useState<CarRole | null>(null)
+
+  useEffect(() => {
+    void fetchMyCarRole().then(setMyRole)
+  }, [])
 
   const loadVehicle = useCallback(async () => {
     if (!supabase || !user) return
@@ -95,17 +104,42 @@ export default function VehicleCard() {
     )
   }
 
-  async function copyJoinCode() {
-    if (!vehicle) return
-    await navigator.clipboard.writeText(vehicle.join_code)
+  async function newInvite() {
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    setCopied(false)
+    const result = await createFamilyInvite()
+    setBusy(false)
+    if (result.error) setError(result.error)
+    setInvite(result.invite)
+  }
+
+  async function copyInvite() {
+    if (!invite) return
+    await navigator.clipboard.writeText(invite.code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function shareInvite() {
+    if (!invite) return
+    const text = inviteShareText(invite.code)
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ text })
+      } catch {
+        // cancelled by the user
+      }
+      return
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
   }
 
   async function joinVehicle(e: FormEvent) {
     e.preventDefault()
     if (!joinCode.trim()) return
-    if (!confirm('Vas a dejar tu vehículo actual y unirte al de otra persona. ¿Continuar?')) return
+    if (!(await confirmDialog('Vas a dejar tu vehículo actual y sumarte al de otra persona. ¿Continuar?'))) return
     await run(async () => {
       const { data, error } = await supabase!.rpc('join_vehicle_by_code', { code: joinCode.trim() })
       if (error) return { error }
@@ -113,17 +147,17 @@ export default function VehicleCard() {
       // record the failed attempt for rate limiting (migration 0021).
       if (!data) return { error: { message: 'Código no válido.' } }
       return { error: null }
-    }, 'Ahora compartís vehículo con ese grupo.')
+    }, 'Listo, ya compartís el vehículo con tu familia.')
     setJoinCode('')
   }
 
-  function resetVehicle() {
-    if (!confirm('Vas a dejar el vehículo compartido y volver a uno propio. ¿Continuar?')) return
+  async function resetVehicle() {
+    if (!(await confirmDialog('Vas a dejar el vehículo compartido y volver a uno propio. ¿Continuar?'))) return
     void run(() => supabase!.rpc('reset_my_vehicle'), 'Volviste a tu propio vehículo.')
   }
 
-  function removeMember(member: Member) {
-    if (!confirm(`¿Quitar a ${member.name} del vehículo? Va a quedar con un vehículo propio.`)) return
+  async function removeMember(member: Member) {
+    if (!(await confirmDialog(`¿Quitar a ${member.name} del vehículo? Va a quedar con un vehículo propio.`))) return
     void run(
       () => supabase!.rpc('remove_vehicle_member', { target_user: member.id }),
       `${member.name} ya no integra tu vehículo.`
@@ -216,25 +250,52 @@ export default function VehicleCard() {
           </div>
 
           <div className={styles.block}>
-            <span className={styles.blockTitle}>Invitá a quienes comparten tu Vigo</span>
+            <span className={styles.blockTitle}>Sumar a tu familia</span>
             <p className={styles.blockText}>
-              ¿Manejan el mismo auto en familia? Pasales este código: al ingresarlo se suman a este vehículo y
-              los kilómetros de todos cuentan juntos en el ranking. Con el auto vinculado, ven su estado y
-              avisos; para mandarle órdenes (Control remoto, Enviar al auto) dales permiso de control en la
-              lista de arriba.
+              ¿Manejan el mismo auto en familia? Creá un código y pasáselo a una persona: al escribirlo se suma a
+              este vehículo y los kilómetros de todos cuentan juntos. Ve el estado del auto y los avisos; para
+              mandarle órdenes, dale permiso de control en la lista de arriba.
             </p>
-            <div className={styles.inlineRow}>
-              <code className={styles.joinCode}>{vehicle.join_code}</code>
-              <button type="button" className={styles.secondaryBtn} onClick={copyJoinCode}>
-                {copied ? 'Copiado ✓' : 'Copiar'}
-              </button>
-            </div>
+            {canControl(myRole) ? (
+              <>
+                {invite && (
+                  <div className={styles.invite} role="status">
+                    <code className={styles.joinCode} aria-label={`Código ${invite.code.split('').join(' ')}`}>
+                      {formatInviteCode(invite.code)}
+                    </code>
+                    <p className={styles.blockText}>
+                      Vence en {INVITE_TTL_HOURS} h, sirve para una persona. Si creás otro, este deja de servir.
+                    </p>
+                    <div className={styles.buttonRow}>
+                      <button type="button" className={styles.secondaryBtn} onClick={() => void copyInvite()}>
+                        {copied ? 'Copiado ✓' : 'Copiar'}
+                      </button>
+                      <button type="button" className={styles.secondaryBtn} onClick={() => void shareInvite()}>
+                        Compartir
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={() => void newInvite()}
+                  disabled={busy}
+                >
+                  {invite ? 'Crear otro código (el anterior deja de servir)' : 'Sumar a tu familia'}
+                </button>
+              </>
+            ) : (
+              <p className={formStyles.hint}>
+                Pedile el código a quien creó el vehículo o a alguien con permiso de control.
+              </p>
+            )}
           </div>
 
           <form className={styles.block} onSubmit={joinVehicle}>
             <span className={styles.blockTitle}>¿Te pasaron un código?</span>
             <p className={styles.blockText}>
-              Ingresalo acá para unirte al vehículo de otra persona. Vas a dejar tu vehículo actual y tus
+              Escribilo acá para sumarte al vehículo de otra persona. Vas a dejar tu vehículo actual y tus
               próximos viajes van a sumar al vehículo compartido.
             </p>
             <div className={styles.inlineRow}>
@@ -244,10 +305,12 @@ export default function VehicleCard() {
                 className={formStyles.input}
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
-                placeholder="Código de 6 letras"
+                placeholder="Código de 8 letras"
+                aria-label="Código para sumarte"
+                autoComplete="off"
               />
               <button type="submit" className={styles.secondaryBtn} disabled={busy || !joinCode.trim()}>
-                Unirme
+                Sumarme
               </button>
             </div>
           </form>
