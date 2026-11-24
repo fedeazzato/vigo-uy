@@ -98,3 +98,60 @@ Barra inferior (móvil), 5 lugares:
   Configuración y service, Tu cuenta; diagnósticos y versiones en «Más detalles».
 - Ningún texto visible menciona specs, migraciones, RLS o Edge Functions.
 - Ninguna funcionalidad desaparece.
+
+## 6. Segunda pasada (2026-11-24, rama `site-audit-2`)
+
+Alcance: todas las páginas y componentes que no tocó la primera pasada. Solo textos, ayudas y estados
+(vacío / error / carga); **sin cambios de navegación ni fusiones** (siguen pendientes en la sección 5).
+
+### Cambios por página
+
+| Página / componente | Cambios |
+|---|---|
+| `/guia` + `GuideLinks` (también barra lateral e Inicio) | Subtítulo «Todo lo que querés saber de tu Vigo, en un solo lugar»; descripciones de cada destino en voseo y orientadas a lo que querés hacer; «FAQ» → «Preguntas frecuentes»; Mi Vigo ya no dice «modelo y color»; Moderación «Revisar aportes y usuarios». |
+| `/carga` › Estaciones de la comunidad | Intro corta (de dónde salen los precios + pedir que reporten); «Open Charge Map» explicado una vez en el mapa («un mapa mundial de cargadores»); validaciones con ejemplo («por ejemplo 60»); filtros sin resultado sugieren «Limpiar filtros». |
+| Elegir cargador (modal) | Sin resultados: «Ninguna estación coincide. Probá con otra red o ciudad.» |
+| Borradores de carga del auto (`CarChargeDrafts`) | Se saca el anglicismo «check-in»: «¿Cómo te fue?», «Publicar reporte», «Reporte publicado… ¡Gracias por avisar!». |
+| `/rutas` | Párrafo final sin repetir «Mirá la comunidad»: explica «Oficial» y linkea a Comunidad. |
+| `/rutas/planificar` | Título con emoji (🧭); subtítulo más simple; errores «Escribí de dónde salís y a dónde vas» y «el servicio de mapas no respondió». |
+| `/costos` | «Aforo» explicado una vez («valor oficial del auto»); el texto de casos reales explica «Oficial» en una frase y no repite el link; estados vacíos de services/seguros que animan. |
+| `/repuestos` | Intro (`parts.json`) más corta y en segunda persona. |
+| `/comunidad` | Estado vacío «¡Sé quien comparta el primero!»; filtros sin resultado dicen qué hacer; aviso de comunidad no disponible sin «instalación». |
+| Comentarios (`ContentReactions`) | Nuevo estado vacío «Todavía no hay comentarios. ¡Dejá el primero!»; confirmación de borrado avisa que no se puede deshacer. |
+| `/mi-actividad` | Estados vacíos por sección con el botón a usar; «+ Nueva entrada» → «+ Nuevo service» / «+ Nuevo seguro»; «Descargar planilla (CSV)» → «⬇️ Descargar planilla»; llave de acceso explicada en una línea y botón «Entrar con tu huella o tu cara»; confirmaciones «¿Borrar…? No se puede deshacer.»; toast «Compra guardada ✓». |
+| `/notificaciones` | Estado vacío con dos caminos claros (Carga y Comunidad). |
+| `/login` | Llave de acceso explicada una vez (huella, cara o PIN; se crea desde Mi actividad); email vacío ahora avisa en vez de no hacer nada; verificación de seguridad dice dónde está. |
+| Formularios (viaje, service, compra, seguro) | Validaciones dicen qué escribir y dan ejemplo («Escribí el kilometraje solo con números (por ejemplo 45000)»); links: «empieza con https://, copialo de la barra del navegador»; errores al abrir un registro dicen qué hacer; placeholder de notas «Lo que quieras contar (opcional)»; viaje: subtítulo más humano y paradas vacías con ayuda; seguro: «Deducible» explicado en una línea. |
+| `/mi-vigo/preparar` | «ADB» explicado una vez; párrafo de Waze/Google más corto; aviso final más corto. |
+| `/mi-vigo/preparar/archivos-google` | Aviso de la firma más corto y tranquilizador. |
+| `/mi-vigo/boveda` | Se saca la explicación duplicada de dónde está la frase (queda en el estado, con voseo «escaneá»). |
+| `/mi-vigo/borradores`, `/mi-vigo/diagnosticos`, `/mi-vigo/configuracion` | Estados vacíos con el paso siguiente; subtítulos cortos; «¿partes faltantes?» → «llegó incompleto, mandalo de nuevo»; archivo equivocado dice cuál elegir. |
+| `/novedades` | Estado vacío: «Cuando salga una versión nueva, la vas a ver acá». |
+| `/licencias` | Sin cambios de fondo (legal); «APK» → «app» en una intro. |
+| `/moderacion` | Sin cambios (técnico pero claro). |
+| 404 (nuevo `NotFoundPage`, ruta `*`) | Antes una ruta desconocida mostraba la página vacía; ahora explica y linkea a Inicio y Guía. |
+| Error de página (`ErrorBoundary`) | «Uy, algo falló.» + qué hacer (recargar, avisar). |
+| Errores genéricos (`lib/errors.ts`, bóveda, carRole, vehicleConfig, OCM) | Mensaje por defecto «Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.»; permiso y datos inválidos dicen qué hacer; «No disponible.» → «Esto no está disponible ahora. Probá más tarde.» |
+| Sin conexión (`OfflineBanner`) | «Sin internet. La Guía anda igual; lo demás vuelve cuando te conectes.» |
+
+Páginas revisadas sin cambios necesarios: Inicio, Mantenimiento, Accesorios, Tecnología, Ficha técnica,
+Preguntas frecuentes (contenido en `src/data/*.json`, ya en tono), Vincular auto.
+
+### Más propuestas (necesitan decisión del dueño)
+
+7. **Reescribir el contenido curado** de `charging.json`, `maintenance.json`, `tech.json` y `faq.json`
+   con la guía de tono (hoy está bien pero largo en partes); conviene hacerlo junto con
+   `specs/CONTENT-MIGRATION.md`.
+8. **Un glosario único** («¿Qué significa…?»: kWh, kWh/100 km, VIN, ADB, llave de acceso, Oficial) y
+   linkear ahí en vez de explicar en cada página.
+9. **Reemplazar `confirm()` del navegador** por un diálogo propio con botones «Borrar» / «Cancelar»
+   (más claro en el celular y consistente con el estilo).
+10. **Mover el aviso de llave de acceso** de Mi actividad a «Tu cuenta» en Mi Vigo (va con la propuesta 5.1).
+11. **Planificador**: mostrar «🧭 Planificá tu viaje» como botón en Carga además de Rutas.
+
+### Pruebas
+
+- Tests actualizados a los textos nuevos: Login, Novedades, Bóveda, NewTripLog, NewInsuranceQuote,
+  CarChargeDrafts, CommunityStations, StationPickerModal, StationsMap, ErrorBoundary, errors, carLink, ocmStations.
+- Nuevo `NotFoundPage.test.tsx`.
+- `npm test`, `npm run type-check`, `npm run lint`, `npm run build` en verde.
