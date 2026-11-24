@@ -21,7 +21,15 @@ import {
   signalUnknownVaultCredential,
   vaultAuthErrorMessage,
 } from './webauthn'
-import { deleteInboxKey, deleteInboxRow, deleteVaultItem, deleteVaultKey, insertVaultKey, publishInboxKey, saveVaultItem } from './vaultApi'
+import {
+  deleteInboxKey,
+  deleteInboxRow,
+  deleteVaultItem,
+  deleteVaultKey,
+  insertVaultKey,
+  publishInboxKey,
+  saveVaultItem,
+} from './vaultApi'
 import { decryptInbox, generateInboxKeyPair, packInboxPrivate, unpackInboxPrivate } from './inbox'
 import { RecoveryCodeError, canonicalRecoveryCode, recoveryErrorMessage } from './recoveryCode'
 import { base64ToBytes, bytesToBase64 } from './encoding'
@@ -50,7 +58,7 @@ export function vaultErrorMessage(error: unknown): string {
         return 'Lo guardado tiene un formato que esta versión de WikiVigo no entiende. Actualizá la página.'
     }
   }
-  return 'Ocurrió un error inesperado. Intentá de nuevo.'
+  return 'Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.'
 }
 
 /** A default name for the passkey list, from the platform only. */
@@ -211,13 +219,18 @@ export async function deleteStoredItems(items: VaultItemRow[]): Promise<{ error:
  * public half published. One passkey prompt. Re-running rotates the key
  * (anything the car sent to the old one can no longer be opened).
  */
-export async function enableInbox(user: VaultUser, keys: VaultKeyRow[], now: Date = new Date()): Promise<{ error: string | null }> {
+export async function enableInbox(
+  user: VaultUser,
+  keys: VaultKeyRow[],
+  now: Date = new Date()
+): Promise<{ error: string | null }> {
   if (keys.length === 0) return { error: 'Primero activá la bóveda con una llave de acceso.' }
   try {
     const dataKey = await unlockDataKey(user, keys, false)
     const pair = await generateInboxKeyPair()
     const published = await publishInboxKey(pair.publicKey)
-    if (published.error || !published.keyId) return { error: published.error ?? 'No se pudo activar el envío desde el auto.' }
+    if (published.error || !published.keyId)
+      return { error: published.error ?? 'No se pudo activar el envío desde el auto.' }
     const encrypted = await encryptItem(dataKey, user.id, 'vault_inbox_private_key', {
       v: 1,
       value: packInboxPrivate(published.keyId, pair.privateKey),

@@ -70,7 +70,9 @@ export default function VehicleConfigPage() {
     if (!f) return
     const s = f.size <= 20_000 ? parseConfigFile(await f.text()) : null
     if (!s) {
-      setError('Ese archivo no es "configuracion_del_auto.txt" del instalador.')
+      setError(
+        'Ese no es el archivo correcto. Elegí «configuracion_del_auto.txt», el que guarda el instalador.'
+      )
       return
     }
     const r = await saveSnapshot(s)
@@ -94,7 +96,7 @@ export default function VehicleConfigPage() {
     <div>
       <PageHeader
         title="🧬 Configuración del auto"
-        subtitle="La configuración de fábrica de tu auto (mercado y opciones), para comparar antes y después de una visita al taller. Solo la ves vos: no la ven otros integrantes del vehículo ni la comunidad."
+        subtitle="Los ajustes de fábrica de tu auto, para comparar antes y después del taller. Solo los ves vos."
       />
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="info">{message}</Alert>}
@@ -112,7 +114,7 @@ export default function VehicleConfigPage() {
         />
       </Card>
       {rows === undefined && <Skeleton lines={3} />}
-      {rows === null && <Alert type="info">Esta función todavía no está disponible.</Alert>}
+      {rows === null && <Alert type="info">Esto todavía no está disponible. Probá más tarde.</Alert>}
       {rows && rows.length > 0 && (
         <Card>
           <CardTitle icon="🗂️">Copias guardadas</CardTitle>

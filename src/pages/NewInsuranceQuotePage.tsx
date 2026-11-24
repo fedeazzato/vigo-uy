@@ -48,9 +48,9 @@ export default function NewInsuranceQuotePage() {
   // Keyed by addon slug. limitValue holds whichever of limit_uyu/limit_count
   // applies (the addon's limit_kind says which) -- a single text field per
   // addon regardless of kind, same UX as the old glass-coverage-limit input.
-  const [addonSelections, setAddonSelections] = useState<Record<string, { checked: boolean; limitValue: string }>>(
-    {}
-  )
+  const [addonSelections, setAddonSelections] = useState<
+    Record<string, { checked: boolean; limitValue: string }>
+  >({})
   const [notes, setNotes] = useState('')
   const [isPublic, setIsPublic] = useState(true)
 
@@ -73,7 +73,7 @@ export default function NewInsuranceQuotePage() {
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
-          setError('No se pudo cargar la entrada.')
+          setError('No pudimos abrir este registro. Revisá tu conexión y probá de nuevo.')
         } else {
           setProvider(data.provider)
           setCoverageLevel(data.coverage_level as InsuranceCoverageLevel)
@@ -170,7 +170,7 @@ export default function NewInsuranceQuotePage() {
     }
     const totalCost = parseLocaleNumber(totalCostUyu)
     if (totalCost === undefined || !Number.isFinite(totalCost) || totalCost < 0) {
-      setError('El costo total debe ser un número válido.')
+      setError('Escribí el costo total solo con números (por ejemplo 45000).')
       return
     }
 
@@ -178,7 +178,7 @@ export default function NewInsuranceQuotePage() {
     if (showDeductible && deductibleUyu.trim()) {
       deductible = parseLocaleNumber(deductibleUyu)
       if (deductible === undefined || !Number.isFinite(deductible) || deductible < 0) {
-        setError('El deducible debe ser un número válido.')
+        setError('Escribí el deducible solo con números, o dejalo vacío.')
         return
       }
     }
@@ -199,7 +199,9 @@ export default function NewInsuranceQuotePage() {
       } else if (addon.limit_kind === 'count' && selection.limitValue.trim()) {
         const parsed = parseLocaleNumber(selection.limitValue)
         if (parsed === undefined || !Number.isInteger(parsed) || parsed < 1) {
-          setError(`La cantidad de usos de ${addon.badge_label.toLowerCase()} debe ser un número entero válido.`)
+          setError(
+            `La cantidad de usos de ${addon.badge_label.toLowerCase()} debe ser un número entero válido.`
+          )
           return
         }
         limitCount = parsed
@@ -419,9 +421,12 @@ export default function NewInsuranceQuotePage() {
               onChange={(e) => setDeductibleUyu(e.target.value)}
               placeholder="Opcional"
             />
+            <span className={formStyles.hint}>
+              Lo que pagás vos en un choque antes de que pague el seguro.
+            </span>
             {deductibleUyu.trim() === '' && (
               <span className={formStyles.hintWarning}>
-                ⚠️ Esta cobertura suele tener deducible — falta este dato (podés guardar igual).
+                ⚠️ Esta cobertura suele tenerlo. Si no lo sabés, podés guardar igual.
               </span>
             )}
           </div>
@@ -431,14 +436,18 @@ export default function NewInsuranceQuotePage() {
           const selection = addonSelections[addon.slug] ?? { checked: false, limitValue: '' }
           return (
             <div key={addon.slug}>
-              <Switch checked={selection.checked} onChange={(checked) => handleAddonToggle(addon.slug, checked)}>
+              <Switch
+                checked={selection.checked}
+                onChange={(checked) => handleAddonToggle(addon.slug, checked)}
+              >
                 {addon.icon} Incluye {addon.checkbox_label}
               </Switch>
 
               {addon.limit_kind !== 'none' && selection.checked && (
                 <div className={formStyles.field}>
                   <label className={formStyles.label} htmlFor={`insurance-addon-limit-${addon.slug}`}>
-                    {addon.icon} {addon.limit_kind === 'cost' ? 'Límite de cobertura (UYU)' : 'Usos gratis por año'}
+                    {addon.icon}{' '}
+                    {addon.limit_kind === 'cost' ? 'Límite de cobertura (UYU)' : 'Usos gratis por año'}
                   </label>
                   <input
                     id={`insurance-addon-limit-${addon.slug}`}
@@ -464,7 +473,7 @@ export default function NewInsuranceQuotePage() {
           id="insurance-notes"
           value={notes}
           onChange={setNotes}
-          placeholder="Detalles adicionales..."
+          placeholder="Lo que quieras contar (opcional)"
         />
 
         <ShareCheckbox checked={isPublic} onChange={setIsPublic} />

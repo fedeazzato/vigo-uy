@@ -203,7 +203,7 @@ export default function StationPickerModal({
         />
 
         {entries.length === 0 ? (
-          <p className={styles.empty}>No hay estaciones que coincidan con el filtro.</p>
+          <p className={styles.empty}>Ninguna estación coincide. Probá con otra red o ciudad.</p>
         ) : view === 'list' ? (
           <ul className={styles.list}>
             {entries.map(({ station, distanceKm }) => (
@@ -213,7 +213,9 @@ export default function StationPickerModal({
                     {station.name}
                     {station.verified && <Badge color="blue">Oficial</Badge>}
                   </span>
-                  <span className={styles.stationMeta}>{stationMeta(station, networkName(station.network))}</span>
+                  <span className={styles.stationMeta}>
+                    {stationMeta(station, networkName(station.network))}
+                  </span>
                   {distanceKm != null && (
                     <span className={styles.distance}>≈ {distanceKm.toFixed(1)} km</span>
                   )}

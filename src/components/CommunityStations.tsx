@@ -166,12 +166,12 @@ export default function CommunityStations() {
     e.preventDefault()
     if (!supabase || !user) return
     if (!name.trim()) {
-      setError('Poné un nombre que identifique la estación.')
+      setError('Ponele un nombre a la estación (por ejemplo «UTE Rocha centro»).')
       return
     }
     const power = parseLocaleNumber(maxPowerKw) ?? null
     if (power != null && (!Number.isFinite(power) || power < 0)) {
-      setError('La potencia debe ser un número válido.')
+      setError('Escribí la potencia solo con números (por ejemplo 60).')
       return
     }
     if (!location) {
@@ -248,8 +248,8 @@ export default function CommunityStations() {
       <Card>
         <CardTitle icon="📍">Estaciones aportadas por la comunidad</CardTitle>
         <p className={styles.intro}>
-          Los precios por kWh se calculan con lo que realmente pagaron otros miembros durante el último año —
-          no son tarifas oficiales. La confiabilidad sale de los reportes de uso.
+          Los precios salen de lo que pagaron otros dueños en el último año (no son tarifas oficiales). Si
+          pasaste por un cargador, contá cómo te fue: así todos saben cuáles andan.
         </p>
 
         <div className={styles.introActions}>
@@ -266,7 +266,8 @@ export default function CommunityStations() {
               setMapView({
                 stations: filteredStations,
                 // OCM has no WikiVigo network or city: with those filters the map stays WikiVigo-only.
-                ocm: providerFilter || cityQuery.trim() ? null : ocmFilterFor(connectorFilter, minPowerFilter),
+                ocm:
+                  providerFilter || cityQuery.trim() ? null : ocmFilterFor(connectorFilter, minPowerFilter),
               })
             }
           >
@@ -368,7 +369,11 @@ export default function CommunityStations() {
           )}
         </div>
 
-        {noResultsFromFilter && <Alert type="info">No hay estaciones que coincidan con el filtro.</Alert>}
+        {noResultsFromFilter && (
+          <Alert type="info">
+            Ninguna estación coincide con estos filtros. Probá con otros o tocá «Limpiar filtros».
+          </Alert>
+        )}
 
         {showForm && (
           <form className={styles.stationForm} onSubmit={addStation}>
@@ -516,10 +521,7 @@ export default function CommunityStations() {
               // ".lastRow" min-width:700px rule in the CSS module).
               const inLastRow = index >= netStations.length - (netStations.length % 2 === 0 ? 2 : 1)
               return (
-                <li
-                  key={station.id}
-                  className={`${styles.stationItem} ${inLastRow ? styles.lastRow : ''}`}
-                >
+                <li key={station.id} className={`${styles.stationItem} ${inLastRow ? styles.lastRow : ''}`}>
                   <div className={styles.stationHeader}>
                     <span className={styles.stationName}>
                       {station.name}

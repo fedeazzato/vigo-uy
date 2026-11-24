@@ -99,7 +99,7 @@ export default function ContentReactions({ content }: ContentReactionsProps) {
 
   async function handleDeleteComment(id: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar este comentario?')) return
+    if (!confirm('¿Borrar este comentario? No se puede deshacer.')) return
     const { error } = await deleteComment(id)
     if (error) {
       setError(error)
@@ -150,6 +150,9 @@ export default function ContentReactions({ content }: ContentReactionsProps) {
                 </li>
               ))}
             </ul>
+          )}
+          {comments && comments.length === 0 && (
+            <p className={styles.signInHint}>Todavía no hay comentarios. ¡Dejá el primero!</p>
           )}
 
           {status === 'signedIn' ? (

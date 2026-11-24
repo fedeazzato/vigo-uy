@@ -21,7 +21,7 @@ export default function OfflineBanner() {
   if (!offline) return null
   return (
     <div className={styles.banner} role="status">
-      Sin conexión — mostrando solo la guía
+      Sin internet. La Guía anda igual; lo demás vuelve cuando te conectes.
     </div>
   )
 }

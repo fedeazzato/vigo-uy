@@ -208,9 +208,7 @@ export default function CommunityFeedPage() {
     <div>
       <PageHeader title="🌐 Comunidad" subtitle="Costos y viajes compartidos por otros dueños de Vigo." />
 
-      {!supabase && (
-        <Alert type="info">La sección de comunidad no está disponible en esta instalación.</Alert>
-      )}
+      {!supabase && <Alert type="info">La comunidad no está disponible por ahora. Probá más tarde.</Alert>}
       {error && <Alert type="danger">{error}</Alert>}
 
       {supabase && (
@@ -324,8 +322,8 @@ export default function CommunityFeedPage() {
         <Card>
           <p className={listStyles.empty}>
             {trips.length + entries.length + purchases.length === 0
-              ? 'Todavía no hay aportes compartidos por la comunidad.'
-              : 'No hay aportes que coincidan con los filtros.'}
+              ? 'Todavía no hay aportes. ¡Sé quien comparta el primero!'
+              : 'Nada coincide con estos filtros. Probá con otros o borrá la búsqueda.'}
           </p>
         </Card>
       ) : (

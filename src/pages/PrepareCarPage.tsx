@@ -101,8 +101,8 @@ export default function PrepareCarPage() {
             <li>
               <strong>Actualizaciones del concesionario:</strong> una actualización oficial puede borrar estas
               mejoras o hacer que dejen de funcionar.{' '}
-              <strong>Antes de llevar el auto al service, usá «Antes del service»</strong> (o «Quitar todo») en
-              el instalador.
+              <strong>Antes de llevar el auto al service, usá «Antes del service»</strong> (o «Quitar todo»)
+              en el instalador.
             </li>
           </ul>
           <h3>Waze y la cuenta de Google</h3>
@@ -112,14 +112,14 @@ export default function PrepareCarPage() {
               APKMirror y el instalador solo verifica que estén firmados por Waze y por Google.
             </li>
             <li>
-              La pantalla de la Vigo no está certificada por Google. Iniciar sesión con tu cuenta de Google en ella
-              puede ir en contra de las condiciones de Google, y Google puede pedirte verificaciones extra o no
-              dejarte entrar. Es tu decisión y tu cuenta.
+              La pantalla de la Vigo no está certificada por Google. Iniciar sesión con tu cuenta de Google en
+              ella puede ir en contra de las condiciones de Google, y Google puede pedirte verificaciones
+              extra o no dejarte entrar. Es tu decisión y tu cuenta.
             </li>
             <li>
               «Quitar todo» borra los servicios de Google Play que puso el instalador y con ellos tu cuenta de
-              Google en la pantalla (la cuenta sigue existiendo; solo sale de la pantalla). Si el instalador había
-              actualizado unos que ya tenías, vuelven los anteriores.
+              Google en la pantalla (la cuenta sigue existiendo; solo sale de la pantalla). Si el instalador
+              había actualizado unos que ya tenías, vuelven los anteriores.
             </li>
           </ul>
           <h3>Lo que sí te garantizamos</h3>
@@ -175,7 +175,8 @@ export default function PrepareCarPage() {
               </li>
               <li>
                 Los <strong>3 archivos de Google</strong> (Waze, servicios de Google Play y Google Services
-                Framework), bajados de APKMirror: <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>.
+                Framework), bajados de APKMirror:{' '}
+                <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>.
               </li>
               <li>Tu cuenta de Google (para iniciar sesión en Waze desde la pantalla).</li>
               <li>Unos 20 minutos.</li>
@@ -247,9 +248,10 @@ export default function PrepareCarPage() {
           <Card>
             <CardTitle icon="3️⃣">Activá el ADB</CardTitle>
             <p className={styles.text}>
-              Se abre un menú en chino (工程调试模式). Buscá el interruptor{' '}
-              <strong className={styles.mono}>adb开启</strong> y activalo. Pide una segunda contraseña:
-              escribí el <strong>código maestro</strong>, que es el mismo para todas las Vigo.
+              El ADB es la puerta por cable que usa el instalador para hablar con la pantalla. Se abre un menú
+              en chino (工程调试模式). Buscá el interruptor <strong className={styles.mono}>adb开启</strong> y
+              activalo. Pide una segunda contraseña: escribí el <strong>código maestro</strong>, que es el
+              mismo para todas las Vigo.
             </p>
             <PhotoPlaceholder caption="el menú de ingeniería con el interruptor adb开启" />
             <Code value={MASTER_CODE} label="Código maestro" />
@@ -285,10 +287,9 @@ export default function PrepareCarPage() {
               la va a mostrar.
             </p>
             <p className={styles.text}>
-              <strong>Waze y los servicios de Google Play son parte de la instalación.</strong> No vienen en el
-              instalador (son de Google): los elegís vos y el instalador verifica la firma oficial de Waze y de
-              Google; un archivo equivocado simplemente se rechaza. Si Waze no se puede poner en tu auto, el
-              instalador te dice por qué y el resto de las mejoras se instala igual.
+              <strong>Waze y Google no vienen en el instalador</strong> (son de Google): los elegís vos. El
+              instalador revisa que sean los originales y rechaza un archivo equivocado. Si Waze no se puede
+              poner, te dice por qué y el resto se instala igual.
             </p>
           </Card>
 
@@ -306,23 +307,23 @@ export default function PrepareCarPage() {
             <ul className={styles.list}>
               <li>
                 <strong>«Quitar todo»</strong>: deja la pantalla como vino de fábrica. Saca todas las mejoras,
-                Waze y los servicios de Google Play que puso el instalador (con ellos sale tu cuenta de Google de
-                la pantalla; la cuenta sigue existiendo).
+                Waze y los servicios de Google Play que puso el instalador (con ellos sale tu cuenta de Google
+                de la pantalla; la cuenta sigue existiendo).
               </li>
               <li>
-                <strong>«Antes del service»</strong>: usalo antes de llevar el auto al concesionario. Guarda una
-                copia de tus ajustes y vuelve a fábrica el cambio de sistema y el asistente de voz; las apps
-                quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo que «Quitar
-                todo»: saca todo, incluidos Waze y Google.
+                <strong>«Antes del service»</strong>: usalo antes de llevar el auto al concesionario. Guarda
+                una copia de tus ajustes y vuelve a fábrica el cambio de sistema y el asistente de voz; las
+                apps quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo
+                que «Quitar todo»: saca todo, incluidos Waze y Google.
               </li>
               <li>
-                <strong>«Después del service»</strong>: cuando el auto vuelve, instala todo de nuevo y te ofrece
-                recuperar tus ajustes de antes del service, preguntándote uno por uno los de seguridad.
+                <strong>«Después del service»</strong>: cuando el auto vuelve, instala todo de nuevo y te
+                ofrece recuperar tus ajustes de antes del service, preguntándote uno por uno los de seguridad.
               </li>
             </ul>
             <Alert type="info">
-              El ADB se apaga solo la próxima vez que se reinicia la pantalla, igual que de fábrica. Si más
-              adelante querés usar el instalador otra vez, repetí los pasos 2 y 3.
+              El ADB se apaga solo cuando se reinicia la pantalla. Para usar el instalador otra vez, repetí
+              los pasos 2 y 3.
             </Alert>
           </Card>
         </>

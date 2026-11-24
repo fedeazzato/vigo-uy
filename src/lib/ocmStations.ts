@@ -174,7 +174,10 @@ export async function fetchOcmStations(url: string, signal?: AbortSignal): Promi
     res = await fetch(url, { signal })
   } catch (e) {
     if (signal?.aborted || (e instanceof Error && e.name === 'AbortError')) return null
-    return { ok: false, message: 'Sin conexión con Open Charge Map.' }
+    return {
+      ok: false,
+      message: 'No pudimos conectar con Open Charge Map. Revisá tu internet y probá de nuevo.',
+    }
   }
   let body: unknown
   try {

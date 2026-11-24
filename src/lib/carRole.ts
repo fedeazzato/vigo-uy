@@ -35,7 +35,7 @@ export async function setMemberCarRole(
   userId: string,
   role: MemberCarRole
 ): Promise<{ error: string | null }> {
-  if (!supabase) return { error: 'No disponible.' }
+  if (!supabase) return { error: 'Esto no está disponible ahora. Probá más tarde.' }
   const { error } = await supabase.rpc('set_vehicle_member_role', { p_user: userId, p_role: role })
   return { error: error ? toFriendlyError(error) : null }
 }

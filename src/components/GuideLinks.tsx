@@ -17,12 +17,22 @@ export const GUIDE_LINKS: GuideLinkItem[] = [
     to: '/ficha-tecnica',
     label: 'Ficha técnica',
     icon: 'spec',
-    description: 'Especificaciones completas del E2 y E2+.',
+    description: 'Medidas, batería y equipamiento del E2 y E2+.',
   },
-  { to: '/carga', label: 'Carga', icon: 'charge', description: 'Cargadores, redes públicas y consejos.' },
-  { to: '/rutas', label: 'Rutas', icon: 'route', description: 'Viajes reales y autonomía en ruta.' },
-  { to: '/costos', label: 'Costos', icon: 'costs', description: 'Costo por km, patente y seguro.' },
-  { to: '/mantenimiento', label: 'Mantenimiento', icon: 'maintenance', description: 'Services, precios y talleres.' },
+  {
+    to: '/carga',
+    label: 'Carga',
+    icon: 'charge',
+    description: 'Dónde y cómo cargar, en casa y en la calle.',
+  },
+  { to: '/rutas', label: 'Rutas', icon: 'route', description: 'Viajes reales y dónde cargar en el camino.' },
+  { to: '/costos', label: 'Costos', icon: 'costs', description: 'Cuánto gastás por km, patente y seguro.' },
+  {
+    to: '/mantenimiento',
+    label: 'Mantenimiento',
+    icon: 'maintenance',
+    description: 'Services, precios y talleres.',
+  },
   {
     to: '/repuestos',
     label: 'Repuestos',
@@ -33,10 +43,20 @@ export const GUIDE_LINKS: GuideLinkItem[] = [
     to: '/accesorios',
     label: 'Accesorios',
     icon: 'accessories',
-    description: 'Accesorios recomendados por el grupo.',
+    description: 'Lo que otros dueños le sumaron a su Vigo.',
   },
-  { to: '/tecnologia', label: 'Tecnología', icon: 'tech', description: 'App, pantalla y trucos de software.' },
-  { to: '/faq', label: 'FAQ', icon: 'faq', description: 'Preguntas frecuentes del grupo.' },
+  {
+    to: '/tecnologia',
+    label: 'Tecnología',
+    icon: 'tech',
+    description: 'La app, la pantalla y algunos trucos.',
+  },
+  {
+    to: '/faq',
+    label: 'Preguntas frecuentes',
+    icon: 'faq',
+    description: 'Las dudas más comunes, respondidas por dueños.',
+  },
 ]
 
 interface GuideLinksProps {

@@ -58,7 +58,7 @@ describe('LoginPage CAPTCHA gating (A3)', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Enviar código' }))
     })
-    expect(screen.getByText('Completá la verificación de seguridad.')).toBeTruthy()
+    expect(screen.getByText(/Completá la verificación de seguridad/)).toBeTruthy()
     expect(sendOtp).not.toHaveBeenCalled()
   })
 

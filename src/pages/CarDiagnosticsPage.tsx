@@ -128,7 +128,7 @@ export default function CarDiagnosticsPage() {
     <div>
       <PageHeader
         title="🩺 Diagnósticos del auto"
-        subtitle="Lo que mandaste desde el auto con «Enviar diagnóstico», para ayudarte con un problema. Lo ven tu familia y los moderadores."
+        subtitle="Lo que mandaste desde el auto para que te ayudemos con un problema. Lo ven tu familia y los moderadores."
       />
       <Link to="/mi-vigo" className={styles.back}>
         ← Mi Vigo
@@ -138,8 +138,8 @@ export default function CarDiagnosticsPage() {
       {rows !== undefined && (rows === null || rows.length === 0) && (
         <Card>
           <p className={styles.empty}>
-            No hay diagnósticos. En el auto: Mi Vigo › Enviar diagnóstico › Enviar. Las contraseñas, claves y
-            correos se borran en el auto antes de enviar; la ubicación solo va si la persona la activa.
+            No hay diagnósticos. ¿Algo anda raro en el auto? Mandá uno desde Mi Vigo › Enviar diagnóstico. Las
+            contraseñas y los correos se borran antes de enviar; la ubicación va solo si la activás.
           </p>
         </Card>
       )}
@@ -192,7 +192,9 @@ export default function CarDiagnosticsPage() {
             </ul>
             {state === 'loading' && <Skeleton lines={2} />}
             {state === null && (
-              <Alert type="warning">No pudimos leer este diagnóstico (¿partes faltantes?).</Alert>
+              <Alert type="warning">
+                No pudimos abrir este diagnóstico: llegó incompleto. Mandalo de nuevo desde el auto.
+              </Alert>
             )}
             {state && state !== 'loading' && (
               <div className={styles.report}>

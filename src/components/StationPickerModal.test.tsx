@@ -53,13 +53,41 @@ function station(overrides: Partial<ChargingStation>): ChargingStation {
 }
 
 const NETWORKS: ChargingNetwork[] = [
-  { slug: 'eone', name: 'EONE', country: 'UY', instructions: null, sort_order: 11, created_at: '2026-07-01T00:00:00Z' },
-  { slug: 'dmc', name: 'DMC', country: 'UY', instructions: null, sort_order: 12, created_at: '2026-07-01T00:00:00Z' },
+  {
+    slug: 'eone',
+    name: 'EONE',
+    country: 'UY',
+    instructions: null,
+    sort_order: 11,
+    created_at: '2026-07-01T00:00:00Z',
+  },
+  {
+    slug: 'dmc',
+    name: 'DMC',
+    country: 'UY',
+    instructions: null,
+    sort_order: 12,
+    created_at: '2026-07-01T00:00:00Z',
+  },
 ]
 
 const STATIONS = [
-  station({ id: 'st-1', name: 'EONE Rocha centro', network: 'eone', city: 'Rocha', lat: -34.483, lng: -54.334 }),
-  station({ id: 'st-2', name: 'EONE Montevideo', network: 'eone', city: 'Montevideo', lat: -34.9011, lng: -56.1645 }),
+  station({
+    id: 'st-1',
+    name: 'EONE Rocha centro',
+    network: 'eone',
+    city: 'Rocha',
+    lat: -34.483,
+    lng: -54.334,
+  }),
+  station({
+    id: 'st-2',
+    name: 'EONE Montevideo',
+    network: 'eone',
+    city: 'Montevideo',
+    lat: -34.9011,
+    lng: -56.1645,
+  }),
   station({ id: 'st-3', name: 'DMC Rocha ruta 9', network: 'dmc', city: 'Rocha', lat: -34.5, lng: -54.3 }),
 ]
 
@@ -114,7 +142,7 @@ describe('StationPickerModal', () => {
   it('shows the empty-filter message when nothing matches', () => {
     renderPicker()
     fireEvent.change(screen.getByLabelText('📍 Ciudad'), { target: { value: 'Nowhereland' } })
-    expect(screen.getByText('No hay estaciones que coincidan con el filtro.')).toBeTruthy()
+    expect(screen.getByText(/Ninguna estación coincide/)).toBeTruthy()
   })
 
   it('selecting a station from the list calls onSelect and onClose', () => {
@@ -178,7 +206,9 @@ describe('StationPickerModal', () => {
 
       fireEvent.click(screen.getByText('📍 Cerca mío'))
 
-      expect(screen.getByText('No pudimos acceder a tu ubicación. Probá buscar por red o ciudad.')).toBeTruthy()
+      expect(
+        screen.getByText('No pudimos acceder a tu ubicación. Probá buscar por red o ciudad.')
+      ).toBeTruthy()
       expect(screen.getByText('EONE Rocha centro')).toBeTruthy()
       expect(screen.queryByText(/km/)).toBeNull()
     })

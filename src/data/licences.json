@@ -5,7 +5,7 @@
       "id": "voz",
       "title": "Voz en español (motor de voz sin conexión)",
       "icon": "🗣️",
-      "intro": "La app «Voz en español» lee en voz alta con un motor de voz que funciona sin internet. Lleva estas piezas de terceros adentro del APK.",
+      "intro": "La app «Voz en español» lee en voz alta con un motor de voz que funciona sin internet. Lleva estas piezas de terceros adentro de la app.",
       "components": [
         {
           "name": "sherpa-onnx",

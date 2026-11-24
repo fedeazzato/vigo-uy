@@ -49,7 +49,7 @@ describe('toFriendlyError', () => {
   })
 
   it('maps RLS violations', () => {
-    const expected = 'No tenés permiso para hacer eso.'
+    const expected = 'No tenés permiso para hacer eso. Si te parece un error, cerrá sesión y volvé a entrar.'
     expect(toFriendlyError({ code: '42501', message: 'x' })).toBe(expected)
     expect(
       toFriendlyError({ message: 'new row violates row-level security policy for table "trip_logs"' })
@@ -58,22 +58,24 @@ describe('toFriendlyError', () => {
 
   it('maps CHECK violations', () => {
     expect(toFriendlyError({ code: '23514', message: 'x' })).toBe(
-      'Alguno de los datos ingresados no es válido.'
+      'Hay un dato que no cierra. Revisá el formulario y probá de nuevo.'
     )
   })
 
   it('falls back to a generic Spanish message and logs the original', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(toFriendlyError({ message: 'some unmapped backend detail' })).toBe(
-      'Ocurrió un error inesperado. Intentá de nuevo.'
+      'Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.'
     )
     expect(spy).toHaveBeenCalled()
   })
 
   it('tolerates non-object inputs', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    expect(toFriendlyError(null)).toBe('Ocurrió un error inesperado. Intentá de nuevo.')
-    expect(toFriendlyError(undefined)).toBe('Ocurrió un error inesperado. Intentá de nuevo.')
+    expect(toFriendlyError(null)).toBe('Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.')
+    expect(toFriendlyError(undefined)).toBe(
+      'Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.'
+    )
     expect(toFriendlyError('Failed to fetch')).toBe('Sin conexión. Revisá tu internet e intentá de nuevo.')
   })
 })

@@ -8,14 +8,14 @@ const MI_VIGO_LINK: GuideLinkItem = {
   to: '/mi-vigo',
   label: 'Mi Vigo',
   icon: 'car',
-  description: 'Configurá tu modelo, tu color y tu cuenta.',
+  description: 'Tu auto, tu cuenta y las mejoras para la pantalla.',
 }
 
 const MODERATION_LINK: GuideLinkItem = {
   to: '/moderacion',
   label: 'Moderación',
   icon: 'shield',
-  description: 'Gestión de contenido y usuarios.',
+  description: 'Revisar aportes y usuarios.',
 }
 
 export default function GuidePage() {
@@ -25,7 +25,7 @@ export default function GuidePage() {
 
   return (
     <div>
-      <PageHeader title="📖 Guía" subtitle="Toda la información de referencia sobre el Vigo E2 y E2+." />
+      <PageHeader title="📖 Guía" subtitle="Todo lo que querés saber de tu Vigo, en un solo lugar." />
       <GuideLinks links={links} />
     </div>
   )

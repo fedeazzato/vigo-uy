@@ -35,7 +35,7 @@ function ocmStatusText(s: OcmLayerState): string | null {
     case 'loading':
       return 'Buscando estaciones de Open Charge Map…'
     case 'zoom':
-      return 'Acercá el mapa para ver también estaciones de Open Charge Map.'
+      return 'Acercá el mapa para ver también los cargadores de Open Charge Map (un mapa mundial de cargadores).'
     case 'error':
       return s.message
     case 'ready': {

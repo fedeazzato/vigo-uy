@@ -73,13 +73,18 @@ export default function RoutePlannerPage() {
   const { model: prefModel, effectiveTheme } = useUserPrefs()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const initial = useMemo(() => parsePlanQuery(searchParams.toString(), prefModel ?? 'E2'), [searchParams, prefModel])
+  const initial = useMemo(
+    () => parsePlanQuery(searchParams.toString(), prefModel ?? 'E2'),
+    [searchParams, prefModel]
+  )
   const [origin, setOrigin] = useState(initial?.origin ?? 'Montevideo')
   const [destination, setDestination] = useState(initial?.destination ?? '')
   const [model, setModel] = useState<Model>(initial?.model ?? prefModel ?? 'E2')
   const [startSoc, setStartSoc] = useState(String(initial?.startSoc ?? 100))
   const [minSoc, setMinSoc] = useState(String(initial?.minArrivalSoc ?? 15))
-  const [consumptionText, setConsumptionText] = useState(initial?.kwhPer100 != null ? String(initial.kwhPer100) : '')
+  const [consumptionText, setConsumptionText] = useState(
+    initial?.kwhPer100 != null ? String(initial.kwhPer100) : ''
+  )
 
   const [estimate, setEstimate] = useState<ConsumptionEstimate | null>(null)
   const [busy, setBusy] = useState(false)
@@ -117,13 +122,15 @@ export default function RoutePlannerPage() {
     try {
       const [o, d] = await Promise.all([resolvePlace(query.origin), resolvePlace(query.destination)])
       if (!o || !d) {
-        setError(`No encontramos "${!o ? query.origin : query.destination}". Probá con el nombre de la ciudad.`)
+        setError(
+          `No encontramos "${!o ? query.origin : query.destination}". Probá con el nombre de la ciudad.`
+        )
         setResult(null)
         return
       }
       const route = await fetchRoute([o, d])
       if (!route) {
-        setError('No pudimos calcular la ruta ahora (el servicio de rutas no respondió). Probá de nuevo en un rato.')
+        setError('No pudimos calcular la ruta: el servicio de mapas no respondió. Probá de nuevo en un rato.')
         setResult(null)
         return
       }
@@ -180,7 +187,7 @@ export default function RoutePlannerPage() {
       kwhPer100: c != null && c >= 5 && c <= 40 ? c : undefined,
     }
     if (!query.origin || !query.destination) {
-      setError('Completá el origen y el destino.')
+      setError('Escribí de dónde salís y a dónde vas.')
       return
     }
     // The URL is the share link; changing it triggers the plan.
@@ -201,7 +208,11 @@ export default function RoutePlannerPage() {
 
   async function handleSave() {
     if (!result) return
-    const res = await saveRoutePlan(result.query, result.kwhPer100, planSnapshot(result.plan, result.distanceKm))
+    const res = await saveRoutePlan(
+      result.query,
+      result.kwhPer100,
+      planSnapshot(result.plan, result.distanceKm)
+    )
     if (res.error) {
       setError(res.error)
       return
@@ -222,8 +233,8 @@ export default function RoutePlannerPage() {
   return (
     <>
       <PageHeader
-        title="Planificar un viaje"
-        subtitle="Calculá dónde cargar con el consumo real de la comunidad y las estaciones de WikiVigo."
+        title="🧭 Planificar un viaje"
+        subtitle="Te decimos dónde cargar en el camino, con el consumo real de otros dueños."
       />
       <p className={styles.back}>
         <Link to="/rutas">← Rutas</Link>
@@ -329,14 +340,15 @@ export default function RoutePlannerPage() {
           />
           {!result.plan.feasible && (
             <Alert type="warning">
-              Con las estaciones de WikiVigo no alcanza para completar el viaje con {result.query.minArrivalSoc}% de
-              reserva. Revisá el mapa de <Link to="/carga">Carga</Link> (incluye Open Charge Map) o bajá la reserva.
+              Con las estaciones de WikiVigo no alcanza para completar el viaje con{' '}
+              {result.query.minArrivalSoc}% de reserva. Revisá el mapa de <Link to="/carga">Carga</Link>{' '}
+              (incluye Open Charge Map) o bajá la reserva.
             </Alert>
           )}
           {result.plan.skippedFailing.length > 0 && (
             <Alert type="warning">
-              No sugerimos {result.plan.skippedFailing.map((s) => s.name).join(', ')}: la reportaron fuera de servicio
-              hace poco.
+              No sugerimos {result.plan.skippedFailing.map((s) => s.name).join(', ')}: la reportaron fuera de
+              servicio hace poco.
             </Alert>
           )}
 
@@ -348,13 +360,14 @@ export default function RoutePlannerPage() {
             {result.plan.stops.map((s) => (
               <li key={s.candidate.id}>
                 <span className={styles.legPlace}>
-                  🟠 {s.candidate.name} {s.candidate.dc ? <Badge color="green">DC</Badge> : <Badge color="gray">AC</Badge>}
+                  🟠 {s.candidate.name}{' '}
+                  {s.candidate.dc ? <Badge color="green">DC</Badge> : <Badge color="gray">AC</Badge>}
                   {s.candidate.flaky && <Badge color="amber">Fallas reportadas</Badge>}
                 </span>
                 <span className={styles.legMeta}>
                   km {Math.round(s.candidate.alongKm)}
-                  {s.candidate.offKm >= 1 ? ` (a ${Math.round(s.candidate.offKm)} km de la ruta)` : ''} · llegás con{' '}
-                  {pct(s.arrivalSoc)}, cargás hasta {pct(s.departureSoc)}
+                  {s.candidate.offKm >= 1 ? ` (a ${Math.round(s.candidate.offKm)} km de la ruta)` : ''} ·
+                  llegás con {pct(s.arrivalSoc)}, cargás hasta {pct(s.departureSoc)}
                   {s.candidate.maxPowerKw ? ` · ${s.candidate.maxPowerKw} kW` : ''}
                 </span>
               </li>
@@ -362,7 +375,9 @@ export default function RoutePlannerPage() {
             <li>
               <span className={styles.legPlace}>🔵 {result.query.destination}</span>
               <span className={styles.legMeta}>
-                {result.plan.feasible ? `Llegás con ${pct(result.plan.arrivalSoc)}` : 'No alcanza con este plan'}
+                {result.plan.feasible
+                  ? `Llegás con ${pct(result.plan.arrivalSoc)}`
+                  : 'No alcanza con este plan'}
               </span>
             </li>
           </ol>
@@ -378,7 +393,11 @@ export default function RoutePlannerPage() {
                 <Popup>🟣 {result.query.origin}</Popup>
               </Marker>
               {result.plan.stops.map((s) => (
-                <Marker key={s.candidate.id} position={[s.candidate.lat, s.candidate.lng]} icon={dotIcon('var(--accent)')}>
+                <Marker
+                  key={s.candidate.id}
+                  position={[s.candidate.lat, s.candidate.lng]}
+                  icon={dotIcon('var(--accent)')}
+                >
                   <Popup>🟠 {s.candidate.name}</Popup>
                 </Marker>
               ))}
@@ -389,8 +408,8 @@ export default function RoutePlannerPage() {
           </div>
 
           <p className={styles.note}>
-            Estimación: cargamos hasta {CHARGE_TO_SOC}% en cada parada (después la carga se vuelve muy lenta). El
-            consumo real cambia con la velocidad, el viento, la temperatura y el aire.
+            Estimación: cargamos hasta {CHARGE_TO_SOC}% en cada parada (después la carga se vuelve muy lenta).
+            El consumo real cambia con la velocidad, el viento, la temperatura y el aire.
           </p>
 
           <div className={styles.actions}>

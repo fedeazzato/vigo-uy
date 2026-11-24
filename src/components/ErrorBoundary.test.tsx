@@ -7,7 +7,9 @@ function Bomb(): never {
 }
 
 function ChunkBomb(): never {
-  throw new Error('Failed to fetch dynamically imported module: https://example.com/assets/PartsPage-abc123.js')
+  throw new Error(
+    'Failed to fetch dynamically imported module: https://example.com/assets/PartsPage-abc123.js'
+  )
 }
 
 describe('ErrorBoundary', () => {
@@ -32,7 +34,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     )
     expect(screen.getByText('contenido sano')).toBeTruthy()
-    expect(screen.queryByText('Algo salió mal.')).toBeNull()
+    expect(screen.queryByText('Uy, algo falló.')).toBeNull()
   })
 
   it('shows the Spanish fallback card with a reload button when a child throws', () => {
@@ -41,7 +43,7 @@ describe('ErrorBoundary', () => {
         <Bomb />
       </ErrorBoundary>
     )
-    expect(screen.getByText('Algo salió mal.')).toBeTruthy()
+    expect(screen.getByText('Uy, algo falló.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Recargar la página' })).toBeTruthy()
     expect(reloadSpy).not.toHaveBeenCalled()
   })
@@ -53,7 +55,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     )
     expect(screen.getByText('Hay una versión nueva')).toBeTruthy()
-    expect(screen.queryByText('Algo salió mal.')).toBeNull()
+    expect(screen.queryByText('Uy, algo falló.')).toBeNull()
     expect(reloadSpy).toHaveBeenCalledTimes(1)
   })
 
@@ -64,7 +66,7 @@ describe('ErrorBoundary', () => {
         <ChunkBomb />
       </ErrorBoundary>
     )
-    expect(screen.getByText('Algo salió mal.')).toBeTruthy()
+    expect(screen.getByText('Uy, algo falló.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Recargar la página' })).toBeTruthy()
     expect(reloadSpy).not.toHaveBeenCalled()
   })

@@ -143,7 +143,7 @@ describe('VaultPage', () => {
     await enrol()
     const hint = await screen.findByText(/Todavía no guardaste la frase\./)
     expect(hint.textContent).toContain('Dashcam › Ajustes › Frase de recuperación')
-    expect(hint.textContent).toContain('escanea el QR que muestra el auto')
+    expect(hint.textContent).toContain('escaneá el QR que aparece')
     expect(screen.getByText(/todavía no está instalada en el auto/)).toBeTruthy()
   })
 

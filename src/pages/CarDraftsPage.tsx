@@ -135,8 +135,8 @@ export default function CarDraftsPage() {
       {drafts !== undefined && (drafts === null || drafts.length === 0) && (
         <Card>
           <p className={styles.empty}>
-            No hay borradores. En el auto: Carga › un viaje (o varios seleccionados) › «Compartir en
-            WikiVigo».
+            No hay borradores por ahora. Para mandar uno, en el auto andá a Carga › elegí un viaje ›
+            «Compartir en WikiVigo».
           </p>
         </Card>
       )}

@@ -38,6 +38,6 @@ describe('NovedadesPage', () => {
         <NovedadesPage />
       </MemoryRouter>
     )
-    expect(await screen.findByText('Todavía no hay novedades publicadas.')).toBeTruthy()
+    expect(await screen.findByText(/Todavía no hay novedades/)).toBeTruthy()
   })
 })

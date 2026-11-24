@@ -51,7 +51,14 @@ function station(overrides: Partial<ChargingStation>): ChargingStation {
 }
 
 const STATIONS = [
-  station({ id: 'st-1', name: 'Axion Carrasco', network: 'eone', city: 'Rocha', connector: 'CCS2', max_power_kw: 180 }),
+  station({
+    id: 'st-1',
+    name: 'Axion Carrasco',
+    network: 'eone',
+    city: 'Rocha',
+    connector: 'CCS2',
+    max_power_kw: 180,
+  }),
   station({
     id: 'st-2',
     name: 'Axion Prado',
@@ -61,7 +68,14 @@ const STATIONS = [
     current_type: 'AC',
     max_power_kw: 22,
   }),
-  station({ id: 'st-3', name: 'Estación Mercedes', network: 'dmc', city: 'Rocha', connector: 'CCS2', max_power_kw: 60 }),
+  station({
+    id: 'st-3',
+    name: 'Estación Mercedes',
+    network: 'dmc',
+    city: 'Rocha',
+    connector: 'CCS2',
+    max_power_kw: 60,
+  }),
 ]
 
 vi.mock('../lib/communityData', () => ({
@@ -70,8 +84,22 @@ vi.mock('../lib/communityData', () => ({
   fetchChargingNetworks: () =>
     Promise.resolve({
       networks: [
-        { slug: 'eone', name: 'EONE', country: 'UY', instructions: null, sort_order: 11, created_at: '2026-07-01T00:00:00Z' },
-        { slug: 'dmc', name: 'DMC', country: 'UY', instructions: null, sort_order: 12, created_at: '2026-07-01T00:00:00Z' },
+        {
+          slug: 'eone',
+          name: 'EONE',
+          country: 'UY',
+          instructions: null,
+          sort_order: 11,
+          created_at: '2026-07-01T00:00:00Z',
+        },
+        {
+          slug: 'dmc',
+          name: 'DMC',
+          country: 'UY',
+          instructions: null,
+          sort_order: 12,
+          created_at: '2026-07-01T00:00:00Z',
+        },
       ],
       error: null,
     }),
@@ -183,7 +211,7 @@ describe('CommunityStations filters', () => {
     fireEvent.change(screen.getByLabelText('🌐 Red'), { target: { value: 'eone' } })
     fireEvent.change(screen.getByPlaceholderText('Rocha'), { target: { value: 'Salto' } })
 
-    await screen.findByText('No hay estaciones que coincidan con el filtro.')
+    await screen.findByText(/Ninguna estación coincide con estos filtros/)
     expect(screen.queryByText('Axion Carrasco')).toBeNull()
 
     const clearBtn = screen.getByText('Limpiar filtros')

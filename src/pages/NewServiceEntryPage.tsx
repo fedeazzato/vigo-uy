@@ -48,7 +48,7 @@ export default function NewServiceEntryPage() {
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
-          setError('No se pudo cargar la entrada.')
+          setError('No pudimos abrir este registro. Revisá tu conexión y probá de nuevo.')
         } else {
           setServiceDate(data.service_date)
           setOdometerKm(String(data.odometer_km))
@@ -77,11 +77,11 @@ export default function NewServiceEntryPage() {
     const km = parseLocaleNumber(odometerKm)
     const cost = parseLocaleNumber(costUyu)
     if (km === undefined || !Number.isFinite(km) || km < 0) {
-      setError('El kilometraje debe ser un número válido.')
+      setError('Escribí el kilometraje solo con números (por ejemplo 45000).')
       return
     }
     if (cost === undefined || !Number.isFinite(cost) || cost < 0) {
-      setError('El costo debe ser un número válido.')
+      setError('Escribí el costo solo con números (por ejemplo 7500).')
       return
     }
     if (!dealer.trim() || !serviceType.trim()) {
@@ -215,7 +215,7 @@ export default function NewServiceEntryPage() {
           id="service-notes"
           value={notes}
           onChange={setNotes}
-          placeholder="Detalles adicionales..."
+          placeholder="Lo que quieras contar (opcional)"
         />
 
         <ShareCheckbox checked={isPublic} onChange={setIsPublic} />

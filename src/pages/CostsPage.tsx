@@ -116,9 +116,9 @@ export default function CostsPage() {
   const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
   const [insuranceAddons, setInsuranceAddons] = useState<InsuranceAddon[]>([])
   const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
-  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<Map<string, InsuranceQuoteAddon[]>>(
-    new Map()
-  )
+  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<
+    Map<string, InsuranceQuoteAddon[]>
+  >(new Map())
   const [insuranceCostStats, setInsuranceCostStats] = useState<InsuranceCostStat[]>([])
   useEffect(() => {
     if (!supabase) return
@@ -134,7 +134,10 @@ export default function CostsPage() {
   }, [])
   const insuranceProviderNames = new Map(insuranceProviders.map((p) => [p.slug, p.name]))
   const providerCostStats = insuranceCostStatsByProvider(insuranceCostStats, insuranceProviders)
-  const providerCoverageCostStats = insuranceCostStatsByProviderAndCoverage(insuranceCostStats, insuranceProviders)
+  const providerCoverageCostStats = insuranceCostStatsByProviderAndCoverage(
+    insuranceCostStats,
+    insuranceProviders
+  )
   const communityInsuranceQuotes = verifiedFirst(insuranceQuotes).slice(0, 10)
   // D1 gate, same pattern as realCases/service_entries above.
   const communityInsuranceFirst =
@@ -215,21 +218,15 @@ export default function CostsPage() {
       <Card>
         <p className={styles.realCaseConditions}>
           {communityFirst ? (
-            <>
-              Estos datos vienen de la comunidad: services reales registrados por otros dueños. Los marcados
-              como oficiales fueron verificados por moderadores.{' '}
-            </>
+            <>Services reales de otros dueños. «Oficial» quiere decir que lo revisó un moderador. </>
           ) : (
-            <>
-              Los casos marcados como oficiales son verificados por el grupo; los de la comunidad vienen
-              directo de otros usuarios.{' '}
-            </>
+            <>«Oficial» quiere decir que lo revisó el grupo; «Comunidad», que lo cargó otro dueño. </>
           )}
-          <Link to="/comunidad">Mirá la comunidad</Link> para ver el listado completo.
+          Mirá todos en <Link to="/comunidad">Comunidad</Link>.
           {supabase && communityEntries.length === 0 && (
             <>
               {' '}
-              Todavía no hay services compartidos — <Link to="/costos/nuevo">registrá el tuyo</Link>.
+              Todavía no hay services compartidos: <Link to="/costos/nuevo">¡sumá el tuyo!</Link>
             </>
           )}
         </p>
@@ -276,14 +273,16 @@ export default function CostsPage() {
           {(!model || model === 'E2') && (
             <div className={styles.patentRow}>
               <span className={styles.patentModel}>Vigo E2</span>
-              <span className={styles.patentVal}>Aforo: {patent.e2.valuation}</span>
+              <span className={styles.patentVal}>Aforo (valor oficial del auto): {patent.e2.valuation}</span>
               <span className={styles.patentCost}>{patent.e2.patent}</span>
             </div>
           )}
           {(!model || model === 'E2+') && (
             <div className={styles.patentRow}>
               <span className={styles.patentModel}>Vigo E2+</span>
-              <span className={styles.patentVal}>Aforo: {patent.e2plus.valuation}</span>
+              <span className={styles.patentVal}>
+                {model === 'E2+' ? 'Aforo (valor oficial del auto)' : 'Aforo'}: {patent.e2plus.valuation}
+              </span>
               <span className={styles.patentCost}>{patent.e2plus.patent}</span>
             </div>
           )}
@@ -317,7 +316,8 @@ export default function CostsPage() {
             <Card>
               <CardTitle icon="📊">Promedio por aseguradora</CardTitle>
               <p className={styles.chargerTip}>
-                Lo que realmente pagó la comunidad por año en cada aseguradora, de la más barata a la más cara.
+                Lo que realmente pagó la comunidad por año en cada aseguradora, de la más barata a la más
+                cara.
               </p>
               <ul className={styles.providerList}>
                 {providerCostStats.map(({ provider, stat }) => (
@@ -368,7 +368,7 @@ export default function CostsPage() {
           <span>
             {communityInsuranceFirst
               ? 'Sumá tu seguro para seguir mejorando el promedio de la comunidad.'
-              : 'Todavía no hay seguros compartidos — registrá el tuyo y ayudá a armar el promedio real.'}
+              : 'Todavía no hay seguros compartidos. ¡Sumá el tuyo y ayudá a armar el promedio!'}
           </span>
           <Link to="/costos/seguro/nuevo" className={listStyles.ctaBtn}>
             + Registrar mi seguro

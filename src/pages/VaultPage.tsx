@@ -395,15 +395,14 @@ function DashcamCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📹">Frase de recuperación de la dashcam</CardTitle>
       <p className={styles.text}>
-        Las 24 palabras que abren las grabaciones de la dashcam después de un reinicio de fábrica. Dónde
-        encontrarlas: en el auto, <strong>Dashcam › Ajustes › Frase de recuperación</strong> (después del PIN):
-        escanea el QR que muestra el auto. La app Dashcam también lo muestra en su primer arranque. Si la Dashcam
-        todavía no está instalada en el auto, aún no hay frase.
+        Las 24 palabras que abren las grabaciones de la dashcam si el auto vuelve a fábrica. La app Dashcam
+        también te las muestra la primera vez que se abre. Si la Dashcam todavía no está instalada en el auto,
+        aún no hay frase.
       </p>
       <p className={styles.status}>
         {item
           ? `Guardada · última actualización el ${formatTimestampDate(item.updated_at)}`
-          : 'Todavía no guardaste la frase. En el auto: Dashcam › Ajustes › Frase de recuperación, escanea el QR que muestra el auto.'}
+          : 'Todavía no guardaste la frase. Buscala en el auto: Dashcam › Ajustes › Frase de recuperación (te pide el PIN) y escaneá el QR que aparece.'}
       </p>
       <Feedback error={fb.error} message={fb.message} />
 
@@ -541,7 +540,9 @@ function InboxCard({ shared }: { shared: Shared }) {
   async function enable() {
     if (
       inbox?.key &&
-      !confirm('Ya está activado. Si generás una llave nueva, lo que el auto haya enviado con la anterior ya no se puede abrir. ¿Seguir?')
+      !confirm(
+        'Ya está activado. Si generás una llave nueva, lo que el auto haya enviado con la anterior ya no se puede abrir. ¿Seguir?'
+      )
     )
       return
     fb.reset()
@@ -559,10 +560,16 @@ function InboxCard({ shared }: { shared: Shared }) {
 
   async function importRow(row: VaultInboxRow) {
     if (!privateItem) {
-      fb.setError('Falta la llave del envío: activá de nuevo «Recibir desde el auto» y pedile al auto que lo envíe otra vez.')
+      fb.setError(
+        'Falta la llave del envío: activá de nuevo «Recibir desde el auto» y pedile al auto que lo envíe otra vez.'
+      )
       return
     }
-    if (itemOf(shared.items, 'dashcam_recovery') && !confirm('Ya hay una frase guardada. ¿Reemplazarla por la que envió el auto?')) return
+    if (
+      itemOf(shared.items, 'dashcam_recovery') &&
+      !confirm('Ya hay una frase guardada. ¿Reemplazarla por la que envió el auto?')
+    )
+      return
     fb.reset()
     shared.setBusy(true)
     const r = await importInbox(shared.user, shared.keys, privateItem, row)
@@ -587,28 +594,49 @@ function InboxCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📥">Recibir la frase desde el auto</CardTitle>
       <p className={styles.text}>
-        Así el auto envía la frase de la dashcam directo a tu bóveda, sin escanear nada: en el auto, Dashcam › Ajustes › Frase de
-        recuperación › «Enviar a mi bóveda». Viaja cifrada: WikiVigo no puede leerla.
+        Así el auto envía la frase de la dashcam directo a tu bóveda, sin escanear nada: en el auto, Dashcam ›
+        Ajustes › Frase de recuperación › «Enviar a mi bóveda». Viaja cifrada: WikiVigo no puede leerla.
       </p>
       <p className={styles.status}>
-        {inbox === null ? 'Cargando…' : inbox.key ? `Activado el ${formatTimestampDate(inbox.key.created_at)}` : 'Sin activar.'}
+        {inbox === null
+          ? 'Cargando…'
+          : inbox.key
+            ? `Activado el ${formatTimestampDate(inbox.key.created_at)}`
+            : 'Sin activar.'}
       </p>
       <Feedback error={fb.error} message={fb.message} />
       {inbox?.rows.map((row) => (
         <div key={row.id} className={styles.revealed}>
-          <span className={styles.meta}>El auto envió la frase de la dashcam el {formatTimestampDate(row.created_at)}.</span>
+          <span className={styles.meta}>
+            El auto envió la frase de la dashcam el {formatTimestampDate(row.created_at)}.
+          </span>
           <div className={styles.actions}>
-            <button type="button" className={styles.primaryBtn} onClick={() => void importRow(row)} disabled={!canUse || shared.busy}>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={() => void importRow(row)}
+              disabled={!canUse || shared.busy}
+            >
               Guardar en la bóveda
             </button>
-            <button type="button" className={styles.secondaryBtn} onClick={() => void discard(row)} disabled={shared.busy}>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={() => void discard(row)}
+              disabled={shared.busy}
+            >
               Descartar
             </button>
           </div>
         </div>
       ))}
       <div className={styles.actions}>
-        <button type="button" className={inbox?.key ? styles.secondaryBtn : styles.primaryBtn} onClick={() => void enable()} disabled={!canUse || shared.busy}>
+        <button
+          type="button"
+          className={inbox?.key ? styles.secondaryBtn : styles.primaryBtn}
+          onClick={() => void enable()}
+          disabled={!canUse || shared.busy}
+        >
           {inbox?.key ? 'Generar una llave nueva' : 'Permitir que el auto envíe la frase'}
         </button>
       </div>

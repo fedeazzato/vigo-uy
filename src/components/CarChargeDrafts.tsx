@@ -64,7 +64,7 @@ export default function CarChargeDrafts({ onCount }: { onCount?: (n: number) => 
   return (
     <>
       {error && <Alert type="danger">{error}</Alert>}
-      {done && <Alert type="success">Check-in publicado en {done}. ¡Gracias!</Alert>}
+      {done && <Alert type="success">Reporte publicado en {done}. ¡Gracias por avisar!</Alert>}
       {drafts.map((d) => {
         const { title, detail } = describeChargeDraft(d)
         const value = choice[d.id] ?? (d.result as CheckinStatus)
@@ -75,7 +75,7 @@ export default function CarChargeDrafts({ onCount }: { onCount?: (n: number) => 
             <div className={formStyles.row}>
               <div className={formStyles.field}>
                 <label className={formStyles.label} htmlFor={`ck-${d.id}`}>
-                  Resultado
+                  ¿Cómo te fue?
                 </label>
                 <select
                   id={`ck-${d.id}`}
@@ -102,7 +102,8 @@ export default function CarChargeDrafts({ onCount }: { onCount?: (n: number) => 
               </div>
             </div>
             <p className={formStyles.hint}>
-              Se publica con tu nombre como cualquier check-in. Si no lo publicás, nadie lo ve.
+              Se publica con tu nombre, para que otros sepan si el cargador anda. Si no lo publicás, nadie lo
+              ve.
             </p>
             <div className={styles.actions}>
               <button
@@ -111,7 +112,7 @@ export default function CarChargeDrafts({ onCount }: { onCount?: (n: number) => 
                 disabled={busy !== null}
                 onClick={() => void publish(d)}
               >
-                Publicar check-in
+                Publicar reporte
               </button>
               <button
                 type="button"

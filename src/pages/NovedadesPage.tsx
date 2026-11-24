@@ -32,7 +32,9 @@ export default function NovedadesPage() {
       />
       {notes === undefined && <Skeleton lines={4} />}
       {(notes === null || notes?.length === 0) && (
-        <Alert type="info">Todavía no hay novedades publicadas.</Alert>
+        <Alert type="info">
+          Todavía no hay novedades. Cuando salga una versión nueva de las mejoras, la vas a ver acá.
+        </Alert>
       )}
       {notes?.map((r) => (
         <Card key={r.serial}>

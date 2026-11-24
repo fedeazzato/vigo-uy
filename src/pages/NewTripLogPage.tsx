@@ -172,28 +172,28 @@ export function parseStopDrafts(stops: StopDraft[]): { stops: TripChargingStop[]
     }
     const stopSpeed = parseLocaleNumber(s.averageSpeed)
     if (!isValidNonNegative(stopSpeed)) {
-      return { error: 'La velocidad media entre paradas debe ser un número válido.' }
+      return { error: 'Escribí la velocidad media entre paradas solo con números.' }
     }
     const cost = parseLocaleNumber(s.cost)
     if (!isValidNonNegative(cost)) {
-      return { error: 'El costo de la carga debe ser un número válido.' }
+      return { error: 'Escribí el costo de la carga solo con números.' }
     }
     const energy = parseLocaleNumber(s.energyKwh)
     if (energy !== undefined && !(energy > 0)) {
-      return { error: 'La energía cargada (kWh) debe ser mayor a cero.' }
+      return { error: 'La energía cargada (kWh) tiene que ser más que cero.' }
     }
     const stop: TripChargingStop = { name: s.name.trim() }
     if (s.note.trim()) stop.note = s.note.trim()
     const distanceFromPrevious = parseLocaleNumber(s.distanceFromPrevious)
     if (!isValidNonNegative(distanceFromPrevious)) {
-      return { error: 'La distancia entre paradas debe ser un número válido.' }
+      return { error: 'Escribí la distancia entre paradas solo con números.' }
     }
     if (distanceFromPrevious !== undefined) stop.distance_from_previous_km = distanceFromPrevious
     if (arrival !== undefined) stop.arrival_percentage = arrival
     if (departure !== undefined) stop.departure_percentage = departure
     const duration = parseLocaleNumber(s.durationMinutes)
     if (!isValidNonNegative(duration)) {
-      return { error: 'Los minutos de carga deben ser un número válido.' }
+      return { error: 'Escribí los minutos de carga solo con números.' }
     }
     if (duration !== undefined) stop.duration_minutes = duration
     if (stopSpeed !== undefined) stop.average_speed_kmh = stopSpeed
@@ -550,7 +550,7 @@ function StopCard({
           className={`${formStyles.input} ${formStyles.textarea}`}
           value={stop.note}
           onChange={(e) => onUpdate('note', e.target.value)}
-          placeholder="Detalles de esta parada..."
+          placeholder="Cómo te fue en esta parada (opcional)"
         />
       </div>
     </div>
@@ -631,7 +631,9 @@ export default function NewTripLogPage() {
   // it exactly as picking it from the dropdown would.
   function handleStationCreated(index: number, station: ChargingStation) {
     setStations((prev) => [...prev, station])
-    setStops((prev) => prev.map((s, i) => (i === index ? { ...s, stationId: station.id, name: station.name } : s)))
+    setStops((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, stationId: station.id, name: station.name } : s))
+    )
     setDirty(true)
   }
 
@@ -644,7 +646,7 @@ export default function NewTripLogPage() {
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
-          setError('No se pudo cargar el viaje.')
+          setError('No pudimos abrir este viaje. Revisá tu conexión y probá de nuevo.')
         } else {
           setOrigin(data.origin)
           setDestination(data.destination)
@@ -814,7 +816,7 @@ export default function NewTripLogPage() {
     }
     const distance = parseLocaleNumber(distanceKm)
     if (distance === undefined || !Number.isFinite(distance) || distance < 0) {
-      return 'La distancia debe ser un número válido.'
+      return 'Escribí la distancia solo con números (por ejemplo 120).'
     }
     return null
   }
@@ -844,7 +846,7 @@ export default function NewTripLogPage() {
       return
     }
     if (isPublic && !model) {
-      setError('Seleccioná el modelo (E2 o E2+) para compartir con la comunidad.')
+      setError('Elegí tu modelo (E2 o E2+) para compartir el viaje.')
       return
     }
 
@@ -862,7 +864,7 @@ export default function NewTripLogPage() {
     }
     const avgSpeed = parseLocaleNumber(averageSpeed)
     if (!isValidNonNegative(avgSpeed)) {
-      setError('La velocidad media debe ser un número válido.')
+      setError('Escribí la velocidad media solo con números.')
       return
     }
 
@@ -908,7 +910,7 @@ export default function NewTripLogPage() {
       <div>
         <PageHeader
           title={isEdit ? '🗺️ Editar viaje' : '🗺️ Nuevo viaje'}
-          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+          subtitle="Contá a dónde fuiste y dónde cargaste. Le sirve a quien haga el mismo camino."
         />
         <Skeleton lines={8} />
       </div>
@@ -922,7 +924,7 @@ export default function NewTripLogPage() {
       <div>
         <PageHeader
           title="🗺️ Nuevo viaje"
-          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+          subtitle="Contá a dónde fuiste y dónde cargaste. Le sirve a quien haga el mismo camino."
         />
         <Card>
           <Alert type="info">
@@ -995,7 +997,7 @@ export default function NewTripLogPage() {
       ) : (
         <PageHeader
           title={isEdit ? '🗺️ Editar viaje' : '🗺️ Nuevo viaje'}
-          subtitle="Registrá un viaje y tus paradas de carga para compartir con la comunidad."
+          subtitle="Contá a dónde fuiste y dónde cargaste. Le sirve a quien haga el mismo camino."
         />
       )}
 
@@ -1014,7 +1016,13 @@ export default function NewTripLogPage() {
                   <label className={formStyles.label} htmlFor="trip-origin">
                     📍 Origen
                   </label>
-                  <CityCombobox id="trip-origin" required value={origin} onChange={setOrigin} placeholder="Montevideo" />
+                  <CityCombobox
+                    id="trip-origin"
+                    required
+                    value={origin}
+                    onChange={setOrigin}
+                    placeholder="Montevideo"
+                  />
                 </div>
                 <div className={formStyles.field}>
                   <label className={formStyles.label} htmlFor="trip-destination">
@@ -1149,7 +1157,11 @@ export default function NewTripLogPage() {
 
                   <div className={formStyles.field}>
                     <span className={formStyles.label}>⚡ Paradas de carga</span>
-                    {stops.length === 0 && <p className={styles.emptyStops}>Sin paradas registradas.</p>}
+                    {stops.length === 0 && (
+                      <p className={styles.emptyStops}>
+                        ¿Cargaste en el camino? Sumá cada parada abajo. Si no paraste, seguí nomás.
+                      </p>
+                    )}
                     <div className={styles.stopsList}>
                       {stops.map((stop, index) => (
                         <StopCard

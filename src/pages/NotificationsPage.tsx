@@ -60,16 +60,15 @@ export default function NotificationsPage() {
           <Skeleton lines={4} />
         ) : rows.length === 0 ? (
           <p className={styles.empty}>
-            No tenés notificaciones. Tocá «🔔 Avisarme si falla» en una estación de <Link to="/carga">Carga</Link> o
-            «🔔 Seguir» en una publicación para recibir avisos.
+            No tenés notificaciones. ¿Querés enterarte de algo? Tocá «🔔 Avisarme si falla» en una estación de{' '}
+            <Link to="/carga">Carga</Link> o «🔔 Seguir» en un aporte de la{' '}
+            <Link to="/comunidad">Comunidad</Link>.
           </p>
         ) : (
           <>
             {unread > 0 && (
               <div className={styles.toolbar}>
-                <span>
-                  {unread} sin leer
-                </span>
+                <span>{unread} sin leer</span>
                 <button type="button" className={styles.linkBtn} onClick={() => void markAll()}>
                   Marcar todas como leídas
                 </button>

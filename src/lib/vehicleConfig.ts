@@ -111,7 +111,7 @@ export async function fetchSnapshots(): Promise<ConfigSnapshot[] | null> {
 }
 
 export async function saveSnapshot(s: ConfigSnapshot): Promise<{ error: string | null }> {
-  if (!supabase) return { error: 'No disponible.' }
+  if (!supabase) return { error: 'Esto no está disponible ahora. Probá más tarde.' }
   const { error } = await supabase.from('vehicle_config_snapshots').insert({
     label: s.label,
     taken_at: s.taken_at,
@@ -124,7 +124,7 @@ export async function saveSnapshot(s: ConfigSnapshot): Promise<{ error: string |
 }
 
 export async function deleteSnapshot(id: string): Promise<{ error: string | null }> {
-  if (!supabase) return { error: 'No disponible.' }
+  if (!supabase) return { error: 'Esto no está disponible ahora. Probá más tarde.' }
   const { error } = await supabase.from('vehicle_config_snapshots').delete().eq('id', id)
   return { error: error ? toFriendlyError(error) : null }
 }

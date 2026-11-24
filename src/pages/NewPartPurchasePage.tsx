@@ -84,7 +84,7 @@ export default function NewPartPurchasePage() {
       .single()
       .then(({ data, error }) => {
         if (error || !data) {
-          setError('No se pudo cargar la compra.')
+          setError('No pudimos abrir esta compra. Revisá tu conexión y probá de nuevo.')
         } else {
           setPurchaseDate(data.purchase_date)
           setCategory(data.category)
@@ -114,12 +114,12 @@ export default function NewPartPurchasePage() {
     }
     const price = parseLocaleNumber(priceUyu)
     if (price === undefined || !Number.isFinite(price) || price < 0) {
-      setError('El precio debe ser un número válido.')
+      setError('Escribí el precio solo con números (por ejemplo 12000).')
       return
     }
     const km = parseLocaleNumber(odometerKm) ?? null
     if (km != null && (!Number.isFinite(km) || km < 0)) {
-      setError('El kilometraje debe ser un número válido.')
+      setError('Escribí el kilometraje solo con números (por ejemplo 45000).')
       return
     }
     if (!item.trim() || !store.trim()) {
@@ -131,12 +131,14 @@ export default function NewPartPurchasePage() {
     // a no-op.
     const trimmedLink = canonicalizeStoreUrl(link.trim())
     if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
-      setError('El link debe empezar con http:// o https://.')
+      setError(
+        'El link tiene que ser una dirección web completa (empieza con https://). Copialo de la barra del navegador.'
+      )
       return
     }
     const trimmedImageUrl = imageUrl.trim()
     if (trimmedImageUrl && !/^https?:\/\//i.test(trimmedImageUrl)) {
-      setError('El link de la foto debe empezar con http:// o https://.')
+      setError('El link de la foto tiene que empezar con https://. Copialo con clic derecho sobre la foto.')
       return
     }
 

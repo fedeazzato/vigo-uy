@@ -143,7 +143,10 @@ describe('fetchCarDevices / revokeCarDevice', () => {
 
   it('reports a friendly error', async () => {
     selectMock.mockResolvedValue({ data: null, error: { code: '42501', message: 'permission denied' } })
-    expect(await fetchCarDevices()).toEqual({ devices: [], error: 'No tenés permiso para hacer eso.' })
+    expect(await fetchCarDevices()).toEqual({
+      devices: [],
+      error: 'No tenés permiso para hacer eso. Si te parece un error, cerrá sesión y volvé a entrar.',
+    })
   })
 
   it('revokes through the RPC', async () => {

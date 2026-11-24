@@ -239,7 +239,7 @@ describe('StationsMap with the Open Charge Map layer', () => {
     Object.assign(view, { south: -35, west: -58.5, north: -30, east: -53 })
     render(<StationsMap stations={[wiki]} open onClose={vi.fn()} ocm={{}} />)
     expect(
-      await screen.findByText('Acercá el mapa para ver también estaciones de Open Charge Map.')
+      await screen.findByText(/Acercá el mapa para ver también los cargadores de Open Charge Map/)
     ).toBeTruthy()
     expect(fetchMock).not.toHaveBeenCalled()
   })

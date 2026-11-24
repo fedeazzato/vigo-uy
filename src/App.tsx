@@ -39,6 +39,7 @@ const CarDiagnosticsPage = lazy(() => import('./pages/CarDiagnosticsPage'))
 const LicencesPage = lazy(() => import('./pages/LicencesPage'))
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
 const RoutePlannerPage = lazy(() => import('./pages/RoutePlannerPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 export default function App() {
   return (
@@ -92,6 +93,7 @@ export default function App() {
           <Route element={<RequireModerator />}>
             <Route path="moderacion" element={<ModerationPage />} />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </>

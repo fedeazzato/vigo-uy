@@ -55,10 +55,10 @@ describe('CarChargeDrafts', () => {
     mocks.confirmChargeDraft.mockResolvedValue(null)
     render(<CarChargeDrafts />)
     expect(await screen.findByText('¿Falló la carga en UTE Florida?')).toBeTruthy()
-    fireEvent.change(screen.getByLabelText('Resultado'), { target: { value: 'ocupado' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Publicar check-in' }))
+    fireEvent.change(screen.getByLabelText('¿Cómo te fue?'), { target: { value: 'ocupado' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar reporte' }))
     await waitFor(() => expect(mocks.confirmChargeDraft).toHaveBeenCalledWith('d1', 'ocupado', ''))
-    expect(await screen.findByText(/Check-in publicado en UTE Florida/)).toBeTruthy()
+    expect(await screen.findByText(/Reporte publicado en UTE Florida/)).toBeTruthy()
     expect(screen.queryByText('¿Falló la carga en UTE Florida?')).toBeNull()
   })
 

@@ -133,7 +133,10 @@ describe('fetchOcmStations', () => {
       'fetch',
       vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
     )
-    expect(await fetchOcmStations('u')).toEqual({ ok: false, message: 'Sin conexión con Open Charge Map.' })
+    expect(await fetchOcmStations('u')).toEqual({
+      ok: false,
+      message: 'No pudimos conectar con Open Charge Map. Revisá tu internet y probá de nuevo.',
+    })
     const c = new AbortController()
     c.abort()
     vi.stubGlobal(

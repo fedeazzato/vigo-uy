@@ -21,7 +21,15 @@ import { purchaseCategoryTitle } from '../lib/purchaseCatalog'
 import ContentReactions from '../components/ContentReactions'
 import PurchaseThumbnail from '../components/PurchaseThumbnail'
 import { INSURANCE_COVERAGE_LABELS } from '../types'
-import type { InsuranceAddon, InsuranceProvider, InsuranceQuote, InsuranceQuoteAddon, PartPurchase, ServiceEntry, TripLog } from '../types'
+import type {
+  InsuranceAddon,
+  InsuranceProvider,
+  InsuranceQuote,
+  InsuranceQuoteAddon,
+  PartPurchase,
+  ServiceEntry,
+  TripLog,
+} from '../types'
 import styles from './DashboardPage.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -33,7 +41,7 @@ const PASSKEY_PROMPT_KEY = 'vigo-passkey-prompt-dismissed'
 const SAVED_MESSAGES: Record<string, string> = {
   viaje: 'Viaje guardado ✓',
   service: 'Service guardado ✓',
-  compra: 'Repuesto guardado ✓',
+  compra: 'Compra guardada ✓',
   seguro: 'Seguro guardado ✓',
 }
 
@@ -68,9 +76,9 @@ export default function DashboardPage() {
   const [insuranceQuotes, setInsuranceQuotes] = useState<InsuranceQuote[]>([])
   const [insuranceProviders, setInsuranceProviders] = useState<InsuranceProvider[]>([])
   const [insuranceAddons, setInsuranceAddons] = useState<InsuranceAddon[]>([])
-  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<Map<string, InsuranceQuoteAddon[]>>(
-    new Map()
-  )
+  const [insuranceQuoteAddonsByQuote, setInsuranceQuoteAddonsByQuote] = useState<
+    Map<string, InsuranceQuoteAddon[]>
+  >(new Map())
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [loadingTrips, setLoadingTrips] = useState(true)
   const [loadingPurchases, setLoadingPurchases] = useState(true)
@@ -150,7 +158,7 @@ export default function DashboardPage() {
 
   async function handleDeleteEntry(entryId: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar esta entrada?')) return
+    if (!confirm('¿Borrar este service? No se puede deshacer.')) return
 
     const { error } = await supabase.from('service_entries').delete().eq('id', entryId)
     if (error) {
@@ -163,7 +171,7 @@ export default function DashboardPage() {
 
   async function handleDeleteTrip(tripId: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar este viaje?')) return
+    if (!confirm('¿Borrar este viaje? No se puede deshacer.')) return
 
     const { error } = await supabase.from('trip_logs').delete().eq('id', tripId)
     if (error) {
@@ -176,7 +184,7 @@ export default function DashboardPage() {
 
   async function handleDeletePurchase(purchaseId: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar esta compra?')) return
+    if (!confirm('¿Borrar esta compra? No se puede deshacer.')) return
 
     const { error } = await supabase.from('part_purchases').delete().eq('id', purchaseId)
     if (error) {
@@ -189,7 +197,7 @@ export default function DashboardPage() {
 
   async function handleDeleteInsurance(quoteId: string) {
     if (!supabase) return
-    if (!confirm('¿Eliminar este seguro?')) return
+    if (!confirm('¿Borrar este seguro? No se puede deshacer.')) return
 
     const { error } = await supabase.from('insurance_quotes').delete().eq('id', quoteId)
     if (error) {
@@ -207,7 +215,7 @@ export default function DashboardPage() {
     setRegisteringPasskey(false)
     setPasskeyMessage(
       error
-        ? 'No se pudo registrar la llave de acceso.'
+        ? 'No pudimos crear la llave de acceso. Probá de nuevo; mientras tanto, entrás con el código por email.'
         : 'Llave de acceso registrada. La próxima vez podés entrar sin código.'
     )
     // Registered: the prompt did its job, don't show it on future visits.
@@ -387,11 +395,14 @@ export default function DashboardPage() {
               </button>
             )}
           </div>
+          {!passkeyMessage && (
+            <p className={listStyles.empty}>
+              Entrá sin esperar el código por email: usá la huella, la cara o el PIN de este dispositivo.
+            </p>
+          )}
           {passkeyMessage && <p className={listStyles.empty}>{passkeyMessage}</p>}
           <button className={styles.addLink} onClick={handleRegisterPasskey} disabled={registeringPasskey}>
-            {registeringPasskey
-              ? 'Registrando…'
-              : '🔑 Registrar llave de acceso (Face ID / huella / Windows Hello)'}
+            {registeringPasskey ? 'Registrando…' : '🔑 Entrar con tu huella o tu cara (llave de acceso)'}
           </button>
         </Card>
       )}
@@ -419,11 +430,11 @@ export default function DashboardPage() {
               <div className={styles.sectionActions}>
                 {entries.length > 0 && (
                   <button className={styles.addLink} onClick={exportEntriesCsv}>
-                    Descargar planilla (CSV)
+                    ⬇️ Descargar planilla
                   </button>
                 )}
                 <Link to="/costos/nuevo" className={styles.addLink}>
-                  + Nueva entrada
+                  + Nuevo service
                 </Link>
               </div>
             </div>
@@ -431,7 +442,9 @@ export default function DashboardPage() {
             {loadingEntries ? (
               <p className={listStyles.empty}>Cargando…</p>
             ) : entries.length === 0 ? (
-              <p className={listStyles.empty}>Todavía no registraste ningún service.</p>
+              <p className={listStyles.empty}>
+                Todavía no registraste ningún service. Tocá «+ Nuevo service» cuando vayas al taller.
+              </p>
             ) : (
               <ul className={listStyles.list}>
                 {entries.map((entry) => (
@@ -473,7 +486,7 @@ export default function DashboardPage() {
               <div className={styles.sectionActions}>
                 {purchases.length > 0 && (
                   <button className={styles.addLink} onClick={exportPurchasesCsv}>
-                    Descargar planilla (CSV)
+                    ⬇️ Descargar planilla
                   </button>
                 )}
                 <Link to="/repuestos/nuevo" className={styles.addLink}>
@@ -485,7 +498,10 @@ export default function DashboardPage() {
             {loadingPurchases ? (
               <p className={listStyles.empty}>Cargando…</p>
             ) : purchases.length === 0 ? (
-              <p className={listStyles.empty}>Todavía no registraste ninguna compra.</p>
+              <p className={listStyles.empty}>
+                Todavía no registraste ninguna compra. ¿Compraste algo para tu Vigo? Sumalo con «+ Nueva
+                compra».
+              </p>
             ) : (
               <ul className={listStyles.list}>
                 {purchases.map((purchase) => (
@@ -537,7 +553,7 @@ export default function DashboardPage() {
               <div className={styles.sectionActions}>
                 {trips.length > 0 && (
                   <button className={styles.addLink} onClick={exportTripsCsv}>
-                    Descargar planilla (CSV)
+                    ⬇️ Descargar planilla
                   </button>
                 )}
                 <Link to="/viajes/nuevo" className={styles.addLink}>
@@ -549,7 +565,9 @@ export default function DashboardPage() {
             {loadingTrips ? (
               <p className={listStyles.empty}>Cargando…</p>
             ) : trips.length === 0 ? (
-              <p className={listStyles.empty}>Todavía no registraste ningún viaje.</p>
+              <p className={listStyles.empty}>
+                Todavía no registraste ningún viaje. ¡Cargá el primero con «+ Nuevo viaje»!
+              </p>
             ) : (
               <ul className={listStyles.list}>
                 {trips.map((trip) => (
@@ -592,11 +610,11 @@ export default function DashboardPage() {
               <div className={styles.sectionActions}>
                 {insuranceQuotes.length > 0 && (
                   <button className={styles.addLink} onClick={exportInsuranceCsv}>
-                    Descargar planilla (CSV)
+                    ⬇️ Descargar planilla
                   </button>
                 )}
                 <Link to="/costos/seguro/nuevo" className={styles.addLink}>
-                  + Nueva entrada
+                  + Nuevo seguro
                 </Link>
               </div>
             </div>
@@ -604,7 +622,10 @@ export default function DashboardPage() {
             {loadingInsurance ? (
               <p className={listStyles.empty}>Cargando…</p>
             ) : insuranceQuotes.length === 0 ? (
-              <p className={listStyles.empty}>Todavía no registraste ningún seguro.</p>
+              <p className={listStyles.empty}>
+                Todavía no registraste ningún seguro. Compartilo con «+ Nuevo seguro» y ayudá a comparar
+                precios.
+              </p>
             ) : (
               <ul className={listStyles.list}>
                 {insuranceQuotes.map((quote) => (
@@ -619,7 +640,9 @@ export default function DashboardPage() {
                         {formatCurrency(quote.total_cost_uyu, 2)}
                       </div>
                     </div>
-                    <div className={listStyles.itemCost}>{formatCurrency(quote.cost_per_year_uyu, 2)}/año</div>
+                    <div className={listStyles.itemCost}>
+                      {formatCurrency(quote.cost_per_year_uyu, 2)}/año
+                    </div>
                     <div className={listStyles.itemActions}>
                       <Link
                         to={`/costos/seguro/${quote.id}/editar`}

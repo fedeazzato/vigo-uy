@@ -56,13 +56,13 @@ export function toFriendlyError(error: unknown): string {
     return 'Falló la verificación de seguridad. Recargá la página e intentá de nuevo.'
   }
   if (code === '42501' || /row-level security/i.test(message)) {
-    return 'No tenés permiso para hacer eso.'
+    return 'No tenés permiso para hacer eso. Si te parece un error, cerrá sesión y volvé a entrar.'
   }
   if (code === '23514') {
-    return 'Alguno de los datos ingresados no es válido.'
+    return 'Hay un dato que no cierra. Revisá el formulario y probá de nuevo.'
   }
 
   // Keep the original error debuggable from the console.
   console.error('Unmapped error:', error)
-  return 'Ocurrió un error inesperado. Intentá de nuevo.'
+  return 'Algo falló de nuestro lado. Revisá tu conexión y probá de nuevo.'
 }

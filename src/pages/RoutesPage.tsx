@@ -99,8 +99,8 @@ export default function RoutesPage() {
       <PageHeader title="🗺️ Rutas" subtitle="Guía de viajes con paradas de carga verificadas por el grupo." />
 
       <Alert type="info">
-        🧭 <Link to="/rutas/planificar">Planificá tu viaje</Link>: te sugerimos dónde cargar según el consumo real de
-        la comunidad.
+        🧭 <Link to="/rutas/planificar">Planificá tu viaje</Link>: te sugerimos dónde cargar según el consumo
+        real de la comunidad.
       </Alert>
 
       {communityFirst ? (
@@ -125,9 +125,8 @@ export default function RoutesPage() {
 
       <Card>
         <p className={styles.routeStopNote}>
-          Las rutas marcadas como oficiales son verificadas por el grupo.{' '}
-          <Link to="/comunidad">Mirá la comunidad</Link> para ver todos los viajes compartidos por otros
-          usuarios, con sus paradas de carga.
+          Las rutas «Oficial» las revisó el grupo. ¿Querés ver más? Todos los viajes con sus paradas están en{' '}
+          <Link to="/comunidad">Comunidad</Link>.
         </p>
       </Card>
     </div>

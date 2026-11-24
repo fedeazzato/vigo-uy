@@ -10,7 +10,9 @@ import NewInsuranceQuotePage from './NewInsuranceQuotePage'
 vi.mock('../lib/supabaseClient', () => ({
   supabase: {
     from: () => ({
-      insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: { id: 'q-1' }, error: null }) }) }),
+      insert: () => ({
+        select: () => ({ single: () => Promise.resolve({ data: { id: 'q-1' }, error: null }) }),
+      }),
       update: () => ({ eq: () => Promise.resolve({ error: null }) }),
       delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
       select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
@@ -98,7 +100,9 @@ describe('NewInsuranceQuotePage', () => {
     // not marked `required` in the DOM precisely because, being a closed
     // select, an empty selection would otherwise be unreachable dead code.
     fireEvent.change(screen.getByLabelText('🎂 Edad promedio'), { target: { value: '35' } })
-    fireEvent.change(screen.getByLabelText('💰 Costo total del período (UYU)'), { target: { value: '45000' } })
+    fireEvent.change(screen.getByLabelText('💰 Costo total del período (UYU)'), {
+      target: { value: '45000' },
+    })
 
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
 
@@ -144,13 +148,13 @@ describe('NewInsuranceQuotePage', () => {
     await waitForProvidersToLoad()
 
     fireEvent.change(screen.getByLabelText('📄 Nivel de cobertura'), { target: { value: 'terceros' } })
-    expect(screen.getByText(/falta este dato/)).toBeTruthy()
+    expect(screen.getByText(/Esta cobertura suele tenerlo/)).toBeTruthy()
 
     fireEvent.change(screen.getByLabelText('💸 Deducible (UYU)'), { target: { value: '5000' } })
-    expect(screen.queryByText(/falta este dato/)).toBeNull()
+    expect(screen.queryByText(/Esta cobertura suele tenerlo/)).toBeNull()
 
     fireEvent.change(screen.getByLabelText('💸 Deducible (UYU)'), { target: { value: '' } })
-    expect(screen.getByText(/falta este dato/)).toBeTruthy()
+    expect(screen.getByText(/Esta cobertura suele tenerlo/)).toBeTruthy()
   })
 
   it('renders one checkbox per catalog addon, with no limit input for a "none"-kind addon', async () => {
@@ -207,7 +211,9 @@ describe('NewInsuranceQuotePage', () => {
     fireEvent.change(screen.getByLabelText('👥 Conductores'), { target: { value: '1' } })
     fireEvent.change(screen.getByLabelText('🎂 Edad promedio'), { target: { value: '35' } })
     fireEvent.change(screen.getByLabelText('📍 Zona de circulación'), { target: { value: 'montevideo' } })
-    fireEvent.change(screen.getByLabelText('💰 Costo total del período (UYU)'), { target: { value: '45000' } })
+    fireEvent.change(screen.getByLabelText('💰 Costo total del período (UYU)'), {
+      target: { value: '45000' },
+    })
 
     fireEvent.click(screen.getByLabelText('🆘 Incluye auxilio en ruta (batería, pinchazos, remolque)'))
     fireEvent.change(screen.getByLabelText('🆘 Usos gratis por año'), { target: { value: '2.5' } })

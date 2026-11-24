@@ -201,7 +201,7 @@ describe('NewTripLogPage wizard (mobile)', () => {
     fillBasics()
     fireEvent.change(screen.getByLabelText('📏 Distancia (km)'), { target: { value: 'abc' } })
     clickNext()
-    expect(screen.getByText('La distancia debe ser un número válido.')).toBeTruthy()
+    expect(screen.getByText('Escribí la distancia solo con números (por ejemplo 120).')).toBeTruthy()
     expect(screen.getByText('Paso 1 de 3')).toBeTruthy()
   })
 
@@ -653,7 +653,7 @@ describe('parseStopDrafts (charging_stops payload)', () => {
 
   it('rejects garbage instead of silently dropping it', () => {
     expect(parseStopDrafts([draft({ durationMinutes: 'abc' })])).toEqual({
-      error: 'Los minutos de carga deben ser un número válido.',
+      error: 'Escribí los minutos de carga solo con números.',
     })
   })
 
@@ -670,10 +670,10 @@ describe('parseStopDrafts (charging_stops payload)', () => {
       error: 'Los porcentajes de batería en las paradas deben estar entre 0 y 100.',
     })
     expect(parseStopDrafts([draft({ cost: '-5' })])).toEqual({
-      error: 'El costo de la carga debe ser un número válido.',
+      error: 'Escribí el costo de la carga solo con números.',
     })
     expect(parseStopDrafts([draft({ energyKwh: '0' })])).toEqual({
-      error: 'La energía cargada (kWh) debe ser mayor a cero.',
+      error: 'La energía cargada (kWh) tiene que ser más que cero.',
     })
   })
 })

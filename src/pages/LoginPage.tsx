@@ -44,9 +44,12 @@ export default function LoginPage() {
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
     const value = emailInput.trim()
-    if (!value) return
+    if (!value) {
+      setError('Escribí tu email para recibir el código.')
+      return
+    }
     if (TURNSTILE_ENABLED && !captchaToken) {
-      setError('Completá la verificación de seguridad.')
+      setError('Completá la verificación de seguridad (la casilla de abajo del email) y probá de nuevo.')
       return
     }
 
@@ -128,6 +131,9 @@ export default function LoginPage() {
             >
               {passkeyPending ? 'Verificando…' : '🔑 Iniciar sesión con llave de acceso'}
             </button>
+            <p className={styles.loginHint}>
+              La llave de acceso es tu huella, tu cara o el PIN del teléfono. Se crea desde Mi actividad.
+            </p>
             <p className={styles.divider}>o con tu email</p>
           </>
         )}
