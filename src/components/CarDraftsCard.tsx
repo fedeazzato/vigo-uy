@@ -35,8 +35,8 @@ export default function CarDraftsCard() {
             : `${count} viajes compartidos desde el auto esperan tu revisión. `)}
         {charges > 0 &&
           (charges === 1
-            ? 'Un check-in de carga espera tu confirmación. '
-            : `${charges} check-ins de carga esperan tu confirmación. `)}
+            ? 'Una carga registrada en el auto espera tu confirmación. '
+            : `${charges} cargas registradas en el auto esperan tu confirmación. `)}
         Nada se publica hasta que lo confirmes.
       </p>
       <Link to="/mi-vigo/borradores" className={styles.link}>

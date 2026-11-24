@@ -48,7 +48,7 @@ export default function LicencesPage() {
     <div>
       <PageHeader
         title="📜 Licencias y código fuente"
-        subtitle="Las piezas de terceros que usan las apps de la comunidad para la Vigo y el instalador: versión, licencia, dónde está su código y qué cambiamos."
+        subtitle="Programas de otros que usan nuestras apps, con su licencia y su código."
       />
 
       <Card>

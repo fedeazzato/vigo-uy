@@ -80,8 +80,8 @@ export default function MyVigoPage() {
         title="🚗 Mi Vigo"
         subtitle={
           <>
-            Configurá tu modelo y color para personalizar la información. ¿Buscás tus viajes y costos? Están
-            en <Link to="/mi-actividad">Mi actividad</Link>.
+            Tu auto, tu cuenta y tus mejoras, todo en un lugar. Tus viajes y gastos están en{' '}
+            <Link to="/mi-actividad">Mi actividad</Link>.
           </>
         }
       />
@@ -171,7 +171,63 @@ export default function MyVigoPage() {
 
       {status === 'signedIn' && (
         <>
-          <SectionDivider label="Mi cuenta" />
+          <SectionDivider label="🔋 Tu auto ahora" />
+          <p className={styles.sectionHint}>
+            Lo que tu auto manda es privado: lo ven solo quienes comparten tu Vigo, y nada se publica sin que
+            lo confirmes.
+          </p>
+          <CarStatusCard />
+          <ServiceReminderCard />
+          <CarDraftsCard />
+
+          {CAR_REMOTE_ENABLED && (
+            <>
+              <SectionDivider label="📡 Control remoto" />
+              <CarRemoteCard />
+              <SendPlaceCard />
+            </>
+          )}
+
+          <SectionDivider label="📊 Datos y estadísticas" />
+          <CarDataCard />
+
+          <SectionDivider label="🔧 Configuración y service" />
+          <CarDevicesCard />
+          <Card>
+            <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
+            <p className={styles.vaultText}>
+              Sumale a tu pantalla Carga, Cargadores, Mi Vigo, Copiloto y la voz en español. Se instalan una
+              vez, desde una computadora con Windows.
+            </p>
+            <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
+              Preparar mi Vigo
+            </Link>{' '}
+            <Link to="/novedades" className={styles.vaultLink}>
+              Novedades de las mejoras
+            </Link>
+          </Card>
+          <Card>
+            <CardTitle icon="🧰">¿Vas al service?</CardTitle>
+            <ol className={styles.steps}>
+              <li>Antes de ir: en el instalador tocá «Antes del service».</li>
+              <li>Al volver: tocá «Después del service» y vuelven las mejoras y tus ajustes.</li>
+            </ol>
+            <Link to="/mi-vigo/configuracion" className={styles.vaultLink}>
+              Ver qué cambió en el auto
+            </Link>
+          </Card>
+          <Card>
+            <CardTitle icon="🔐">Bóveda</CardTitle>
+            <p className={styles.vaultText}>
+              Un lugar seguro para la frase de recuperación de la dashcam y la clave de respaldo. Se abre solo
+              con tu huella o tu cara; ni nosotros podemos leerla.
+            </p>
+            <Link to="/mi-vigo/boveda" className={styles.vaultLink}>
+              Abrir la bóveda
+            </Link>
+          </Card>
+
+          <SectionDivider label="👤 Tu cuenta" />
           {profile?.banned_at && (
             <Alert type="danger">Tu cuenta está suspendida: no podés publicar contenido nuevo.</Alert>
           )}
@@ -186,56 +242,18 @@ export default function MyVigoPage() {
           )}
           <ProfileCard />
           <VehicleCard />
-          <CarDevicesCard />
-          <CarStatusCard />
-          <ServiceReminderCard />
-          {CAR_REMOTE_ENABLED && <CarRemoteCard />}
-          {CAR_REMOTE_ENABLED && <SendPlaceCard />}
-          <CarDraftsCard />
-          <CarDataCard />
-          <CarDiagnosticsCard />
-          <FirmwareCard />
-          <Card>
-            <CardTitle icon="🔐">Bóveda</CardTitle>
-            <p className={styles.vaultText}>
-              Guardá cifradas la frase de recuperación de la dashcam y la clave de respaldo de ajustes. Solo
-              se abren con la huella o el rostro de tus dispositivos; WikiVigo guarda únicamente datos
-              cifrados.
-            </p>
-            <Link to="/mi-vigo/boveda" className={styles.vaultLink}>
-              Abrir la bóveda
-            </Link>
-          </Card>
-          <Card>
-            <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
-            <p className={styles.vaultText}>
-              Cómo activar el modo de ingeniería de la pantalla e instalar Carga, Cargadores, Mi Vigo, la voz
-              en español y Copiloto desde una computadora con Windows.
-            </p>
-            <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
-              Preparar mi Vigo
-            </Link>
-          </Card>
-          <Card>
-            <CardTitle icon="🧬">Service y configuración del auto</CardTitle>
-            <p className={styles.vaultText}>
-              Antes de ir al taller usá «Antes del service» en el instalador; al volver, «Después del service»
-              reinstala las mejoras y tus ajustes. Compará la configuración de fábrica de antes y de después
-              (solo la ves vos).
-            </p>
-            <Link to="/mi-vigo/configuracion" className={styles.vaultLink}>
-              Configuración del auto
-            </Link>{' '}
-            <Link to="/novedades" className={styles.vaultLink}>
-              Novedades de las mejoras
-            </Link>
-          </Card>
+
+          <details className={styles.more}>
+            <summary>Más detalles (para curiosos)</summary>
+            <CarDiagnosticsCard />
+            <FirmwareCard />
+          </details>
         </>
       )}
 
       {topTrips.length > 0 && (
         <>
-          <SectionDivider label="Mi vehículo en ruta" />
+          <SectionDivider label="🏁 Tus mejores viajes" />
           <Card>
             <CardTitle icon="🏁">Los viajes más largos de tu vehículo</CardTitle>
             <ol className={styles.topTrips}>

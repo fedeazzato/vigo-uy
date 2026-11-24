@@ -296,7 +296,7 @@ export default function RoutePlannerPage() {
             <span className={formStyles.hint}>
               {estimate?.source === 'comunidad'
                 ? `Mediana de ${estimate.samples} viajes reales de la comunidad. Dejalo vacío para usarla.`
-                : 'Pocos viajes de la comunidad con datos completos: usamos 15 kWh/100 km (ruta con aire).'}
+                : 'Todavía hay pocos viajes de la comunidad: usamos 15 kWh/100 km (ruta con aire). kWh/100 km es la energía que gasta cada 100 km; menos es mejor.'}
               {shownConsumption
                 ? ` Autonomía estimada: ${Math.round(rangeKm(100, 0, battery, shownConsumption))} km al 100%.`
                 : ''}

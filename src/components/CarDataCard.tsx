@@ -64,8 +64,7 @@ export default function CarDataCard() {
     <Card>
       <CardTitle icon="📊">Datos del auto</CardTitle>
       <p className={styles.lead}>
-        Lo que tu auto envió con Carga. Es privado: solo lo ven los miembros de este vehículo, salvo lo que
-        elijas compartir abajo.
+        Lo que tu auto fue juntando: kilómetros, batería y consumo. Abajo elegís qué compartir.
       </p>
 
       {km && (
@@ -129,6 +128,9 @@ export default function CarDataCard() {
               ))}
             </tbody>
           </table>
+          <p className={styles.small}>
+            kWh/100 km = cuánta energía gasta el auto cada 100 km. Cuanto más bajo, mejor.
+          </p>
         </section>
       )}
 

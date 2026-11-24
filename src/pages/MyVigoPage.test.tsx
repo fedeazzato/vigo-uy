@@ -89,3 +89,17 @@ describe('MyVigoPage "Preparar mi Vigo" card (specs/prepare-my-vigo.md R5)', () 
     )
   })
 })
+
+describe('MyVigoPage grouping (specs/site-audit-2026-11.md)', () => {
+  it('shows the car sections in order, with technical details collapsed', () => {
+    const { container } = renderSignedIn('Ana')
+    const text = container.textContent ?? ''
+    const order = ['Tu auto ahora', 'Datos y estadísticas', 'Configuración y service', 'Tu cuenta']
+    const positions = order.map((label) => text.indexOf(label))
+    positions.forEach((p) => expect(p).toBeGreaterThan(-1))
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions)
+    const details = container.querySelector('details')
+    expect(details?.open).toBe(false)
+    expect(details?.querySelector('summary')?.textContent).toMatch(/Más detalles/)
+  })
+})

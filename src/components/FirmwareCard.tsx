@@ -48,8 +48,8 @@ export default function FirmwareCard() {
     <Card>
       <CardTitle icon="🧩">Versiones de software de la pantalla</CardTitle>
       <p className={styles.note}>
-        Las versiones que informan los autos vinculados a WikiVigo, sin decir de quién es cada auto. En
-        Uruguay la pantalla no se actualiza sola: una versión nueva la instala el concesionario.
+        ¿Tu pantalla está al día? Comparamos con los otros autos conectados (sin decir de quién es cada
+        uno). En Uruguay la pantalla la actualiza el concesionario.
       </p>
       {mine && (
         <div className={styles.own} role="status">

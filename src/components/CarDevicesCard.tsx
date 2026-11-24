@@ -49,7 +49,7 @@ export default function CarDevicesCard() {
 
   return (
     <Card>
-      <CardTitle icon="📲">Dispositivos vinculados</CardTitle>
+      <CardTitle icon="📲">Pantalla del auto conectada</CardTitle>
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="info">{message}</Alert>}
       {devices === null ? (
@@ -95,8 +95,7 @@ export default function CarDevicesCard() {
             ))}
           </ul>
           <p className={formStyles.hint}>
-            Un auto vinculado solo envía datos a tu vehículo y nada se publica sin que lo confirmes. ¿Otro
-            auto? <Link to="/mi-vigo/vincular">Vincular auto</Link>
+            ¿Otro auto? <Link to="/mi-vigo/vincular">Vincular auto</Link>
           </p>
         </>
       )}

@@ -58,7 +58,7 @@ export default function PrepareCarPage() {
     <div>
       <PageHeader
         title="🛠️ Preparar mi Vigo"
-        subtitle="Cómo activar el modo de ingeniería de la pantalla para instalar las mejoras de la comunidad desde una computadora con Windows."
+        subtitle="Paso a paso para sumarle las apps de la comunidad a tu pantalla, con una computadora con Windows. Primero se abre un menú oculto de la pantalla (el «modo de ingeniería»)."
       />
 
       <Card>

@@ -157,7 +157,7 @@ export default function CostsPage() {
 
   return (
     <div>
-      <PageHeader title="💰 Costos" subtitle="Comparativa de costos de carga y ahorro real vs combustible." />
+      <PageHeader title="💰 Costos" subtitle="¿Cuánto cuesta cargar y cuánto ahorrás frente a la nafta?" />
 
       <Card>
         <CardTitle icon="📏">Costo por kilómetro</CardTitle>

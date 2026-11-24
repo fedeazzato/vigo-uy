@@ -128,7 +128,7 @@ export default function CarDiagnosticsPage() {
     <div>
       <PageHeader
         title="🩺 Diagnósticos del auto"
-        subtitle="Registros que el auto envió con «Enviar diagnóstico» (Mi Vigo en la pantalla del auto). Los ven los miembros del vehículo y los moderadores."
+        subtitle="Lo que mandaste desde el auto con «Enviar diagnóstico», para ayudarte con un problema. Lo ven tu familia y los moderadores."
       />
       <Link to="/mi-vigo" className={styles.back}>
         ← Mi Vigo

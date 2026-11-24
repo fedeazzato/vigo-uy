@@ -36,7 +36,7 @@ export default function HomePage() {
     <div>
       <PageHeader
         title="⚡ Wiki Vigo Uruguay"
-        subtitle="Guía colaborativa de la comunidad Amantes de la Vigo Uruguay."
+        subtitle="Todo para disfrutar tu Vigo: dónde cargar, cuánto gastás y qué dice la comunidad Amantes de la Vigo Uruguay."
       />
 
       {totals && (

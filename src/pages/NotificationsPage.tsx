@@ -51,7 +51,7 @@ export default function NotificationsPage() {
   return (
     <>
       <PageHeader
-        title="Notificaciones"
+        title="🔔 Notificaciones"
         subtitle="Avisos de estaciones que seguís, comentarios en tus publicaciones y novedades de tu Vigo."
       />
       {error && <Alert type="danger">{error}</Alert>}

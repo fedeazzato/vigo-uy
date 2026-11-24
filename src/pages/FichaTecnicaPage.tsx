@@ -29,7 +29,7 @@ export default function FichaTecnicaPage() {
     <div>
       <PageHeader
         title="📋 Ficha técnica"
-        subtitle="Especificaciones oficiales del manual Dongfeng VIGO y de la ficha técnica del importador oficial (mercado Uruguay)."
+        subtitle="Los números oficiales de tu Vigo, del manual y del importador en Uruguay."
       />
 
       {data.specGroups.map((group) => {
@@ -78,7 +78,7 @@ export default function FichaTecnicaPage() {
       <SectionDivider label="Identificación del vehículo" />
 
       <Card>
-        <CardTitle icon="🔎">VIN y puertos de diagnóstico</CardTitle>
+        <CardTitle icon="🔎">VIN (número de chasis) y puertos de diagnóstico</CardTitle>
         <TipList items={data.vinLocations.map((v) => ({ bold: `${v.label}:`, text: v.text }))} />
       </Card>
 

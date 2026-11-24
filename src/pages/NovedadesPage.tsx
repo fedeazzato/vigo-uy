@@ -28,7 +28,7 @@ export default function NovedadesPage() {
     <div>
       <PageHeader
         title="🆕 Novedades de las mejoras"
-        subtitle="Qué trae cada versión de Carga, Copiloto, Cargadores, Mi Vigo y la voz en español. El auto se actualiza solo con Wi-Fi (Mi Vigo › Ajustes › Actualizaciones)."
+        subtitle="Lo nuevo en las apps de la comunidad. Tu auto se actualiza solo cuando tiene Wi-Fi."
       />
       {notes === undefined && <Skeleton lines={4} />}
       {(notes === null || notes?.length === 0) && (
