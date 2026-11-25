@@ -501,6 +501,67 @@ export type Database = {
           },
         ]
       }
+      car_location: {
+        Row: {
+          acc_m: number | null
+          device_id: string | null
+          kind: string | null
+          lat: number | null
+          lon: number | null
+          mode: string
+          observed_at: string | null
+          received_at: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          acc_m?: number | null
+          device_id?: string | null
+          kind?: string | null
+          lat?: number | null
+          lon?: number | null
+          mode: string
+          observed_at?: string | null
+          received_at?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          acc_m?: number | null
+          device_id?: string | null
+          kind?: string | null
+          lat?: number | null
+          lon?: number | null
+          mode?: string
+          observed_at?: string | null
+          received_at?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_location_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_location_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_location_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_odometer_log: {
         Row: {
           anomaly: boolean
@@ -673,6 +734,51 @@ export type Database = {
           },
           {
             foreignKeyName: "car_pairing_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_parking_spots: {
+        Row: {
+          acc_m: number | null
+          id: number
+          lat: number
+          lon: number
+          observed_at: string
+          received_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          acc_m?: number | null
+          id?: never
+          lat: number
+          lon: number
+          observed_at: string
+          received_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          acc_m?: number | null
+          id?: never
+          lat?: number
+          lon?: number
+          observed_at?: string
+          received_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_parking_spots_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_parking_spots_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2597,7 +2703,12 @@ export type Database = {
         Returns: Json
       }
       car_submit_location: {
-        Args: { p_device_id: string; p_mode: string; p_point: Json; p_ts: number }
+        Args: {
+          p_device_id: string
+          p_mode: string
+          p_point: Json
+          p_ts: number
+        }
         Returns: Json
       }
       car_submit_status: {
