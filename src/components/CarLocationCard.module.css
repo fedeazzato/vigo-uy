@@ -1,0 +1,59 @@
+/* "Dónde está tu auto" (specs/car-location.md R5): same text scale as "Tu auto ahora" (CarStatusCard.module.css). */
+.text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.state {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.muted {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.mapLoading {
+  padding: 40px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  margin: 10px 0 2px;
+  font-size: 14px;
+}
+
+.link {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.spots {
+  margin-top: 14px;
+}
+
+.spotsTitle {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.spotList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-primary);
+}

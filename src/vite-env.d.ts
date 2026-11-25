@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_VAULT_INBOX?: string
   /** "1" shows "Control remoto" in Mi Vigo (specs/car-remote-e3.md R6); only after migration 0052 is applied. */
   readonly VITE_CAR_REMOTE?: string
+  /** "1" shows "Dónde está tu auto" in Mi Vigo (specs/car-location.md R5); only after migration 0083 is applied. */
+  readonly VITE_CAR_LOCATION?: string
 }
 
 interface ImportMeta {

@@ -2596,6 +2596,10 @@ export type Database = {
         }
         Returns: Json
       }
+      car_submit_location: {
+        Args: { p_device_id: string; p_mode: string; p_point: Json; p_ts: number }
+        Returns: Json
+      }
       car_submit_status: {
         Args: { p_device_id: string; p_status: Json; p_ts: number }
         Returns: Json
@@ -2712,6 +2716,7 @@ export type Database = {
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_family_invite_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
+      get_car_location: { Args: never; Returns: Json }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
       is_car_release_publisher: { Args: { uid: string }; Returns: boolean }
       is_p256_spki: { Args: { k: string }; Returns: boolean }

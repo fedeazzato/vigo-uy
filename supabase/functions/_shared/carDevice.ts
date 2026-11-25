@@ -97,6 +97,7 @@ export type CarRequest =
       text: string
     }
   | { action: 'inbox_key'; ts: number; deviceId: string }
+  | { action: 'location'; ts: number; deviceId: string; mode: LocationMode; point: CarLocationPoint | null }
   | { action: 'trip_draft'; ts: number; deviceId: string; draft: CarTripDraft }
   | { action: 'charge_draft'; ts: number; deviceId: string; draft: CarChargeDraft }
   | { action: 'car_data'; ts: number; deviceId: string; draft: CarData }
@@ -611,6 +612,44 @@ export function parseCarData(raw: unknown): CarData | null {
   if (kind === 'drive' && out.energy_kwh === undefined && out.regen_kwh === undefined) return null
   return out as CarData
 }
+// ---- Car location (specs/car-location.md): action "location", opt-in, the mode travels with every call
+
+export const LOCATION_MODES = ['off', 'last', 'spots'] as const
+export type LocationMode = (typeof LOCATION_MODES)[number]
+export const LOCATION_ACC_MAX = 10000
+const LOCATION_TOP_KEYS = ['v', 'action', 'device_id', 'ts', 'mode', 'point']
+const LOCATION_POINT_KEYS = ['kind', 'observed_at', 'lat', 'lon', 'acc_m']
+
+export interface CarLocationPoint {
+  kind: 'driving' | 'parked'
+  observed_at: number
+  lat: number
+  lon: number
+  acc_m: number | null
+}
+
+/** 4 decimals (about 11 m): the precision the server keeps, whatever the car sent (specs/car-location.md L2). */
+export function roundCoord(v: number): number {
+  const r = Math.round(v * 1e4) / 1e4
+  return Object.is(r, -0) ? 0 : r
+}
+
+/** Validates the "point" object of a location call; null = bad_request. Unknown keys are refused; coordinates come back rounded. */
+export function parseLocationPoint(raw: unknown): CarLocationPoint | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  if (Object.keys(o).some((k) => !LOCATION_POINT_KEYS.includes(k))) return null
+  if (o.kind !== 'driving' && o.kind !== 'parked') return null
+  if (!isMs(o.observed_at)) return null
+  if (!isLat(o.lat) || !isLon(o.lon)) return null
+  const lat = roundCoord(o.lat)
+  const lon = roundCoord(o.lon)
+  if (lat === 0 && lon === 0) return null // "null island": a bad fix, never a real parking spot
+  const acc = optInt(o.acc_m, 0, LOCATION_ACC_MAX)
+  if (acc === undefined) return null
+  return { kind: o.kind, observed_at: o.observed_at, lat, lon, acc_m: acc }
+}
+
 // ---- Car updates (specs/car-updates.md): update_check / update_report
 
 export const UPDATE_PHASES = ['IDLE', 'STAGING', 'STAGED', 'APPLYING', 'TRIAL', 'ROLLING_BACK'] as const
@@ -923,6 +962,19 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (serial === undefined || !phase || last === undefined) return null
       return { action: 'update_report', ts, deviceId: o.device_id.toLowerCase(), serial, phase, last }
     }
+    // Car location (specs/car-location.md R2): strict at both levels; "off" (the forget call) carries no point.
+    case 'location': {
+      if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
+      if (Object.keys(o).some((k) => !LOCATION_TOP_KEYS.includes(k))) return null
+      if (typeof o.mode !== 'string' || !(LOCATION_MODES as readonly string[]).includes(o.mode)) return null
+      let point: CarLocationPoint | null = null
+      if (o.point !== undefined && o.point !== null) {
+        if (o.mode === 'off') return null
+        point = parseLocationPoint(o.point)
+        if (!point) return null
+      }
+      return { action: 'location', ts, deviceId: o.device_id.toLowerCase(), mode: o.mode as LocationMode, point }
+    }
     case 'inbox_key':
       if (typeof o.device_id !== 'string' || !UUID.test(o.device_id)) return null
       return { action: 'inbox_key', ts, deviceId: o.device_id.toLowerCase() }
@@ -1228,7 +1280,14 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
                   p_ts: parsed.ts,
                   p_draft: parsed.draft,
                 })
-              : parsed.action === 'charge_draft'
+              : parsed.action === 'location'
+                ? await deps.rpc('car_submit_location', {
+                    p_device_id: parsed.deviceId,
+                    p_ts: parsed.ts,
+                    p_mode: parsed.mode,
+                    p_point: parsed.point,
+                  })
+                : parsed.action === 'charge_draft'
                 ? await deps.rpc('car_submit_charge_draft', {
                     p_device_id: parsed.deviceId,
                     p_ts: parsed.ts,
@@ -1269,7 +1328,8 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       parsed.action === 'status' ||
       parsed.action === 'trip_draft' ||
       parsed.action === 'charge_draft' ||
-      parsed.action === 'car_data'
+      parsed.action === 'car_data' ||
+      parsed.action === 'location'
     )
       return reply(200, { ok: true, stored: row.stored === true }, now)
     if (parsed.action === 'diag_put')

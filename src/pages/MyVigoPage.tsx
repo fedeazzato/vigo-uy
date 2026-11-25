@@ -23,6 +23,8 @@ import ServiceReminderCard from '../components/ServiceReminderCard'
 import OwnFirmwareLine from '../components/OwnFirmwareLine'
 import PasskeyCard from '../components/PasskeyCard'
 import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
+import { CAR_LOCATION_ENABLED } from '../lib/carLocationFlag'
+import CarLocationCard from '../components/CarLocationCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
@@ -169,6 +171,8 @@ export default function MyVigoPage() {
           </p>
           {/* One "Tu auto ahora" card: status, online/offline and the Control remoto buttons (owner decision 2026-11-24 #2). */}
           <CarStatusCard />
+          {/* "Dónde está tu auto" (specs/car-location.md R5): creator / control only, opt-in on the car. */}
+          {CAR_LOCATION_ENABLED && <CarLocationCard />}
           {CAR_REMOTE_ENABLED && <SendPlaceCard />}
           <ServiceReminderCard />
           <CarDraftsCard />
