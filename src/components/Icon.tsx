@@ -48,6 +48,13 @@ const GLYPHS = {
       <path d="M9 4v13.5M15 6.5V20" />
     </>
   ),
+  // Compass: the trip planner (its pages use 🧭), distinct from Rutas' map.
+  planner: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15.5 8.5-2 5-5 2 2-5z" />
+    </>
+  ),
   costs: (
     <>
       <circle cx="12" cy="12" r="9" />

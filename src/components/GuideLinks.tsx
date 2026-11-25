@@ -40,7 +40,7 @@ export const GUIDE_LINKS: GuideLinkItem[] = [
   {
     to: '/rutas/planificar',
     label: 'Planificá tu viaje',
-    icon: 'route',
+    icon: 'planner',
     description: 'Decinos a dónde vas y te decimos dónde cargar.',
     group: 'viajar',
   },
