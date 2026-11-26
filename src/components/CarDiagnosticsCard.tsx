@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Card, CardTitle } from './UI'
 import { fetchDiagnostics } from '../lib/carDiagnostics'
 import styles from './CarDraftsCard.module.css'

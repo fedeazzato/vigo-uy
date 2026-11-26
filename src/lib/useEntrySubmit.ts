@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toFriendlyError } from './errors'
 import { invalidateCommunityCache } from './communityData'
 
@@ -35,7 +35,7 @@ export function useEntrySubmit(saved: SavedFlag) {
       return false
     }
     invalidateCommunityCache()
-    navigate('/mi-vigo/registros', { state: { saved } })
+    void navigate('/mi-vigo/registros', { state: { saved } })
     return true
   }
 

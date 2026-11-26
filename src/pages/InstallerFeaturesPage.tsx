@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Badge, SectionDivider, Skeleton } from '../components/UI'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
 import { STATUS_BADGE, installerFeatures } from '../lib/installerFeatures'

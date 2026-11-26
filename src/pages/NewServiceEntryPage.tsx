@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { FormError } from '../components/UI'
 import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
@@ -111,7 +111,7 @@ export default function NewServiceEntryPage() {
 
   async function handleCancel() {
     if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
-    navigate('/mi-vigo/registros')
+    void navigate('/mi-vigo/registros')
   }
 
   return (

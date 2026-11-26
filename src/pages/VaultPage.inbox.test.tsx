@@ -1,7 +1,7 @@
 // specs/vault-onboarding.md Phase C: the Bóveda inbox card (flag on), and its absence with the flag off.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import { FakeAuthenticator, uninstallFakeAuthenticator } from '../test/fakeAuthenticator'
 import { RECOVERY_VECTORS } from '../lib/vault/testVectors'
 import type { VaultInboxRow, VaultItemRow, VaultKeyRow } from '../types'

@@ -2,7 +2,7 @@
 // whose car for moderators (members see no names), search by code.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import type { CarDiagnosticRow } from '../types'
 
 const mocks = vi.hoisted(() => ({

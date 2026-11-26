@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import QrScanner from '../components/QrScanner'
 import RecoveryWordsGrid from '../components/RecoveryWordsGrid'

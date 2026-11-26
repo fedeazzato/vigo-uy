@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Alert } from './UI'
 import { GOOGLE_APP_NAMES, phaseLabel } from '../lib/carReleases'
 import type { CarUpdateInfoState } from '../lib/useCarUpdateInfo'

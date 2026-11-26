@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { FormError, Switch } from '../components/UI'
 import EntryFormShell, { NotesField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
@@ -245,7 +245,7 @@ export default function NewInsuranceQuotePage() {
 
   async function handleCancel() {
     if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
-    navigate('/mi-vigo/registros')
+    void navigate('/mi-vigo/registros')
   }
 
   return (

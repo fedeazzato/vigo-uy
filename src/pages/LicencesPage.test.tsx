@@ -1,7 +1,7 @@
 // specs/licences-and-sources.md
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import LicencesPage from './LicencesPage'
 import rawData from '../data/licences.json'
 import type { LicencesData } from '../types'

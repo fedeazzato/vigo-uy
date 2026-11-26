@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { PageHeader, PageTabs } from '../components/UI'
 
 // "Cuidar tu Vigo" (owner decision 2026-11-24 #5): Mantenimiento, Repuestos and Accesorios as three tabs of one page. Each tab is

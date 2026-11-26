@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import rawData from '../data/licences.json'
 import { PageHeader, Card, CardTitle, Alert, Badge } from '../components/UI'
 import styles from './LicencesPage.module.css'

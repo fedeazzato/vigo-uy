@@ -1,7 +1,7 @@
 // specs/car-navigate-b2.md R5: the "Enviar al auto" button.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 const mocks = vi.hoisted(() => ({
   fetchCarLink: vi.fn(),

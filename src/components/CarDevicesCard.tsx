@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Card, CardTitle, Alert } from './UI'
 import { fetchCarDevices, formatTimestampDate, lastSeenLabel, revokeCarDevice } from '../lib/carLink'
 import type { CarDevice } from '../types'

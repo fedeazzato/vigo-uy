@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Card, Alert } from '../components/UI'
 import TripCard, { TripSummaryButton } from '../components/TripCard'
 import { useAuth } from '../context/AuthContext'
@@ -58,7 +58,7 @@ export default function DashboardPage() {
   })
   useEffect(() => {
     if ((location.state as { saved?: string } | null)?.saved) {
-      navigate(location.pathname, { replace: true, state: null })
+      void navigate(location.pathname, { replace: true, state: null })
     }
   }, [location, navigate])
   // Shown as a toast that dismisses itself (mobile redesign).

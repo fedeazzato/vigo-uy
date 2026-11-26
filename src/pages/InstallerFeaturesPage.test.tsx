@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import InstallerFeaturesPage from './InstallerFeaturesPage'
 import { installerFeatures } from '../lib/installerFeatures'
 import type { CarBetaState } from '../lib/carBeta'

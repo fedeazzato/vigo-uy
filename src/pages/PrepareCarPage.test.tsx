@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import PrepareCarPage from './PrepareCarPage'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import type { CarBetaState } from '../lib/carBeta'
 
 // «Qué agrega el instalador» links are gated (beta testers + moderators): the page tests run as a moderator unless they say otherwise.

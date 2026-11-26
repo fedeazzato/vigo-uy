@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Card, CardTitle, Alert, Badge } from './UI'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'

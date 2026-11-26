@@ -1,7 +1,7 @@
 // Site structure (owner decisions 2026-11-24 #1, #5, #6): old routes redirect to the new tabs / pages.
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router'
 import RedirectKeepState from './components/RedirectKeepState'
 import { PRIMARY_NAV } from './lib/primaryNav'
 import { GUIDE_GROUPS, GUIDE_LINKS } from './components/GuideLinks'

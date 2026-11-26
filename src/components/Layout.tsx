@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router'
 import ErrorBoundary from './ErrorBoundary'
 import OfflineBanner from './OfflineBanner'
 import SiteSearch from './SiteSearch'

@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 import { PageHeader, Card, Alert } from '../components/UI'
 import { TurnstileWidget, TURNSTILE_ENABLED } from '../components/TurnstileWidget'
 import { useAuth } from '../context/AuthContext'
@@ -33,7 +33,7 @@ export default function LoginPage() {
   const [turnstileKey, setTurnstileKey] = useState(0)
 
   useEffect(() => {
-    if (status === 'signedIn') navigate(from ?? '/mi-vigo/registros', { replace: true })
+    if (status === 'signedIn') void navigate(from ?? '/mi-vigo/registros', { replace: true })
   }, [status, navigate, from])
 
   useEffect(() => {

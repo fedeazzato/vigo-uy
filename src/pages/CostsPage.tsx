@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import rawData from '../data/costs.json'
 import { PageHeader, Card, CardTitle, Alert, Badge, SectionDivider, StatGrid } from '../components/UI'
 import { useUserPrefs } from '../context/UserPrefsContext'

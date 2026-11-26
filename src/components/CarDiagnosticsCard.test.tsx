@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import CarDiagnosticsCard from './CarDiagnosticsCard'
 

@@ -4,7 +4,7 @@
 // real consumption. Share = a link with the inputs; signed-in users can
 // also keep plans in "Mis planes" (route_plans).
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router'
 import { Marker, Polyline, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, CardTitle, Alert, Badge, Segmented, StatGrid } from '../components/UI'

@@ -3,7 +3,7 @@
 // short confirmation with the delivery and driving notices (and a warning when the car reported its remote switch off);
 // sending queues a `navigate` order that the car turns into Waze navigation.
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
 import {

@@ -3,7 +3,7 @@
 // prefilled with the car's odometer and the service's name (the draft; nothing is saved until the owner submits it). Hidden
 // until the car has reported an odometer.
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import {
   draftLink,
   fetchServiceReminderData,

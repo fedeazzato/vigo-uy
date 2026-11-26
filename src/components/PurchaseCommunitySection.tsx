@@ -4,7 +4,7 @@
 // both display the result the same way. Reuses PartsPage.module.css's
 // itemNotes/itemCostRight classes rather than duplicating them, matching how
 // AccessoriesPage already borrowed that stylesheet before this extraction.
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Card, Badge, StatGrid, SectionDivider } from './UI'
 import ContentReactions from './ContentReactions'
 import PurchaseThumbnail from './PurchaseThumbnail'

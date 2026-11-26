@@ -1,7 +1,7 @@
 // specs/car-trip-drafts.md test plan: empty when the feature is absent, list renders, "Usar" fills the trip form and navigates.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import type { CarTripDraftRow } from '../types'
 
 const mocks = vi.hoisted(() => ({ fetchPendingDrafts: vi.fn(), markDraft: vi.fn() }))

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import rawData from '../data/tech-faq.json'
 import { PageHeader } from '../components/UI'
 import styles from './Pages.module.css'

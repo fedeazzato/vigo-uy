@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { PageHeader, Card, FormError, Alert, Skeleton, Segmented } from '../components/UI'
 import { useAuth } from '../context/AuthContext'
 import { useUserPrefs, MODELS } from '../context/UserPrefsContext'
@@ -796,7 +796,7 @@ export default function NewTripLogPage() {
     // New trips are autosaved as a draft, so leaving no longer discards
     // anything -- only edits (never drafted) still need the confirmation.
     if (isEdit && dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
-    navigate('/mi-vigo/registros')
+    void navigate('/mi-vigo/registros')
   }
 
   // "← Atrás": previous step, or leave the form from step 1.

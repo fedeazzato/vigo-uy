@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, CardTitle, Alert, StatGrid, Skeleton } from '../components/UI'
@@ -108,7 +108,7 @@ export default function CarDraftsPage() {
     saveDraft(draftToTripState(row, stations, preferredModel ?? ''))
     // Marking is best-effort: if it fails the draft simply stays in the list.
     await markDraft(row.id, 'used')
-    navigate('/viajes/nuevo')
+    void navigate('/viajes/nuevo')
   }
 
   async function discard(row: CarTripDraftRow) {

@@ -1,7 +1,7 @@
 // specs/car-firmware-a8.md R4 and specs/car-service-reminders-a4.md R4: the two Mi Vigo cards.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 const mocks = vi.hoisted(() => ({
   fetchFirmwareVersions: vi.fn(),

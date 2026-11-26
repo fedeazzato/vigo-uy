@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import styles from './PrepareCarPage.module.css'
 

@@ -1,7 +1,7 @@
 // Mi Vigo keeps one line about the car's head-unit software (owner decision 2026-11-24 #7); the community table of versions
 // (FirmwareCard) lives on Novedades. Hidden until the car reported its version (or before migration 0056).
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { fetchOwnFirmware } from '../lib/carFirmware'
 import styles from './accountCards.module.css'
 

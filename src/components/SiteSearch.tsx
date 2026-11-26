@@ -2,7 +2,7 @@
 // in Layout.tsx (sidebar + mobile header, same pattern as the Registrar
 // sheet); this component owns the input, debounce, and both result sources.
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { searchCommunityContent } from '../lib/communityData'
 import { searchCuratedContent } from '../lib/siteSearch'
 import { isAccessoryCategory } from '../lib/purchaseCatalog'
@@ -84,7 +84,7 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   }, [debouncedQuery])
 
   function goTo(path: string) {
-    navigate(path)
+    void navigate(path)
     onClose()
   }
 

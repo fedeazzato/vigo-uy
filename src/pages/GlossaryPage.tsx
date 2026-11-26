@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router'
 import { PageHeader, Card } from '../components/UI'
 import { GLOSSARY } from '../lib/glossary'
 import styles from './GlossaryPage.module.css'

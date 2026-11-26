@@ -65,7 +65,7 @@ optimization (e.g. hand-rolling a slimmer Supabase client to shave the
 - `vite.config.ts` — `build.rollupOptions.output.manualChunks` (function
   form; this project's Vite 8 uses the Rolldown bundler, which requires a
   callback rather than the classic Rollup object-map form) splitting
-  `react`/`react-dom`/`react-router-dom` into `vendor-react` and
+  `react`/`react-dom`/`react-router` (was `react-router-dom` before the v7 upgrade) into `vendor-react` and
   `@supabase/supabase-js` into `vendor-supabase`.
 
 ## Test plan

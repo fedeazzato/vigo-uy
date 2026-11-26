@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, StatGrid, SectionDivider } from '../components/UI'
 import { GuideLinks, GUIDE_LINKS } from '../components/GuideLinks'
 import VehicleLeaderboard from '../components/VehicleLeaderboard'

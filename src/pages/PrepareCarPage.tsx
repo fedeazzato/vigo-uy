@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
 import { MASTER_CODE, factoryCode, isValidPdsn, normalizePdsn } from '../lib/vigoPass'
 import styles from './PrepareCarPage.module.css'

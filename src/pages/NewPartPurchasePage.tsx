@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { FormError } from '../components/UI'
 import EntryFormShell, { NotesField, RatingField, ShareCheckbox } from '../components/EntryFormShell'
 import { useAuth } from '../context/AuthContext'
@@ -168,7 +168,7 @@ export default function NewPartPurchasePage() {
 
   async function handleCancel() {
     if (dirty && !(await confirmDialog('¿Descartar los cambios sin guardar?'))) return
-    navigate('/mi-vigo/registros')
+    void navigate('/mi-vigo/registros')
   }
 
   return (

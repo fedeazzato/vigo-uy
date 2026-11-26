@@ -1,5 +1,5 @@
 import { CSSProperties, KeyboardEvent, ReactNode, useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import styles from './UI.module.css'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'

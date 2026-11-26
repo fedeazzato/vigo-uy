@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card } from '../components/UI'
 
 // Catch-all route: an old or mistyped link lands here instead of a blank page.

@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router'
 
 // A renamed route that forwards location.state too (the forms' "saved" toast) and the query string.
 export default function RedirectKeepState({ to }: { to: string }) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Alert, Skeleton } from '../components/UI'
 import { appName, fetchReleaseNotes, type ReleaseNote } from '../lib/carReleaseNotes'
 import FirmwareCard from '../components/FirmwareCard'

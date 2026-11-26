@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { PageHeader, Card, Alert, Badge, Skeleton } from '../components/UI'
 import { supabase } from '../lib/supabaseClient'
 import { toFriendlyError } from '../lib/errors'

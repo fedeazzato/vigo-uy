@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router'
 import { UserPrefsProvider } from './context/UserPrefsContext'
 import { AuthProvider } from './context/AuthContext'
 import App from './App'

@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { PageHeader, PageTabs } from '../components/UI'
 
 // Mi Vigo with two tabs (owner decision 2026-11-24 #1): "Mi auto" (the car, account and upgrades) and "Mis registros" (the old

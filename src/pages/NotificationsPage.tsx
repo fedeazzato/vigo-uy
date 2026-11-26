@@ -2,7 +2,7 @@
 // station failure alerts (B4), comments/reactions on posts the user wrote
 // or follows, and new trips/services from the user's vehicle group.
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { PageHeader, Card, Alert, Skeleton } from '../components/UI'
 import {
   NOTIFICATION_ICON,
