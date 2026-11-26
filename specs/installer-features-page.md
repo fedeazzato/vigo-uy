@@ -19,18 +19,28 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
   information, so this is a UX gate, not security. Drop the gate when the launch installer ships.
 - Linked from the top of «Preparar mi Vigo» (a card before the disclaimer: «Antes de empezar, mirá qué vas a tener»), from its step 4
   (where the installer is downloaded) and from Mi Vigo's «Mejoras de la comunidad» card.
-- One card per feature, grouped: Manejo y voz / Energía y carga / Apps que se suman (third-party apps) / Pantalla de inicio y Mi Vigo /
-  Privacidad y avisos / Actualizaciones y ayuda. Each card: name, one-sentence benefit, «Dónde lo encontrás», optional «Necesitás»
-  (phone, account, internet), photo slot (`PhotoPlaceholder`, now a shared component).
+- **Benefits, not internals (owner feedback 2026-11-26):** every card states something the owner perceives, in plain Rioplatense
+  Spanish, with a picture that makes sense; no internal names (Carga, Open Headunit, Wi-Fi Direct, Google Play services). Fewer,
+  stronger cards: 15 in 4 groups — Tu auto y tus cosas, a salvo (Modo invitado, Dashcam, Dónde está tu auto) / Al volante
+  (Copiloto: le hablás en español, Waze, Android Auto sin cable, Centro de Energía inteligente) / Música, fotos y pantalla (Radio
+  mejorada, Tus fotos en el auto y de fondo, YouTube y Chrome, Spotify, Todo en buen español) / Conectado con WikiVigo (Mi Vigo,
+  Actualizaciones remotas, Avisos que no se pierden). Merged: Copiloto + Voz en español (+ the wheel voice key as one phrase);
+  Carga + Cargadores cercanos → Centro de Energía inteligente; Galería + Fondo; Avisos de software de Google + Actualizaciones
+  automáticas → Actualizaciones remotas; Privacidad into Mi Vigo. Removed: Servicios de Google Play (only «con tu cuenta de Google»
+  in Waze and the 3 Google files in «Qué necesitás»), Pantalla de inicio ordenada, Enviar diagnóstico.
+- **Modo invitado** (`docs/GUEST_MODE.md` in vigo-hack, `specs/guest-mode.md` here) is the headline: first card, `highlight: true`
+  (accent edge, full width). Exactly one highlighted card.
+- Each card: name, one-sentence benefit, «Dónde lo encontrás», optional «Necesitás» (phone, account, internet), photo slot
+  (`PhotoPlaceholder`, now a shared component).
 - The page describes the **first public (launch) installer** (owner decisions 2026-11-26): Waze + Google Play services (mandatory),
   Carga inside Energía (with «Dónde está tu auto»), the Radio, Gallery and Home kits, Dashcam, Android Auto over Wi-Fi Direct
   (Open Headunit) and the virtual T-Box (owner change 2026-11-26), besides Copiloto, Voz, Cargadores,
   Mi Vigo, the Spanish overlays, the tiles and the updater. Each launch item goes in only after passing on a second stock Vigo: a
   process note, not a page badge.
-- Every card carries a status (`InstallerFeatureStatus`): `incluido` (no badge), `opcional` (wheel voice key, YouTube/Chrome),
+- Every card carries a status (`InstallerFeatureStatus`): `incluido` (no badge), `opcional` (YouTube/Chrome),
   `deFabrica` (Spotify). There is no «Se están probando» section any more (Android Auto joined the launch set). The owner-only V8/Mustang AVAS sound is never listed.
 - Sections «Qué no cambia y qué podés deshacer» (Quitar todo, Antes/Después del service, settings copy, driving untouched) and «Qué
-  necesitás» (Windows PC, USB-C to the left port, car on and in P, ~20 minutes, the 3 Google files + Google account, YouTube/Chrome files optional) + a link to Preparar mi Vigo.
+  necesitás» (Windows PC, a **USB-A to USB-C** cable to the left port — said plainly that USB-C to USB-C does not work, the owner lost hours on it; same in Preparar mi Vigo's requirements and step 4 —, car on and in P, ~20 minutes, the 3 Google files + Google account, YouTube/Chrome files optional) + a link to Preparar mi Vigo.
 - Curated content: `src/data/installerFeatures.json`, typed by `InstallerFeaturesData` in `src/types.ts`. A card whose kit status could
   not be confirmed has a `verify` field (not shown) = the «[verificar]» note.
 
@@ -43,8 +53,9 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
 ## Acceptance criteria / test plan
 
 - `InstallerFeaturesPage.test.tsx`: every group renders as a region with one card per feature (benefit, «Dónde lo encontrás», photo
-  caption); the «Apps que se suman» group has Waze and Android Auto (no badge), Google Play services, YouTube y Chrome («Opcional»),
-  Spotify; Carga, Radio, Galería and Dashcam sit in their groups; no «Se están probando» section; no AVAS/Mustang/V8 text; ids unique,
+  caption); the merged/renamed cards exist and the removed ones do not (no Open Headunit / Wi-Fi Direct text); Modo invitado is
+  the first, only highlighted card (PIN, WikiVigo on the phone); badges only on YouTube y Chrome («Opcional») and Spotify; no «Se
+  están probando» section; the USB-C to USB-C warning; no AVAS/Mustang/V8 text; ids unique,
   required fields non-empty; undo / needs sections and the
   Preparar mi Vigo link.
 - Gate: list for a beta tester and for a moderator (no beta call); «Muy pronto» only for a non-beta user, a view-only member

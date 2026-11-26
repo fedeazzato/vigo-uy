@@ -60,8 +60,8 @@ export default function PrepareCarPage() {
         <Card>
           <CardTitle icon="👀">Antes de empezar, mirá qué vas a tener</CardTitle>
           <p className={styles.text}>
-            Waze, Android Auto sin cable, Copiloto, Carga dentro de Energía, la Dashcam, Mi Vigo, la Radio y
-            la Galería mejoradas, las apps de fábrica en español y más: una tarjeta por cada cosa que suma el
+            El Modo invitado, Waze, Android Auto sin cable, Copiloto en español, el Centro de Energía
+            inteligente, la Dashcam, Mi Vigo, la Radio y la Galería mejoradas, todo en buen español y más: una tarjeta por cada cosa que suma el
             instalador, con dónde la encontrás en el auto.
           </p>
           <Link to={INSTALLER_FEATURES_PATH} className={styles.featuresLink}>
@@ -179,8 +179,9 @@ export default function PrepareCarPage() {
               <li>El auto encendido y en P (no hace falta andar).</li>
               <li>Una computadora con Windows.</li>
               <li>
-                Un cable USB-C para el puerto <strong>izquierdo</strong> de la consola central (el derecho no
-                sirve para esto).
+                Un cable <strong>USB-A a USB-C</strong>: la punta USB-A (la rectangular de siempre) va a la
+                computadora y la USB-C al puerto <strong>izquierdo</strong> de la consola central (el derecho no
+                sirve para esto). Un cable USB-C a USB-C no sirve: con ese, la computadora no encuentra el auto.
               </li>
               <li>
                 Los <strong>3 archivos de Google</strong> (Waze, servicios de Google Play y Google Services
@@ -277,7 +278,9 @@ export default function PrepareCarPage() {
             )}
             <ol className={styles.list}>
               <li>Descargá el instalador y descomprimilo en la computadora.</li>
-              <li>Conectá la computadora al puerto USB-C izquierdo del auto.</li>
+              <li>
+                Conectá la computadora al puerto USB-C izquierdo del auto, con el cable USB-A a USB-C.
+              </li>
               <li>
                 Hacé doble clic en <strong>Iniciar.cmd</strong>, leé el aviso, tocá «Buscar el auto» y después
                 «Instalar».

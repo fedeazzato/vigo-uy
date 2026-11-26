@@ -46,27 +46,56 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     }
   })
 
-  it('has the third-party apps group; Waze and Android Auto are part of the launch installer, YouTube and Chrome are optional', () => {
-    renderPage()
-    const apps = screen.getByRole('region', { name: 'Apps que se suman' })
-    for (const n of ['Waze', 'Servicios de Google Play', 'Android Auto', 'YouTube y Chrome', 'Spotify'])
-      expect(within(apps).getByRole('heading', { name: n })).toBeTruthy()
-    const card = (n: string) => within(apps).getByRole('heading', { name: n }).parentElement as HTMLElement
-    for (const n of ['Waze', 'Android Auto']) expect(within(card(n)).queryByText('Opcional')).toBeNull()
-    expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
+  it('names benefits, not internals: the merged and renamed cards are there, the removed ones are not', () => {
+    const { container } = renderPage()
+    const card = (n: string) => screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
+    for (const n of [
+      'Modo invitado',
+      'Copiloto: le hablás en español',
+      'Centro de Energía inteligente',
+      'Android Auto sin cable',
+      'Actualizaciones remotas',
+      'Tus fotos, en el auto y de fondo',
+    ])
+      expect(card(n)).toBeTruthy()
+    for (const n of [
+      'Servicios de Google Play',
+      'Voz en español',
+      'Botón de voz del volante',
+      'Carga, dentro de Energía',
+      'Cargadores cercanos',
+      'Avisos de software de Google',
+      'Tus fotos de fondo',
+      'Pantalla de inicio ordenada',
+      'Enviar diagnóstico',
+    ])
+      expect(screen.queryByRole('heading', { name: n })).toBeNull()
+    expect(container.textContent).not.toMatch(/Open Headunit|Wi-Fi Direct/)
+    // The steering-wheel key survives only as a phrase inside Copiloto; Google sign-in inside Waze.
+    expect(within(card('Copiloto: le hablás en español')).getByText(/botón de voz del volante/)).toBeTruthy()
+    expect(within(card('Waze')).getAllByText(/cuenta de Google/).length).toBeGreaterThan(0)
   })
 
-  it('lists the launch kits in their groups and has no «Se están probando» section', () => {
+  it('Modo invitado is the highlighted first card, with the PIN and WikiVigo on the phone', () => {
     renderPage()
-    const region = (n: string) => screen.getByRole('region', { name: n })
-    expect(
-      within(region('Energía y carga')).getByRole('heading', { name: 'Carga, dentro de Energía' })
-    ).toBeTruthy()
-    expect(within(region('Radio y fotos')).getByRole('heading', { name: 'Radio mejorada' })).toBeTruthy()
-    expect(within(region('Radio y fotos')).getByRole('heading', { name: 'Fotos «En el auto»' })).toBeTruthy()
-    expect(
-      within(region('Seguridad, privacidad y avisos')).getByRole('heading', { name: 'Dashcam' })
-    ).toBeTruthy()
+    const first = screen.getAllByRole('heading', { level: 3 })[0]
+    expect(first.textContent).toBe('Modo invitado')
+    const card = first.parentElement as HTMLElement
+    expect(card.className).toMatch(/highlight/)
+    expect(within(card).getByText(/lavadero o con un valet/)).toBeTruthy()
+    expect(within(card).getByText(/tu PIN/)).toBeTruthy()
+    expect(within(card).getByText(/WikiVigo en tu celular/)).toBeTruthy()
+    const all = installerFeatures.groups.flatMap((g) => g.features)
+    expect(all.filter((f) => f.highlight).map((f) => f.id)).toEqual(['modo-invitado'])
+  })
+
+  it('badges only where meaningful: YouTube y Chrome optional, Spotify de fábrica, the rest none', () => {
+    renderPage()
+    const card = (n: string) => screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
+    expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
+    expect(within(card('Spotify')).getByText('Ya viene de fábrica')).toBeTruthy()
+    for (const n of ['Waze', 'Android Auto sin cable', 'Modo invitado', 'Centro de Energía inteligente'])
+      expect(within(card(n)).queryByText(/Opcional|Ya viene de fábrica/)).toBeNull()
     expect(screen.queryByText(/Se están probando/)).toBeNull()
     for (const g of installerFeatures.groups)
       for (const f of g.features) expect(['incluido', 'opcional', 'deFabrica']).toContain(f.status)
@@ -89,6 +118,8 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     expect(screen.getByText(/Qué no cambia y qué podés deshacer/)).toBeTruthy()
     expect(screen.getByText(/«Quitar todo»/)).toBeTruthy()
     expect(screen.getByText('Unos 20 minutos.')).toBeTruthy()
+    expect(screen.getByText(/Un cable USB-C a USB-C no sirve/)).toBeTruthy()
+    expect(screen.getByText('USB-A a USB-C')).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Preparar mi Vigo' }).getAttribute('href')).toBe(
       '/mi-vigo/preparar'
     )
@@ -102,13 +133,13 @@ describe('InstallerFeaturesPage gate: beta testers and moderators only', () => {
     mocks.auth = signedIn(false)
     mocks.fetchCarBeta.mockResolvedValue({ allowed: true, beta: true, request: null })
     renderPage()
-    expect(await screen.findByRole('region', { name: 'Apps que se suman' })).toBeTruthy()
+    expect(await screen.findByRole('region', { name: 'Al volante' })).toBeTruthy()
     expect(screen.queryByText('Muy pronto')).toBeNull()
   })
 
   it('shows the list to a moderator without asking for beta', () => {
     renderPage()
-    expect(screen.getByRole('region', { name: 'Apps que se suman' })).toBeTruthy()
+    expect(screen.getByRole('region', { name: 'Al volante' })).toBeTruthy()
     expect(mocks.fetchCarBeta).not.toHaveBeenCalled()
   })
 

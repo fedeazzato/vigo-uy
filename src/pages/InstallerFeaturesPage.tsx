@@ -12,7 +12,7 @@ import styles from './InstallerFeaturesPage.module.css'
 function FeatureCard({ feature }: { feature: InstallerFeature }) {
   const badge = STATUS_BADGE[feature.status]
   return (
-    <Card className={styles.feature}>
+    <Card className={feature.highlight ? `${styles.feature} ${styles.highlight}` : styles.feature}>
       <h3 className={styles.name}>{feature.name}</h3>
       {badge && <Badge color={badge.color}>{badge.label}</Badge>}
       <p className={styles.benefit}>{feature.benefit}</p>
@@ -68,8 +68,8 @@ export default function InstallerFeaturesPage() {
 
       <Card>
         <p className={styles.benefit}>
-          Cada tarjeta es una mejora. Las que no tienen etiqueta las recibe todo el que instala.{' '}
-          <strong>Opcional</strong>: la elegís vos al instalar. Si algo no se puede poner en tu auto, el
+          Cada tarjeta es algo que vas a notar en tu auto. Las que no tienen etiqueta las recibe todo el que
+          instala; las <strong>Opcional</strong> las elegís vos al instalar. Si algo no se puede poner en tu auto, el
           instalador te dice por qué e instala el resto.
         </p>
       </Card>
@@ -115,7 +115,9 @@ export default function InstallerFeaturesPage() {
         <ul className={styles.list}>
           <li>Una computadora con Windows.</li>
           <li>
-            Un cable USB-C para el puerto <strong>izquierdo</strong> de la consola central.
+            Un cable <strong>USB-A a USB-C</strong>: la punta USB-A (la rectangular de siempre) va a la
+            computadora y la USB-C al puerto <strong>izquierdo</strong> de la consola central. Un cable USB-C a
+            USB-C no sirve: con ese, la computadora no encuentra el auto.
           </li>
           <li>El auto encendido y en P (no hace falta andar).</li>
           <li>Unos 20 minutos.</li>

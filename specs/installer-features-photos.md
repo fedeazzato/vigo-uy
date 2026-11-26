@@ -9,29 +9,24 @@ names, the plate, the WikiVigo pairing code / QR. Day theme unless noted; Spanis
 
 | # | Card (id) | Screen | State to capture | Blur |
 |---|---|---|---|---|
-| 1 | Copiloto (`copiloto`) | Any app with Copiloto's floating panel open | Listening after «prendé el aire» | Anything personal behind the panel |
-| 2 | Botón de voz del volante (`tecla-volante`) | Copiloto › Ajustes | «Tecla del volante» row, «Micrófono» chosen | — |
-| 3 | Voz en español (`voz-espanol`) | Stock Settings page that shows the text-to-speech voice [verificar which] | «Voz en español» selected | — |
-| 4 | Cargadores cercanos (`cargadores`) | Cargadores cercanos list | List sorted by distance | Distances/location if they reveal home: take it away from home |
-| 5 | Carga, dentro de Energía (`carga`) | Centro de Energía, a Carga tab (Viajes) | Some trips and charges | Trip places, personal dates |
-| 6 | Waze (`waze`) | Waze full screen | A route on the map, guidance visible | Origin/destination, home/work, account avatar |
-| 7 | Servicios de Google Play (`google-play`) | Mi Vigo › Versiones | «Software de Google» section | — |
-| 8 | YouTube y Chrome (`youtube-chrome`) | Home screen | YouTube and Chrome icons | Wallpaper if it is a personal photo |
-| 9 | Avisos de software de Google (`avisos-google`) | Bell (notification panel) | An «Actualización de Google» notice | Other notices' content |
-| 10 | Spotify (`spotify`) | Spotify app | The app's home | Account name, named playlists |
-| 11 | Mi Vigo (`mi-vigo`) | Mi Vigo | Rail with the 8 tabs, «Mi cuenta» selected | Account name/e-mail, pairing code, QR |
-| 12 | Tus fotos de fondo (`fondo`) | Home screen | An own picture as wallpaper (plus optionally Mi Vigo › Fondo with the 4 «Lugar» tiles) | Use a neutral landscape, not a family photo |
-| 13 | Apps de fábrica en español (`espanol`) | A stock Settings page | Spanish texts (optional before/after pair) | Serial numbers if «Acerca del IVI» is used |
-| 14 | Pantalla de inicio ordenada (`iconos`) | Home screen | Waze, Copiloto, Mi Vigo and Dashcam tiles | Wallpaper if personal |
-| 15 | Vos decidís qué se comparte (`compartir`) | Mi Vigo › Privacidad | Switches OFF (the default) | — |
-| 16 | Avisos en la campana (`campana`) | Bell panel open | One notice from an app | Places, names in other notices |
-| 17 | Dónde está tu auto (`ubicacion`) | Mi Vigo › Privacidad › Ubicación del auto | The pill on «Apagado» or «Última ubicación» | Never a map with a real place |
-| 18 | Actualizaciones automáticas (`actualizaciones`) | Mi Vigo › Versiones | «Actualización lista» + «Instalar ahora» (a fake STAGED is fine) | — |
-| 19 | Enviar diagnóstico (`diagnostico`) | Mi Vigo › Ayuda | «¿Algo no funciona?» card | Note text if typed |
-| 20 | Android Auto (`android-auto`) | Home screen phone card | Android Auto connected over Wi-Fi Direct | Phone name, contacts, map position |
-| 21 | Radio mejorada (`radio`) | Stock Radio | Frequency keypad open (from + in favourites edit) and the volume slider | — |
-| 22 | Fotos «En el auto» (`galeria`) | Stock Gallery | «En el auto» tab with pictures, and the «¿En qué lugar?» dialog | The picture if personal |
-| 23 | Dashcam (`dashcam`) | Home screen + Dashcam app | Tile in its recording colour; the app searching by date | Map positions in the search; never the recovery words |
+| 1 | Modo invitado (`modo-invitado`) | Mi Vigo › Modo invitado + one app in guest mode | The card with «Activar» (or the confirmation pop-up), and e.g. Energía or the Gallery showing the «Modo invitado» placeholder instead of the data | Anything personal around the placeholder; never the PIN being typed |
+| 2 | Dashcam (`dashcam`) | Home screen + Dashcam app | Tile in its recording colour; the app searching by date | Map positions in the search; never the recovery words |
+| 3 | Dónde está tu auto (`ubicacion`) | Mi Vigo › Privacidad › Ubicación del auto | The pill on «Apagado» or «Última ubicación» | Never a map with a real place |
+| 4 | Copiloto: le hablás en español (`copiloto`) | Any app with Copiloto's floating panel open | Answering after «prendé el aire» (reply text visible) | Anything personal behind the panel |
+| 5 | Waze (`waze`) | Waze full screen | A route on the map, guidance visible | Origin/destination, home/work, account avatar |
+| 6 | Android Auto sin cable (`android-auto`) | Android Auto projected on the car screen | The Android Auto launcher with the phone's apps (maps, music, messages), connected without cable | Phone name, contacts, messages, map position |
+| 7 | Centro de Energía inteligente (`energia`) | Energía app: the new trips/charges tab + Cargadores cercanos | Some trips and charges; the chargers list sorted by distance | Trip places, personal dates; take the chargers list away from home |
+| 8 | Radio mejorada (`radio`) | Stock Radio | Frequency keypad open (from + in favourites edit) and the volume slider | — |
+| 9 | Tus fotos, en el auto y de fondo (`fotos`) | Home screen + Gallery | An own picture as wallpaper; the Gallery «En el auto» tab | Use a neutral landscape, not a family photo |
+| 10 | YouTube y Chrome (`youtube-chrome`) | YouTube, car in P | A video playing (or the YouTube home) | Account avatar, watch history |
+| 11 | Spotify (`spotify`) | Spotify app | The app's home | Account name, named playlists |
+| 12 | Todo en buen español (`espanol`) | A stock Settings page | Spanish texts (optional before/after pair) | Serial numbers if «Acerca del IVI» is used |
+| 13 | Mi Vigo (`mi-vigo`) | Mi Vigo | Rail with the tabs; Privacidad with the switches OFF (the default) | Account name/e-mail, pairing code, QR |
+| 14 | Actualizaciones remotas (`actualizaciones`) | Bell + Mi Vigo › Versiones | An update notice in the bell; «Actualización lista» + «Instalar ahora» (a fake STAGED is fine) | Other notices' content |
+| 15 | Avisos que no se pierden (`campana`) | Bell panel open | One notice from an app (e.g. charge finished) | Places, names in other notices |
+
+Dropped 2026-11-26 (owner feedback, cards removed or merged): Botón de voz del volante, Voz en español, Servicios de Google Play,
+Avisos de software de Google, Pantalla de inicio ordenada, Enviar diagnóstico, the separate Cargadores cercanos and Tus fotos de fondo shots.
 
 Also pending for «Preparar mi Vigo» (`specs/prepare-my-vigo.md` D5): «Acerca del IVI» (BLUR the PDSN), the software-version line with
 the password box, the engineering menu with «adb开启».

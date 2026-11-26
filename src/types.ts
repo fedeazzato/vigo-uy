@@ -637,6 +637,8 @@ export interface InstallerFeature {
   id: string
   name: string
   status: InstallerFeatureStatus
+  /** A headline selling point (Modo invitado): the card stands out. */
+  highlight?: boolean
   /** One sentence: what the owner gets. */
   benefit: string
   /** Where it is in the car. */
