@@ -40,9 +40,8 @@ export default function InstallerFeaturesPage() {
       <Card>
         <p className={styles.benefit}>
           Cada tarjeta es una mejora. Las que no tienen etiqueta las recibe todo el que instala.{' '}
-          <strong>Opcional</strong>: la elegís vos al instalar. <strong>Todavía no en el instalador</strong>:
-          ya anda en el auto de prueba y llega cuando pase también en un segundo auto; mientras tanto, el
-          instalador te avisa y pone el resto.
+          <strong>Opcional</strong>: la elegís vos al instalar. Si algo no se puede poner en tu auto, el
+          instalador te dice por qué e instala el resto.
         </p>
       </Card>
 
@@ -61,8 +60,8 @@ export default function InstallerFeaturesPage() {
         <details className={styles.testing}>
           <summary>🧪 Se están probando (no vienen en el instalador)</summary>
           <p className={styles.benefit}>
-            Andan en el auto donde se prueban las mejoras, pero todavía no está decidido si llegan al
-            instalador. Si llegan, lo vas a ver en <Link to="/novedades">Novedades</Link>.
+            Andan en el auto donde se prueban las mejoras, pero no vienen en esta versión del instalador. Si
+            llegan, lo vas a ver en <Link to="/novedades">Novedades</Link>.
           </p>
           <div className={styles.grid}>
             {testing.map((f) => (
@@ -81,7 +80,7 @@ export default function InstallerFeaturesPage() {
           </li>
           <li>
             <strong>Las apps de fábrica siguen ahí</strong> (Energía, Radio, Ajustes, Galería…): lo nuevo se
-            suma.
+            les suma, y todo lo de fábrica sigue funcionando como antes.
           </li>
           <li>
             <strong>Antes de cambiar nada, el instalador guarda una copia de tus ajustes.</strong>
@@ -107,9 +106,10 @@ export default function InstallerFeaturesPage() {
           <li>El auto encendido y en P (no hace falta andar).</li>
           <li>Unos 20 minutos.</li>
           <li>
-            Para YouTube y Chrome (opcional): los archivos de Google que bajás vos (
-            <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>).
+            Los <strong>3 archivos de Google</strong> para Waze, bajados por vos de APKMirror (y, si querés
+            YouTube y Chrome, también esos): <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>.
           </li>
+          <li>Tu cuenta de Google, para iniciar sesión en Waze desde la pantalla.</li>
         </ul>
         <Link to="/mi-vigo/preparar" className={styles.cta}>
           Preparar mi Vigo

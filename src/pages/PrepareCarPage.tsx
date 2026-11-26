@@ -56,8 +56,9 @@ export default function PrepareCarPage() {
       <Card>
         <CardTitle icon="👀">Antes de empezar, mirá qué vas a tener</CardTitle>
         <p className={styles.text}>
-          Copiloto, Mi Vigo, Cargadores cercanos, las apps de fábrica en español y más: una tarjeta por cada cosa
-          que suma el instalador, con dónde la encontrás en el auto.
+          Waze, Copiloto, Carga dentro de Energía, la Dashcam, Mi Vigo, la Radio y la Galería mejoradas, las apps
+          de fábrica en español y más: una tarjeta por cada cosa que suma el instalador, con dónde la encontrás
+          en el auto.
         </p>
         <Link to={INSTALLER_FEATURES_PATH} className={styles.featuresLink}>
           Qué agrega el instalador a tu Vigo
@@ -318,8 +319,9 @@ export default function PrepareCarPage() {
               </li>
               <li>
                 <strong>«Antes del service»</strong>: usalo antes de llevar el auto al concesionario. Guarda
-                una copia de tus ajustes y vuelve a fábrica el cambio de sistema y el asistente de voz; las
-                apps quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo
+                una copia de tus ajustes y vuelve a fábrica el cambio de sistema, las apps de fábrica que el
+                instalador mejoró (Energía, Radio, Galería, pantalla de inicio) y el asistente de voz; las
+                apps nuevas quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo
                 que «Quitar todo»: saca todo, incluidos Waze y Google.
               </li>
               <li>

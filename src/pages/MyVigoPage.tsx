@@ -189,8 +189,8 @@ export default function MyVigoPage() {
             <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
             <p className={styles.vaultText}>
               Sumale a tu Vigo las aplicaciones de la comunidad: Waze en la pantalla, un copiloto que te
-              entiende en español, tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque y
-              tu auto en WikiVigo. Se instalan una vez, desde una computadora con Windows.
+              entiende en español, tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque, una
+              dashcam, la radio y la galería mejoradas y tu auto en WikiVigo. Se instalan una vez, desde una computadora con Windows.
             </p>
             <Link to={INSTALLER_FEATURES_PATH} className={styles.vaultLink}>
               Qué agrega el instalador

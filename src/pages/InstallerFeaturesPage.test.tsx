@@ -28,14 +28,31 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     }
   })
 
-  it('has the third-party apps group and labels what the public installer does not bring yet', () => {
+  it('has the third-party apps group; Waze is part of the launch installer, YouTube and Chrome are optional', () => {
     renderPage()
     const apps = screen.getByRole('region', { name: 'Apps que se suman' })
-    for (const n of ['Waze', 'YouTube y Chrome', 'Spotify'])
+    for (const n of ['Waze', 'Servicios de Google Play', 'YouTube y Chrome', 'Spotify'])
       expect(within(apps).getByRole('heading', { name: n })).toBeTruthy()
-    const waze = within(apps).getByRole('heading', { name: 'Waze' }).parentElement as HTMLElement
-    expect(within(waze).getByText('Todavía no en el instalador')).toBeTruthy()
+    const card = (n: string) => within(apps).getByRole('heading', { name: n }).parentElement as HTMLElement
+    expect(within(card('Waze')).queryByText(/Opcional|auto de prueba/)).toBeNull()
+    expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
+  })
+
+  it('lists the launch kits in their groups and keeps only Android Auto under «Se están probando»', () => {
+    renderPage()
+    const region = (n: string) => screen.getByRole('region', { name: n })
+    expect(
+      within(region('Energía y carga')).getByRole('heading', { name: 'Carga, dentro de Energía' })
+    ).toBeTruthy()
+    expect(within(region('Radio y fotos')).getByRole('heading', { name: 'Radio mejorada' })).toBeTruthy()
+    expect(within(region('Radio y fotos')).getByRole('heading', { name: 'Fotos «En el auto»' })).toBeTruthy()
+    expect(
+      within(region('Seguridad, privacidad y avisos')).getByRole('heading', { name: 'Dashcam' })
+    ).toBeTruthy()
     expect(screen.getByText(/Se están probando/)).toBeTruthy()
+    expect(installerFeatures.testing.map((f) => f.id)).toEqual(['android-auto'])
+    for (const g of installerFeatures.groups)
+      for (const f of g.features) expect(['incluido', 'opcional', 'deFabrica']).toContain(f.status)
   })
 
   it('never lists the owner-only engine sound', () => {

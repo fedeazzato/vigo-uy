@@ -40,23 +40,22 @@
       "title": "Energía y carga",
       "features": [
         {
+          "id": "carga",
+          "name": "Carga, dentro de Energía",
+          "status": "incluido",
+          "benefit": "Tus viajes y cargas quedan registrados solos, y el botón «Finalizar carga» ya no desaparece cuando la carga llega al límite.",
+          "where": "En la app de Energía de fábrica (Centro de Energía), en sus pestañas nuevas.",
+          "photo": "Centro de Energía con las pestañas de Carga (viajes y cargas)"
+        },
+        {
           "id": "cargadores",
           "name": "Cargadores cercanos",
           "status": "incluido",
-          "benefit": "Los cargadores de Uruguay que la comunidad tiene en WikiVigo, ordenados por distancia desde donde estás.",
+          "benefit": "Los cargadores de Uruguay que la comunidad tiene en WikiVigo, ordenados por distancia, y con un toque Waze te lleva.",
           "where": "Decile a Copiloto «cargadores cercanos», o tocá «Estaciones de carga cercanas» en la app de Energía.",
           "needs": "Internet en la pantalla para bajar la lista.",
           "photo": "Cargadores cercanos con la lista ordenada por distancia",
-          "verify": "The Energy button «Estaciones de carga cercanas» only appears while the (virtual) T-Box is connected (chargers/STUDY.md) and the virtual T-Box is not in the public kit; 'tap to go' hands off to Waze, which public kits do not ship yet."
-        },
-        {
-          "id": "carga",
-          "name": "Carga, dentro de Energía",
-          "status": "pronto",
-          "benefit": "Tus viajes y cargas quedan registrados solos, y el botón «Finalizar carga» ya no desaparece cuando la carga llega al límite.",
-          "where": "En la app de Energía de fábrica (Centro de Energía), en sus pestañas nuevas.",
-          "photo": "Centro de Energía con las pestañas de Carga (viajes y cargas)",
-          "verify": "Public kits carry NO Carga until a stock second car passed the Energy merge (owner 2026-11-25; installer/README.md)."
+          "verify": "The Energy button «Estaciones de carga cercanas» only appears while the (virtual) T-Box is connected (chargers/STUDY.md); the virtual T-Box is not in installer/build_kit.sh. Confirm the launch kit's entry points (Copiloto, a Carga tab?)."
         }
       ]
     },
@@ -68,22 +67,21 @@
         {
           "id": "waze",
           "name": "Waze",
-          "status": "pronto",
-          "benefit": "La navegación que se usa en Uruguay, en la pantalla grande: le dictás la dirección con calles y números, y Cargadores cercanos te lleva al cargador con Waze.",
+          "status": "incluido",
+          "benefit": "La navegación que se usa en Uruguay, en la pantalla grande: le dictás la dirección con calles y números, y Cargadores cercanos o Carga te mandan al cargador con Waze.",
           "where": "Ícono Waze en la pantalla de inicio, en el lugar de la navegación de fábrica.",
           "needs": "Tu cuenta de Google, internet en la pantalla y los archivos de Waze que bajás vos de APKMirror.",
           "photo": "Waze abierto en la pantalla del auto con una ruta",
-          "verify": "Waze is mandatory but only in ASSISTED kits (WAZE_ITEM=1) until a second car passed; public kits say it is not available yet (installer/README.md, owner 2026-11-22). Dictation into Waze = Copiloto as the speech service (voice_es/DECISIONS.md): confirm the public install sets it."
+          "verify": "Dictation into Waze's search needs Copiloto as the system speech service (voice_es/DECISIONS.md); install_all.sh does not set voice_recognition_service today: confirm the launch install sets it."
         },
         {
           "id": "google-play",
           "name": "Servicios de Google Play",
-          "status": "pronto",
+          "status": "incluido",
           "benefit": "Lo que Waze necesita para que inicies sesión con tu cuenta de Google. Sin Play Store: solo lo justo.",
           "where": "No tiene ícono: lo ves en Mi Vigo › Versiones › «Software de Google».",
           "needs": "Los archivos de Google que bajás vos de APKMirror.",
-          "photo": "Mi Vigo › Versiones con la sección «Software de Google»",
-          "verify": "Comes with Waze (same assisted-kit gate)."
+          "photo": "Mi Vigo › Versiones con la sección «Software de Google»"
         },
         {
           "id": "youtube-chrome",
@@ -98,10 +96,9 @@
           "id": "avisos-google",
           "name": "Avisos de software de Google",
           "status": "incluido",
-          "benefit": "Cuando sale una versión nueva de una app de Google que pusiste, Mi Vigo te avisa; se instala con el cable, desde el instalador.",
+          "benefit": "Cuando sale una versión nueva de Waze o de los servicios de Google, Mi Vigo te avisa; se instala con el cable, desde el instalador.",
           "where": "La campana de la pantalla y Mi Vigo › Versiones › «Software de Google».",
-          "photo": "Aviso de actualización de Google en la campana",
-          "verify": "With no Waze / Google Play services in public kits, confirm which Google apps raise these notices (YouTube / Chrome / WebView of the optional item?)."
+          "photo": "Aviso de actualización de Google en la campana"
         },
         {
           "id": "spotify",
@@ -110,8 +107,30 @@
           "benefit": "Ya viene en la Vigo de fábrica. El instalador no lo cambia.",
           "where": "Donde estaba: en las apps de fábrica.",
           "needs": "Tu cuenta de Spotify e internet en la pantalla.",
-          "photo": "Spotify abierto en la pantalla",
-          "verify": "Spotify investigation is parked (HANDOFF section 8); nothing in installer/ touches it."
+          "photo": "Spotify abierto en la pantalla"
+        }
+      ]
+    },
+    {
+      "id": "multimedia",
+      "icon": "🎵",
+      "title": "Radio y fotos",
+      "features": [
+        {
+          "id": "radio",
+          "name": "Radio mejorada",
+          "status": "incluido",
+          "benefit": "Agregás una emisora escribiendo su frecuencia con el botón +, tenés un control de volumen al costado y ves todas tus favoritas juntas.",
+          "where": "La app de Radio de fábrica: el + aparece al editar las favoritas.",
+          "photo": "Radio con el teclado de frecuencia abierto y el control de volumen"
+        },
+        {
+          "id": "galeria",
+          "name": "Fotos «En el auto»",
+          "status": "incluido",
+          "benefit": "Copiás fotos de una memoria USB al auto, las ves aunque saques la memoria y ponés cualquiera de fondo.",
+          "where": "La app de Galería de fábrica: pestañas «Memoria USB» y «En el auto», y «Fondo de pantalla» al abrir una foto.",
+          "photo": "Galería en la pestaña «En el auto», y el diálogo «¿En qué lugar?»"
         }
       ]
     },
@@ -133,9 +152,9 @@
           "id": "fondo",
           "name": "Tus fotos de fondo",
           "status": "incluido",
-          "benefit": "Elegí una foto tuya para cada lugar de la pantalla de inicio, desde una memoria USB o las fotos de la pantalla.",
-          "where": "Mi Vigo › Fondo. «Todo de fábrica» vuelve a los fondos originales.",
-          "photo": "Mi Vigo › Fondo con los cuatro lugares y una foto elegida"
+          "benefit": "Elegí una foto tuya para cada lugar de la pantalla de inicio, y queda puesta aunque apagues el auto.",
+          "where": "Mi Vigo › Fondo o la Galería. «Todo de fábrica» vuelve a los fondos originales.",
+          "photo": "Pantalla de inicio con una foto propia de fondo"
         },
         {
           "id": "espanol",
@@ -149,17 +168,27 @@
           "id": "iconos",
           "name": "Pantalla de inicio ordenada",
           "status": "incluido",
-          "benefit": "Se suman los íconos de Copiloto y Mi Vigo, y se esconde el de la navegación de fábrica, que acá no se usa.",
+          "benefit": "Se suman los íconos de Waze, Copiloto, Mi Vigo y Dashcam, y se esconde el de la navegación de fábrica, que acá no se usa.",
           "where": "La pantalla de inicio.",
-          "photo": "Pantalla de inicio con los íconos de Copiloto y Mi Vigo"
+          "photo": "Pantalla de inicio con los íconos de Waze, Copiloto, Mi Vigo y Dashcam",
+          "verify": "The bundle launcher overlays (charge_app BUNDLE=1) have Waze/YouTube/Chrome variants but the Dashcam tile so far exists only in the owner overlay: the launch overlay needs it."
         }
       ]
     },
     {
       "id": "privacidad",
       "icon": "🔒",
-      "title": "Privacidad y avisos",
+      "title": "Seguridad, privacidad y avisos",
       "features": [
+        {
+          "id": "dashcam",
+          "name": "Dashcam",
+          "status": "incluido",
+          "benefit": "Graba con las cámaras del auto mientras manejás y guarda los videos cifrados: buscás por fecha o en el mapa y los copiás a una memoria USB.",
+          "where": "Ícono Dashcam en la pantalla de inicio, que cambia de color mientras graba o si algo falla.",
+          "needs": "Para guardar la llave de los videos en tu Bóveda, una cuenta de WikiVigo (si no, la anotás vos).",
+          "photo": "Ícono de Dashcam grabando en la pantalla de inicio, y la app con la búsqueda por fecha"
+        },
         {
           "id": "compartir",
           "name": "Vos decidís qué se comparte",
@@ -169,21 +198,20 @@
           "photo": "Mi Vigo › Privacidad con los interruptores apagados"
         },
         {
+          "id": "ubicacion",
+          "name": "Dónde está tu auto",
+          "status": "incluido",
+          "benefit": "Si lo activás, ves en WikiVigo dónde quedó estacionado tu auto. Viene apagado.",
+          "where": "En el auto: Mi Vigo › Privacidad › Ubicación del auto. En WikiVigo: Mi Vigo › Tu auto ahora.",
+          "photo": "Mi Vigo › Privacidad › Ubicación del auto (sin mostrar un lugar real)"
+        },
+        {
           "id": "campana",
           "name": "Avisos en la campana",
           "status": "incluido",
           "benefit": "Los mensajes de tus apps llegan a la campana de la pantalla, y los importantes quedan hasta que los resolvés.",
           "where": "La campana de la barra de arriba; en Mi Vigo › Avisos elegís de qué apps.",
           "photo": "La campana abierta con un aviso de una app"
-        },
-        {
-          "id": "ubicacion",
-          "name": "Dónde está tu auto",
-          "status": "pronto",
-          "benefit": "Si lo activás, ves en WikiVigo dónde quedó estacionado tu auto. Viene apagado.",
-          "where": "En el auto: Mi Vigo › Privacidad › Ubicación del auto. En WikiVigo: Mi Vigo › Tu auto ahora.",
-          "photo": "Mi Vigo › Privacidad › Ubicación del auto (sin mostrar un lugar real)",
-          "verify": "The location comes from Carga (the only app with the location permission, accounts_proxy/MIVIGO.md), so it waits for Carga in public kits."
         }
       ]
     },
@@ -221,35 +249,7 @@
       "benefit": "Tu celular Android en la pantalla, sin cable, con Open Headunit; la tarjeta de inicio muestra si está conectado.",
       "where": "La tarjeta de CarPlay / Android Auto de la pantalla de inicio.",
       "needs": "Un celular Android con Android Auto.",
-      "photo": "Tarjeta de inicio de Android Auto conectado",
-      "verify": "Bundle overlays have no Android Auto and the bundle excludes Wi-Fi Direct (installer/README.md, owner 2026-11-21)."
-    },
-    {
-      "id": "radio",
-      "name": "Radio mejorada",
-      "status": "enPrueba",
-      "benefit": "Agregás emisoras por frecuencia con el botón +, un control de volumen y todas tus favoritas juntas.",
-      "where": "La app de Radio de fábrica.",
-      "photo": "Radio con el botón + y el control de volumen",
-      "verify": "media_merge kit is applied by hand on the test car only; not in installer/build_kit.sh."
-    },
-    {
-      "id": "galeria",
-      "name": "Fotos del auto como fondo",
-      "status": "enPrueba",
-      "benefit": "Desde la Galería elegís una foto como fondo para cada lugar de la pantalla de inicio.",
-      "where": "La app de Galería de fábrica.",
-      "photo": "Galería con «¿En qué lugar?»",
-      "verify": "gallery_merge kit is applied by hand on the test car only; not in installer/build_kit.sh."
-    },
-    {
-      "id": "dashcam",
-      "name": "Dashcam",
-      "status": "enPrueba",
-      "benefit": "Graba con la cámara del auto y guarda los videos cifrados; la llave queda en tu Bóveda de WikiVigo.",
-      "where": "Ícono Dashcam en la pantalla de inicio, que cambia de color mientras graba.",
-      "photo": "Ícono de Dashcam grabando en la pantalla de inicio",
-      "verify": "dashcam/ is installed by hand (dashcam/INSTALL_SESSION.md); not in installer/build_kit.sh."
+      "photo": "Tarjeta de inicio de Android Auto conectado"
     }
   ]
 }
