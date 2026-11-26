@@ -119,7 +119,7 @@ export function directionsUrl(p: { lat: number; lon: number }): string {
 
 export const LOCATION_EMPTY_TEXT =
   'Viene apagado. Para verlo acá, en la pantalla del auto entrá a Mi Vigo › Ajustes › Ubicación del auto y elegí ' +
-  '«Última ubicación» o «Con estacionamientos».'
+  '«Última ubicación» o «Ubicación y paradas».'
 export const LOCATION_WAITING_TEXT = 'Activado. La primera ubicación llega cuando el auto ande con internet.'
 
 export function privacyNote(mode: CarLocationMode): string {

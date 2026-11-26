@@ -89,7 +89,7 @@ LOCATION_FORGET_BODY = {"v":1,"action":"location","device_id":"6f1c2b4e-8d3a-4c5
 ## R3. Car: Mi Vigo (`accounts_proxy`, holds the mode, the key and the queue)
 
 - **Ajustes** card "Ubicación del auto": the stock radio pill (SelectionRadioGroup look, as Carga's Ajustes) with **Apagado** /
-  **Última ubicación** / **Con estacionamientos**, and under it the selected option in full ("Última ubicación + estacionamientos de 7
+  **Última ubicación** / **Ubicación y paradas**, and under it the selected option in full ("Última ubicación + estacionamientos de 7
   días") with a plain explanation of who sees it and what is kept. (The third label in full does not fit a pill third at 28 sp; the
   caption carries the owner's wording.) Default Apagado; stored as `location_mode=off|last|spots` in `files/ajustes.txt` (never seeded
   from `mivigo.conf`). Hint when Carga lacks the location permission: "Necesita Carga con «Registrar viajes y cargas» y el permiso de
@@ -124,7 +124,7 @@ LOCATION_FORGET_BODY = {"v":1,"action":"location","device_id":"6f1c2b4e-8d3a-4c5
 - Its own card right below "Tu auto ahora", rendered only when `get_car_location` says `allowed` (creator / control) **and** the
   vehicle has a linked screen. View-only members see nothing (and the RPC gives them nothing).
 - `mode` null → empty state: "Viene apagado. Para verlo acá, en la pantalla del auto entrá a Mi Vigo › Ajustes › Ubicación del auto
-  y elegí «Última ubicación» o «Con estacionamientos»."
+  y elegí «Última ubicación» o «Ubicación y paradas»."
 - Mode set, no point → "Activado. La primera ubicación llega cuando el auto ande con internet."
 - A point → the site's map (OpenFreeMap through `FittedMapContainer`, no new provider), an accent dot for the car; text "Estacionado ·
   hace 2 h" / "En viaje · hace 4 min" (`observed_at`), "precisión ~12 m", a "Cómo llegar" link (Google Maps directions in a new tab)
@@ -216,4 +216,4 @@ Undo: a new migration dropping the two tables, the three functions and the trigg
 
 Car test (vigo-hack NEXT_VISIT / `charge_app/CAR_TEST.md` L1-L6): Mi Vigo 2.16 + Carga 0.12; Carga with "Registrar viajes y cargas"
 and the location permission; Mi Vigo › Ajustes › "Última ubicación"; drive 10 min online → the card shows "En viaje"; park → "Estacionado"
-at the spot; switch to "Con estacionamientos", two short trips → two spots; back to "Apagado" → the card shows the empty state.
+at the spot; switch to "Ubicación y paradas", two short trips → two spots; back to "Apagado" → the card shows the empty state.
