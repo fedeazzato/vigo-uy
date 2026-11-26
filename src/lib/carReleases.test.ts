@@ -35,6 +35,14 @@ describe('parseManifest', () => {
     expect(r.summary.notices).toEqual([{ pkg: 'com.waze', versionCode: 1061234, label: 'Waze 5.30' }])
   })
 
+  it('accepts the source line release.sh writes (car 2026-11-25: r1 refused as "Línea desconocida")', () => {
+    const text = MANIFEST.replace(
+      'end\n',
+      'source https://github.com/fedeazzato/vigo-releases/releases/download/r1/\nend\n'
+    )
+    expect('summary' in parseManifest(text)).toBe(true)
+  })
+
   it.each([
     ['CRLF', MANIFEST.replace(/\n/g, '\r\n')],
     ['no header', MANIFEST.replace('vigo-update 1\n', '')],

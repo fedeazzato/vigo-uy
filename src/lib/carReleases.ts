@@ -93,6 +93,8 @@ export function parseManifest(text: string): { summary: ManifestSummary } | { er
       case 'notice':
         s.notices!.push({ pkg: f[1], versionCode: n(2), label: (f[3] ?? '').replace(/_/g, ' ') })
         break
+      case 'source': // download folder (updater Manifest.java); the publish form checks it equals the folder field
+        break
       case 'end':
         break
       default:
