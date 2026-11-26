@@ -14,7 +14,14 @@ export function BaseMap({ theme }: { theme: 'light' | 'dark' }) {
     let layer: Layer | null = null
     let cancelled = false
     void (async () => {
-      await import('maplibre-gl/dist/maplibre-gl.css')
+      const [{ setWorkerUrl }, { default: workerUrl }] = await Promise.all([
+        import('maplibre-gl'),
+        // MapLibre 6 is ESM-only and looks for its worker next to its own module (import.meta.url), which bundling breaks:
+        // Vite emits the worker as its own file and MapLibre is pointed at it (MapLibre's documented Vite setup).
+        import('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'),
+        import('maplibre-gl/dist/maplibre-gl.css'),
+      ])
+      setWorkerUrl(workerUrl)
       await import('@maplibre/maplibre-gl-leaflet')   // adds L.maplibreGL
       if (cancelled) return
       // The bridge shows attributionControl.customAttribution in Leaflet's own attribution control.

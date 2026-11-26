@@ -20,7 +20,7 @@ night (dark) theme, matching the head-unit look (`specs/stock-head-unit-look.md`
 - MapLibre (~290 kB gzip) loads on demand when a map mounts, never in the main bundle.
 - Attribution: "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" with links, shown in Leaflet's attribution control
   (`attributionControl.customAttribution` of the bridge).
-- Versions pinned exactly: `maplibre-gl` 5.24.0 (v6 resolves its worker at run time, which Vite does not emit: "Worker failed to load"; v5 inlines the worker), `@maplibre/maplibre-gl-leaflet` 0.1.4.
+- Versions pinned exactly: `maplibre-gl` 6.19.0, `@maplibre/maplibre-gl-leaflet` 0.1.4 (peer range includes ^6). v6 is ESM-only and resolves its worker from `import.meta.url` at run time, which Vite does not emit ("Worker failed to load"); `BaseMap.tsx` therefore imports `maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url` and calls `setWorkerUrl()` (MapLibre's documented Vite setup). v6 also requires WebGL2 (no WebGL1 fallback). Upgraded from 5.24.0 for GHSA-jrc7-96c5-q579 (DOM.sanitize XSS, not reachable here).
 
 ### Non-goals
 - No change to map behaviour, markers or routing; no style customisation (the styles are used as published).
