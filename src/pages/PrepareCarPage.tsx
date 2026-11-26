@@ -247,9 +247,9 @@ export default function PrepareCarPage() {
           </Card>
 
           <Card>
-            <CardTitle icon="3️⃣">Activá el ADB</CardTitle>
+            <CardTitle icon="3️⃣">Abrí la conexión del instalador</CardTitle>
             <p className={styles.text}>
-              El <GlossaryLink term="adb">ADB</GlossaryLink> es la puerta por cable del instalador. Se abre un menú
+              Es la puerta por cable que usa el instalador (<GlossaryLink term="adb">qué es</GlossaryLink>). Se abre un menú
               en chino (工程调试模式). Buscá el interruptor <strong className={styles.mono}>adb开启</strong> y
               activalo. Pide una segunda contraseña: escribí el <strong>código maestro</strong>, que es el
               mismo para todas las Vigo.
@@ -323,7 +323,7 @@ export default function PrepareCarPage() {
               </li>
             </ul>
             <Alert type="info">
-              El ADB se apaga solo cuando se reinicia la pantalla. Para usar el instalador otra vez, repetí
+              Esta conexión (<strong className={styles.mono}>adb开启</strong>) se apaga sola cuando se reinicia la pantalla. Para usar el instalador otra vez, repetí
               los pasos 2 y 3.
             </Alert>
           </Card>
