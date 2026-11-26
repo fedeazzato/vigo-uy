@@ -102,3 +102,21 @@ describe('MyVigoPage grouping (specs/site-audit-2026-11.md)', () => {
     expect(text).not.toMatch(/Más detalles/)
   })
 })
+
+describe('MyVigoPage «Qué agrega el instalador» button (beta testers and moderators only)', () => {
+  it('is shown to a moderator', () => {
+    renderSignedIn('Ana')
+    expect(screen.queryByRole('link', { name: 'Qué agrega el instalador' })).toBeNull()
+    auth.current = { ...auth.current, profile: { ...makeProfile('Ana'), is_moderator: true } }
+    render(
+      <MemoryRouter>
+        <UserPrefsProvider>
+          <MyVigoPage />
+        </UserPrefsProvider>
+      </MemoryRouter>
+    )
+    expect(screen.getByRole('link', { name: 'Qué agrega el instalador' }).getAttribute('href')).toBe(
+      '/mi-vigo/preparar/que-agrega'
+    )
+  })
+})

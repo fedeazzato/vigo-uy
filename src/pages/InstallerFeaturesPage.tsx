@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
-import { PageHeader, Card, Badge, SectionDivider } from '../components/UI'
+import { PageHeader, Card, CardTitle, Badge, SectionDivider, Skeleton } from '../components/UI'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
 import { STATUS_BADGE, installerFeatures } from '../lib/installerFeatures'
+import { useInstallerFeaturesAccess } from '../lib/installerFeaturesAccess'
 import type { InstallerFeature } from '../types'
 import styles from './InstallerFeaturesPage.module.css'
 
-// «Qué agrega el instalador a tu Vigo» (specs/installer-features-page.md): public, read before installing. The list lives in
-// src/data/installerFeatures.json; each card's status says what the PUBLIC installer kit does with it today.
+// «Qué agrega el instalador a tu Vigo» (specs/installer-features-page.md): what the launch installer adds. The list lives in
+// src/data/installerFeatures.json. For now only beta testers and moderators see it; everyone else gets «Muy pronto».
 
 function FeatureCard({ feature }: { feature: InstallerFeature }) {
   const badge = STATUS_BADGE[feature.status]
@@ -28,12 +29,40 @@ function FeatureCard({ feature }: { feature: InstallerFeature }) {
   )
 }
 
+const TITLE = '🧩 Qué agrega el instalador a tu Vigo'
+
 export default function InstallerFeaturesPage() {
+  const access = useInstallerFeaturesAccess()
   const { groups } = installerFeatures
+
+  if (access === 'loading') {
+    return (
+      <div>
+        <PageHeader title={TITLE} />
+        <Skeleton lines={4} />
+      </div>
+    )
+  }
+
+  if (access === 'denied') {
+    return (
+      <div>
+        <PageHeader title={TITLE} />
+        <Card>
+          <CardTitle icon="⏳">Muy pronto</CardTitle>
+          <p className={styles.benefit}>
+            Estamos preparando el instalador de las mejoras de la comunidad. Cuando esté listo, acá vas a ver
+            todo lo que le suma a tu Vigo. Las novedades salen en <Link to="/novedades">Novedades</Link>.
+          </p>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div>
       <PageHeader
-        title="🧩 Qué agrega el instalador a tu Vigo"
+        title={TITLE}
         subtitle="Lo que vas a tener en la pantalla después de instalar las mejoras de la comunidad, y dónde encontrarlo en el auto."
       />
 

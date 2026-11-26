@@ -1,6 +1,6 @@
 # «Qué agrega el instalador a tu Vigo»
 
-**Status:** Implemented (2026-11-26). Photos are placeholders until the screenshots in `specs/installer-features-photos.md` are taken.
+**Status:** Live 2026-11-26 for beta testers and moderators only (gate below). Photos are placeholders until the screenshots in `specs/installer-features-photos.md` are taken.
 
 ## Context
 
@@ -11,7 +11,12 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
 
 ## Requirements
 
-- Route `#/mi-vigo/preparar/que-agrega`, **public** (outside `RequireAuth`): it holds no secret and owners read it before deciding.
+- Route `#/mi-vigo/preparar/que-agrega`, outside `RequireAuth` (signed-out visitors get «Muy pronto», not a login detour).
+- **Gate (owner 2026-11-26, no migration):** the feature list shows only to a signed-in user whose car is in beta (`my_car_beta()`,
+  migration 0084: `allowed && beta`) or a moderator (`profiles.is_moderator`, as Moderación). Everyone else, signed out included, sees
+  a short «Muy pronto» card with no feature list, and the links to the page (Preparar mi Vigo top card + step 4, Mi Vigo «Mejoras de
+  la comunidad») are not rendered. `useInstallerFeaturesAccess()` in `src/lib/installerFeaturesAccess.ts`. The content is public
+  information, so this is a UX gate, not security. Drop the gate when the launch installer ships.
 - Linked from the top of «Preparar mi Vigo» (a card before the disclaimer: «Antes de empezar, mirá qué vas a tener»), from its step 4
   (where the installer is downloaded) and from Mi Vigo's «Mejoras de la comunidad» card.
 - One card per feature, grouped: Manejo y voz / Energía y carga / Apps que se suman (third-party apps) / Pantalla de inicio y Mi Vigo /
@@ -21,7 +26,7 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
   Carga inside Energía (with «Dónde está tu auto»), the Radio, Gallery and Home kits, Dashcam, Android Auto over Wi-Fi Direct
   (Open Headunit) and the virtual T-Box (owner change 2026-11-26), besides Copiloto, Voz, Cargadores,
   Mi Vigo, the Spanish overlays, the tiles and the updater. Each launch item goes in only after passing on a second stock Vigo: a
-  process note, not a page badge. The page stays **not deployed / not merged** until the launch installer ships.
+  process note, not a page badge.
 - Every card carries a status (`InstallerFeatureStatus`): `incluido` (no badge), `opcional` (wheel voice key, YouTube/Chrome),
   `deFabrica` (Spotify). There is no «Se están probando» section any more (Android Auto joined the launch set). The owner-only V8/Mustang AVAS sound is never listed.
 - Sections «Qué no cambia y qué podés deshacer» (Quitar todo, Antes/Después del service, settings copy, driving untouched) and «Qué
@@ -42,7 +47,10 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
   Spotify; Carga, Radio, Galería and Dashcam sit in their groups; no «Se están probando» section; no AVAS/Mustang/V8 text; ids unique,
   required fields non-empty; undo / needs sections and the
   Preparar mi Vigo link.
-- `PrepareCarPage.test.tsx`: the features link sits before the disclaimer (visible without accepting) and again at step 4.
+- Gate: list for a beta tester and for a moderator (no beta call); «Muy pronto» only for a non-beta user, a view-only member
+  (`allowed:false`), a failed call, and signed out (no database call).
+- `PrepareCarPage.test.tsx`: the features link sits before the disclaimer (visible without accepting) and again at step 4; links for a
+  beta tester, none for a non-beta user or signed out. `MyVigoPage.test.tsx`: the button only for a moderator.
 - `npm test`, `npm run type-check`, `npm run build` pass.
 
 ## Keep current

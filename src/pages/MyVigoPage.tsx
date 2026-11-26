@@ -30,6 +30,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
 import { INSTALLER_FEATURES_PATH } from '../lib/installerFeatures'
+import { useInstallerFeaturesAccess } from '../lib/installerFeaturesAccess'
 import styles from './MyVigoPage.module.css'
 
 const MODEL_INFO: Record<Model, { battery: string; extra: string }> = {
@@ -44,6 +45,7 @@ const PLACEHOLDER_NAME = /^Miembro \d{4}$/
 export default function MyVigoPage() {
   const { model, color, setModel, setColor, clear } = useUserPrefs()
   const { status, profile } = useAuth()
+  const showInstallerFeatures = useInstallerFeaturesAccess() === 'allowed'
   const [namePromptDismissed, setNamePromptDismissed] = useState(false)
   const showNamePrompt =
     !namePromptDismissed && profile != null && PLACEHOLDER_NAME.test(profile.display_name)
@@ -80,7 +82,6 @@ export default function MyVigoPage() {
 
   return (
     <div>
-
       {(model || color) && (
         <div className={styles.currentSelection}>
           {color && (
@@ -188,13 +189,18 @@ export default function MyVigoPage() {
           <Card>
             <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
             <p className={styles.vaultText}>
-              Sumale a tu Vigo las aplicaciones de la comunidad: Waze en la pantalla, Android Auto sin cable, un copiloto que te
-              entiende en español, tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque, una
-              dashcam, la radio y la galería mejoradas y tu auto en WikiVigo. Se instalan una vez, desde una computadora con Windows.
+              Sumale a tu Vigo las aplicaciones de la comunidad: Waze en la pantalla, Android Auto sin cable,
+              un copiloto que te entiende en español, tus viajes y cargas registrados solos, los cargadores de
+              Uruguay a un toque, una dashcam, la radio y la galería mejoradas y tu auto en WikiVigo. Se
+              instalan una vez, desde una computadora con Windows.
             </p>
-            <Link to={INSTALLER_FEATURES_PATH} className={styles.vaultLink}>
-              Qué agrega el instalador
-            </Link>{' '}
+            {showInstallerFeatures && (
+              <>
+                <Link to={INSTALLER_FEATURES_PATH} className={styles.vaultLink}>
+                  Qué agrega el instalador
+                </Link>{' '}
+              </>
+            )}
             <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
               Preparar mi Vigo
             </Link>{' '}

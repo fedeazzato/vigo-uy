@@ -1,8 +1,26 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import InstallerFeaturesPage from './InstallerFeaturesPage'
 import { installerFeatures } from '../lib/installerFeatures'
+import type { CarBetaState } from '../lib/carBeta'
+
+// The page is gated (beta testers + moderators): tests run as a moderator unless they set another user.
+const mocks = vi.hoisted(() => ({
+  auth: {},
+  fetchCarBeta: vi.fn<() => Promise<CarBetaState | null>>(),
+}))
+vi.mock('../context/AuthContext', () => ({ useAuth: () => mocks.auth }))
+vi.mock('../lib/carBeta', () => ({ fetchCarBeta: mocks.fetchCarBeta }))
+
+function signedIn(isModerator: boolean) {
+  return { user: { id: 'user-1' }, profile: { id: 'user-1', is_moderator: isModerator }, status: 'signedIn' }
+}
+
+beforeEach(() => {
+  mocks.auth = signedIn(true)
+  mocks.fetchCarBeta.mockReset()
+})
 
 function renderPage() {
   return render(
@@ -74,5 +92,51 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     expect(screen.getByRole('link', { name: 'Preparar mi Vigo' }).getAttribute('href')).toBe(
       '/mi-vigo/preparar'
     )
+  })
+})
+
+describe('InstallerFeaturesPage gate: beta testers and moderators only', () => {
+  const comingSoon = () => screen.findByText('Muy pronto')
+
+  it('shows the list to a signed-in user whose car is in beta', async () => {
+    mocks.auth = signedIn(false)
+    mocks.fetchCarBeta.mockResolvedValue({ allowed: true, beta: true, request: null })
+    renderPage()
+    expect(await screen.findByRole('region', { name: 'Apps que se suman' })).toBeTruthy()
+    expect(screen.queryByText('Muy pronto')).toBeNull()
+  })
+
+  it('shows the list to a moderator without asking for beta', () => {
+    renderPage()
+    expect(screen.getByRole('region', { name: 'Apps que se suman' })).toBeTruthy()
+    expect(mocks.fetchCarBeta).not.toHaveBeenCalled()
+  })
+
+  it('shows only «Muy pronto» to a signed-in user whose car is not in beta', async () => {
+    mocks.auth = signedIn(false)
+    mocks.fetchCarBeta.mockResolvedValue({ allowed: true, beta: false, request: null })
+    renderPage()
+    expect(await comingSoon()).toBeTruthy()
+    expect(screen.queryByRole('region')).toBeNull()
+    expect(screen.queryByText(/Waze/)).toBeNull()
+  })
+
+  it('shows only «Muy pronto» to a view-only member (allowed:false) or when the call fails', async () => {
+    mocks.auth = signedIn(false)
+    mocks.fetchCarBeta.mockResolvedValue({ allowed: false })
+    const { unmount } = renderPage()
+    expect(await comingSoon()).toBeTruthy()
+    unmount()
+    mocks.fetchCarBeta.mockResolvedValue(null)
+    renderPage()
+    expect(await comingSoon()).toBeTruthy()
+  })
+
+  it('shows only «Muy pronto» when signed out, without calling the database', async () => {
+    mocks.auth = { user: null, profile: null, status: 'signedOut' }
+    renderPage()
+    expect(await comingSoon()).toBeTruthy()
+    expect(screen.queryByRole('region')).toBeNull()
+    expect(mocks.fetchCarBeta).not.toHaveBeenCalled()
   })
 })

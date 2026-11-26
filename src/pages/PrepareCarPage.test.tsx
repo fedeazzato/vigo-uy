@@ -1,7 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import PrepareCarPage from './PrepareCarPage'
 import { MemoryRouter } from 'react-router-dom'
+import type { CarBetaState } from '../lib/carBeta'
+
+// «Qué agrega el instalador» links are gated (beta testers + moderators): the page tests run as a moderator unless they say otherwise.
+const gate = vi.hoisted(() => ({
+  auth: {},
+  fetchCarBeta: vi.fn<() => Promise<CarBetaState | null>>(),
+}))
+vi.mock('../context/AuthContext', () => ({ useAuth: () => gate.auth }))
+vi.mock('../lib/carBeta', () => ({ fetchCarBeta: gate.fetchCarBeta }))
+const moderator = { user: { id: 'u1' }, profile: { id: 'u1', is_moderator: true }, status: 'signedIn' }
+beforeEach(() => {
+  gate.auth = moderator
+  gate.fetchCarBeta.mockReset()
+})
 
 function renderPage() {
   return render(
@@ -100,5 +114,30 @@ describe('PrepareCarPage › Qué agrega el instalador', () => {
     expect(top.compareDocumentPosition(disclaimer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     accept()
     expect(screen.getByRole('link', { name: 'qué agrega el instalador' }).getAttribute('href')).toBe('/mi-vigo/preparar/que-agrega')
+  })
+})
+
+describe('PrepareCarPage › Qué agrega el instalador gate', () => {
+  it('shows the links to a beta tester', async () => {
+    gate.auth = { user: { id: 'u2' }, profile: { id: 'u2', is_moderator: false }, status: 'signedIn' }
+    gate.fetchCarBeta.mockResolvedValue({ allowed: true, beta: true, request: null })
+    renderPage()
+    expect(await screen.findByRole('link', { name: 'Qué agrega el instalador a tu Vigo' })).toBeTruthy()
+  })
+
+  it('renders no link for a user whose car is not in beta', async () => {
+    gate.auth = { user: { id: 'u2' }, profile: { id: 'u2', is_moderator: false }, status: 'signedIn' }
+    gate.fetchCarBeta.mockResolvedValue({ allowed: true, beta: false, request: null })
+    renderPage()
+    await waitFor(() => expect(gate.fetchCarBeta).toHaveBeenCalled())
+    accept()
+    expect(screen.queryByRole('link', { name: /qué agrega el instalador/i })).toBeNull()
+  })
+
+  it('renders no link when signed out', () => {
+    gate.auth = { user: null, profile: null, status: 'signedOut' }
+    renderPage()
+    accept()
+    expect(screen.queryByRole('link', { name: /qué agrega el instalador/i })).toBeNull()
   })
 })
