@@ -38,6 +38,7 @@ const LinkCarPage = lazy(() => import('./pages/LinkCarPage'))
 const VaultPage = lazy(() => import('./pages/VaultPage'))
 const PrepareCarPage = lazy(() => import('./pages/PrepareCarPage'))
 const GoogleFilesPage = lazy(() => import('./pages/GoogleFilesPage'))
+const InstallerFeaturesPage = lazy(() => import('./pages/InstallerFeaturesPage'))
 const CarDraftsPage = lazy(() => import('./pages/CarDraftsPage'))
 const CarDiagnosticsPage = lazy(() => import('./pages/CarDiagnosticsPage'))
 const LicencesPage = lazy(() => import('./pages/LicencesPage'))
@@ -81,6 +82,8 @@ export default function App() {
           <Route path="faq" element={<FaqPage />} />
           <Route path="novedades" element={<NovedadesPage />} />
           <Route path="licencias" element={<LicencesPage />} />
+          {/* Public on purpose: owners read it before deciding to install (specs/installer-features-page.md). */}
+          <Route path="mi-vigo/preparar/que-agrega" element={<InstallerFeaturesPage />} />
           <Route path="login" element={<LoginPage />} />
           {/* Publicly readable since Phase 6 (anon RLS policies); submitting still requires auth. */}
           <Route path="comunidad" element={<CommunityFeedPage />} />

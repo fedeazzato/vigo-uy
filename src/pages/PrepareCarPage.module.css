@@ -92,25 +92,13 @@
   color: var(--text-secondary);
 }
 
-.photo {
-  margin: 0 0 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.photoBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 120px;
-  margin-bottom: 4px;
-  border: 2px dashed var(--border-strong);
-  border-radius: var(--radius-md);
-  font-size: 28px;
-}
-
 .download {
   composes: primary from '../styles/buttons.module.css';
   margin: 4px 0 12px;
+  text-decoration: none;
+}
+
+.featuresLink {
+  composes: secondary from '../styles/buttons.module.css';
   text-decoration: none;
 }

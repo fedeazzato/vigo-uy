@@ -90,3 +90,15 @@ describe('PrepareCarPage (specs/prepare-my-vigo.md)', () => {
     expect(screen.getAllByText(/Después del service/).length).toBeGreaterThan(0)
   })
 })
+
+describe('PrepareCarPage › Qué agrega el instalador', () => {
+  it('links the features page before the disclaimer and again at the install step', () => {
+    renderPage()
+    const top = screen.getByRole('link', { name: 'Qué agrega el instalador a tu Vigo' })
+    expect(top.getAttribute('href')).toBe('/mi-vigo/preparar/que-agrega')
+    const disclaimer = screen.getByText('Antes de empezar: leé esto')
+    expect(top.compareDocumentPosition(disclaimer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    accept()
+    expect(screen.getByRole('link', { name: 'qué agrega el instalador' }).getAttribute('href')).toBe('/mi-vigo/preparar/que-agrega')
+  })
+})

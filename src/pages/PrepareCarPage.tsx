@@ -5,23 +5,14 @@ import { MASTER_CODE, factoryCode, isValidPdsn, normalizePdsn } from '../lib/vig
 import styles from './PrepareCarPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 import GlossaryLink from '../components/GlossaryLink'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { INSTALLER_FEATURES_PATH } from '../lib/installerFeatures'
 
 // "Preparar mi Vigo" (specs/prepare-my-vigo.md): guides the owner through the engineering menu (Factory + Master codes) and links
 // the Windows installer. The PDSN stays in component state: never sent, never stored (D2).
 
 /** The hosted installer zip; null until it is published (D6). */
 export const INSTALLER_URL: string | null = null
-
-function PhotoPlaceholder({ caption }: { caption: string }) {
-  return (
-    <figure className={styles.photo}>
-      <div className={styles.photoBox} aria-hidden="true">
-        📷
-      </div>
-      <figcaption>Foto (próximamente): {caption}</figcaption>
-    </figure>
-  )
-}
 
 function Code({ value, label }: { value: string; label: string }) {
   return (
@@ -61,6 +52,17 @@ export default function PrepareCarPage() {
         title="🛠️ Preparar mi Vigo"
         subtitle="Paso a paso para sumarle las apps de la comunidad a tu pantalla, con una computadora con Windows. Primero se abre un menú oculto de la pantalla (el «modo de ingeniería»)."
       />
+
+      <Card>
+        <CardTitle icon="👀">Antes de empezar, mirá qué vas a tener</CardTitle>
+        <p className={styles.text}>
+          Copiloto, Mi Vigo, Cargadores cercanos, las apps de fábrica en español y más: una tarjeta por cada cosa
+          que suma el instalador, con dónde la encontrás en el auto.
+        </p>
+        <Link to={INSTALLER_FEATURES_PATH} className={styles.featuresLink}>
+          Qué agrega el instalador a tu Vigo
+        </Link>
+      </Card>
 
       <Card>
         <CardTitle icon="⚠️">Antes de empezar: leé esto</CardTitle>
@@ -261,6 +263,9 @@ export default function PrepareCarPage() {
 
           <Card>
             <CardTitle icon="4️⃣">Instalá las mejoras</CardTitle>
+            <p className={styles.text}>
+              ¿Qué vas a tener después? Mirá <Link to={INSTALLER_FEATURES_PATH}>qué agrega el instalador</Link>.
+            </p>
             <ol className={styles.list}>
               <li>Descargá el instalador y descomprimilo en la computadora.</li>
               <li>Conectá la computadora al puerto USB-C izquierdo del auto.</li>

@@ -29,6 +29,7 @@ import CarBetaCard from '../components/CarBetaCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
+import { INSTALLER_FEATURES_PATH } from '../lib/installerFeatures'
 import styles from './MyVigoPage.module.css'
 
 const MODEL_INFO: Record<Model, { battery: string; extra: string }> = {
@@ -191,6 +192,9 @@ export default function MyVigoPage() {
               entiende en español, tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque y
               tu auto en WikiVigo. Se instalan una vez, desde una computadora con Windows.
             </p>
+            <Link to={INSTALLER_FEATURES_PATH} className={styles.vaultLink}>
+              Qué agrega el instalador
+            </Link>{' '}
             <Link to="/mi-vigo/preparar" className={styles.vaultLink}>
               Preparar mi Vigo
             </Link>{' '}

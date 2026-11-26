@@ -1,0 +1,120 @@
+import { Link } from 'react-router-dom'
+import { PageHeader, Card, Badge, SectionDivider } from '../components/UI'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { STATUS_BADGE, installerFeatures } from '../lib/installerFeatures'
+import type { InstallerFeature } from '../types'
+import styles from './InstallerFeaturesPage.module.css'
+
+// «Qué agrega el instalador a tu Vigo» (specs/installer-features-page.md): public, read before installing. The list lives in
+// src/data/installerFeatures.json; each card's status says what the PUBLIC installer kit does with it today.
+
+function FeatureCard({ feature }: { feature: InstallerFeature }) {
+  const badge = STATUS_BADGE[feature.status]
+  return (
+    <Card className={styles.feature}>
+      <h3 className={styles.name}>{feature.name}</h3>
+      {badge && <Badge color={badge.color}>{badge.label}</Badge>}
+      <p className={styles.benefit}>{feature.benefit}</p>
+      <p className={styles.where}>
+        <strong>Dónde lo encontrás:</strong> {feature.where}
+      </p>
+      {feature.needs && (
+        <p className={styles.where}>
+          <strong>Necesitás:</strong> {feature.needs}
+        </p>
+      )}
+      <PhotoPlaceholder caption={feature.photo} />
+    </Card>
+  )
+}
+
+export default function InstallerFeaturesPage() {
+  const { groups, testing } = installerFeatures
+  return (
+    <div>
+      <PageHeader
+        title="🧩 Qué agrega el instalador a tu Vigo"
+        subtitle="Lo que vas a tener en la pantalla después de instalar las mejoras de la comunidad, y dónde encontrarlo en el auto."
+      />
+
+      <Card>
+        <p className={styles.benefit}>
+          Cada tarjeta es una mejora. Las que no tienen etiqueta las recibe todo el que instala.{' '}
+          <strong>Opcional</strong>: la elegís vos al instalar. <strong>Todavía no en el instalador</strong>:
+          ya anda en el auto de prueba y llega cuando pase también en un segundo auto; mientras tanto, el
+          instalador te avisa y pone el resto.
+        </p>
+      </Card>
+
+      {groups.map((g) => (
+        <section key={g.id} aria-label={g.title}>
+          <SectionDivider label={`${g.icon} ${g.title}`} />
+          <div className={styles.grid}>
+            {g.features.map((f) => (
+              <FeatureCard key={f.id} feature={f} />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {testing.length > 0 && (
+        <details className={styles.testing}>
+          <summary>🧪 Se están probando (no vienen en el instalador)</summary>
+          <p className={styles.benefit}>
+            Andan en el auto donde se prueban las mejoras, pero todavía no está decidido si llegan al
+            instalador. Si llegan, lo vas a ver en <Link to="/novedades">Novedades</Link>.
+          </p>
+          <div className={styles.grid}>
+            {testing.map((f) => (
+              <FeatureCard key={f.id} feature={f} />
+            ))}
+          </div>
+        </details>
+      )}
+
+      <SectionDivider label="↩️ Qué no cambia y qué podés deshacer" />
+      <Card>
+        <ul className={styles.list}>
+          <li>
+            <strong>El auto se maneja igual.</strong> No se toca el motor, los frenos, la dirección, la
+            batería ni nada de manejo o de seguridad.
+          </li>
+          <li>
+            <strong>Las apps de fábrica siguen ahí</strong> (Energía, Radio, Ajustes, Galería…): lo nuevo se
+            suma.
+          </li>
+          <li>
+            <strong>Antes de cambiar nada, el instalador guarda una copia de tus ajustes.</strong>
+          </li>
+          <li>
+            <strong>«Quitar todo»</strong> deja la pantalla como vino de fábrica.
+          </li>
+          <li>
+            <strong>«Antes del service»</strong> vuelve a fábrica lo que toca el sistema antes de ir al
+            concesionario (si querés, también oculta las apps), y <strong>«Después del service»</strong> lo
+            pone de nuevo.
+          </li>
+        </ul>
+      </Card>
+
+      <SectionDivider label="🧰 Qué necesitás" />
+      <Card>
+        <ul className={styles.list}>
+          <li>Una computadora con Windows.</li>
+          <li>
+            Un cable USB-C para el puerto <strong>izquierdo</strong> de la consola central.
+          </li>
+          <li>El auto encendido y en P (no hace falta andar).</li>
+          <li>Unos 20 minutos.</li>
+          <li>
+            Para YouTube y Chrome (opcional): los archivos de Google que bajás vos (
+            <Link to="/mi-vigo/preparar/archivos-google">cuáles bajar</Link>).
+          </li>
+        </ul>
+        <Link to="/mi-vigo/preparar" className={styles.cta}>
+          Preparar mi Vigo
+        </Link>
+      </Card>
+    </div>
+  )
+}

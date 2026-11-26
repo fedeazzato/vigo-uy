@@ -627,3 +627,39 @@ export interface LicencesData {
   updated: string
   groups: LicenceGroup[]
 }
+
+// "Qué agrega el instalador" (specs/installer-features-page.md). status: what the PUBLIC installer kit does with the feature today.
+//   incluido  = every owner gets it;  opcional = an installer checkbox / owner-picked files;
+//   pronto    = decided for every owner, shipped only in assisted kits until a second car passed (Waze, Carga);
+//   enPrueba  = only on the test car, not decided for the installer;  deFabrica = already on a stock Vigo, the installer does not touch it.
+export type InstallerFeatureStatus = 'incluido' | 'opcional' | 'pronto' | 'enPrueba' | 'deFabrica'
+
+export interface InstallerFeature {
+  id: string
+  name: string
+  status: InstallerFeatureStatus
+  /** One sentence: what the owner gets. */
+  benefit: string
+  /** Where it is in the car. */
+  where: string
+  /** What it needs (phone, account, internet), when anything. */
+  needs?: string
+  /** Caption of the screenshot slot (specs/installer-features-photos.md). */
+  photo: string
+  /** Not shown: why this card still needs checking against the public kit ([verificar]). */
+  verify?: string
+}
+
+export interface InstallerFeatureGroup {
+  id: string
+  icon: string
+  title: string
+  features: InstallerFeature[]
+}
+
+export interface InstallerFeaturesData {
+  updated: string
+  groups: InstallerFeatureGroup[]
+  /** Only on the test car: listed apart, folded. */
+  testing: InstallerFeature[]
+}
