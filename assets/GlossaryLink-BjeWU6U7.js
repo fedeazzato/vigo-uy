@@ -1,0 +1,1 @@
+import{r as e,t}from"./vendor-react-FMZ7yP21.js";import{n}from"./glossary-MqSWzjSx.js";var r=t();function i({term:t,children:i}){return(0,r.jsx)(e,{to:n(t),title:`¿Qué significa? Ver en el glosario`,children:i})}export{i as t};

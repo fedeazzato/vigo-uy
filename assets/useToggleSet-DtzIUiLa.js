@@ -1,0 +1,1 @@
+import{r as e}from"./rolldown-runtime-QQ38H6s1.js";import{h as t}from"./vendor-react-FMZ7yP21.js";var n=e(t());function r(){let[e,t]=(0,n.useState)(new Set);return[e,(0,n.useCallback)(e=>{t(t=>{let n=new Set(t);return n.has(e)?n.delete(e):n.add(e),n})},[])]}export{r as t};

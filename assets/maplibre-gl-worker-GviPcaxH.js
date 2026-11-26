@@ -1,0 +1,1 @@
+var e=`/vigo-uy/assets/maplibre-gl-worker-Du6Ubxw3.js`;export{e as default};

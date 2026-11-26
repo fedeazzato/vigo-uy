@@ -1,0 +1,1 @@
+import{t as e}from"./vendor-react-FMZ7yP21.js";var t={photo:`_photo_vdkwx_1`,photoBox:`_photoBox_vdkwx_13`},n=e();function r({caption:e}){return(0,n.jsxs)(`figure`,{className:t.photo,children:[(0,n.jsx)(`div`,{className:t.photoBox,"aria-hidden":`true`,children:`📷`}),(0,n.jsxs)(`figcaption`,{children:[`Foto (próximamente): `,e]})]})}export{r as t};
