@@ -56,7 +56,7 @@ export default function PrepareCarPage() {
       <Card>
         <CardTitle icon="👀">Antes de empezar, mirá qué vas a tener</CardTitle>
         <p className={styles.text}>
-          Waze, Copiloto, Carga dentro de Energía, la Dashcam, Mi Vigo, la Radio y la Galería mejoradas, las apps
+          Waze, Android Auto sin cable, Copiloto, Carga dentro de Energía, la Dashcam, Mi Vigo, la Radio y la Galería mejoradas, las apps
           de fábrica en español y más: una tarjeta por cada cosa que suma el instalador, con dónde la encontrás
           en el auto.
         </p>

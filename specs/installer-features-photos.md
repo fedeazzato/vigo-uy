@@ -28,7 +28,7 @@ names, the plate, the WikiVigo pairing code / QR. Day theme unless noted; Spanis
 | 17 | Dónde está tu auto (`ubicacion`) | Mi Vigo › Privacidad › Ubicación del auto | The pill on «Apagado» or «Última ubicación» | Never a map with a real place |
 | 18 | Actualizaciones automáticas (`actualizaciones`) | Mi Vigo › Versiones | «Actualización lista» + «Instalar ahora» (a fake STAGED is fine) | — |
 | 19 | Enviar diagnóstico (`diagnostico`) | Mi Vigo › Ayuda | «¿Algo no funciona?» card | Note text if typed |
-| 20 | Android Auto (`android-auto`, testing) | Home screen card | Android Auto connected | Phone name, contacts, map position |
+| 20 | Android Auto (`android-auto`) | Home screen phone card | Android Auto connected over Wi-Fi Direct | Phone name, contacts, map position |
 | 21 | Radio mejorada (`radio`) | Stock Radio | Frequency keypad open (from + in favourites edit) and the volume slider | — |
 | 22 | Fotos «En el auto» (`galeria`) | Stock Gallery | «En el auto» tab with pictures, and the «¿En qué lugar?» dialog | The picture if personal |
 | 23 | Dashcam (`dashcam`) | Home screen + Dashcam app | Tile in its recording colour; the app searching by date | Map positions in the search; never the recovery words |

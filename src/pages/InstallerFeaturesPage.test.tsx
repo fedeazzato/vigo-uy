@@ -28,17 +28,17 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     }
   })
 
-  it('has the third-party apps group; Waze is part of the launch installer, YouTube and Chrome are optional', () => {
+  it('has the third-party apps group; Waze and Android Auto are part of the launch installer, YouTube and Chrome are optional', () => {
     renderPage()
     const apps = screen.getByRole('region', { name: 'Apps que se suman' })
-    for (const n of ['Waze', 'Servicios de Google Play', 'YouTube y Chrome', 'Spotify'])
+    for (const n of ['Waze', 'Servicios de Google Play', 'Android Auto', 'YouTube y Chrome', 'Spotify'])
       expect(within(apps).getByRole('heading', { name: n })).toBeTruthy()
     const card = (n: string) => within(apps).getByRole('heading', { name: n }).parentElement as HTMLElement
-    expect(within(card('Waze')).queryByText(/Opcional|auto de prueba/)).toBeNull()
+    for (const n of ['Waze', 'Android Auto']) expect(within(card(n)).queryByText('Opcional')).toBeNull()
     expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
   })
 
-  it('lists the launch kits in their groups and keeps only Android Auto under «Se están probando»', () => {
+  it('lists the launch kits in their groups and has no «Se están probando» section', () => {
     renderPage()
     const region = (n: string) => screen.getByRole('region', { name: n })
     expect(
@@ -49,8 +49,7 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     expect(
       within(region('Seguridad, privacidad y avisos')).getByRole('heading', { name: 'Dashcam' })
     ).toBeTruthy()
-    expect(screen.getByText(/Se están probando/)).toBeTruthy()
-    expect(installerFeatures.testing.map((f) => f.id)).toEqual(['android-auto'])
+    expect(screen.queryByText(/Se están probando/)).toBeNull()
     for (const g of installerFeatures.groups)
       for (const f of g.features) expect(['incluido', 'opcional', 'deFabrica']).toContain(f.status)
   })
@@ -61,11 +60,10 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
   })
 
   it('every feature has the fields the page shows, and unique ids', () => {
-    const all = [...installerFeatures.groups.flatMap((g) => g.features), ...installerFeatures.testing]
+    const all = installerFeatures.groups.flatMap((g) => g.features)
     expect(new Set(all.map((f) => f.id)).size).toBe(all.length)
     for (const f of all)
       for (const k of ['name', 'benefit', 'where', 'photo'] as const) expect(f[k].length).toBeGreaterThan(0)
-    for (const f of installerFeatures.testing) expect(f.status).toBe('enPrueba')
   })
 
   it('explains what can be undone, what you need, and links Preparar mi Vigo', () => {

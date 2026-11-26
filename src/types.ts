@@ -630,8 +630,8 @@ export interface LicencesData {
 
 // "Qué agrega el instalador" (specs/installer-features-page.md). status: what the first public (launch) installer does with the feature (owner 2026-11-26).
 //   incluido  = every owner gets it;  opcional = an installer checkbox / owner-picked files;
-//   enPrueba  = only on the test car, not in the launch installer;  deFabrica = already on a stock Vigo, the installer does not touch it.
-export type InstallerFeatureStatus = 'incluido' | 'opcional' | 'enPrueba' | 'deFabrica'
+//   deFabrica = already on a stock Vigo, the installer does not touch it.
+export type InstallerFeatureStatus = 'incluido' | 'opcional' | 'deFabrica'
 
 export interface InstallerFeature {
   id: string
@@ -659,6 +659,4 @@ export interface InstallerFeatureGroup {
 export interface InstallerFeaturesData {
   updated: string
   groups: InstallerFeatureGroup[]
-  /** Only on the test car: listed apart, folded. */
-  testing: InstallerFeature[]
 }

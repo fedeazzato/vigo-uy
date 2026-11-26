@@ -29,7 +29,7 @@ function FeatureCard({ feature }: { feature: InstallerFeature }) {
 }
 
 export default function InstallerFeaturesPage() {
-  const { groups, testing } = installerFeatures
+  const { groups } = installerFeatures
   return (
     <div>
       <PageHeader
@@ -55,21 +55,6 @@ export default function InstallerFeaturesPage() {
           </div>
         </section>
       ))}
-
-      {testing.length > 0 && (
-        <details className={styles.testing}>
-          <summary>🧪 Se están probando (no vienen en el instalador)</summary>
-          <p className={styles.benefit}>
-            Andan en el auto donde se prueban las mejoras, pero no vienen en esta versión del instalador. Si
-            llegan, lo vas a ver en <Link to="/novedades">Novedades</Link>.
-          </p>
-          <div className={styles.grid}>
-            {testing.map((f) => (
-              <FeatureCard key={f.id} feature={f} />
-            ))}
-          </div>
-        </details>
-      )}
 
       <SectionDivider label="↩️ Qué no cambia y qué podés deshacer" />
       <Card>

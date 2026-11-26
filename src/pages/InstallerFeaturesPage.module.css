@@ -47,18 +47,6 @@
   color: var(--text-primary);
 }
 
-.testing {
-  margin: 16px 0;
-}
-
-.testing summary {
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-title);
-  padding: 8px 0;
-}
-
 .cta {
   composes: primary from '../styles/buttons.module.css';
   margin-top: 8px;

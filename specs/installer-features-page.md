@@ -18,14 +18,14 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
   Privacidad y avisos / Actualizaciones y ayuda. Each card: name, one-sentence benefit, «Dónde lo encontrás», optional «Necesitás»
   (phone, account, internet), photo slot (`PhotoPlaceholder`, now a shared component).
 - The page describes the **first public (launch) installer** (owner decisions 2026-11-26): Waze + Google Play services (mandatory),
-  Carga inside Energía (with «Dónde está tu auto»), the Radio, Gallery and Home kits, and Dashcam, besides Copiloto, Voz, Cargadores,
+  Carga inside Energía (with «Dónde está tu auto»), the Radio, Gallery and Home kits, Dashcam, Android Auto over Wi-Fi Direct
+  (Open Headunit) and the virtual T-Box (owner change 2026-11-26), besides Copiloto, Voz, Cargadores,
   Mi Vigo, the Spanish overlays, the tiles and the updater. Each launch item goes in only after passing on a second stock Vigo: a
   process note, not a page badge. The page stays **not deployed / not merged** until the launch installer ships.
 - Every card carries a status (`InstallerFeatureStatus`): `incluido` (no badge), `opcional` (wheel voice key, YouTube/Chrome),
-  `deFabrica` (Spotify). Android Auto (Open Headunit / Wi-Fi Direct) is NOT in the launch installer: `enPrueba`, in the folded «Se
-  están probando» list. The owner-only V8/Mustang AVAS sound is never listed.
+  `deFabrica` (Spotify). There is no «Se están probando» section any more (Android Auto joined the launch set). The owner-only V8/Mustang AVAS sound is never listed.
 - Sections «Qué no cambia y qué podés deshacer» (Quitar todo, Antes/Después del service, settings copy, driving untouched) and «Qué
-  necesitás» (Windows PC, USB-C to the left port, car on and in P, ~20 minutes, optional Google files) + a link to Preparar mi Vigo.
+  necesitás» (Windows PC, USB-C to the left port, car on and in P, ~20 minutes, the 3 Google files + Google account, YouTube/Chrome files optional) + a link to Preparar mi Vigo.
 - Curated content: `src/data/installerFeatures.json`, typed by `InstallerFeaturesData` in `src/types.ts`. A card whose kit status could
   not be confirmed has a `verify` field (not shown) = the «[verificar]» note.
 
@@ -38,15 +38,16 @@ non-technical Vigo owners; Rioplatense Spanish (voseo, «auto»), short and visu
 ## Acceptance criteria / test plan
 
 - `InstallerFeaturesPage.test.tsx`: every group renders as a region with one card per feature (benefit, «Dónde lo encontrás», photo
-  caption); the «Apps que se suman» group has Waze (no badge), Google Play services, YouTube y Chrome («Opcional»), Spotify; Carga,
-  Radio, Galería and Dashcam sit in their groups; the testing list is Android Auto only; no AVAS/Mustang/V8 text; ids unique, required fields non-empty, testing entries are `enPrueba`; undo / needs sections and the
+  caption); the «Apps que se suman» group has Waze and Android Auto (no badge), Google Play services, YouTube y Chrome («Opcional»),
+  Spotify; Carga, Radio, Galería and Dashcam sit in their groups; no «Se están probando» section; no AVAS/Mustang/V8 text; ids unique,
+  required fields non-empty; undo / needs sections and the
   Preparar mi Vigo link.
 - `PrepareCarPage.test.tsx`: the features link sits before the disclaimer (visible without accepting) and again at step 4.
 - `npm test`, `npm run type-check`, `npm run build` pass.
 
 ## Keep current
 
-If a launch item fails its second-car check and is held back, or Android Auto joins the installer, change its card in the JSON before
+If a launch item fails its second-car check and is held back, change its card in the JSON before
 the page goes live; drop a `verify` note once it is confirmed. Preparar mi Vigo (Antes del service) and Mi Vigo's «Mejoras de la
 comunidad» card name the same set. Outside this repo: vigo-hack `installer/windows/LEEME.txt` still describes Waze/Carga as possibly
 missing from the kit.

@@ -11,6 +11,5 @@ export const STATUS_BADGE: Record<InstallerFeatureStatus, { label: string; color
   {
     incluido: null,
     opcional: { label: 'Opcional', color: 'blue' },
-    enPrueba: { label: 'Solo en el auto de prueba', color: 'gray' },
     deFabrica: { label: 'Ya viene de fábrica', color: 'gray' },
   }

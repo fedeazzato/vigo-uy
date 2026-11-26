@@ -54,8 +54,7 @@
           "benefit": "Los cargadores de Uruguay que la comunidad tiene en WikiVigo, ordenados por distancia, y con un toque Waze te lleva.",
           "where": "Decile a Copiloto «cargadores cercanos», o tocá «Estaciones de carga cercanas» en la app de Energía.",
           "needs": "Internet en la pantalla para bajar la lista.",
-          "photo": "Cargadores cercanos con la lista ordenada por distancia",
-          "verify": "The Energy button «Estaciones de carga cercanas» only appears while the (virtual) T-Box is connected (chargers/STUDY.md); the virtual T-Box is not in installer/build_kit.sh. Confirm the launch kit's entry points (Copiloto, a Carga tab?)."
+          "photo": "Cargadores cercanos con la lista ordenada por distancia"
         }
       ]
     },
@@ -71,8 +70,7 @@
           "benefit": "La navegación que se usa en Uruguay, en la pantalla grande: le dictás la dirección con calles y números, y Cargadores cercanos o Carga te mandan al cargador con Waze.",
           "where": "Ícono Waze en la pantalla de inicio, en el lugar de la navegación de fábrica.",
           "needs": "Tu cuenta de Google, internet en la pantalla y los archivos de Waze que bajás vos de APKMirror.",
-          "photo": "Waze abierto en la pantalla del auto con una ruta",
-          "verify": "Dictation into Waze's search needs Copiloto as the system speech service (voice_es/DECISIONS.md); install_all.sh does not set voice_recognition_service today: confirm the launch install sets it."
+          "photo": "Waze abierto en la pantalla del auto con una ruta"
         },
         {
           "id": "google-play",
@@ -82,6 +80,15 @@
           "where": "No tiene ícono: lo ves en Mi Vigo › Versiones › «Software de Google».",
           "needs": "Los archivos de Google que bajás vos de APKMirror.",
           "photo": "Mi Vigo › Versiones con la sección «Software de Google»"
+        },
+        {
+          "id": "android-auto",
+          "name": "Android Auto",
+          "status": "incluido",
+          "benefit": "Tu celular Android en la pantalla del auto, sin cable, con Open Headunit: tus mapas y tu música del teléfono en grande.",
+          "where": "La tarjeta del teléfono en la pantalla de inicio muestra cuándo está conectado.",
+          "needs": "Un celular Android con Android Auto.",
+          "photo": "Tarjeta del teléfono en la pantalla de inicio con Android Auto conectado"
         },
         {
           "id": "youtube-chrome",
@@ -170,8 +177,7 @@
           "status": "incluido",
           "benefit": "Se suman los íconos de Waze, Copiloto, Mi Vigo y Dashcam, y se esconde el de la navegación de fábrica, que acá no se usa.",
           "where": "La pantalla de inicio.",
-          "photo": "Pantalla de inicio con los íconos de Waze, Copiloto, Mi Vigo y Dashcam",
-          "verify": "The bundle launcher overlays (charge_app BUNDLE=1) have Waze/YouTube/Chrome variants but the Dashcam tile so far exists only in the owner overlay: the launch overlay needs it."
+          "photo": "Pantalla de inicio con los íconos de Waze, Copiloto, Mi Vigo y Dashcam"
         }
       ]
     },
@@ -239,17 +245,6 @@
           "photo": "Mi Vigo › Ayuda con «Enviar diagnóstico»"
         }
       ]
-    }
-  ],
-  "testing": [
-    {
-      "id": "android-auto",
-      "name": "Android Auto",
-      "status": "enPrueba",
-      "benefit": "Tu celular Android en la pantalla, sin cable, con Open Headunit; la tarjeta de inicio muestra si está conectado.",
-      "where": "La tarjeta de CarPlay / Android Auto de la pantalla de inicio.",
-      "needs": "Un celular Android con Android Auto.",
-      "photo": "Tarjeta de inicio de Android Auto conectado"
     }
   ]
 }
