@@ -5,23 +5,15 @@ import { MASTER_CODE, factoryCode, isValidPdsn, normalizePdsn } from '../lib/vig
 import styles from './PrepareCarPage.module.css'
 import formStyles from '../styles/formControls.module.css'
 import GlossaryLink from '../components/GlossaryLink'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { INSTALLER_FEATURES_PATH } from '../lib/installerFeatures'
+import { useInstallerFeaturesAccess } from '../lib/installerFeaturesAccess'
 
 // "Preparar mi Vigo" (specs/prepare-my-vigo.md): guides the owner through the engineering menu (Factory + Master codes) and links
 // the Windows installer. The PDSN stays in component state: never sent, never stored (D2).
 
 /** The hosted installer zip; null until it is published (D6). */
 export const INSTALLER_URL: string | null = null
-
-function PhotoPlaceholder({ caption }: { caption: string }) {
-  return (
-    <figure className={styles.photo}>
-      <div className={styles.photoBox} aria-hidden="true">
-        📷
-      </div>
-      <figcaption>Foto (próximamente): {caption}</figcaption>
-    </figure>
-  )
-}
 
 function Code({ value, label }: { value: string; label: string }) {
   return (
@@ -36,6 +28,8 @@ const TRIES_WARNING =
 
 export default function PrepareCarPage() {
   const [accepted, setAccepted] = useState(false)
+  // «Qué agrega el instalador» links: beta testers and moderators only for now (specs/installer-features-page.md).
+  const showFeatures = useInstallerFeaturesAccess() === 'allowed'
   const [raw, setRaw] = useState('')
   const [factory, setFactory] = useState<string | null>(null)
   const pdsn = normalizePdsn(raw)
@@ -61,6 +55,20 @@ export default function PrepareCarPage() {
         title="🛠️ Preparar mi Vigo"
         subtitle="Paso a paso para sumarle las apps de la comunidad a tu pantalla, con una computadora con Windows. Primero se abre un menú oculto de la pantalla (el «modo de ingeniería»)."
       />
+
+      {showFeatures && (
+        <Card>
+          <CardTitle icon="👀">Antes de empezar, mirá qué vas a tener</CardTitle>
+          <p className={styles.text}>
+            Waze, Android Auto sin cable, Copiloto, Carga dentro de Energía, la Dashcam, Mi Vigo, la Radio y
+            la Galería mejoradas, las apps de fábrica en español y más: una tarjeta por cada cosa que suma el
+            instalador, con dónde la encontrás en el auto.
+          </p>
+          <Link to={INSTALLER_FEATURES_PATH} className={styles.featuresLink}>
+            Qué agrega el instalador a tu Vigo
+          </Link>
+        </Card>
+      )}
 
       <Card>
         <CardTitle icon="⚠️">Antes de empezar: leé esto</CardTitle>
@@ -249,10 +257,10 @@ export default function PrepareCarPage() {
           <Card>
             <CardTitle icon="3️⃣">Abrí la conexión del instalador</CardTitle>
             <p className={styles.text}>
-              Es la puerta por cable que usa el instalador (<GlossaryLink term="adb">qué es</GlossaryLink>). Se abre un menú
-              en chino (工程调试模式). Buscá el interruptor <strong className={styles.mono}>adb开启</strong> y
-              activalo. Pide una segunda contraseña: escribí el <strong>código maestro</strong>, que es el
-              mismo para todas las Vigo.
+              Es la puerta por cable que usa el instalador (<GlossaryLink term="adb">qué es</GlossaryLink>).
+              Se abre un menú en chino (工程调试模式). Buscá el interruptor{' '}
+              <strong className={styles.mono}>adb开启</strong> y activalo. Pide una segunda contraseña:
+              escribí el <strong>código maestro</strong>, que es el mismo para todas las Vigo.
             </p>
             <PhotoPlaceholder caption="el menú de ingeniería con el interruptor adb开启" />
             <Code value={MASTER_CODE} label="Código maestro" />
@@ -261,6 +269,12 @@ export default function PrepareCarPage() {
 
           <Card>
             <CardTitle icon="4️⃣">Instalá las mejoras</CardTitle>
+            {showFeatures && (
+              <p className={styles.text}>
+                ¿Qué vas a tener después? Mirá{' '}
+                <Link to={INSTALLER_FEATURES_PATH}>qué agrega el instalador</Link>.
+              </p>
+            )}
             <ol className={styles.list}>
               <li>Descargá el instalador y descomprimilo en la computadora.</li>
               <li>Conectá la computadora al puerto USB-C izquierdo del auto.</li>
@@ -313,9 +327,10 @@ export default function PrepareCarPage() {
               </li>
               <li>
                 <strong>«Antes del service»</strong>: usalo antes de llevar el auto al concesionario. Guarda
-                una copia de tus ajustes y vuelve a fábrica el cambio de sistema y el asistente de voz; las
-                apps quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo mismo
-                que «Quitar todo»: saca todo, incluidos Waze y Google.
+                una copia de tus ajustes y vuelve a fábrica el cambio de sistema, las apps de fábrica que el
+                instalador mejoró (Energía, Radio, Galería, pantalla de inicio) y el asistente de voz; las
+                apps nuevas quedan. Si a «¿Ocultar también las apps?» respondés <strong>Sí</strong>, hace lo
+                mismo que «Quitar todo»: saca todo, incluidos Waze y Google.
               </li>
               <li>
                 <strong>«Después del service»</strong>: cuando el auto vuelve, instala todo de nuevo y te
@@ -323,8 +338,8 @@ export default function PrepareCarPage() {
               </li>
             </ul>
             <Alert type="info">
-              Esta conexión (<strong className={styles.mono}>adb开启</strong>) se apaga sola cuando se reinicia la pantalla. Para usar el instalador otra vez, repetí
-              los pasos 2 y 3.
+              Esta conexión (<strong className={styles.mono}>adb开启</strong>) se apaga sola cuando se
+              reinicia la pantalla. Para usar el instalador otra vez, repetí los pasos 2 y 3.
             </Alert>
           </Card>
         </>

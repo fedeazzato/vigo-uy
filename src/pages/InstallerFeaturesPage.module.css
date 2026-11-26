@@ -1,0 +1,54 @@
+/* «Qué agrega el instalador a tu Vigo» (specs/installer-features-page.md). */
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Cards inside the grid: the grid gap spaces them. */
+.feature {
+  margin: 0;
+}
+
+.name {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text-title);
+}
+
+.benefit {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.where {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.list {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.cta {
+  composes: primary from '../styles/buttons.module.css';
+  margin-top: 8px;
+  text-decoration: none;
+}
