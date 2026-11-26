@@ -99,10 +99,10 @@ describe('CarGuestCard', () => {
 
   it('declining the confirmation sends nothing', async () => {
     mocks.fetchCarGuest.mockResolvedValue(base())
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
     render(<CarGuestCard />)
     fireEvent.click(await screen.findByRole('button', { name: 'Activar modo invitado' }))
-    await waitFor(() => expect(window.confirm).toHaveBeenCalled())
+    await waitFor(() => expect(confirmSpy).toHaveBeenCalled())
     expect(mocks.setCarGuest).not.toHaveBeenCalled()
   })
 
