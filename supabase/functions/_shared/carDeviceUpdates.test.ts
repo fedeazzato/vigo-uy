@@ -124,6 +124,14 @@ describe('update_check', () => {
     expect(parseCarRequest(checkBody({ last: 'x'.repeat(301) }))).toBeNull()
   })
 
+  it('accepts the real head unit build id with spaces (car 2026-11-25 was refused)', () => {
+    const fw = 'trinket-userdebug 10 QKQ1.210910.001 707 test-keys'
+    expect(parseCarRequest(checkBody({ firmware: fw, last: 'installed by cable' }))?.action).toBe('update_check')
+    expect(parseCarRequest(checkBody({ firmware: ' leading' }))).toBeNull()
+    expect(parseCarRequest(checkBody({ firmware: 'x'.repeat(65) }))).toBeNull()
+    expect(parseCarRequest(checkBody({ firmware: 'a\nb' }))).toBeNull()
+  })
+
   it('returns the picked manifest with the GitHub download folder and records the offer', async () => {
     const { rpc, calls } = fakeRpc({
       car_device_public_key: ok(fresh.spki),

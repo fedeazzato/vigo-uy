@@ -656,6 +656,9 @@ export const UPDATE_PHASES = ['IDLE', 'STAGING', 'STAGED', 'APPLYING', 'TRIAL', 
 export type UpdatePhase = (typeof UPDATE_PHASES)[number]
 export const UPDATE_LAST_MAX = 300
 export const UPDATE_MAX_PACKAGES = 32
+/** ro.build.display.id as the car sends it, with spaces (car 2026-11-25: "trinket-userdebug 10 QKQ1.210910.001 707 test-keys"
+ *  was refused as bad_request by FW_VERSION). Informational only; the table keeps 64 chars. */
+export const UPDATE_FIRMWARE = /^[A-Za-z0-9_.-][A-Za-z0-9_. -]{0,63}$/
 const PACKAGE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/
 
 export interface CarUpdateReport {
@@ -689,7 +692,7 @@ export function parseUpdateReport(o: Record<string, unknown>): CarUpdateReport |
   const channel = o.channel ?? null
   if (channel !== null && channel !== 'stable' && channel !== 'beta') return null
   const firmware = o.firmware ?? null
-  if (firmware !== null && (typeof firmware !== 'string' || !FW_VERSION.test(firmware))) return null
+  if (firmware !== null && (typeof firmware !== 'string' || !UPDATE_FIRMWARE.test(firmware))) return null
   const installedRaw = o.installed ?? {}
   if (typeof installedRaw !== 'object' || installedRaw === null || Array.isArray(installedRaw)) return null
   const entries = Object.entries(installedRaw as Record<string, unknown>)
