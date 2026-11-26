@@ -16,6 +16,8 @@ export type NotificationKind =
   | 'vehicle_service'
   | 'car_rollback'
   | 'car_charge_draft'
+  | 'car_beta_request'
+  | 'car_beta'
 
 export type FollowKind = 'station' | 'trip_log' | 'service_entry' | 'part_purchase'
 export interface FollowTarget {
@@ -38,6 +40,8 @@ export const NOTIFICATION_ICON: Record<NotificationKind, string> = {
   vehicle_service: '🔧',
   car_rollback: '↩️',
   car_charge_draft: '🔌',
+  car_beta_request: '🧪',
+  car_beta: '🧪',
 }
 
 // Where tapping a notification goes. Content has no per-item page yet, so
@@ -52,9 +56,12 @@ export function notificationLink(
     case 'vehicle_service':
       return '/mi-vigo/registros'
     case 'car_rollback':
+    case 'car_beta_request':
       return '/moderacion?tab=versiones'
     case 'car_charge_draft':
       return '/mi-vigo/borradores'
+    case 'car_beta':
+      return '/mi-vigo'
     default:
       if (n.part_purchase_id) return '/cuidar/repuestos'
       if (n.service_entry_id) return '/costos'

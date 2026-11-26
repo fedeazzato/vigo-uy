@@ -23,7 +23,7 @@ install anything the maintainer did not sign; it can only withhold.
 | D5 | Rollout: `rollout <percent> <salt>` is signed. `update_check` returns the newest unexpired release whose rollout includes the car: bucket = first two bytes of sha256(`salt:device_id`) mod 100 (same as the car's `Policy.bucket`; JDK-made vectors in the tests). A car outside the newest rollout gets the previous release (normally what it has). |
 | D6 | Server-side withhold: `rollout_cap` per release (moderator: Pausar = 0, Limitar a 10/25/50 %, Sin límite). Effective percent = min(signed, cap): the server can lower, never raise. Raising = re-sign with the same salt and a higher serial. |
 | D7 | Kill switch = a signed manifest with `kill 1` (pre-signed kill manifests kept offline by the maintainer) published through the same form; a kill release is served to every car regardless of percent. |
-| D8 | Beta (O4): moderators mark vehicles as beta (`car_update_beta`); a beta car takes beta and stable releases at any percent. The car's own `channel` field is recorded, not trusted. |
+| D8 | Beta (O4): moderators mark vehicles as beta (`car_update_beta`), or owners ask from Mi Vigo and the maintainer approves ("Pedir beta" below, 0084); a beta car takes beta and stable releases at any percent. The car's own `channel` field is recorded, not trusted. |
 | D9 | Google software (O6): `notice` lines only. Members read the notices of the release their car would see through `car_update_notices()` (notice lines only, never the rest of the manifest); "Estado del auto" shows those newer than the versionCode the car reported. |
 | D10 | Privacy: `update_check` sends channel, firmware id, installed versionCodes of our packages + `com.google.android.gms` + `com.waze`, updater phase and last line. Stored as ONE row per vehicle (`car_update_status`), no history. |
 
@@ -77,3 +77,38 @@ folder or cars. Page `/novedades` (linked from Mi Vigo). Tests: `src/lib/carRele
 - O-N1 (owner): anon may call it (page works signed out). Revoke anon to make it members-only.
 - Gap left: Mi Vigo on the car does not show the note text (the note is not in the signed manifest; adding it to the `update_check`
   reply is an Edge Function change). Mi Vigo could link to `/novedades` instead.
+
+## Pedir beta (owner request 2026-11-25, branch `feature/beta-requests`)
+
+Owners ask to join beta testing of car updates themselves instead of asking a moderator. Migration
+`0084_car_beta_requests.sql` (**NOT applied**; no Edge Function change, nothing to deploy server-side besides the migration).
+
+- **Who may ask / leave:** the same people who may act on the car (0070 `can_control_car`: the vehicle's creator and members
+  with the `control` role). View-only members and people without a vehicle get `allowed:false`; the card stays hidden.
+- **Mi Vigo › Configuración y service › "🧪 Probar versiones beta"** (`src/components/CarBetaCard.tsx`, shown only with a
+  connected screen): "Tu auto recibe las versiones nuevas de las mejoras antes que el resto. Pueden tener algún error chico, y
+  podés salir cuando quieras." States: offer ("Quiero probar las versiones beta") → "Pedido enviado. Te avisamos cuando lo
+  revisemos." + "Cancelar pedido" → beta ("Tu auto está en beta." + "Salir de beta") or rejected ("Tu último pedido no fue
+  aprobado esta vez. Podés volver a pedirlo." + the button again). Leaving / cancelling is immediate, nobody approves it.
+- **Moderación › Versiones del auto:** card "🧪 Pedidos para probar beta" right above "Autos conectados", shown only when there
+  are pending requests: car (member names), who asked, when, "sin pantalla conectada" / "Ya es beta", **Aprobar** /
+  **Rechazar**. Approve = `admin_set_car_beta(vehicle, true)`, i.e. exactly "Marcar como beta", and like it only for car
+  release publishers (0080); every active moderator can read the list.
+- **The requester sees the result** on the card (beta / rejected) and as a notification `car_beta` ("Tu auto ya recibe las
+  versiones beta" / "Tu pedido para probar versiones beta no fue aprobado esta vez", opens `/mi-vigo`). Publishers get a
+  `car_beta_request` notification per new request (opens `/moderacion?tab=versiones`).
+- **SQL:** table `car_beta_requests` (status pending/approved/rejected/cancelled, at most one pending per car by a partial
+  unique index; RLS on, no grants, no policies). Functions: `my_car_beta()` (jsonb `{allowed, beta, request}`),
+  `request_car_beta()` (returns `pending` / `beta`; at most 5 requests per car per day), `leave_car_beta()` (removes the
+  `car_update_beta` row and cancels a pending request), moderator `admin_list_car_beta_requests()`, publisher
+  `admin_decide_car_beta_request(p_request, p_approve)`. Notifications kind check gains `car_beta_request`, `car_beta`.
+  Anon surface added: none.
+- **Before the migration is applied** the card stays hidden (`my_car_beta` missing → null) and the moderation list is empty
+  (PGRST202 treated as "no requests"); nothing breaks.
+- **Car side:** nothing changes. `update_check` already reads `car_update_beta` (beta cars take beta + stable at any
+  percent); after leaving, the car sees only stable releases from its next check and keeps what it installed until a stable
+  release with a higher serial arrives (serials are global, D4).
+- Tests: `src/lib/carBeta.test.ts`, `src/components/CarBetaCard.test.tsx`, `src/components/CarReleasesAdmin.test.tsx`,
+  `src/lib/notifications.test.ts`.
+- Go live: owner OK → `npx supabase db push` (applies 0084) → `npm run gen:types` (replaces the hand-added function types)
+  → deploy the site.

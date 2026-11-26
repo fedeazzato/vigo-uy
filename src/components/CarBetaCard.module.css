@@ -1,0 +1,22 @@
+/* "Probar versiones beta" (specs/car-updates.md "Pedir beta"): same text scale as "Dónde está tu auto" (CarLocationCard). */
+.text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.state {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.primaryBtn {
+  composes: primary from '../styles/buttons.module.css';
+}
+
+.secondaryBtn {
+  composes: secondary from '../styles/buttons.module.css';
+}

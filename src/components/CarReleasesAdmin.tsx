@@ -15,6 +15,7 @@ import {
   type CarReleaseRow,
   type CarUpdateAdminRow,
 } from '../lib/carReleases'
+import { decideBetaRequest, fetchBetaRequests, type BetaRequestAdminRow } from '../lib/carBeta'
 import formStyles from '../styles/formControls.module.css'
 import listStyles from '../styles/listPatterns.module.css'
 
@@ -164,14 +165,16 @@ function PublishForm({ onDone }: { onDone: () => void }) {
 export default function CarReleasesAdmin() {
   const [releases, setReleases] = useState<CarReleaseRow[] | null>(null)
   const [cars, setCars] = useState<CarUpdateAdminRow[]>([])
+  const [requests, setRequests] = useState<BetaRequestAdminRow[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   async function load() {
-    const [r, c] = await Promise.all([fetchReleases(), fetchCarUpdates()])
+    const [r, c, q] = await Promise.all([fetchReleases(), fetchCarUpdates(), fetchBetaRequests()])
     setReleases(r.rows)
     setCars(c.rows)
-    setError(r.error ?? c.error)
+    setRequests(q.rows)
+    setError(r.error ?? c.error ?? q.error)
   }
 
   useEffect(() => {
@@ -279,6 +282,43 @@ export default function CarReleasesAdmin() {
         <h2 className={listStyles.sectionTitle}>Publicar una versión</h2>
         <PublishForm onDone={() => void load()} />
       </Card>
+
+      {/* Owners ask from Mi Vigo › "Probar versiones beta" (migration 0084); Aprobar = "Marcar como beta". Shown only when
+          there is something to decide. */}
+      {requests.length > 0 && (
+        <Card>
+          <h2 className={listStyles.sectionTitle}>🧪 Pedidos para probar beta</h2>
+          <ul className={listStyles.list} aria-label="Pedidos para probar beta">
+            {requests.map((q) => (
+              <li key={q.id} className={listStyles.item}>
+                <div className={listStyles.itemTitle}>
+                  {q.members || 'Auto sin miembros'} {q.beta && <Badge>Ya es beta</Badge>}
+                </div>
+                <div className={listStyles.itemMeta}>
+                  Pedido por {q.requested_by_name || 'alguien que ya no está'} · {fmtDate(q.created_at)}
+                  {!q.linked && ' · sin pantalla conectada'}
+                </div>
+                <div className={listStyles.itemActions}>
+                  <button
+                    className={listStyles.actionLink}
+                    disabled={busy}
+                    onClick={() => void act(decideBetaRequest(q.id, true))}
+                  >
+                    Aprobar
+                  </button>
+                  <button
+                    className={listStyles.actionLink}
+                    disabled={busy}
+                    onClick={() => void act(decideBetaRequest(q.id, false))}
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card>
         <h2 className={listStyles.sectionTitle}>🚗 Autos conectados</h2>

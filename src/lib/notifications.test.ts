@@ -11,6 +11,8 @@ describe('notifications helpers', () => {
     expect(notificationLink({ ...n, kind: 'comment' })).toBe('/comunidad')
     expect(notificationLink({ ...n, kind: 'reaction', part_purchase_id: 'p' })).toBe('/cuidar/repuestos')
     expect(notificationLink({ ...n, kind: 'comment', service_entry_id: 's' })).toBe('/costos')
+    expect(notificationLink({ ...n, kind: 'car_beta_request' })).toBe('/moderacion?tab=versiones')
+    expect(notificationLink({ ...n, kind: 'car_beta' })).toBe('/mi-vigo')
   })
 
   it('counts unread rows', () => {

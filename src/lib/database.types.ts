@@ -2516,6 +2516,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_decide_car_beta_request: {
+        Args: { p_approve: boolean; p_request: string }
+        Returns: undefined
+      }
+      admin_list_car_beta_requests: {
+        Args: never
+        Returns: {
+          beta: boolean
+          created_at: string
+          id: string
+          linked: boolean
+          members: string
+          requested_by_name: string
+          vehicle_id: string
+        }[]
+      }
       admin_list_car_updates: {
         Args: never
         Returns: {
@@ -2833,10 +2849,12 @@ export type Database = {
       is_p256_spki: { Args: { k: string }; Returns: boolean }
       is_user_banned: { Args: { uid: string }; Returns: boolean }
       join_vehicle_by_code: { Args: { code: string }; Returns: string }
+      leave_car_beta: { Args: never; Returns: undefined }
       mark_notifications_read: {
         Args: { p_ids?: string[] }
         Returns: undefined
       }
+      my_car_beta: { Args: never; Returns: Json }
       my_car_role: { Args: never; Returns: string }
       ocm_tiles_begin: {
         Args: { p_can_fetch?: boolean; p_client: string; p_tiles: string[] }
@@ -2852,6 +2870,7 @@ export type Database = {
         Args: { target_user: string }
         Returns: undefined
       }
+      request_car_beta: { Args: never; Returns: string }
       request_car_pairing: {
         Args: { p_device_name?: string; p_public_key: string }
         Returns: Json
