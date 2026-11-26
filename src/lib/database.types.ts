@@ -109,6 +109,51 @@ export type Database = {
           },
         ]
       }
+      car_beta_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          requested_by: string | null
+          status: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          requested_by?: string | null
+          status?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          requested_by?: string | null
+          status?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_beta_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_beta_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_charge_drafts: {
         Row: {
           avg_kw: number | null
