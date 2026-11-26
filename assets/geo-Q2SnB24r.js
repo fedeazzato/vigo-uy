@@ -1,1 +1,0 @@
-var e=6371;function t(e){return e*Math.PI/180}function n(n,r){let i=t(r.lat-n.lat),a=t(r.lng-n.lng),o=t(n.lat),s=t(r.lat),c=Math.sin(i/2)**2+Math.cos(o)*Math.cos(s)*Math.sin(a/2)**2;return 2*e*Math.asin(Math.sqrt(c))}export{n as t};

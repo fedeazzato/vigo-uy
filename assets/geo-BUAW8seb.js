@@ -1,0 +1,1 @@
+function e(e){return e*Math.PI/180}function t(t,n){let r=e(n.lat-t.lat),i=e(n.lng-t.lng),a=e(t.lat),o=e(n.lat),s=Math.sin(r/2)**2+Math.cos(a)*Math.cos(o)*Math.sin(i/2)**2;return 12742*Math.asin(Math.sqrt(s))}export{t};
