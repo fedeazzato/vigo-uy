@@ -546,6 +546,116 @@ export type Database = {
           },
         ]
       }
+      car_guest_requests: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          device_id: string | null
+          expires_at: string | null
+          finished_at: string | null
+          id: string
+          result_code: string | null
+          sent_at: string | null
+          state: string
+          vehicle_id: string
+          want: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          device_id?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          id?: string
+          result_code?: string | null
+          sent_at?: string | null
+          state?: string
+          vehicle_id: string
+          want: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          device_id?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          id?: string
+          result_code?: string | null
+          sent_at?: string | null
+          state?: string
+          vehicle_id?: string
+          want?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_guest_requests_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_guest_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_guest_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      car_guest_state: {
+        Row: {
+          device_id: string | null
+          reported_at: string
+          since: string | null
+          state: string
+          vehicle_id: string
+        }
+        Insert: {
+          device_id?: string | null
+          reported_at?: string
+          since?: string | null
+          state: string
+          vehicle_id: string
+        }
+        Update: {
+          device_id?: string | null
+          reported_at?: string
+          since?: string | null
+          state?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_guest_state_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "car_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_guest_state_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicle_km_leaderboard"
+            referencedColumns: ["vehicle_id"]
+          },
+          {
+            foreignKeyName: "car_guest_state_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_location: {
         Row: {
           acc_m: number | null
@@ -2669,8 +2779,8 @@ export type Database = {
         Args: { p_vehicle_id: string }
         Returns: boolean
       }
-      cancel_car_order: { Args: { p_id: string }; Returns: Json }
       cancel_car_guest_request: { Args: never; Returns: Json }
+      cancel_car_order: { Args: { p_id: string }; Returns: Json }
       car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
       car_device_accept: {
         Args: { p_device_id: string; p_kind?: string; p_ts: number }
@@ -2691,6 +2801,20 @@ export type Database = {
           fw_version: string
           last_seen_month: string
         }[]
+      }
+      car_guest_expire: { Args: { p_vehicle: string }; Returns: undefined }
+      car_guest_notify: {
+        Args: {
+          p_actor: string
+          p_except: string
+          p_title: string
+          p_vehicle: string
+        }
+        Returns: undefined
+      }
+      car_guest_store: {
+        Args: { p_device: string; p_guest: Json; p_vehicle: string }
+        Returns: Json
       }
       car_heartbeat: {
         Args: { p_app_version?: string; p_device_id: string; p_ts: number }
@@ -2721,7 +2845,12 @@ export type Database = {
       car_order_sender: { Args: { p_display_name: string }; Returns: string }
       car_orders_expire: { Args: { p_vehicle_id: string }; Returns: undefined }
       car_poll_orders: {
-        Args: { p_device_id: string; p_guest?: Json; p_live: Json; p_ts: number }
+        Args: {
+          p_device_id: string
+          p_guest?: Json
+          p_live: Json
+          p_ts: number
+        }
         Returns: Json
       }
       car_release_notes: {
@@ -2936,11 +3065,11 @@ export type Database = {
           title: string
         }[]
       }
+      set_car_guest_mode: { Args: { p_on: boolean }; Returns: Json }
       set_vehicle_data_sharing: {
         Args: { p_key: string; p_on: boolean }
         Returns: undefined
       }
-      set_car_guest_mode: { Args: { p_on: boolean }; Returns: Json }
       set_vehicle_member_role: {
         Args: { p_role: string; p_user: string }
         Returns: undefined
