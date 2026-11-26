@@ -82,19 +82,18 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
     expect(first.textContent).toBe('Modo invitado')
     const card = first.parentElement as HTMLElement
     expect(card.className).toMatch(/highlight/)
-    expect(within(card).getByText(/lavadero o con un valet/)).toBeTruthy()
+    expect(within(card).getByText(/lavadero o en un estacionamiento/)).toBeTruthy()
     expect(within(card).getByText(/tu PIN/)).toBeTruthy()
     expect(within(card).getByText(/WikiVigo en tu celular/)).toBeTruthy()
     const all = installerFeatures.groups.flatMap((g) => g.features)
     expect(all.filter((f) => f.highlight).map((f) => f.id)).toEqual(['modo-invitado'])
   })
 
-  it('badges only where meaningful: YouTube y Chrome optional, Spotify de fábrica, the rest none', () => {
+  it('badges only where meaningful: YouTube y Chrome optional, the rest none', () => {
     renderPage()
     const card = (n: string) => screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
     expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
-    expect(within(card('Spotify')).getByText('Ya viene de fábrica')).toBeTruthy()
-    for (const n of ['Waze', 'Android Auto sin cable', 'Modo invitado', 'Centro de Energía inteligente'])
+    for (const n of ['Waze', 'Spotify y TikTok', 'Android Auto sin cable', 'Modo invitado', 'Centro de Energía inteligente'])
       expect(within(card(n)).queryByText(/Opcional|Ya viene de fábrica/)).toBeNull()
     expect(screen.queryByText(/Se están probando/)).toBeNull()
     for (const g of installerFeatures.groups)

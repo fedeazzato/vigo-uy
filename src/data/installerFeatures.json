@@ -11,7 +11,7 @@
           "name": "Modo invitado",
           "status": "incluido",
           "highlight": true,
-          "benefit": "¿Dejás el auto en el lavadero o con un valet? Con un toque se esconden tus viajes, tu Dashcam, tus fotos, tus avisos y las apps con tus cuentas. Para volver a verlos, tu PIN.",
+          "benefit": "¿Dejás el auto en el lavadero o en un estacionamiento? Con un toque se esconden tus viajes, tu Dashcam, tus fotos, tus avisos y las apps con tus cuentas. Para volver a verlos, tu PIN.",
           "where": "En el auto: Mi Vigo › Modo invitado, o pedíselo a Copiloto. También lo prendés y lo apagás desde WikiVigo en tu celular (Mi Vigo), aunque no estés en el auto.",
           "needs": "Para manejarlo desde el celular, la pantalla conectada a WikiVigo.",
           "photo": "Mi Vigo › Modo invitado con «Activar», y una app mostrando «Modo invitado» en lugar de los datos"
@@ -110,12 +110,12 @@
         },
         {
           "id": "spotify",
-          "name": "Spotify",
-          "status": "deFabrica",
-          "benefit": "Ya viene en la Vigo de fábrica. El instalador no lo cambia.",
-          "where": "Donde estaba: en las apps de fábrica.",
-          "needs": "Tu cuenta de Spotify e internet en la pantalla.",
-          "photo": "Spotify abierto en la pantalla"
+          "name": "Spotify y TikTok",
+          "status": "incluido",
+          "benefit": "Vienen en la pantalla pero escondidas de fábrica. El instalador las deja a mano, para tu música y tus videos.",
+          "where": "En la pantalla de inicio, con las demás apps.",
+          "needs": "Tu cuenta de Spotify (y la de TikTok, si querés) e internet en la pantalla.",
+          "photo": "Las apps de Spotify y TikTok en la pantalla de inicio"
         },
         {
           "id": "espanol",

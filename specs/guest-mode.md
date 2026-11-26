@@ -8,7 +8,7 @@ mode support, the web card does not exist (no build flag needed, see R4).
 ## Context
 
 `vigo-hack/docs/GUEST_MODE.md` (plan + owner decisions 2026-11-26): guest mode hides the owner's personal info on the car screen
-while the car is left with someone else (car wash, valet). It is entered on the car (Mi Vigo button, Copiloto voice) and left on the
+while the car is left with someone else (car wash, parking garage). It is entered on the car (Mi Vigo button, Copiloto voice) and left on the
 car **only with the owner PIN** (Mi Vigo). Owner decision **D7**: WikiVigo is the second way to switch it on/off, and the recovery when
 the PIN is forgotten. Remote exit is authorised by the account role, not by the PIN; the PIN digits never leave the car (plan 2.3).
 

@@ -140,7 +140,7 @@ export async function cancelCarGuest(): Promise<string | null> {
 
 export const GUEST_EXPLAINER =
   'Esconde tus datos personales en la pantalla del auto (viajes, ubicación, Dashcam, fotos y las apps con tu cuenta) cuando ' +
-  'se lo dejás a otra persona, por ejemplo en el lavadero o a un valet. El auto se maneja igual. En el auto se sale con tu PIN; ' +
+  'se lo dejás a otra persona, por ejemplo en el lavadero o en un estacionamiento. El auto se maneja igual. En el auto se sale con tu PIN; ' +
   'desde acá lo podés desactivar sin PIN, también si te lo olvidaste.'
 
 export const GUEST_FOOTER =

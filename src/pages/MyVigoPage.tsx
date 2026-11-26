@@ -192,7 +192,7 @@ export default function MyVigoPage() {
           <Card>
             <CardTitle icon="🛠️">Mejoras de la comunidad</CardTitle>
             <p className={styles.vaultText}>
-              Sumale a tu Vigo las aplicaciones de la comunidad: el modo invitado para el lavadero o el valet,
+              Sumale a tu Vigo las aplicaciones de la comunidad: el modo invitado para el lavadero o el estacionamiento,
               Waze en la pantalla, Android Auto sin cable, un copiloto que te entiende en español, un Centro de
               Energía inteligente (tus viajes y cargas registrados solos, los cargadores de Uruguay a un toque),
               una dashcam, la radio y la galería mejoradas y tu auto en WikiVigo. Se
