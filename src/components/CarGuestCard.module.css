@@ -1,0 +1,46 @@
+/* "Modo invitado" (specs/guest-mode.md R4): same text scale as "Probar versiones beta" / "Dónde está tu auto". */
+.text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.state {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.detail {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.primaryBtn {
+  composes: primary from '../styles/buttons.module.css';
+}
+
+.secondaryBtn {
+  composes: secondary from '../styles/buttons.module.css';
+}
+
+.footer {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}

@@ -26,6 +26,7 @@ import { CAR_REMOTE_ENABLED } from '../lib/carRemoteFlag'
 import { CAR_LOCATION_ENABLED } from '../lib/carLocationFlag'
 import CarLocationCard from '../components/CarLocationCard'
 import CarBetaCard from '../components/CarBetaCard'
+import CarGuestCard from '../components/CarGuestCard'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { formatDate } from '../lib/format'
@@ -172,6 +173,8 @@ export default function MyVigoPage() {
           </p>
           {/* One "Tu auto ahora" card: status, online/offline and the Control remoto buttons (owner decision 2026-11-24 #2). */}
           <CarStatusCard />
+          {/* "Modo invitado" (specs/guest-mode.md R4): creator / control only, once the car reported support. */}
+          <CarGuestCard />
           {/* "Dónde está tu auto" (specs/car-location.md R5): creator / control only, opt-in on the car. */}
           {CAR_LOCATION_ENABLED && <CarLocationCard />}
           {CAR_REMOTE_ENABLED && <SendPlaceCard />}

@@ -2670,6 +2670,7 @@ export type Database = {
         Returns: boolean
       }
       cancel_car_order: { Args: { p_id: string }; Returns: Json }
+      cancel_car_guest_request: { Args: never; Returns: Json }
       car_clean_text: { Args: { max_len: number; t: string }; Returns: string }
       car_device_accept: {
         Args: { p_device_id: string; p_kind?: string; p_ts: number }
@@ -2720,7 +2721,7 @@ export type Database = {
       car_order_sender: { Args: { p_display_name: string }; Returns: string }
       car_orders_expire: { Args: { p_vehicle_id: string }; Returns: undefined }
       car_poll_orders: {
-        Args: { p_device_id: string; p_live: Json; p_ts: number }
+        Args: { p_device_id: string; p_guest?: Json; p_live: Json; p_ts: number }
         Returns: Json
       }
       car_release_notes: {
@@ -2888,6 +2889,7 @@ export type Database = {
       generate_car_pairing_code: { Args: never; Returns: string }
       generate_family_invite_code: { Args: never; Returns: string }
       generate_join_code: { Args: never; Returns: string }
+      get_car_guest_mode: { Args: never; Returns: Json }
       get_car_location: { Args: never; Returns: Json }
       is_active_moderator: { Args: { uid: string }; Returns: boolean }
       is_car_release_publisher: { Args: { uid: string }; Returns: boolean }
@@ -2938,6 +2940,7 @@ export type Database = {
         Args: { p_key: string; p_on: boolean }
         Returns: undefined
       }
+      set_car_guest_mode: { Args: { p_on: boolean }; Returns: Json }
       set_vehicle_member_role: {
         Args: { p_role: string; p_user: string }
         Returns: undefined

@@ -86,7 +86,14 @@ export type CarRequest =
   | { action: 'heartbeat'; ts: number; deviceId: string; appVersion: string | null }
   | { action: 'unpair'; ts: number; deviceId: string }
   | { action: 'status'; ts: number; deviceId: string; status: CarStatus }
-  | { action: 'orders'; ts: number; deviceId: string; live: CarStatus | null }
+  | {
+      action: 'orders'
+      ts: number
+      deviceId: string
+      live: CarStatus | null
+      /** Guest mode report (specs/guest-mode.md); absent = an older car, which gets the old reply. */
+      guest?: CarGuestReport
+    }
   | {
       action: 'order_result'
       ts: number
@@ -650,6 +657,80 @@ export function parseLocationPoint(raw: unknown): CarLocationPoint | null {
   return { kind: o.kind, observed_at: o.observed_at, lat, lon, acc_m: acc }
 }
 
+// ---- Guest mode (specs/guest-mode.md): rides on the orders poll, "guest" in the body and in the reply
+
+export const GUEST_STATES = ['on', 'off', 'unsupported'] as const
+export type GuestState = (typeof GUEST_STATES)[number]
+/** How the car handled a request (car-reported only). */
+export const GUEST_RESULT_CODES = ['ok', 'unsupported', 'no_pin', 'failed', 'expired_on_car'] as const
+export type GuestResultCode = (typeof GUEST_RESULT_CODES)[number]
+const GUEST_KEYS = ['state', 'since', 'last_id', 'last_code']
+
+/** The car's guest mode report: its actual state and the last request it handled (id + code, both or neither). */
+export interface CarGuestReport {
+  state: GuestState
+  since: number | null
+  last_id: string | null
+  last_code: GuestResultCode | null
+}
+
+/** The pending request handed to the car (what car_poll_orders returns, passed through field by field). */
+export interface CarGuestRequestOut {
+  id: string
+  want: 'on' | 'off'
+  at: number
+  expires_at: number | null
+  sender: string | null
+}
+
+/**
+ * Validates the "guest" object of an orders poll; null = bad_request. Unknown keys are refused (a PIN or anything else can never
+ * travel here). `since` only with state "on"; `last_id` and `last_code` both set or both null; missing optional keys = null.
+ */
+export function parseGuestReport(raw: unknown): CarGuestReport | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  if (Object.keys(o).some((k) => !GUEST_KEYS.includes(k))) return null
+  if (typeof o.state !== 'string' || !(GUEST_STATES as readonly string[]).includes(o.state)) return null
+  const state = o.state as GuestState
+  const since = o.since ?? null
+  if (since !== null && (!isMs(since) || state !== 'on')) return null
+  const lastId = o.last_id ?? null
+  const lastCode = o.last_code ?? null
+  if ((lastId === null) !== (lastCode === null)) return null
+  if (lastId !== null && (typeof lastId !== 'string' || !UUID.test(lastId))) return null
+  if (
+    lastCode !== null &&
+    (typeof lastCode !== 'string' || !(GUEST_RESULT_CODES as readonly string[]).includes(lastCode))
+  )
+    return null
+  return {
+    state,
+    since,
+    last_id: lastId === null ? null : lastId.toLowerCase(),
+    last_code: lastCode as GuestResultCode | null,
+  }
+}
+
+/** car_poll_orders' "guest": null, or the pending request; undefined when malformed. */
+function guestOut(v: unknown): CarGuestRequestOut | null | undefined {
+  if (v === null || v === undefined) return null
+  const r = asRecord(v)
+  if (!r) return undefined
+  const expires = r.expires_at ?? null
+  const sender = r.sender ?? null
+  if (
+    typeof r.id !== 'string' ||
+    !UUID.test(r.id) ||
+    (r.want !== 'on' && r.want !== 'off') ||
+    !isMs(r.at) ||
+    (expires !== null && !isMs(expires)) ||
+    (sender !== null && typeof sender !== 'string')
+  )
+    return undefined
+  return { id: r.id, want: r.want, at: r.at, expires_at: expires, sender }
+}
+
 // ---- Car updates (specs/car-updates.md): update_check / update_report
 
 export const UPDATE_PHASES = ['IDLE', 'STAGING', 'STAGED', 'APPLYING', 'TRIAL', 'ROLLING_BACK'] as const
@@ -869,6 +950,12 @@ export function parseCarRequest(text: string): CarRequest | null {
       if (o.live !== undefined && o.live !== null) {
         live = parseCarStatus(o.live, true)
         if (!live) return null
+      }
+      // Guest mode (specs/guest-mode.md): optional; when present it must be valid (JSON null = absent).
+      if (o.guest !== undefined && o.guest !== null) {
+        const guest = parseGuestReport(o.guest)
+        if (!guest) return null
+        return { action: 'orders', ts, deviceId: o.device_id.toLowerCase(), live, guest }
       }
       return { action: 'orders', ts, deviceId: o.device_id.toLowerCase(), live }
     }
@@ -1230,6 +1317,8 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
               p_device_id: parsed.deviceId,
               p_ts: parsed.ts,
               p_live: parsed.live,
+              // only when the car sent it: an older car's call (and reply) stay exactly as before
+              ...(parsed.guest ? { p_guest: parsed.guest } : {}),
             })
           : await deps.rpc('car_order_result', {
               p_device_id: parsed.deviceId,
@@ -1254,6 +1343,14 @@ export async function handleCarDevice(req: Request, deps: HandlerDeps): Promise<
       if (!orders) {
         log('orders: malformed result from car_poll_orders')
         return fail('server', now)
+      }
+      if (parsed.action === 'orders' && parsed.guest) {
+        const guest = guestOut(orderRow.guest)
+        if (guest === undefined) {
+          log('orders: malformed guest from car_poll_orders')
+          return fail('server', now)
+        }
+        return reply(200, { ok: true, orders, guest }, now)
       }
       return reply(200, { ok: true, orders }, now)
     }

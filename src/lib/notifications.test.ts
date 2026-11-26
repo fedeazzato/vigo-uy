@@ -13,6 +13,7 @@ describe('notifications helpers', () => {
     expect(notificationLink({ ...n, kind: 'comment', service_entry_id: 's' })).toBe('/costos')
     expect(notificationLink({ ...n, kind: 'car_beta_request' })).toBe('/moderacion?tab=versiones')
     expect(notificationLink({ ...n, kind: 'car_beta' })).toBe('/mi-vigo')
+    expect(notificationLink({ ...n, kind: 'car_guest_mode' })).toBe('/mi-vigo')
   })
 
   it('counts unread rows', () => {

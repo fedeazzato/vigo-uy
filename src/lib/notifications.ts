@@ -18,6 +18,7 @@ export type NotificationKind =
   | 'car_charge_draft'
   | 'car_beta_request'
   | 'car_beta'
+  | 'car_guest_mode'
 
 export type FollowKind = 'station' | 'trip_log' | 'service_entry' | 'part_purchase'
 export interface FollowTarget {
@@ -42,6 +43,7 @@ export const NOTIFICATION_ICON: Record<NotificationKind, string> = {
   car_charge_draft: '🔌',
   car_beta_request: '🧪',
   car_beta: '🧪',
+  car_guest_mode: '🕶️',
 }
 
 // Where tapping a notification goes. Content has no per-item page yet, so
@@ -61,6 +63,7 @@ export function notificationLink(
     case 'car_charge_draft':
       return '/mi-vigo/borradores'
     case 'car_beta':
+    case 'car_guest_mode':
       return '/mi-vigo'
     default:
       if (n.part_purchase_id) return '/cuidar/repuestos'
