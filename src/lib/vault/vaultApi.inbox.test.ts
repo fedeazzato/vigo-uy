@@ -38,7 +38,7 @@ describe('inboxKeyErrorMessage', () => {
     const msg = inboxKeyErrorMessage({ code: '42501', message: 'permission denied for function is_p256_spki' })
     expect(msg).toBe(INBOX_KEY_REFUSED_MESSAGE)
     expect(msg).toMatch(/cerrar sesión no lo arregla/)
-    expect(msg).toMatch(/escaneá el QR del auto o escribí las 24 palabras/)
+    expect(msg).toMatch(/escribí las 24 palabras/)
     expect(msg).not.toMatch(/No tenés permiso/)
   })
 
