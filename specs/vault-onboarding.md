@@ -94,6 +94,12 @@ both sides):
 `car_vault_recipient`, `car_vault_inbox_key`, `car_vault_inbox_put` (service_role only). Hand-written types in
 `src/lib/database.types.ts` until `gen:types`.
 
+**Fix 0086 (owner car session 2026-11-26):** «Permitir que el auto envíe la frase» always failed with the generic "No tenés
+permiso" because `vault_inbox_keys.public_key`'s CHECK called `public.is_p256_spki`, whose EXECUTE 0045 revoked from
+`authenticated`; this is the only table the browser inserts into directly, so Postgres refused with 42501 "permission denied for
+function is_p256_spki". `0086_vault_inbox_key_check.sql` replaces that CHECK with the same regex inline (the helper stays
+client-unreachable). The page now shows a specific message for this action (`inboxKeyErrorMessage` in `vaultApi.ts`).
+
 **Edge Function:** `car-device` actions `inbox_key` (returns user_id, key_id, public_key) and `inbox_put` (kind, key_id, epk, iv,
 ciphertext), strict parsing, errors `no_inbox` 404 and `stale_key` 409. NOTE: the car-status-e1 branch also changes `carDevice.ts`
 (action `status`); merging both needs a small manual merge of the parser/handler switch.
@@ -114,7 +120,7 @@ vigo-hack `accounts_proxy/MIVIGO.md` section 10.
 mapping, malformed row).
 
 **Owner steps to switch it on** (each needs the owner's OK):
-1. `npx supabase db push` (applies 0049; check it applies cleanly after whatever is merged first).
+1. `npx supabase db push` (applies 0049 and 0086; check it applies cleanly after whatever is merged first).
 2. `npm run gen:types` (should equal the hand-written types; commit).
 3. `npx supabase functions deploy car-device --no-verify-jwt`.
 4. Build and deploy the site with `VITE_VAULT_INBOX=1` (e.g. add it to `.env.production` or the deploy command).

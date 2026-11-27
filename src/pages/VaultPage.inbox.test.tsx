@@ -57,6 +57,7 @@ vi.mock('../components/QrScanner', () => ({ default: () => <div /> }))
 
 import VaultPage from './VaultPage'
 import { encryptForInbox } from '../lib/vault/inbox'
+import { publishInboxKey } from '../lib/vault/vaultApi'
 
 // The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
 vi.mock('../lib/confirmDialog', () => ({ confirmDialog: (m: string) => Promise.resolve(window.confirm(m)) }))
@@ -114,6 +115,18 @@ describe('VaultPage inbox card', () => {
     fireEvent.click(saveButtons[saveButtons.length - 1])
     await waitFor(() => expect(db.items.some((i) => i.kind === 'dashcam_recovery')).toBe(true))
     expect(db.inbox).toHaveLength(0)
+  })
+
+  it('a server refusal shows what is wrong and what to do, and keeps the card off', async () => {
+    const refused = 'El servidor de WikiVigo rechazó la llave para recibir la frase del auto. (prueba)'
+    vi.mocked(publishInboxKey).mockResolvedValueOnce({ keyId: null, error: refused })
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Activar con huella o rostro' }))
+    await screen.findByText('¡Listo! La bóveda quedó activada con esta llave.')
+    fireEvent.click(await screen.findByRole('button', { name: 'Permitir que el auto envíe la frase' }))
+    await screen.findByText(refused)
+    expect(db.items.some((i) => i.kind === 'vault_inbox_private_key')).toBe(false)
+    expect(screen.getByText('Sin activar.')).toBeTruthy()
   })
 
   it('a sending can be discarded', async () => {
