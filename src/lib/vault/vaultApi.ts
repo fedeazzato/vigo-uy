@@ -100,7 +100,7 @@ export async function fetchInbox(): Promise<InboxSnapshot & { error: string | nu
 }
 
 const INBOX_FALLBACK =
-  'Mientras tanto podés guardarla igual: en la tarjeta «Frase de recuperación de la dashcam» de esta página, escaneá el QR del auto o escribí las 24 palabras.'
+  'Mientras tanto podés guardarla igual: en la tarjeta «Frase de recuperación de la dashcam» de esta página, escribí las 24 palabras (en el auto: Dashcam › Ajustes › Frase de recuperación › Ver las palabras).'
 
 /** Shown when the server refuses the inbox key (42501): not the user's session, so "cerrá sesión" would not help. */
 export const INBOX_KEY_REFUSED_MESSAGE =
