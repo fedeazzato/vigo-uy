@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Alert } from '../components/UI'
-import QrScanner from '../components/QrScanner'
+import RecoveryWordsForm from '../components/RecoveryWordsForm'
 import RecoveryWordsGrid from '../components/RecoveryWordsGrid'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -26,13 +26,8 @@ import {
   saveSecret,
   type VaultUser,
 } from '../lib/vault/vault'
-import {
-  RECOVERY_WORD_COUNT,
-  RecoveryCodeError,
-  canonicalRecoveryCode,
-  recoveryErrorMessage,
-  splitRecoveryWords,
-} from '../lib/vault/recoveryCode'
+import { canonicalRecoveryCode, recoveryErrorMessage } from '../lib/vault/recoveryCode'
+import { SECRET_INPUT_PROPS } from '../lib/vault/secretInput'
 import { generatePassphrase, passphraseError } from '../lib/vault/passphrase'
 import type { VaultPlaintext } from '../lib/vault/envelope'
 import { formatTimestampDate } from '../lib/carLink'
@@ -49,17 +44,6 @@ import { confirmDialog } from '../lib/confirmDialog'
 // saving. Nothing here logs or sends a plaintext value.
 
 const REVEAL_MS = 2 * 60 * 1000
-
-// No spell check (Chrome's enhanced spell check sends text to Google), no
-// autofill, no autocorrect, no password-manager prompts.
-const SECRET_INPUT_PROPS = {
-  autoComplete: 'off',
-  autoCorrect: 'off',
-  autoCapitalize: 'none',
-  spellCheck: false,
-  'data-1p-ignore': true,
-  'data-lpignore': 'true',
-} as const
 
 const COPY_WARNING =
   'Copiado. Lo copiado queda en el portapapeles: otras apps pueden leerlo. Pegalo donde lo necesites y después copiá otra cosa.'
@@ -286,48 +270,12 @@ function KeysCard({ shared }: { shared: Shared }) {
 
 function DashcamCard({ shared }: { shared: Shared }) {
   const item = itemOf(shared.items, 'dashcam_recovery')
-  const [mode, setMode] = useState<'scan' | 'paste' | null>(null)
-  const [draft, setDraft] = useState('')
-  const [draftStatus, setDraftStatus] = useState<{ ok: boolean; text: string } | null>(null)
+  const [typing, setTyping] = useState(false)
   const [revealed, setRevealed, hide] = useRevealed()
   const fb = useFeedback()
-  const validation = useRef(0)
   const canUse = shared.prfUsable && shared.keys.length > 0
 
-  function onDraftChange(text: string) {
-    setDraft(text)
-    const id = ++validation.current
-    if (!text.trim()) {
-      setDraftStatus(null)
-      return
-    }
-    canonicalRecoveryCode(text).then(
-      () => {
-        if (validation.current === id) setDraftStatus({ ok: true, text: 'Las 24 palabras pasan el control.' })
-      },
-      (error: unknown) => {
-        if (validation.current !== id) return
-        const count = splitRecoveryWords(text).length
-        const typing =
-          error instanceof RecoveryCodeError &&
-          error.kind === 'wrong_word_count' &&
-          count < RECOVERY_WORD_COUNT
-        setDraftStatus({
-          ok: false,
-          text: typing ? `${count} de ${RECOVERY_WORD_COUNT} palabras.` : recoveryErrorMessage(error),
-        })
-      }
-    )
-  }
-
-  function closeDraft() {
-    validation.current++
-    setDraft('')
-    setDraftStatus(null)
-    setMode(null)
-  }
-
-  async function store(input: string, source: 'qr' | 'paste'): Promise<boolean> {
+  async function store(input: string): Promise<boolean> {
     let canonical: string
     try {
       canonical = await canonicalRecoveryCode(input)
@@ -337,7 +285,7 @@ function DashcamCard({ shared }: { shared: Shared }) {
     }
     if (item && !(await confirmDialog('Ya hay una frase guardada. ¿Reemplazarla por esta?'))) return false
     shared.setBusy(true)
-    const result = await saveSecret(shared.user, shared.keys, 'dashcam_recovery', canonical, source)
+    const result = await saveSecret(shared.user, shared.keys, 'dashcam_recovery', canonical, 'typed')
     shared.setBusy(false)
     if (result.error) {
       fb.setError(result.error)
@@ -349,15 +297,9 @@ function DashcamCard({ shared }: { shared: Shared }) {
     return true
   }
 
-  async function onScanned(payload: string) {
-    setMode(null)
+  async function onSaveTyped(text: string) {
     fb.reset()
-    await store(payload, 'qr')
-  }
-
-  async function onSavePasted() {
-    fb.reset()
-    if (await store(draft, 'paste')) closeDraft()
+    if (await store(text)) setTyping(false)
   }
 
   async function reveal() {
@@ -396,14 +338,18 @@ function DashcamCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📹">Frase de recuperación de la dashcam</CardTitle>
       <p className={styles.text}>
-        Las 24 palabras que abren las grabaciones de la dashcam si el auto vuelve a fábrica. La app Dashcam
-        también te las muestra la primera vez que se abre. Si la Dashcam todavía no está instalada en el auto,
-        aún no hay frase.
+        Las 24 palabras que abren las grabaciones de la dashcam si el auto vuelve a fábrica. Para verlas en el
+        auto: Dashcam › Ajustes › Frase de recuperación (te pide el PIN) › «Ver las palabras». Si la Dashcam
+        todavía no está instalada en el auto, aún no hay frase.
       </p>
       <p className={styles.status}>
         {item
           ? `Guardada · última actualización el ${formatTimestampDate(item.updated_at)}`
-          : 'Todavía no guardaste la frase. Buscala en el auto: Dashcam › Ajustes › Frase de recuperación (te pide el PIN) y escaneá el QR que aparece.'}
+          : `Todavía no guardaste la frase. Tocá «Escribir las 24 palabras» y copialas de la pantalla del auto.${
+              VAULT_INBOX_ENABLED
+                ? ' O dejá que el auto la envíe solo: mirá «Recibir la frase desde el auto», acá abajo.'
+                : ''
+            }`}
       </p>
       <Feedback error={fb.error} message={fb.message} />
 
@@ -427,71 +373,26 @@ function DashcamCard({ shared }: { shared: Shared }) {
         </div>
       )}
 
-      {mode === 'scan' && (
-        <QrScanner onResult={(payload) => void onScanned(payload)} onCancel={() => setMode(null)} />
+      {typing && (
+        <RecoveryWordsForm
+          busy={shared.busy}
+          onSave={(text) => void onSaveTyped(text)}
+          onCancel={() => setTyping(false)}
+        />
       )}
 
-      {mode === 'paste' && (
-        <div className={formStyles.field}>
-          <label className={formStyles.label} htmlFor="vault-recovery-words">
-            Las 24 palabras
-          </label>
-          <textarea
-            id="vault-recovery-words"
-            className={`${formStyles.input} ${formStyles.textarea} ${styles.mono}`}
-            value={draft}
-            onChange={(e) => onDraftChange(e.target.value)}
-            rows={4}
-            placeholder="1 palabra 2 palabra 3 palabra…"
-            aria-describedby="vault-recovery-status"
-            {...SECRET_INPUT_PROPS}
-          />
-          <span
-            id="vault-recovery-status"
-            className={draftStatus && !draftStatus.ok ? formStyles.hintWarning : formStyles.hint}
-          >
-            {draftStatus?.text ??
-              'En orden, separadas por espacios o una por línea. También sirve el texto del QR.'}
-          </span>
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.primaryBtn}
-              onClick={() => void onSavePasted()}
-              disabled={shared.busy || !draftStatus?.ok}
-            >
-              Guardar en la bóveda
-            </button>
-            <button type="button" className={styles.secondaryBtn} onClick={closeDraft}>
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {mode === null && (
+      {!typing && (
         <div className={styles.actions}>
           <button
             type="button"
             className={styles.primaryBtn}
             onClick={() => {
               fb.reset()
-              setMode('scan')
+              setTyping(true)
             }}
             disabled={!canUse || shared.busy}
           >
-            Escanear el QR del auto
-          </button>
-          <button
-            type="button"
-            className={styles.secondaryBtn}
-            onClick={() => {
-              fb.reset()
-              setMode('paste')
-            }}
-            disabled={!canUse || shared.busy}
-          >
-            Pegar las palabras
+            Escribir las 24 palabras
           </button>
           {item && !revealed && (
             <button
@@ -595,9 +496,17 @@ function InboxCard({ shared }: { shared: Shared }) {
     <Card>
       <CardTitle icon="📥">Recibir la frase desde el auto</CardTitle>
       <p className={styles.text}>
-        Así el auto envía la frase de la dashcam directo a tu bóveda, sin escanear nada: en el auto, Dashcam ›
-        Ajustes › Frase de recuperación › «Enviar a mi bóveda». Viaja cifrada: WikiVigo no puede leerla.
+        Así el auto envía la frase de la dashcam directo a tu bóveda, sin escribir nada. Viaja cifrada: WikiVigo
+        no puede leerla.
       </p>
+      <ol className={styles.howTo}>
+        <li>Acá, una sola vez: «Permitir que el auto envíe la frase».</li>
+        <li>
+          En el auto: «Guardar la clave en mi WikiVigo» en la primera pantalla de la Dashcam, o Dashcam › Ajustes ›
+          Frase de recuperación (te pide el PIN) › «Guardar en WikiVigo».
+        </li>
+        <li>De vuelta acá: «Guardar en la bóveda» en el envío que aparece.</li>
+      </ol>
       <p className={styles.status}>
         {inbox === null
           ? 'Cargando…'

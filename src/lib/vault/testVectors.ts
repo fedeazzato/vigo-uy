@@ -50,5 +50,5 @@ export const RECOVERY_VECTORS: ReadonlyArray<{ scalarHex: string; words: string 
   },
 ]
 
-/** The 4th vector as the car's QR shows it. */
+/** The 4th vector in the prefixed text form (`vigovault:dashcam:1:`). */
 export const SAMPLE_PAYLOAD = `vigovault:dashcam:1:${RECOVERY_VECTORS[3].words}`

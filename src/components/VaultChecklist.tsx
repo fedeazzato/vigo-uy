@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { Alert } from './UI'
-import QrScanner from './QrScanner'
+import RecoveryWordsForm from './RecoveryWordsForm'
 import { useAuth } from '../context/AuthContext'
 import { fetchVault, type VaultSnapshot } from '../lib/vault/vaultApi'
 import { detectPrfSupport, PRF_UNSUPPORTED_MESSAGE, type PrfSupport } from '../lib/vault/webauthn'
 import { enrolPasskey, guessDeviceLabel, saveSecret, type VaultUser } from '../lib/vault/vault'
 import { canonicalRecoveryCode, recoveryErrorMessage } from '../lib/vault/recoveryCode'
 import { generatePassphrase } from '../lib/vault/passphrase'
+import { VAULT_INBOX_ENABLED } from '../lib/vault/inboxFlag'
 import type { VaultItemKind } from '../types'
 import styles from './VaultChecklist.module.css'
 import vaultStyles from '../pages/VaultPage.module.css'
@@ -31,7 +32,7 @@ export default function VaultChecklist() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState<Step[]>([])
-  const [scanning, setScanning] = useState(false)
+  const [typing, setTyping] = useState(false)
   const [shown, setShown] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
@@ -118,23 +119,23 @@ export default function VaultChecklist() {
     await reload()
   }
 
-  async function onScanned(payload: string) {
-    setScanning(false)
+  async function saveWords(text: string) {
     setError(null)
     let canonical: string
     try {
-      canonical = await canonicalRecoveryCode(payload)
+      canonical = await canonicalRecoveryCode(text)
     } catch (e) {
       setError(recoveryErrorMessage(e))
       return
     }
     setBusy(true)
-    const r = await saveSecret(user_, keys, 'dashcam_recovery', canonical, 'qr')
+    const r = await saveSecret(user_, keys, 'dashcam_recovery', canonical, 'typed')
     setBusy(false)
     if (r.error) {
       setError(r.error)
       return
     }
+    setTyping(false)
     await reload()
   }
 
@@ -239,12 +240,25 @@ export default function VaultChecklist() {
           </div>
           {!done.dashcam && !isSkipped('dashcam') && !unsupported && (
             <>
+              {VAULT_INBOX_ENABLED && (
+                <p className={styles.hint}>
+                  <strong>Que la envíe el auto:</strong> en la <Link to="/mi-vigo/boveda">Bóveda</Link> tocá
+                  «Permitir que el auto envíe la frase»; después, en el auto, «Guardar la clave en mi WikiVigo» (o
+                  Dashcam › Ajustes › Frase de recuperación › «Guardar en WikiVigo»); al final volvé a la Bóveda y
+                  tocá «Guardar en la bóveda».
+                </p>
+              )}
               <p className={styles.hint}>
-                En el auto: <strong>Dashcam › Ajustes › Frase de recuperación</strong> (después del PIN) y escaneá el QR
-                que muestra el auto. Si todavía no instalaste la Dashcam, dejalo para más tarde.
+                <strong>Escribirla vos:</strong> en el auto, Dashcam › Ajustes › Frase de recuperación (te pide el
+                PIN) › «Ver las palabras», y copiá acá las 24. Si todavía no instalaste la Dashcam, dejalo para más
+                tarde.
               </p>
-              {scanning ? (
-                <QrScanner onResult={(p) => void onScanned(p)} onCancel={() => setScanning(false)} />
+              {typing ? (
+                <RecoveryWordsForm
+                  busy={busy}
+                  onSave={(text) => void saveWords(text)}
+                  onCancel={() => setTyping(false)}
+                />
               ) : (
                 <div className={vaultStyles.actions}>
                   <button
@@ -252,11 +266,11 @@ export default function VaultChecklist() {
                     className={vaultStyles.primaryBtn}
                     onClick={() => {
                       setError(null)
-                      setScanning(true)
+                      setTyping(true)
                     }}
                     disabled={busy || !done.key}
                   >
-                    Escanear el QR del auto
+                    Escribir las 24 palabras
                   </button>
                   <button type="button" className={vaultStyles.secondaryBtn} onClick={() => skip('dashcam')}>
                     Todavía no tengo la Dashcam

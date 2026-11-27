@@ -27,19 +27,23 @@ vi.mock('../lib/vault/vaultApi', () => ({
   deleteVaultItem: vi.fn(() => Promise.resolve({ error: null })),
 }))
 
-const scan = vi.hoisted(() => ({ payload: '' }))
-vi.mock('./QrScanner', () => ({
-  default: ({ onResult, onCancel }: { onResult: (p: string) => void; onCancel: () => void }) => (
-    <div>
-      <button onClick={() => onResult(scan.payload)}>Simular lectura del QR</button>
-      <button onClick={onCancel}>Cancelar</button>
-    </div>
-  ),
+const flag = vi.hoisted(() => ({ on: false }))
+vi.mock('../lib/vault/inboxFlag', () => ({
+  get VAULT_INBOX_ENABLED() {
+    return flag.on
+  },
 }))
 
 import VaultChecklist from './VaultChecklist'
 
 let fake: FakeAuthenticator
+
+async function typeAndSave(text: string) {
+  fireEvent.click(screen.getByRole('button', { name: 'Escribir las 24 palabras' }))
+  fireEvent.change(screen.getByLabelText('Las 24 palabras'), { target: { value: text } })
+  await screen.findByText('Las 24 palabras pasan el control.')
+  fireEvent.click(screen.getByRole('button', { name: 'Guardar en la bóveda' }))
+}
 
 function renderIt() {
   return render(
@@ -50,6 +54,7 @@ function renderIt() {
 }
 
 beforeEach(() => {
+  flag.on = false
   db.keys = []
   db.items = []
   auth.current = { user: { id: '6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f', email: 'ana@x.uy' }, status: 'signedIn' }
@@ -69,7 +74,7 @@ describe('VaultChecklist', () => {
     expect(screen.getAllByText('Por hacer')).toHaveLength(3)
     // steps 2 and 3 need the passkey first
     expect(screen.getByRole('button', { name: 'Generar una clave fuerte' }).hasAttribute('disabled')).toBe(true)
-    expect(screen.getByRole('button', { name: 'Escanear el QR del auto' }).hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: 'Escribir las 24 palabras' }).hasAttribute('disabled')).toBe(true)
     expect(screen.getByText(/Dashcam › Ajustes › Frase de recuperación/)).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Activar con huella o rostro' }))
@@ -83,10 +88,14 @@ describe('VaultChecklist', () => {
     // the stored value is ciphertext, never the shown passphrase
     expect(db.items[0].ciphertext).not.toContain(shown.textContent ?? '')
 
-    scan.payload = WORDS
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear el QR del auto' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura del QR' }))
+    // the passphrase is still on screen; the words field appears next to it
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Escribir las 24 palabras' }).hasAttribute('disabled')).toBe(false)
+    )
+    await typeAndSave(WORDS)
     await screen.findByText(/Todo listo/)
+    for (const w of WORDS.split(' ')) expect(JSON.stringify(db.items)).not.toContain(w)
+    expect(screen.queryByLabelText('Las 24 palabras')).toBeNull()
     expect(db.items.map((i) => i.kind).sort()).toEqual(['dashcam_recovery', 'settings_backup_passphrase'])
     expect(screen.getAllByText('Listo')).toHaveLength(3)
   })
@@ -99,7 +108,7 @@ describe('VaultChecklist', () => {
     expect(screen.getAllByText('Listo')).toHaveLength(2)
     expect(screen.queryByRole('button', { name: 'Activar con huella o rostro' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Generar una clave fuerte' })).toBeNull()
-    expect(screen.getByRole('button', { name: 'Escanear el QR del auto' }).hasAttribute('disabled')).toBe(false)
+    expect(screen.getByRole('button', { name: 'Escribir las 24 palabras' }).hasAttribute('disabled')).toBe(false)
   })
 
   it('every step can be skipped and then points to the Bóveda', async () => {
@@ -112,14 +121,33 @@ describe('VaultChecklist', () => {
     expect(screen.getByRole('link', { name: 'Ir a la Bóveda' }).getAttribute('href')).toBe('/mi-vigo/boveda')
   })
 
-  it('rejects a bad QR with the recovery-code message and saves nothing', async () => {
+  it('words that fail the check cannot be saved', async () => {
     db.keys = [{ credential_id: 'a', prf_salt: 's', wrapped_dk: 'w', label: 'Pixel', created_at: '2026-11-20T00:00:00Z' }]
     renderIt()
-    scan.payload = 'esto no es una frase'
-    fireEvent.click(await screen.findByRole('button', { name: 'Escanear el QR del auto' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura del QR' }))
-    await waitFor(() => expect(screen.getAllByRole('alert').length).toBeGreaterThan(0))
+    fireEvent.click(await screen.findByRole('button', { name: 'Escribir las 24 palabras' }))
+    const list = WORDS.split(' ')
+    ;[list[0], list[1]] = [list[1], list[0]]
+    fireEvent.change(screen.getByLabelText('Las 24 palabras'), { target: { value: list.join(' ') } })
+    await screen.findByText(/no pasan el control/)
+    expect(screen.getByRole('button', { name: 'Guardar en la bóveda' }).hasAttribute('disabled')).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.queryByLabelText('Las 24 palabras')).toBeNull()
     expect(db.items).toHaveLength(0)
+  })
+
+  it('offers the car-send way only when the inbox is enabled, and never a QR scan', async () => {
+    const view = renderIt()
+    await screen.findByText('3. Frase de recuperación de la dashcam')
+    expect(screen.queryByText('Que la envíe el auto:')).toBeNull()
+    expect(screen.getByText('Escribirla vos:')).toBeTruthy()
+    view.unmount()
+
+    flag.on = true
+    renderIt()
+    const car = await screen.findByText('Que la envíe el auto:')
+    expect(car.parentElement?.textContent).toContain('«Permitir que el auto envíe la frase»')
+    expect(car.parentElement?.textContent).toContain('«Guardar la clave en mi WikiVigo»')
+    expect(document.body.textContent).not.toMatch(/escane|QR/i)
   })
 
   it('without PRF shows the message and offers no step actions', async () => {

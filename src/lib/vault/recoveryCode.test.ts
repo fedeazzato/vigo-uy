@@ -7,7 +7,6 @@ import {
   canonicalRecoveryCode,
   decodeRecoveryWords,
   encodeRecoveryScalar,
-  isVaultPayload,
   recoveryErrorMessage,
   splitRecoveryWords,
 } from './recoveryCode'
@@ -119,8 +118,6 @@ describe('errors', () => {
   it('other payload versions or kinds are refused', async () => {
     expect((await errorOf(`vigovault:dashcam:2:${list.join(' ')}`)).kind).toBe('unsupported_payload')
     expect((await errorOf(`vigovault:other:1:${list.join(' ')}`)).kind).toBe('unsupported_payload')
-    expect(isVaultPayload('VIGOVAULT:dashcam:1:x')).toBe(true)
-    expect(isVaultPayload('https://example.com')).toBe(false)
   })
 
   it('messages are Spanish and never echo the words', async () => {

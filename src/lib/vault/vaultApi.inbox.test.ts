@@ -2,11 +2,19 @@
 // server's refusal must not read like a session problem.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const calls = vi.hoisted(() => ({
-  deleteError: null as unknown,
-  insertResult: { data: null as { key_id: string } | null, error: null as unknown },
-  inserted: [] as unknown[],
-}))
+interface Calls {
+  deleteError: unknown
+  insertResult: { data: { key_id: string } | null; error: unknown }
+  inserted: unknown[]
+}
+
+const calls = vi.hoisted(
+  (): Calls => ({
+    deleteError: null,
+    insertResult: { data: null, error: null },
+    inserted: [],
+  })
+)
 
 const fromMock = vi.hoisted(() =>
   vi.fn(() => ({

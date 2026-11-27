@@ -53,8 +53,6 @@ vi.mock('../lib/vault/vaultApi', () => ({
   }),
 }))
 
-vi.mock('../components/QrScanner', () => ({ default: () => <div /> }))
-
 import VaultPage from './VaultPage'
 import { encryptForInbox } from '../lib/vault/inbox'
 import { publishInboxKey } from '../lib/vault/vaultApi'
@@ -127,6 +125,15 @@ describe('VaultPage inbox card', () => {
     await screen.findByText(refused)
     expect(db.items.some((i) => i.kind === 'vault_inbox_private_key')).toBe(false)
     expect(screen.getByText('Sin activar.')).toBeTruthy()
+  })
+
+  it('explains both ways: the car sends it, or the 24 words are typed', async () => {
+    renderPage()
+    const hint = await screen.findByText(/Todavía no guardaste la frase\./)
+    expect(hint.textContent).toContain('Escribir las 24 palabras')
+    expect(hint.textContent).toContain('Recibir la frase desde el auto')
+    expect(screen.getByText(/«Guardar la clave en mi WikiVigo»/)).toBeTruthy()
+    expect(document.body.textContent).not.toMatch(/escane/i)
   })
 
   it('a sending can be discarded', async () => {

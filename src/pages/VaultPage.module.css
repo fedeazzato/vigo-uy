@@ -8,6 +8,11 @@
   color: var(--text-primary);
 }
 
+.howTo {
+  composes: text;
+  padding-left: 20px;
+}
+
 .status {
   margin: 0 0 12px;
   font-size: 13px;

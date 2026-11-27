@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router'
 import { FakeAuthenticator, uninstallFakeAuthenticator } from '../test/fakeAuthenticator'
 import { RECOVERY_VECTORS, SAMPLE_PAYLOAD } from '../lib/vault/testVectors'
 import { PRF_UNSUPPORTED_MESSAGE } from '../lib/vault/webauthn'
+import { saveSecret } from '../lib/vault/vault'
 import type { VaultItemRow, VaultKeyRow } from '../types'
 
 const WORDS = RECOVERY_VECTORS[3].words
@@ -44,17 +45,6 @@ vi.mock('../lib/vault/vaultApi', () => ({
   }),
 }))
 
-// The camera is covered by QrScanner.test.tsx; here a button stands in for a successful scan.
-const scan = vi.hoisted(() => ({ payload: '' }))
-vi.mock('../components/QrScanner', () => ({
-  default: ({ onResult, onCancel }: { onResult: (p: string) => void; onCancel: () => void }) => (
-    <div>
-      <button onClick={() => onResult(scan.payload)}>Simular lectura del QR</button>
-      <button onClick={onCancel}>Cancelar</button>
-    </div>
-  ),
-}))
-
 import VaultPage from './VaultPage'
 
 // The site's confirm dialog (lib/confirmDialog) is answered through the window.confirm spy below.
@@ -78,8 +68,8 @@ async function enrol(label = 'Pixel de Ana') {
   await screen.findByText('¡Listo! La bóveda quedó activada con esta llave.')
 }
 
-async function pasteAndSave(text: string) {
-  fireEvent.click(screen.getByRole('button', { name: 'Pegar las palabras' }))
+async function typeAndSave(text: string) {
+  fireEvent.click(screen.getByRole('button', { name: 'Escribir las 24 palabras' }))
   fireEvent.change(screen.getByLabelText('Las 24 palabras'), { target: { value: text } })
   await screen.findByText('Las 24 palabras pasan el control.')
   fireEvent.click(screen.getByRole('button', { name: 'Guardar en la bóveda' }))
@@ -117,7 +107,7 @@ describe('VaultPage', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Activar con huella o rostro' })).toBeNull()
     )
-    expect(screen.getByRole('button', { name: 'Escanear el QR del auto' }).hasAttribute('disabled')).toBe(
+    expect(screen.getByRole('button', { name: 'Escribir las 24 palabras' }).hasAttribute('disabled')).toBe(
       true
     )
     expect(screen.queryByLabelText(/contraseña/i)).toBeNull()
@@ -145,15 +135,20 @@ describe('VaultPage', () => {
     renderPage()
     await enrol()
     const hint = await screen.findByText(/Todavía no guardaste la frase\./)
-    expect(hint.textContent).toContain('Dashcam › Ajustes › Frase de recuperación')
-    expect(hint.textContent).toContain('escaneá el QR que aparece')
+    expect(hint.textContent).toContain('«Escribir las 24 palabras»')
+    // flag off in tests: no pointer to the car-send card (see VaultPage.inbox.test.tsx)
+    expect(hint.textContent).not.toContain('Recibir la frase desde el auto')
+    expect(
+      screen.getByText(/Dashcam › Ajustes › Frase de recuperación \(te pide el PIN\) › «Ver las palabras»/)
+    ).toBeTruthy()
+    expect(document.body.textContent).not.toMatch(/escane|QR del auto/i)
     expect(screen.getByText(/todavía no está instalada en el auto/)).toBeTruthy()
   })
 
   it('validates pasted words live and saves only ciphertext', async () => {
     renderPage()
     await enrol()
-    fireEvent.click(screen.getByRole('button', { name: 'Pegar las palabras' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Escribir las 24 palabras' }))
     const box = screen.getByLabelText('Las 24 palabras')
     expect(box.getAttribute('spellcheck')).toBe('false')
     expect(box.getAttribute('autocomplete')).toBe('off')
@@ -167,7 +162,7 @@ describe('VaultPage', () => {
     expect(screen.getByRole('button', { name: 'Guardar en la bóveda' }).hasAttribute('disabled')).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
 
-    await pasteAndSave(list.map((w, i) => `${i + 1}. ${w.toUpperCase()}`).join('\n'))
+    await typeAndSave(list.map((w, i) => `${i + 1}. ${w.toUpperCase()}`).join('\n'))
     expect(db.items.map((i) => i.kind)).toEqual(['dashcam_recovery'])
     for (const w of list) expect(JSON.stringify(db.sent)).not.toContain(w)
     // the draft is gone after saving
@@ -175,26 +170,35 @@ describe('VaultPage', () => {
     expect(screen.getByText(/Guardada · última actualización/)).toBeTruthy()
   })
 
-  it('saves from the car QR and refuses a payload of another version', async () => {
+  it('refuses a prefixed payload of another version and saves nothing', async () => {
     renderPage()
     await enrol()
-    scan.payload = SAMPLE_PAYLOAD.replace(':1:', ':2:')
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear el QR del auto' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura del QR' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Escribir las 24 palabras' }))
+    fireEvent.change(screen.getByLabelText('Las 24 palabras'), {
+      target: { value: SAMPLE_PAYLOAD.replace(':1:', ':2:') },
+    })
     await screen.findByText(/es de una versión más nueva/)
+    expect(screen.getByRole('button', { name: 'Guardar en la bóveda' }).hasAttribute('disabled')).toBe(true)
     expect(db.items).toHaveLength(0)
+  })
 
-    scan.payload = SAMPLE_PAYLOAD
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear el QR del auto' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura del QR' }))
-    await screen.findByText('Frase guardada cifrada en la bóveda.')
-    expect(db.items).toHaveLength(1)
+  it('still opens a phrase saved by the removed QR scan (source "qr")', async () => {
+    const first = renderPage()
+    await enrol()
+    const user = { id: '6f1c2b4e-8d3a-4c5b-9e7f-0a1b2c3d4e5f', name: 'ana@x.uy' }
+    expect(await saveSecret(user, db.keys, 'dashcam_recovery', WORDS, 'qr')).toEqual({ error: null })
+    first.unmount()
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Ver' }))
+    const grid = await screen.findByRole('list', { name: 'Frase de recuperación' })
+    expect(within(grid).getAllByRole('listitem')).toHaveLength(24)
+    expect(grid.textContent).toContain('rivup')
   })
 
   it('reveals the words after a passkey confirmation and hides them when the page is hidden', async () => {
     renderPage()
     await enrol()
-    await pasteAndSave(WORDS)
+    await typeAndSave(WORDS)
     const assertions = fake.getCalls.length
     fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
     const grid = await screen.findByRole('list', { name: 'Frase de recuperación' })
@@ -217,7 +221,7 @@ describe('VaultPage', () => {
   it('a cancelled confirmation shows nothing', async () => {
     renderPage()
     await enrol()
-    await pasteAndSave(WORDS)
+    await typeAndSave(WORDS)
     fake.nextError = 'NotAllowedError'
     fireEvent.click(screen.getByRole('button', { name: 'Ver' }))
     await screen.findByText(/Se canceló la confirmación/)
@@ -255,7 +259,7 @@ describe('VaultPage', () => {
   it('removing the last passkey warns plainly and deletes what was stored', async () => {
     renderPage()
     await enrol()
-    await pasteAndSave(WORDS)
+    await typeAndSave(WORDS)
     fireEvent.click(screen.getByRole('button', { name: 'Quitar Pixel de Ana' }))
     await screen.findByText('«Pixel de Ana» se quitó de la bóveda.')
     expect(String(confirmSpy.mock.calls[confirmSpy.mock.calls.length - 1]?.[0])).toMatch(

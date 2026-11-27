@@ -13,7 +13,10 @@ import { concatBytes, utf8 } from './encoding'
 
 export const RECOVERY_WORD_COUNT = 24
 export const RECOVERY_SECRET_BYTES = 32
-/** What the car's QR holds: this prefix, then the 24 words joined by single spaces. Not a URL on purpose. */
+/**
+ * Prefixed text form the car's Dashcam used to show as a QR (removed 2026-11):
+ * this prefix, then the 24 words joined by single spaces. Still accepted.
+ */
 export const DASHCAM_PAYLOAD_PREFIX = 'vigovault:dashcam:1:'
 const PAYLOAD_SCHEME = 'vigovault:'
 const DOMAIN = utf8('vigo-dashcam-recovery-v1')
@@ -93,8 +96,8 @@ export async function encodeRecoveryScalar(scalar: Uint8Array): Promise<string[]
 }
 
 /**
- * Accepts what people scan or paste: the car's QR payload
- * (`vigovault:dashcam:1:<words>`) or the 24 words in any layout. Returns the
+ * Accepts what people type or paste (and what the car sends): the 24 words in
+ * any layout, or the prefixed form `vigovault:dashcam:1:<words>`. Returns the
  * canonical form (24 lowercase words, single spaces) after the full check;
  * throws RecoveryCodeError otherwise.
  */
@@ -111,23 +114,19 @@ export async function canonicalRecoveryCode(input: string): Promise<string> {
   return words.join(' ')
 }
 
-export function isVaultPayload(text: string): boolean {
-  return text.trim().toLowerCase().startsWith(PAYLOAD_SCHEME)
-}
-
 /** Spanish message for the page (never contains the words). */
 export function recoveryErrorMessage(error: unknown): string {
   if (!(error instanceof RecoveryCodeError)) return 'No se pudo revisar la frase. Intentá de nuevo.'
   switch (error.kind) {
     case 'wrong_word_count':
       return error.position === 0
-        ? 'Pegá las 24 palabras de la frase de recuperación.'
+        ? 'Escribí las 24 palabras de la frase de recuperación.'
         : `La frase tiene 24 palabras y acá hay ${error.position}.`
     case 'unknown_word':
       return `La palabra ${error.position} no está en la lista de la dashcam. Revisá cómo está escrita.`
     case 'bad_checksum':
       return 'Las palabras no pasan el control: alguna está mal escrita o fuera de orden.'
     case 'unsupported_payload':
-      return 'Ese código no es la frase de la dashcam (o es de una versión más nueva). Actualizá WikiVigo o pegá las palabras.'
+      return 'Ese código no es la frase de la dashcam (o es de una versión más nueva). Actualizá WikiVigo o escribí las 24 palabras.'
   }
 }

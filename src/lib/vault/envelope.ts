@@ -20,6 +20,8 @@ const DK_BYTES = 32
 const TAG_BYTES = 16
 export const WRAPPED_DK_BYTES = IV_BYTES + DK_BYTES + TAG_BYTES
 
+// 'qr' and 'paste' are no longer written (the QR scan was removed, 2026-11-27)
+// but stay readable: items saved with them must keep opening.
 export type VaultSource = 'qr' | 'paste' | 'generated' | 'typed' | 'car'
 
 /** What is inside an item's ciphertext (never stored or sent in the clear). */

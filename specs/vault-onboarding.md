@@ -2,6 +2,11 @@
 
 **Status:** Phase A implemented. Phase B implemented and deployed (owner 2026-11-21: "do as much as you can now"). Phase C: see its section.
 
+**2026-11-27 (owner decision): no QR for the words.** The car's Dashcam no longer shows a QR with the recovery words, so the web
+scanner («Escanear el QR del auto») was removed from the Bóveda and from the post-pairing checklist. Two ways remain: the car sends
+the words (Phase C) or the owner types the 24 words. The car's pairing QR (`#/mi-vigo/vincular?c=CODE`) is unchanged: the phone's
+camera app opens it. Context and Phase C's design note below are kept as history.
+
 ## Context
 
 At the car on 2026-11-21 the owner scanned the car's pairing QR (Mi Vigo, `#/mi-vigo/vincular?c=CODE`), got "Vinculado", and then
@@ -15,12 +20,14 @@ The project's end goal is to reach non-technical Vigo owners (`vigo-hack/wikivig
 
 ## Phase A (implemented): say where the words are
 
-- R-A1. The dashcam card's description names the place: app **Dashcam › Ajustes › Frase de recuperación** (after the PIN), "escanea el
-  QR que muestra el auto"; the first-run screen of the Dashcam also shows it.
-- R-A2. The empty state ("Todavía no guardaste la frase.") carries the same hint, so the next step is visible without reading the card.
+- R-A1. The dashcam card's description names the place: app **Dashcam › Ajustes › Frase de recuperación** (after the PIN) ›
+  «Ver las palabras».
+- R-A2. The empty state ("Todavía no guardaste la frase.") says what to do («Escribir las 24 palabras», copied from the car's
+  screen; with the inbox enabled, also "Recibir la frase desde el auto"), so the next step is visible without reading the card.
 - R-A3. The hint mentions that the Dashcam app must be installed on the car (until then there are no words).
 - Files: `src/pages/VaultPage.tsx`, `src/pages/VaultPage.test.tsx`, `specs/secret-vault.md` (R6 line).
-- Test plan: the empty dashcam card shows "Dashcam › Ajustes › Frase de recuperación" and "escanea el QR que muestra el auto".
+- Test plan: the dashcam card shows "Dashcam › Ajustes › Frase de recuperación (te pide el PIN) › «Ver las palabras»"; the empty state
+  names "Escribir las 24 palabras" (and the car-send card only with the inbox on); no text asks to scan the words.
 
 ## Phase B (implemented): guided flow right after "Vinculado"
 
@@ -29,15 +36,17 @@ After `claim_car_pairing` succeeds, `LinkCarPage` shows a short checklist instea
    second device later.
 2. **Clave de respaldo de ajustes**: "Generar una clave fuerte" inline (same component as the Bóveda card), saved with the passkey
    prompt already open in step 1 when possible (one UV prompt per operation stays: R1 "no caching").
-3. **Frase de la dashcam**: if the paired car reports the Dashcam app (car-link device info), "En el auto: Dashcam › Ajustes › Frase de
-   recuperación → escanea el QR"; the scanner opens here. If not installed: "Cuando instales la Dashcam".
+3. **Frase de la dashcam**: two ways, in Rioplatense Spanish. "Que la envíe el auto" (only with the inbox enabled: «Permitir que el
+   auto envíe la frase» in the Bóveda, then «Guardar la clave en mi WikiVigo» / «Guardar en WikiVigo» on the car, then «Guardar en la
+   bóveda») and "Escribirla vos" (Dashcam › Ajustes › Frase de recuperación › «Ver las palabras»; «Escribir las 24 palabras» opens
+   the field here).
 Each step can be skipped ("Más tarde") and is then shown in the Bóveda. Nothing new is stored; it only re-arranges existing actions.
 
 As built (2026-11-21): `src/components/VaultChecklist.tsx` rendered by `LinkCarPage` after a successful claim. The car does not report
-whether the Dashcam is installed (no such device info today), so step 3 always shows the hint with "Todavía no tengo la Dashcam" as
+whether the Dashcam is installed (no such device info today), so step 3 always shows both hints with "Todavía no tengo la Dashcam" as
 its skip. Steps 2 and 3 need step 1 (the passkey) first. A generated passphrase is shown once (2 min, cleared on hide/pagehide).
 "Guardar una que ya tengo" stays in the Bóveda (linked). Tests: `src/components/VaultChecklist.test.tsx` (order and real state,
-already-saved items, skipping, bad QR saves nothing, no-PRF browser, passphrase hidden on visibilitychange); `LinkCarPage.test.tsx`
+already-saved items, skipping, words that fail the check cannot be saved, no-PRF browser, passphrase hidden on visibilitychange); `LinkCarPage.test.tsx`
 checks the checklist appears after "Vinculado".
 
 ## Phase C (design): no second QR at all: the car sends the words into the vault, still end-to-end
@@ -98,7 +107,8 @@ both sides):
 permiso" because `vault_inbox_keys.public_key`'s CHECK called `public.is_p256_spki`, whose EXECUTE 0045 revoked from
 `authenticated`; this is the only table the browser inserts into directly, so Postgres refused with 42501 "permission denied for
 function is_p256_spki". `0086_vault_inbox_key_check.sql` replaces that CHECK with the same regex inline (the helper stays
-client-unreachable). The page now shows a specific message for this action (`inboxKeyErrorMessage` in `vaultApi.ts`).
+client-unreachable). The page now shows a specific message for this action (`inboxKeyErrorMessage` in `vaultApi.ts`). The owner applied 0086 on
+2026-11-27 (reported by the owner; not re-checked from this repository).
 
 **Edge Function:** `car-device` actions `inbox_key` (returns user_id, key_id, public_key) and `inbox_put` (kind, key_id, epk, iv,
 ciphertext), strict parsing, errors `no_inbox` 404 and `stale_key` 409. NOTE: the car-status-e1 branch also changes `carDevice.ts`
@@ -111,7 +121,8 @@ ciphertext), strict parsing, errors `no_inbox` 404 and `stale_key` 409. NOTE: th
 (reproduces the vector's ciphertext byte for byte), `Client.sendWords` (signed `inbox_key` -> encrypt -> signed `inbox_put`, one
 re-fetch on `stale_key`), `VaultReceiver` (explicit ordered broadcast `com.vigo.mivigo.VAULT_SEND`, signature permission
 `VAULT_SEND`, words never stored or logged), switch `vault_inbox=true` in mivigo.conf (default false). The Dashcam app's
-"Enviar a mi Bóveda" button (recovery-phrase dialog, after the PIN) exists only in a `VAULT_INBOX=1` build. Details and car checks:
+send button (then "Enviar a mi Bóveda"; since Dashcam 0.6 «Guardar la clave en mi WikiVigo» on the first run and
+«Guardar en WikiVigo» in the recovery-phrase dialog, after the PIN) exists only in a `VAULT_INBOX=1` build. Details and car checks:
 vigo-hack `accounts_proxy/MIVIGO.md` section 10.
 
 **Tests:** `inbox.test.ts` (vector, round trip, tamper/wrong user/wrong key_id/wrong key, labels, packing), `vaultInbox.test.ts`
