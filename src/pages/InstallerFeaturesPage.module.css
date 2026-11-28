@@ -53,14 +53,6 @@
   margin-top: 12px;
 }
 
-.shot {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-strong);
-}
-
 .list {
   margin: 0 0 8px;
   padding-left: 20px;

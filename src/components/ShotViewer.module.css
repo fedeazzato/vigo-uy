@@ -1,0 +1,84 @@
+/* Thumbnail: never wider than a comfortable preview, never taller than a third of the screen. */
+.thumb {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: zoom-in;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+}
+
+.overlay {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  /* an opaque page-coloured sheet: the pictures are dark car screens */
+  background: var(--surface);
+}
+
+.close {
+  align-self: flex-start;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  margin: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-title);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+.close:hover {
+  background: var(--fill-hover);
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  padding: 0 8px 8px;
+}
+
+.big {
+  /* auto margins centre it and still allow scrolling to every edge when larger than the screen */
+  margin: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: zoom-in;
+  max-width: 100%;
+}
+
+.big img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100 * var(--vh) - 72px);
+  width: auto;
+  height: auto;
+}
+
+.zoomed {
+  max-width: none;
+  flex-shrink: 0;
+  cursor: zoom-out;
+}
+
+.zoomed img {
+  max-width: none;
+  max-height: none;
+}

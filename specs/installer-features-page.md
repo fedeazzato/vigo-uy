@@ -70,3 +70,8 @@ If a launch item fails its second-car check and is held back, change its card in
 the page goes live; drop a `verify` note once it is confirmed. Preparar mi Vigo (Antes del service) and Mi Vigo's «Mejoras de la
 comunidad» card name the same set. Outside this repo: vigo-hack `installer/windows/LEEME.txt` still describes Waze/Carga as possibly
 missing from the kit.
+
+## Follow-up 2026-11-28 (owner): screenshot size
+Screenshots were too large and opened in another tab. Each is now a thumbnail of at most 420 px (`ShotViewer`); a tap opens it
+over the page (close button, tap outside, Escape), and a tap on the large picture switches between fit and full size (scroll to read
+on a phone). No link leaves the page. Test: open, zoom, close by button and by Escape.

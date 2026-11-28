@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import InstallerFeaturesPage from './InstallerFeaturesPage'
 import { installerFeatures } from '../lib/installerFeatures'
@@ -48,6 +48,25 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
         } else expect(within(card).getByText(`Foto (próximamente): ${f.photo}`)).toBeTruthy()
       }
     }
+  })
+
+  it('opens a screenshot large on this page (no new tab) and closes it again', () => {
+    renderPage()
+    expect(document.querySelector('a[target="_blank"] img')).toBeNull()
+    const shot = installerFeatures.groups.flatMap((g) => g.features.flatMap((f) => f.shots ?? []))[0]
+    const thumb = screen.getByRole('img', { name: shot.alt }).closest('button') as HTMLButtonElement
+    expect(screen.queryByRole('dialog')).toBeNull()
+    fireEvent.click(thumb)
+    const dialog = screen.getByRole('dialog', { name: shot.alt })
+    const zoom = within(dialog).getByRole('button', { name: 'Agrandar' })
+    fireEvent.click(zoom)
+    expect(zoom.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cerrar imagen' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    fireEvent.click(thumb)
+    expect(screen.getByRole('button', { name: 'Agrandar' })).toBeTruthy()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 
   it('ships every screenshot it names', () => {

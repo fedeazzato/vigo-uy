@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { PageHeader, Card, CardTitle, Badge, SectionDivider, Skeleton } from '../components/UI'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import ShotViewer from '../components/ShotViewer'
 import { STATUS_BADGE, installerFeatures } from '../lib/installerFeatures'
 import { useInstallerFeaturesAccess } from '../lib/installerFeaturesAccess'
 import type { InstallerFeature } from '../types'
@@ -29,17 +30,7 @@ function FeatureCard({ feature }: { feature: InstallerFeature }) {
       {feature.shots ? (
         <div className={styles.shots}>
           {feature.shots.map((s) => (
-            // a tap opens the full picture (the car screen is 1920 wide: small text on a phone)
-            <a key={s.src} href={`${BASE}${s.src}`} target="_blank" rel="noopener noreferrer">
-              <img
-                className={styles.shot}
-                src={`${BASE}${s.src}`}
-                alt={s.alt}
-                width={s.width}
-                height={s.height}
-                loading="lazy"
-              />
-            </a>
+            <ShotViewer key={s.src} {...s} src={`${BASE}${s.src}`} />
           ))}
         </div>
       ) : (
