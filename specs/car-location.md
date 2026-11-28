@@ -217,3 +217,7 @@ Undo: a new migration dropping the two tables, the three functions and the trigg
 Car test (vigo-hack NEXT_VISIT / `charge_app/CAR_TEST.md` L1-L6): Mi Vigo 2.16 + Carga 0.12; Carga with "Registrar viajes y cargas"
 and the location permission; Mi Vigo › Ajustes › "Última ubicación"; drive 10 min online → the card shows "En viaje"; park → "Estacionado"
 at the spot; switch to "Ubicación y paradas", two short trips → two spots; back to "Apagado" → the card shows the empty state.
+
+## Follow-up 2026-11-27 (owner): parking list
+The list of the 7-day parkings is collapsed by default (summary with the count). A row is a button: it highlights that parking
+on the map (bigger accent dot, map moved to it, popup open); tapping a marker highlights its row.

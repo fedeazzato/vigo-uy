@@ -45,15 +45,38 @@
 }
 
 .spotsTitle {
-  margin: 0 0 6px;
+  padding: 8px 0;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
+  cursor: pointer;
 }
 
 .spotList {
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row of the list: picks that parking on the map (44 px touch target). */
+.spotButton {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  text-align: left;
+  font: inherit;
   font-size: 13px;
   color: var(--text-primary);
+  background: none;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.spotButton:hover {
+  background: var(--fill-hover);
+}
+.spotButton[aria-pressed='true'] {
+  background: var(--fill-secondary);
+  border-left-color: var(--accent);
 }

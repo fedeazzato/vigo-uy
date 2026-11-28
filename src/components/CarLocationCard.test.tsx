@@ -1,7 +1,7 @@
 // specs/car-location.md R5: "Dónde está tu auto" shows only for creator / control members with a linked screen; empty state
 // tells how to turn it on in the car; the map itself is its own lazy component (stubbed here: Leaflet needs real layout).
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { CarLocationState } from '../lib/carLocation'
 
 const mocks = vi.hoisted(() => ({ fetchCarLocation: vi.fn(), fetchCarLastSeen: vi.fn() }))
@@ -15,7 +15,9 @@ vi.mock('../lib/carRemote', async (importOriginal) => ({
   fetchCarLastSeen: mocks.fetchCarLastSeen,
 }))
 vi.mock('./CarLocationMap', () => ({
-  default: ({ spots }: { spots: unknown[] }) => <div data-testid="map" data-spots={spots.length} />,
+  default: ({ spots, selected }: { spots: unknown[]; selected: string | null }) => (
+    <div data-testid="map" data-spots={spots.length} data-selected={selected ?? ''} />
+  ),
 }))
 
 import CarLocationCard from './CarLocationCard'
@@ -98,8 +100,16 @@ describe('CarLocationCard', () => {
     })
     render(<CarLocationCard />)
     expect(await screen.findByText(/En viaje · hace 4 min/)).toBeTruthy()
-    expect(screen.getByText('Estacionamientos de los últimos 7 días')).toBeTruthy()
-    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+    // collapsed by default, with the count
+    const summary = screen.getByText(/Estacionamientos de los últimos 7 días \(2\)/)
+    expect(summary.closest('details')?.open).toBe(false)
+    expect(screen.getAllByRole('listitem', { hidden: true })).toHaveLength(2)
+    // a row picks that parking on the map
+    fireEvent.click(summary)
+    const rows = screen.getAllByRole('button', { hidden: true, pressed: false })
+    fireEvent.click(rows[0])
+    await waitFor(() => expect(screen.getByTestId('map').dataset.selected).toBeTruthy())
+    expect(rows[0].getAttribute('aria-pressed')).toBe('true')
     expect((await screen.findByTestId('map')).dataset.spots).toBe('2')
     expect(screen.getByText(/y los estacionamientos de 7 días/)).toBeTruthy()
   })

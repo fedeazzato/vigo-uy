@@ -7,12 +7,12 @@ import L from 'leaflet'
 // design token (`var(--accent)`): the markup lives in the page, so the
 // token follows the active theme. Flat like the car's legend dots: a ring in
 // the card colour plus a hairline outline instead of a shadow.
-export function dotIcon(color: string): L.DivIcon {
+export function dotIcon(color: string, size = 16): L.DivIcon {
   return L.divIcon({
     className: '',
-    html: `<span style="display:block;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);outline:1px solid var(--border-strong);background:${color}"></span>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
+    html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:50%;border:2px solid var(--surface);outline:1px solid var(--border-strong);background:${color}"></span>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   })
 }
 

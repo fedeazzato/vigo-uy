@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Card, CardTitle } from './UI'
 import {
   describeCarLocation,
@@ -25,6 +25,8 @@ export default function CarLocationCard() {
   const [state, setState] = useState<CarLocationState | null>(null)
   const [linked, setLinked] = useState(false)
   const [now, setNow] = useState(() => new Date())
+  const [selected, setSelected] = useState<string | null>(null)
+  const mapBox = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -79,9 +81,11 @@ export default function CarLocationCard() {
             {v.state} · {v.when}
             {v.accuracy && <span className={styles.muted}> · {v.accuracy}</span>}
           </p>
-          <Suspense fallback={<div className={styles.mapLoading}>Cargando el mapa…</div>}>
-            <CarLocationMap last={last} spots={state.spots} />
-          </Suspense>
+          <div ref={mapBox}>
+            <Suspense fallback={<div className={styles.mapLoading}>Cargando el mapa…</div>}>
+              <CarLocationMap last={last} spots={state.spots} selected={selected} onSelect={setSelected} />
+            </Suspense>
+          </div>
           <p className={styles.actions}>
             <a href={directionsUrl(last)} target="_blank" rel="noopener noreferrer" className={styles.link}>
               Cómo llegar
@@ -91,21 +95,34 @@ export default function CarLocationCard() {
         </>
       )}
       {state.mode === 'spots' && (
-        <section className={styles.spots} aria-label="Estacionamientos de los últimos 7 días">
-          <h3 className={styles.spotsTitle}>Estacionamientos de los últimos 7 días</h3>
+        // collapsed until asked for (owner 2026-11-27); a row shows that parking on the map
+        <details className={styles.spots}>
+          <summary className={styles.spotsTitle}>
+            Estacionamientos de los últimos 7 días{state.spots.length > 0 && ` (${state.spots.length})`}
+          </summary>
           {state.spots.length === 0 ? (
             <p className={styles.muted}>Todavía ninguno.</p>
           ) : (
             <ul className={styles.spotList}>
               {state.spots.map((s) => (
                 <li key={s.observedAt}>
-                  {formatSpotTime(s.observedAt)}{' '}
-                  <span className={styles.muted}>· {formatRelativeTime(new Date(s.observedAt), now)}</span>
+                  <button
+                    type="button"
+                    className={styles.spotButton}
+                    aria-pressed={selected === s.observedAt}
+                    onClick={() => {
+                      setSelected(s.observedAt)
+                      mapBox.current?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
+                    }}
+                  >
+                    {formatSpotTime(s.observedAt)}{' '}
+                    <span className={styles.muted}>· {formatRelativeTime(new Date(s.observedAt), now)}</span>
+                  </button>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </details>
       )}
       <p className={styles.note}>{privacyNote(state.mode)}</p>
     </Card>
