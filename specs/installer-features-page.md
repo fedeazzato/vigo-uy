@@ -75,3 +75,5 @@ missing from the kit.
 Screenshots were too large and opened in another tab. Each is now a thumbnail of at most 420 px (`ShotViewer`); a tap opens it
 over the page (close button, tap outside, Escape), and a tap on the large picture switches between fit and full size (scroll to read
 on a phone). No link leaves the page. Test: open, zoom, close by button and by Escape.
+`cargadores.jpg` shows real station names and addresses with made-up distances (owner 2026-11-28): real distances to public stations
+would give away where the car was parked.

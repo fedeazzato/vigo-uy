@@ -108,7 +108,7 @@
             },
             {
               "src": "installer/cargadores.jpg",
-              "alt": "Estaciones de carga cercanas, con la potencia de cada una (lugares tapados)",
+              "alt": "Estaciones de carga cercanas, con la distancia y la potencia de cada una",
               "width": 1280,
               "height": 720
             }
