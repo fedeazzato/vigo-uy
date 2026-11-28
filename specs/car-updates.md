@@ -113,7 +113,7 @@ Owners ask to join beta testing of car updates themselves instead of asking a mo
 - Go live: owner OK → `npx supabase db push` (applies 0084) → `npm run gen:types` (replaces the hand-added function types)
   → deploy the site.
 
-## Beta notes, GitHub notes and publishing with a limit (owner 2026-11-28, migration 0087 - NOT applied until the owner OKs it)
+## Beta notes, GitHub notes and publishing with a limit (owner 2026-11-28, migration 0087 applied 2026-11-28 with the owner’s OK)
 
 - **Beta notes**: `car_release_notes` returns the beta releases too when the caller is a moderator or a member of a beta vehicle, and
   a `channel` column; the page marks them «Beta». Everyone else (signed out included) keeps getting stable only.
