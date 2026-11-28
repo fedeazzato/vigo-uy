@@ -33,6 +33,7 @@ function PublishForm({ onDone }: { onDone: () => void }) {
   const [signature, setSignature] = useState('')
   const [downloadBase, setDownloadBase] = useState('')
   const [note, setNote] = useState('')
+  const [limit, setLimit] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -54,6 +55,10 @@ function PublishForm({ onDone }: { onDone: () => void }) {
       return setMessage(
         'El manifiesto firmado debe tener la línea "source <carpeta de descarga>" igual a la carpeta de arriba: el auto descarga desde esa línea firmada.'
       )
+    // a kill switch reaches every car: no limit
+    const cap = summary.kill || limit.trim() === '' ? null : Number(limit)
+    if (cap !== null && (!Number.isInteger(cap) || cap < 0 || cap > 100))
+      return setMessage('El límite debe ser un número entero de 0 a 100, o quedar vacío.')
     setBusy(true)
     const ok = await verifyManifestSignature(text, signature)
     if (!ok) {
@@ -62,12 +67,13 @@ function PublishForm({ onDone }: { onDone: () => void }) {
         'La firma no corresponde a este manifiesto con ninguna clave de confianza. No se publicó nada.'
       )
     }
-    const err = await publishRelease({ channel, manifest: text, signature, downloadBase, note })
+    const err = await publishRelease({ channel, manifest: text, signature, downloadBase, note, cap })
     setBusy(false)
     if (err) return setMessage(err)
     setManifest('')
     setSignature('')
     setNote('')
+    setLimit('')
     setMessage(null)
     onDone()
   }
@@ -149,6 +155,29 @@ function PublishForm({ onDone }: { onDone: () => void }) {
           onChange={(e) => setNote(e.target.value)}
         />
       </div>
+      {!summary?.kill && (
+        <div className={formStyles.field}>
+          <label className={formStyles.label} htmlFor="rel-limit">
+            Limitar a (% de los autos)
+          </label>
+          <input
+            id="rel-limit"
+            className={formStyles.input}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100}
+            step={1}
+            value={limit}
+            placeholder="Sin límite"
+            onChange={(e) => setLimit(e.target.value)}
+          />
+          <p className={formStyles.hint}>
+            Vacío = sin límite (según la firma). 0 = publicada pero pausada. Los autos beta la reciben
+            siempre. Después se puede cambiar en la lista, nunca por encima del porcentaje firmado.
+          </p>
+        </div>
+      )}
       {message && <p className={formStyles.hintWarning}>⚠️ {message}</p>}
       <button
         type="button"

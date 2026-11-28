@@ -112,3 +112,16 @@ Owners ask to join beta testing of car updates themselves instead of asking a mo
   `src/lib/notifications.test.ts`.
 - Go live: owner OK → `npx supabase db push` (applies 0084) → `npm run gen:types` (replaces the hand-added function types)
   → deploy the site.
+
+## Beta notes, GitHub notes and publishing with a limit (owner 2026-11-28, migration 0087 - NOT applied until the owner OKs it)
+
+- **Beta notes**: `car_release_notes` returns the beta releases too when the caller is a moderator or a member of a beta vehicle, and
+  a `channel` column; the page marks them «Beta». Everyone else (signed out included) keeps getting stable only.
+- **Text**: Novedades shows the notes of the public GitHub release `r<serial>` (one request to the releases list of
+  `fedeazzato/vigo-releases`, only when the list is not empty), so nothing is typed twice. Rendered as elements (headings, nested
+  lists, bold, code; links as text), never as HTML. If GitHub cannot be read, the card shows the note and the app versions.
+- **Publish with a limit** (owner: "do it in a single step"): the publish form has «Limitar a (% de los autos)» (empty = none, 0 =
+  paused; hidden for a kill switch) and `admin_publish_car_release` takes `p_cap` in the same call. Correction to D6 guidance:
+  WikiVigo only limits below the signed percent, so sign at 100 and limit here. Beta cars take any release (D8).
+- Tests: releaseText, carReleaseNotes (GitHub), NovedadesPage (notes + badge), CarReleasesAdmin (limit sent / refused).
+- Apply: `npx supabase db push`, `npm run gen:types`, then deploy. The page works before it (no limit sent, stable rows only).

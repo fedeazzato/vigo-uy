@@ -2722,6 +2722,7 @@ export type Database = {
       }
       admin_publish_car_release: {
         Args: {
+          p_cap?: number
           p_channel: string
           p_download_base: string
           p_manifest: string
@@ -2857,6 +2858,7 @@ export type Database = {
         Args: { p_limit?: number }
         Returns: {
           apps: Json
+          channel: string
           note: string
           notices: Json
           published_at: string

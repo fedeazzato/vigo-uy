@@ -220,7 +220,7 @@ export async function fetchReleases(): Promise<{ rows: CarReleaseRow[]; error: s
 export async function fetchCarUpdates(): Promise<{ rows: CarUpdateAdminRow[]; error: string | null }> {
   if (!supabase) return { rows: [], error: null }
   const { data, error } = await supabase.rpc('admin_list_car_updates')
-  return { rows: (data ?? []), error: error ? toFriendlyError(error) : null }
+  return { rows: data ?? [], error: error ? toFriendlyError(error) : null }
 }
 
 export async function publishRelease(args: {
@@ -229,6 +229,8 @@ export async function publishRelease(args: {
   signature: string
   downloadBase: string
   note: string
+  /** Reach limit set in the same step: null = none, 0 = paused, n = at most n %. */
+  cap?: number | null
 }): Promise<string | null> {
   if (!supabase) return 'Sin conexión con el servidor.'
   const { error } = await supabase.rpc('admin_publish_car_release', {
@@ -237,6 +239,8 @@ export async function publishRelease(args: {
     p_signature: args.signature.trim(),
     p_download_base: args.downloadBase.trim(),
     p_note: args.note,
+    // sent only when set, so publishing without a limit also works before migration 0087
+    ...(args.cap === null || args.cap === undefined ? {} : { p_cap: args.cap }),
   })
   return error ? toFriendlyError(error) : null
 }
