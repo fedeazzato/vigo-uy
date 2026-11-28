@@ -222,14 +222,6 @@ export default function Layout() {
             />
             <div className={styles.footerLinks}>
               <a
-                href="https://forms.gle/SiNjQ77d71bUHvJ96"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.footerLink}
-              >
-                Sugerir info
-              </a>
-              <a
                 href="https://github.com/fedeazzato/vigo-uy"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -272,16 +264,12 @@ export default function Layout() {
                   </span>
                 </Link>
               )}
-              <a
-                href="https://forms.gle/SiNjQ77d71bUHvJ96"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.headerButton}
-                title="Sugerir info"
-                aria-label="Sugerir info (abre un formulario)"
-              >
-                <Icon name="chat" size={22} />
-              </a>
+              {/* Moderators reach Moderación in one tap on a phone (the sidebar link is desktop only). */}
+              {profile?.is_moderator && (
+                <Link to={MODERATION_ITEM.to} className={styles.headerButton} title="Moderación" aria-label="Moderación">
+                  <Icon name="shield" size={22} />
+                </Link>
+              )}
               <button
                 className={styles.headerButton}
                 onClick={toggleTheme}
