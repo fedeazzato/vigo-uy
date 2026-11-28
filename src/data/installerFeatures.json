@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "groups": [
     {
       "id": "seguridad",
@@ -14,7 +14,15 @@
           "benefit": "¿Dejás el auto en el lavadero o en un estacionamiento? Con un toque se esconden tus viajes, tu Dashcam, tus fotos, tus avisos y las apps con tus cuentas. Para volver a verlos, tu PIN.",
           "where": "En el auto: Mi Vigo › Modo invitado, o pedíselo a Copiloto. También lo prendés y lo apagás desde WikiVigo en tu celular (Mi Vigo), aunque no estés en el auto.",
           "needs": "Para manejarlo desde el celular, la pantalla conectada a WikiVigo.",
-          "photo": "Mi Vigo › Modo invitado con «Activar», y una app mostrando «Modo invitado» en lugar de los datos"
+          "photo": "Mi Vigo › Modo invitado con «Activar», y una app mostrando «Modo invitado» en lugar de los datos",
+          "shots": [
+            {
+              "src": "installer/modo-invitado.jpg",
+              "alt": "Mi Vigo: la tarjeta «Modo invitado» con el botón para activarlo",
+              "width": 672,
+              "height": 474
+            }
+          ]
         },
         {
           "id": "dashcam",
@@ -31,7 +39,15 @@
           "status": "incluido",
           "benefit": "¿Dónde lo dejé? Si lo activás, lo ves en WikiVigo desde el celular. Viene apagado: lo prendés solo si querés.",
           "where": "En el auto: Mi Vigo › Privacidad › Ubicación del auto. En WikiVigo: Mi Vigo › Tu auto ahora.",
-          "photo": "Mi Vigo › Privacidad › Ubicación del auto (sin mostrar un lugar real)"
+          "photo": "Mi Vigo › Privacidad › Ubicación del auto (sin mostrar un lugar real)",
+          "shots": [
+            {
+              "src": "installer/ubicacion.jpg",
+              "alt": "Mi Vigo: «Ubicación del auto» con las opciones Apagado, Última ubicación y Ubicación y paradas",
+              "width": 672,
+              "height": 176
+            }
+          ]
         }
       ]
     },
@@ -47,7 +63,15 @@
           "benefit": "Le pedís las cosas como hablás —«prendé el aire», «cerrá las ventanas», «llamá a Ana», «sintonizá la 101.5»— y te contesta en voz alta, en español. Sin soltar el volante: si querés, también con el botón de voz del volante.",
           "where": "Ícono Copiloto en la pantalla de inicio. Se abre en un panel chico, encima de lo que estés usando.",
           "needs": "Para llamar, el celular conectado por Bluetooth.",
-          "photo": "Copiloto abierto en su panel flotante, respondiendo un pedido"
+          "photo": "Copiloto abierto en su panel flotante, respondiendo un pedido",
+          "shots": [
+            {
+              "src": "installer/copiloto.jpg",
+              "alt": "Copiloto en la pantalla del auto: «Tocá el micrófono y hablá»",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         },
         {
           "id": "waze",
@@ -74,7 +98,21 @@
           "benefit": "Tus viajes y tus cargas quedan anotados solos, con lo que gastaste. El botón «Finalizar carga» ya no desaparece. Y ves los cargadores de Uruguay más cercanos: con un toque, Waze te lleva.",
           "where": "En la app de Energía de siempre, con pestañas nuevas. Los cargadores, también diciéndole a Copiloto «cargadores cercanos».",
           "needs": "Internet en la pantalla para ver los cargadores.",
-          "photo": "Centro de Energía con la lista de viajes y cargas, y los cargadores cercanos ordenados por distancia"
+          "photo": "Centro de Energía con la lista de viajes y cargas, y los cargadores cercanos ordenados por distancia",
+          "shots": [
+            {
+              "src": "installer/energia.jpg",
+              "alt": "Centro de Energía: resumen con batería, viaje en curso, última carga y consumo",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "installer/cargadores.jpg",
+              "alt": "Estaciones de carga cercanas, con la potencia de cada una (lugares tapados)",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         }
       ]
     },
@@ -97,7 +135,15 @@
           "status": "incluido",
           "benefit": "Pasás fotos de una memoria USB al auto, las ves aunque saques la memoria y ponés las que quieras de fondo en la pantalla de inicio. Quedan puestas aunque apagues el auto.",
           "where": "La Galería de siempre (pestaña «En el auto» y «Fondo de pantalla» al abrir una foto), o Mi Vigo › Fondo.",
-          "photo": "Pantalla de inicio con una foto propia de fondo, y la Galería en la pestaña «En el auto»"
+          "photo": "Pantalla de inicio con una foto propia de fondo, y la Galería en la pestaña «En el auto»",
+          "shots": [
+            {
+              "src": "installer/fondo.jpg",
+              "alt": "Pantalla de inicio del auto con una foto de paisaje de fondo",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         },
         {
           "id": "youtube-chrome",
@@ -115,7 +161,21 @@
           "benefit": "Vienen en la pantalla pero escondidas de fábrica. El instalador las deja a mano, para tu música y tus videos.",
           "where": "En la pantalla de inicio, con las demás apps.",
           "needs": "Tu cuenta de Spotify (y la de TikTok, si querés) e internet en la pantalla.",
-          "photo": "Las apps de Spotify y TikTok en la pantalla de inicio"
+          "photo": "Las apps de Spotify y TikTok en la pantalla de inicio",
+          "shots": [
+            {
+              "src": "installer/spotify.jpg",
+              "alt": "Spotify en la pantalla del auto",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "installer/apps.jpg",
+              "alt": "Las apps de la pantalla, con Spotify, TikTok, Waze y Copiloto",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         },
         {
           "id": "espanol",
@@ -123,7 +183,15 @@
           "status": "incluido",
           "benefit": "Los textos de fábrica que estaban sin traducir o mal traducidos —Ajustes, Energía, Radio, Galería, el teclado— pasan a un español claro.",
           "where": "En toda la pantalla: no tenés que tocar nada.",
-          "photo": "Una pantalla de Ajustes de fábrica, antes y después, en español"
+          "photo": "Una pantalla de Ajustes de fábrica, antes y después, en español",
+          "shots": [
+            {
+              "src": "installer/espanol.jpg",
+              "alt": "Ajustes de conducción del auto, en español",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         }
       ]
     },
@@ -139,7 +207,15 @@
           "benefit": "Tu auto conectado con WikiVigo: lo ves desde el celular, recibís ayuda de la comunidad y elegís qué se comparte. Nada sale del auto hasta que vos lo activás.",
           "where": "Ícono Mi Vigo en la pantalla de inicio.",
           "needs": "Para conectarla, una cuenta en WikiVigo e internet en la pantalla.",
-          "photo": "Mi Vigo con sus pestañas a la izquierda, y Privacidad con los interruptores apagados"
+          "photo": "Mi Vigo con sus pestañas a la izquierda, y Privacidad con los interruptores apagados",
+          "shots": [
+            {
+              "src": "installer/mi-vigo.jpg",
+              "alt": "Mi Vigo: las cuatro imágenes de fondo de la pantalla de inicio",
+              "width": 1280,
+              "height": 720
+            }
+          ]
         },
         {
           "id": "actualizaciones",
@@ -148,7 +224,15 @@
           "benefit": "Las mejoras de tu auto —las de la comunidad y las apps de Google como Waze— llegan solas desde WikiVigo. Te aparece un aviso y las instalás con un toque, estacionado. Sin computadora ni cable.",
           "where": "El aviso llega a la campana; también en Mi Vigo › Versiones › «Instalar ahora».",
           "needs": "Internet en la pantalla.",
-          "photo": "Aviso de actualización en la campana, y Mi Vigo › Versiones con «Instalar ahora»"
+          "photo": "Aviso de actualización en la campana, y Mi Vigo › Versiones con «Instalar ahora»",
+          "shots": [
+            {
+              "src": "installer/actualizaciones.jpg",
+              "alt": "Mi Vigo: «Las apps están al día» y las versiones instaladas",
+              "width": 1370,
+              "height": 318
+            }
+          ]
         },
         {
           "id": "campana",

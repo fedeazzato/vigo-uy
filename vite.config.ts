@@ -28,6 +28,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico,woff2}'],
+        // the installer page's car screenshots are only downloaded by whoever opens that page
+        globIgnores: ['**/installer/**'],
         // Static legal pages (specs/legal-pages-dashcam.md) must never get the SPA shell.
         navigateFallbackDenylist: [/\/legal\//],
         runtimeCaching: [

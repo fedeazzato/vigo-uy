@@ -9,6 +9,8 @@ import styles from './InstallerFeaturesPage.module.css'
 // «Qué agrega el instalador a tu Vigo» (specs/installer-features-page.md): what the launch installer adds. The list lives in
 // src/data/installerFeatures.json. For now only beta testers and moderators see it; everyone else gets «Muy pronto».
 
+const BASE = import.meta.env.BASE_URL
+
 function FeatureCard({ feature }: { feature: InstallerFeature }) {
   const badge = STATUS_BADGE[feature.status]
   return (
@@ -24,7 +26,25 @@ function FeatureCard({ feature }: { feature: InstallerFeature }) {
           <strong>Necesitás:</strong> {feature.needs}
         </p>
       )}
-      <PhotoPlaceholder caption={feature.photo} />
+      {feature.shots ? (
+        <div className={styles.shots}>
+          {feature.shots.map((s) => (
+            // a tap opens the full picture (the car screen is 1920 wide: small text on a phone)
+            <a key={s.src} href={`${BASE}${s.src}`} target="_blank" rel="noopener noreferrer">
+              <img
+                className={styles.shot}
+                src={`${BASE}${s.src}`}
+                alt={s.alt}
+                width={s.width}
+                height={s.height}
+                loading="lazy"
+              />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <PhotoPlaceholder caption={feature.photo} />
+      )}
     </Card>
   )
 }
@@ -69,8 +89,8 @@ export default function InstallerFeaturesPage() {
       <Card>
         <p className={styles.benefit}>
           Cada tarjeta es algo que vas a notar en tu auto. Las que no tienen etiqueta las recibe todo el que
-          instala; las <strong>Opcional</strong> las elegís vos al instalar. Si algo no se puede poner en tu auto, el
-          instalador te dice por qué e instala el resto.
+          instala; las <strong>Opcional</strong> las elegís vos al instalar. Si algo no se puede poner en tu
+          auto, el instalador te dice por qué e instala el resto.
         </p>
       </Card>
 
@@ -116,8 +136,8 @@ export default function InstallerFeaturesPage() {
           <li>Una computadora con Windows.</li>
           <li>
             Un cable <strong>USB-A a USB-C</strong>: la punta USB-A (la rectangular de siempre) va a la
-            computadora y la USB-C al puerto <strong>izquierdo</strong> de la consola central. Un cable USB-C a
-            USB-C no sirve: con ese, la computadora no encuentra el auto.
+            computadora y la USB-C al puerto <strong>izquierdo</strong> de la consola central. Un cable USB-C
+            a USB-C no sirve: con ese, la computadora no encuentra el auto.
           </li>
           <li>El auto encendido y en P (no hace falta andar).</li>
           <li>Unos 20 minutos.</li>

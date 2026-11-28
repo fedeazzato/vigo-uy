@@ -1,6 +1,6 @@
 # «Qué agrega el instalador a tu Vigo»
 
-**Status:** Live 2026-11-26 for beta testers and moderators only (gate below). Photos are placeholders until the screenshots in `specs/installer-features-photos.md` are taken.
+**Status:** Live 2026-11-26 for beta testers and moderators only (gate below). Screenshots from the owner's car (2026-11-27) sit on nine cards (`shots` in the data, files in `public/installer/`, places, distances and the odometer painted over; Spotify as is, owner OK); the other cards keep the placeholder until their screen can be captured (Gallery and Radio after their redesign).
 
 ## Context
 

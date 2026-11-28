@@ -647,6 +647,8 @@ export interface InstallerFeature {
   needs?: string
   /** Caption of the screenshot slot (specs/installer-features-photos.md). */
   photo: string
+  /** Screenshots from the car (public/), shown instead of the empty slot. */
+  shots?: { src: string; alt: string; width: number; height: number }[]
   /** Not shown: why this card still needs checking against the public kit ([verificar]). */
   verify?: string
 }

@@ -31,7 +31,7 @@ function renderPage() {
 }
 
 describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
-  it('renders every group and one card per feature with where-to-find and a photo slot', () => {
+  it('renders every group and one card per feature with where-to-find and its screenshots or a photo slot', () => {
     renderPage()
     expect(screen.getByRole('heading', { level: 1, name: /Qué agrega el instalador a tu Vigo/ })).toBeTruthy()
     for (const g of installerFeatures.groups) {
@@ -41,14 +41,26 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
           .parentElement as HTMLElement
         expect(within(card).getByText(f.benefit)).toBeTruthy()
         expect(within(card).getByText(/Dónde lo encontrás/)).toBeTruthy()
-        expect(within(card).getByText(`Foto (próximamente): ${f.photo}`)).toBeTruthy()
+        if (f.shots) {
+          for (const s of f.shots)
+            expect(within(card).getByRole('img', { name: s.alt }).getAttribute('src')).toContain(s.src)
+          expect(within(card).queryByText(/Foto \(próximamente\)/)).toBeNull()
+        } else expect(within(card).getByText(`Foto (próximamente): ${f.photo}`)).toBeTruthy()
       }
     }
   })
 
+  it('ships every screenshot it names', () => {
+    const shots = installerFeatures.groups.flatMap((g) => g.features.flatMap((f) => f.shots ?? []))
+    expect(shots.length).toBeGreaterThan(0)
+    const files = Object.keys(import.meta.glob('../../public/installer/*.jpg'))
+    for (const s of shots) expect(files, s.src).toContain(`../../public/${s.src}`)
+  })
+
   it('names benefits, not internals: the merged and renamed cards are there, the removed ones are not', () => {
     const { container } = renderPage()
-    const card = (n: string) => screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
+    const card = (n: string) =>
+      screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
     for (const n of [
       'Modo invitado',
       'Copiloto: le hablás en español',
@@ -91,9 +103,16 @@ describe('InstallerFeaturesPage (specs/installer-features-page.md)', () => {
 
   it('badges only where meaningful: YouTube y Chrome optional, the rest none', () => {
     renderPage()
-    const card = (n: string) => screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
+    const card = (n: string) =>
+      screen.getByRole('heading', { level: 3, name: n }).parentElement as HTMLElement
     expect(within(card('YouTube y Chrome')).getByText('Opcional')).toBeTruthy()
-    for (const n of ['Waze', 'Spotify y TikTok', 'Android Auto sin cable', 'Modo invitado', 'Centro de Energía inteligente'])
+    for (const n of [
+      'Waze',
+      'Spotify y TikTok',
+      'Android Auto sin cable',
+      'Modo invitado',
+      'Centro de Energía inteligente',
+    ])
       expect(within(card(n)).queryByText(/Opcional|Ya viene de fábrica/)).toBeNull()
     expect(screen.queryByText(/Se están probando/)).toBeNull()
     for (const g of installerFeatures.groups)
